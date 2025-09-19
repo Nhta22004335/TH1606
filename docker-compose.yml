@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  php-web:
+    build: .
+    container_name: php-demo
+    ports:
+      - "8080:80"
+    depends_on:
+      - pg-demo           # <-- phải trùng với tên service PostgreSQL
+    environment:
+      DB_HOST: pg-demo
+      DB_USER: postgres
+      DB_PASS: 22004335
+      DB_NAME: csdl_bds
+    volumes:
+      - ./php:/var/www/html
+
+  pg-demo:                 # <-- tên service trùng với DB_HOST và depends_on
+    image: postgres:15
+    container_name: pg-demo
+    environment:
+      POSTGRES_DB: csdl_bds
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 22004335
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
