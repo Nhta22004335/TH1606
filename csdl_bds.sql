@@ -1,119 +1,181 @@
--- 1. Bảng người dùng (chung)
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- 1. Bảng người dùng (chung) với ràng buộc dữ liệu
 CREATE TABLE nguoi_dung (
-    id SERIAL PRIMARY KEY,
-    ten_dang_nhap VARCHAR(100),
-    mat_khau VARCHAR(255),
-    email VARCHAR(150),
-    so_dt VARCHAR(20),
-    vai_tro VARCHAR(50), -- admin, khachhang, moigioi
-    trang_thai VARCHAR(50),    -- hoat_dong, khoa
-    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);	
-
-		
-INSERT INTO nguoi_dung (ten_dang_nhap, mat_khau, email, so_dt, vai_tro, trang_thai)
-VALUES
-('admin1', '22004335', 'admin1@example.com', '0901000001', 'admin', 'hoat_dong'),
-('admin2', '22004335', 'admin2@example.com', '0901000002', 'admin', 'chua_kich_hoat'),
-('khach1', '123456', 'khach1@example.com', '0911000001', 'khachhang', 'hoat_dong'),
-('khach2', '123456', 'khach2@example.com', '0911000002', 'khachhang', 'khoa'),
-('khach3', '123456', 'khach3@example.com', '0911000003', 'khachhang', 'chua_kich_hoat'),
-('moigioi1', '123456', 'moigioi1@example.com', '0922000001', 'moigioi', 'hoat_dong'),
-('moigioi2', '123456', 'moigioi2@example.com', '0922000002', 'moigioi', 'khoa'),
-('moigioi3', '123456', 'moigioi3@example.com', '0922000003', 'moigioi', 'chua_kich_hoat');
-
--- 2. Bảng admin
-CREATE TABLE admin (
-    id SERIAL PRIMARY KEY,
-    id_nguoi_dung INT,    
-    ho_ten VARCHAR(150),
-    gioi_tinh VARCHAR(10),
-    dia_chi TEXT,
-    ngay_sinh DATE
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    ten_dang_nhap VARCHAR(100) NOT NULL UNIQUE,       
+    mat_khau VARCHAR(255) NOT NULL,                 
+    email VARCHAR(150) NOT NULL UNIQUE,              
+    so_dt VARCHAR(20) UNIQUE DEFAULT 'chuacapnhat',                        
+    vai_tro VARCHAR(50) DEFAULT 'khachhang',     
+    trang_thai VARCHAR(50) DEFAULT 'danghoatdong', 
+    hoat_dong VARCHAR(50) DEFAULT 'offline',        
+    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    -- Ràng buộc CHECK để kiểm soát giá trị hợp lệ
+    CONSTRAINT chk_vai_tro CHECK (vai_tro IN ('khachhang', 'quantri', 'moigioi')),
+    CONSTRAINT chk_trang_thai CHECK (trang_thai IN ('danghoatdong', 'chuakichhoat', 'khoa')),
+    CONSTRAINT chk_hoat_dong CHECK (hoat_dong IN ('online', 'offline')),
+    -- Chỉ kiểm tra số điện thoại < 11 số
+    CONSTRAINT chk_so_dt CHECK (so_dt ~ '^[0-9]{0,10}$')
 );
 
-INSERT INTO admin (id_nguoi_dung, ho_ten, gioi_tinh, dia_chi, ngay_sinh)
+INSERT INTO nguoi_dung (ten_dang_nhap, mat_khau, email, so_dt, vai_tro, trang_thai, hoat_dong)
 VALUES
-(1, 'Nguyễn Văn A', 'Nam', '123 Nguyễn Huệ, Quận 1, TP.HCM', '1985-04-15'),
-(2, 'Trần Thị B', 'Nữ', '45 Lê Lợi, Quận 3, TP.HCM', '1990-09-22');
+('nguyenvana', 'demo@123', 'vana.nguyen@example.com', '0987654321', 'khachhang', 'danghoatdong', 'offline'),
+('tranthibich', 'demo@123', 'bich.tran@example.com', '0912345678', 'khachhang', 'danghoatdong', 'online'),
+('lehoangnam', 'demo@123', 'nam.le@example.com', '0901234567', 'moigioi', 'danghoatdong', 'offline'),
+('phamthuydung', 'demo@123', 'dung.pham@example.com', '0976543210', 'khachhang', 'chuakichhoat', 'offline'),
+('vuhoanganh', 'demo@123', 'anh.vu@example.com', '0934567890', 'moigioi', 'danghoatdong', 'online'),
+('dinhquanghuy', 'demo@123', 'huy.dinh@example.com', '0981112233', 'khachhang', 'khoa', 'offline'),
+('ngothutrang', 'demo@123', 'trang.ngo@example.com', '0923456789', 'khachhang', 'danghoatdong', 'online'),
+('truongminhtuan', 'demo@123', 'tuan.truong@example.com', '0945671234', 'quantri', 'danghoatdong', 'online'),
+('phanthihong', 'demo@123', 'hong.phan@example.com', '0956789123', 'khachhang', 'danghoatdong', 'offline'),
+('buiducmanh', 'demo@123', 'manh.bui@example.com', '0967891234', 'moigioi', 'chuakichhoat', 'offline'),
+('doanthithu', 'demo@123', 'thu.doan@example.com', '0978912345', 'khachhang', 'danghoatdong', 'online'),
+('hoangminhquan', 'demo@123', 'quan.hoang@example.com', '0989123456', 'khachhang', 'khoa', 'offline'),
+('trinhthibao', 'demo@123', 'bao.trinh@example.com', '0912233445', 'moigioi', 'danghoatdong', 'online'),
+('maiquangvinh', 'demo@123', 'vinh.mai@example.com', '0923344556', 'khachhang', 'danghoatdong', 'offline'),
+('nguyenhongson', 'demo@123', 'son.nguyen@example.com', '0934455667', 'quantri', 'danghoatdong', 'online'),
+('dangthithao', 'demo@123', 'thao.dang@example.com', '0945566778', 'khachhang', 'chuakichhoat', 'offline'),
+('trankhanhlinh', 'demo@123', 'linh.tran@example.com', '0956677889', 'moigioi', 'danghoatdong', 'online'),
+('luongminhduc', 'demo@123', 'duc.luong@example.com', '0967788990', 'khachhang', 'danghoatdong', 'offline'),
+('hoangthianh', 'demo@123', 'anh.hoang@example.com', '0978899001', 'khachhang', 'danghoatdong', 'online'),
+('nguyenquynhanh', 'demo@123', 'anh.quynh@example.com', '0989900112', 'khachhang', 'khoa', 'offline');
+
+SELECT * FROM nguoi_dung
+
+-- 2. Bảng admin
+CREATE TABLE quan_tri (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id_nguoi_dung UUID UNIQUE NOT NULL,
+    ho_ten VARCHAR(150) DEFAULT 'chuacapnhat',
+    gioi_tinh VARCHAR(20) DEFAULT 'chuacapnhat',
+    avt TEXT DEFAULT 'avt.png',
+    dia_chi TEXT DEFAULT 'chuacapnhat',
+    ngay_sinh DATE DEFAULT (CURRENT_DATE - INTERVAL '18 years'),
+    -- Khóa ngoại
+    CONSTRAINT fk_admin_nguoidung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
+    -- Giới tính hợp lệ
+    CONSTRAINT chk_gioi_tinh CHECK (gioi_tinh IN ('nam', 'nu', 'khac', 'chuacapnhat')),
+    -- Ngày sinh phải >= 18 tuổi
+    CONSTRAINT chk_tuoi CHECK (ngay_sinh <= CURRENT_DATE - INTERVAL '18 years')
+);
+
+SELECT * FROM quan_tri
 
 -- 3. Bảng khách hàng
 CREATE TABLE khach_hang (
-    id SERIAL PRIMARY KEY,
-    id_nguoi_dung INT,
-    ho_ten VARCHAR(150),
-    gioi_tinh VARCHAR(10),
-    dia_chi TEXT,
-    ngay_sinh DATE
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id_nguoi_dung UUID UNIQUE NOT NULL,
+    ho_ten VARCHAR(150) DEFAULT 'chuacapnhat',
+    gioi_tinh VARCHAR(20) DEFAULT 'chuacapnhat',
+    avt TEXT DEFAULT 'avt.png',
+    dia_chi TEXT DEFAULT 'chuacapnhat',
+    ngay_sinh DATE DEFAULT (CURRENT_DATE - INTERVAL '18 years'),
+    -- Khóa ngoại
+    CONSTRAINT fk_khachhang_nguoidung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
+    -- Giới tính hợp lệ
+    CONSTRAINT chk_khachhang_gioitinh CHECK (gioi_tinh IN ('nam', 'nu', 'khac', 'chuacapnhat')),
+    -- Ngày sinh phải >= 18 tuổi
+    CONSTRAINT chk_khachhang_tuoi CHECK (ngay_sinh <= CURRENT_DATE - INTERVAL '18 years')
 );
 
-INSERT INTO khach_hang (id_nguoi_dung, ho_ten, gioi_tinh, dia_chi, ngay_sinh)
-VALUES
-(3, 'Lê Văn C', 'Nam', '12 Trần Phú, Hà Nội', '1995-03-10'),
-(4, 'Phạm Thị D', 'Nữ', '34 Nguyễn Trãi, Hà Nội', '1992-07-21'),
-(5, 'Nguyễn Văn E', 'Nam', '56 Lý Thường Kiệt, TP.HCM', '1988-11-05'),
+SELECT * FROM khach_hang
 
 -- 4. Bảng môi giới
 CREATE TABLE moi_gioi (
-    id SERIAL PRIMARY KEY,
-    id_nguoi_dung INT,
-    ho_ten VARCHAR(150),
-    gioi_tinh VARCHAR(10),
-    cty VARCHAR(200),
-    kinh_nghiem INT,
-    mo_ta TEXT
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),                            
+    id_nguoi_dung UUID UNIQUE NOT NULL,                   
+    ho_ten VARCHAR(150) DEFAULT 'chuacapnhat',                        
+    avt TEXT DEFAULT 'avt.png',                          
+    gioi_tinh VARCHAR(20) DEFAULT 'chuacapnhat',                     
+    cty VARCHAR(200) DEFAULT 'chuacapnhat',                                   
+    kinh_nghiem INT CHECK (kinh_nghiem >= 0),            
+    mo_ta TEXT DEFAULT 'chuacapnhat',
+    -- Khóa ngoại
+    CONSTRAINT fk_moigioi_nguoidung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
+    -- Giới tính hợp lệ
+    CONSTRAINT chk_gioi_tinh CHECK (gioi_tinh IN ('nam', 'nu', 'khac', 'chuacapnhat'))
 );
 
-INSERT INTO moi_gioi (id_nguoi_dung, ho_ten, gioi_tinh, cty, kinh_nghiem, mo_ta)
-VALUES
-(6, 'Nguyễn Văn G', 'Nam', 'Công ty BĐS A', 5, 'Chuyên môi giới căn hộ cao cấp tại TP.HCM.'),
-(7, 'Trần Thị H', 'Nữ', 'Công ty BĐS B', 3, 'Chuyên môi giới nhà phố và biệt thự tại Hà Nội.'),
-(8, 'Lê Văn I', 'Nam', 'Công ty BĐS C', 7, 'Có kinh nghiệm nhiều năm trong thị trường đất nền.'),
+SELECT * FROM moi_gioi
+
+CREATE OR REPLACE FUNCTION fn_after_insert_nguoi_dung()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Nếu là quản trị viên
+    IF NEW.vai_tro = 'quantri' THEN
+        INSERT INTO quan_tri (id_nguoi_dung) VALUES (NEW.id);
+    -- Nếu là khách hàng
+    ELSIF NEW.vai_tro = 'khachhang' THEN
+        INSERT INTO khach_hang (id_nguoi_dung) VALUES (NEW.id);
+    -- Nếu là môi giới
+    ELSIF NEW.vai_tro = 'moigioi' THEN
+        INSERT INTO moi_gioi (id_nguoi_dung) VALUES (NEW.id);
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_after_insert_nguoi_dung
+AFTER INSERT ON nguoi_dung
+FOR EACH ROW
+EXECUTE FUNCTION fn_after_insert_nguoi_dung();
 
 -- 5. Bảng bất động sản
 CREATE TABLE bat_dong_san (
-    id SERIAL PRIMARY KEY,
-    tieu_de VARCHAR(200),
-    mo_ta TEXT,
-    gia NUMERIC(18,2),
-    dien_tich NUMERIC(10,2),
-    dia_chi TEXT,
-    loai VARCHAR(100), -- bán, cho thuê, dự án
-    khu_vuc VARCHAR(100),
-	trang_thai VARCHAR(50),
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), 
+	id_moi_gioi UUID NOT NULL,
+    tieu_de VARCHAR(200) DEFAULT 'chuacapnhat',
+    mo_ta TEXT DEFAULT 'chuacapnhat',
+    gia NUMERIC(18,2) CHECK (gia >= 0),                  
+    dien_tich NUMERIC(10,2) CHECK (dien_tich > 0),     
+    dia_chi TEXT DEFAULT 'chuacapnhat',
+    loai VARCHAR(100) DEFAULT 'chuacapnhat',                          
+    khu_vuc VARCHAR(100) DEFAULT 'chuacapnhat',
+    trang_thai VARCHAR(50) DEFAULT 'choduyet',
     ngay_dang TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    id_moi_gioi INT
+    -- Ràng buộc giá trị hợp lệ
+    CONSTRAINT chk_loai CHECK (loai IN ('ban', 'thue', 'duan', 'chuacapnhat')),
+    CONSTRAINT chk_trang_thai_bds CHECK (trang_thai IN ('choduyet', 'dangban', 'daban', 'dathue')),
+    -- Khóa ngoại: mỗi BĐS phải thuộc 1 môi giới
+    CONSTRAINT fk_bds_moigioi FOREIGN KEY (id_moi_gioi) REFERENCES moi_gioi(id_nguoi_dung) ON DELETE CASCADE
 );
 
-INSERT INTO bat_dong_san (tieu_de, mo_ta, gia, dien_tich, dia_chi, loai, khu_vuc, id_moi_gioi)
+-- 20 bất động sản mẫu với id_moi_gioi có sẵn
+INSERT INTO bat_dong_san (id_moi_gioi, tieu_de, mo_ta, gia, dien_tich, dia_chi, loai, khu_vuc, trang_thai)
 VALUES
-('Căn hộ cao cấp Quận 1 view sông', 
- 'Căn hộ 2 phòng ngủ, nội thất hiện đại, tiện ích hồ bơi, gym, an ninh 24/7.', 
- 3500000000, 75.5, '123 Nguyễn Huệ, Quận 1, TP.HCM', 'Căn hộ', 'TP.HCM', 6),
+-- môi giới 1
+('b6e7dbf5-37a3-423d-a51e-59fc00467984', 'Căn hộ cao cấp Vinhomes', 'Căn hộ 2PN full nội thất', 3500000000, 75.5, 'Quận 1, TP.HCM', 'ban', 'TP.HCM', 'dangban'),
+('b6e7dbf5-37a3-423d-a51e-59fc00467984', 'Nhà phố trung tâm', 'Nhà 3 tầng, sổ hồng riêng', 5200000000, 120.0, 'Quận 3, TP.HCM', 'ban', 'TP.HCM', 'dangban'),
+('b6e7dbf5-37a3-423d-a51e-59fc00467984', 'Căn hộ dịch vụ', 'Cho thuê ngắn hạn, đầy đủ tiện nghi', 15000000, 55.0, 'Quận Bình Thạnh, TP.HCM', 'thue', 'TP.HCM', 'choduyet'),
+('b6e7dbf5-37a3-423d-a51e-59fc00467984', 'Đất nền dự án', 'Khu dân cư mới, hạ tầng hoàn chỉnh', 1200000000, 100.0, 'Thủ Đức, TP.HCM', 'duan', 'TP.HCM', 'dangban'),
 
-('Nhà phố 3 tầng Bình Thạnh', 
- 'Nhà phố 3 tầng, 4 phòng ngủ, sân vườn, gara ô tô, gần chợ và trường học.', 
- 5500000000, 120, '45 Bùi Hữu Nghĩa, Bình Thạnh, TP.HCM', 'Nhà phố', 'TP.HCM', 6),
+-- môi giới 2
+('0ee0decd-fae2-4ee6-83a4-b2d6d96f0587', 'Nhà nguyên căn cho thuê', 'Nhà 2 tầng, phù hợp gia đình nhỏ', 18000000, 90.0, 'Quận 7, TP.HCM', 'thue', 'TP.HCM', 'dangban'),
+('0ee0decd-fae2-4ee6-83a4-b2d6d96f0587', 'Căn hộ mini giá rẻ', '1PN, đầy đủ tiện ích, gần trường học', 950000000, 45.0, 'Quận Gò Vấp, TP.HCM', 'ban', 'TP.HCM', 'choduyet'),
+('0ee0decd-fae2-4ee6-83a4-b2d6d96f0587', 'Biệt thự nghỉ dưỡng', 'Biệt thự ven biển, hồ bơi riêng', 15500000000, 300.0, 'Nha Trang, Khánh Hòa', 'ban', 'Khánh Hòa', 'dangban'),
+('0ee0decd-fae2-4ee6-83a4-b2d6d96f0587', 'Căn hộ officetel', 'Thiết kế hiện đại, tiện ích đa năng', 2200000000, 60.0, 'Quận 2, TP.HCM', 'ban', 'TP.HCM', 'choduyet'),
 
-('Căn hộ dịch vụ Quận 7 full nội thất', 
- 'Cho thuê căn hộ dịch vụ 55m2, đầy đủ nội thất, gần RMIT, tiện đi lại.', 
- 12000000, 55, '678 Nguyễn Văn Linh, Quận 7, TP.HCM', 'Căn hộ', 'TP.HCM', 7),
+-- môi giới 3
+('f72326b2-c29f-42f5-b928-f8fa7ddfe328', 'Mặt bằng kinh doanh', 'Mặt tiền đường lớn, đông đúc', 45000000, 150.0, 'Quận Tân Bình, TP.HCM', 'thue', 'TP.HCM', 'dangban'),
+('f72326b2-c29f-42f5-b928-f8fa7ddfe328', 'Đất vườn nghỉ dưỡng', 'Không khí trong lành, phù hợp nghỉ dưỡng', 2500000000, 500.0, 'Bảo Lộc, Lâm Đồng', 'ban', 'Lâm Đồng', 'dangban'),
+('f72326b2-c29f-42f5-b928-f8fa7ddfe328', 'Nhà phố khu đô thị mới', 'Nhà 4PN, gần trường học, chợ', 4200000000, 140.0, 'Quận 9, TP.HCM', 'ban', 'TP.HCM', 'dangban'),
+('f72326b2-c29f-42f5-b928-f8fa7ddfe328', 'Căn hộ cao cấp The Manor', '3PN, view sông', 5800000000, 110.0, 'Quận Bình Thạnh, TP.HCM', 'ban', 'TP.HCM', 'dangban'),
 
-('Chung cư mini Cầu Giấy giá rẻ', 
- 'Chung cư mini 35m2, có thang máy, phù hợp sinh viên và gia đình nhỏ.', 
- 850000000, 35, '12 Trần Thái Tông, Cầu Giấy, Hà Nội', 'Chung cư', 'Hà Nội', 8),
+-- môi giới 4
+('5b1469ab-190d-41f2-894e-a118718fd18e', 'Đất nền thổ cư', 'Sổ đỏ riêng, xây dựng tự do', 1700000000, 80.0, 'Long An', 'ban', 'Long An', 'choduyet'),
+('5b1469ab-190d-41f2-894e-a118718fd18e', 'Căn hộ studio giá rẻ', 'Nội thất đầy đủ, tiện nghi', 1200000000, 40.0, 'Quận 12, TP.HCM', 'ban', 'TP.HCM', 'dangban'),
+('5b1469ab-190d-41f2-894e-a118718fd18e', 'Shophouse thương mại', 'Khu dân cư sầm uất, thuận tiện kinh doanh', 7500000000, 160.0, 'Bình Dương', 'ban', 'Bình Dương', 'dangban'),
+('5b1469ab-190d-41f2-894e-a118718fd18e', 'Nhà trọ cho thuê', '10 phòng trọ, thu nhập ổn định', 6000000, 200.0, 'Quận Thủ Đức, TP.HCM', 'thue', 'TP.HCM', 'dangban'),
 
-('Biệt thự nghỉ dưỡng ven hồ Tây', 
- 'Biệt thự 200m2, hồ bơi riêng, thiết kế sang trọng, yên tĩnh, gần trung tâm.', 
- 12000000000, 200, 'Hồ Tây, Tây Hồ, Hà Nội', 'Biệt thự', 'Hà Nội', 6),
+-- môi giới 5
+('0c662b99-d4a4-430b-8838-f755d03cabf3', 'Căn hộ cao cấp Landmark 81', 'View sông, nội thất nhập khẩu', 7000000000, 130.0, 'Bình Thạnh, TP.HCM', 'ban', 'TP.HCM', 'dangban'),
+('0c662b99-d4a4-430b-8838-f755d03cabf3', 'Biệt thự ven sông', 'Khu compound an ninh', 12500000000, 280.0, 'Quận 2, TP.HCM', 'ban', 'TP.HCM', 'choduyet'),
+('0c662b99-d4a4-430b-8838-f755d03cabf3', 'Nhà phố giá rẻ', '2 tầng, thích hợp gia đình nhỏ', 2100000000, 70.0, 'Quận 8, TP.HCM', 'ban', 'TP.HCM', 'dangban'),
+('0c662b99-d4a4-430b-8838-f755d03cabf3', 'Đất nền ven biển', 'Khu du lịch tiềm năng', 3200000000, 200.0, 'Phan Thiết, Bình Thuận', 'ban', 'Bình Thuận', 'dangban');
 
-('Đất nền dự án Ecopark', 
- 'Đất nền 100m2, hạ tầng đồng bộ, gần công viên và trường học, thích hợp xây nhà.', 
- 3000000000, 100, 'Ecopark, Văn Giang, Hưng Yên', 'Đất nền', 'Hưng Yên', 7),
-
-('Nhà phố kinh doanh quận 3', 
- 'Nhà 4 tầng, mặt tiền 6m, thích hợp mở cửa hàng hoặc văn phòng, trung tâm sầm uất.', 
- 9500000000, 110, '89 Lý Chính Thắng, Quận 3, TP.HCM', 'Nhà phố', 'TP.HCM', 8);
+SELECT * FROM bat_dong_san
 
 -- 6. Bảng hình ảnh sản phẩm
 CREATE TABLE hinh_anh (
