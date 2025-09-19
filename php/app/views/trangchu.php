@@ -62,14 +62,14 @@
                     <li class="relative">
                         <a class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý Khách hàng <i class="fas fa-chevron-right ml-1 transition-transform duration-300"></i></a> 
                         <ul class="hidden fixed left-0 top-full bg-white border shadow-md mt-1 sub-menu z-100">
-                            <li><a href="trangchu.php?page=taikhoan" class="block px-4 py-2 hover:bg-blue-100">Danh sách tài khoản</a></li>
+                            <li><a href="trangchu.php?page=khachhang" class="block px-4 py-2 hover:bg-blue-100">Danh sách khách hàng</a></li>
                             <li><a href="#" class="block px-4 py-2 hover:bg-blue-100">Lịch sử đăng nhập/đăng xuất</a></li>
                         </ul>
                     </li>
                     <li class="relative ">
                         <a class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý môi giới<i class="fas fa-chevron-right ml-2 transition-transform duration-300"></i></a>
                         <ul class="hidden fixed bg-white border shadow-md mt-1 sub-menu">
-                            <li><a href="#" class="block px-4 py-2 hover:bg-blue-100">Danh sách môi giới</a></li>
+                            <li><a href="trangchu.php?page=moigioi" class="block px-4 py-2 hover:bg-blue-100">Danh sách môi giới</a></li>
                             <li><a href="#" class="block px-4 py-2 hover:bg-blue-100">Quản lý biểu mẫu</a></li>
                         </ul>
                     </li>
@@ -182,7 +182,7 @@
 
 <?php
     $page = isset($_GET['page']) ? $_GET['page'] : 'trangchu';
-    $allowed_pages = ['sanpham', 'danhgiasanpham', 'danhgiasanphamct', 'taikhoan'];
+    $allowed_pages = ['sanpham', 'danhgiasanpham', 'danhgiasanphamct', 'khachhang', 'moigioi'];
     $showHome = ($page === 'trangchu');
 ?>
 

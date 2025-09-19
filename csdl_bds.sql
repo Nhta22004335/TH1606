@@ -63,7 +63,7 @@ CREATE TABLE moi_gioi (
     kinh_nghiem INT,
     mo_ta TEXT
 );
-			
+
 INSERT INTO moi_gioi (id_nguoi_dung, ho_ten, gioi_tinh, cty, kinh_nghiem, mo_ta)
 VALUES
 (6, 'Nguyễn Văn G', 'Nam', 'Công ty BĐS A', 5, 'Chuyên môi giới căn hộ cao cấp tại TP.HCM.'),

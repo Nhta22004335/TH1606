@@ -78,7 +78,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quản lý tài khoản người dùng</title>
+<title>Quản lý khách hàng</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/alpinejs" defer></script>
 <link rel="stylesheet" href="../../public/assets/fontawesome/css/all.min.css">
@@ -94,33 +94,25 @@
         </h2>
 
         <label class="block mb-2 text-sm">Hoạt động</label>
-        <select id="hoatdong-desktop" class="w-full border rounded-lg p-2 mb-4">
+        <select id="hoatdong-desktop" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
             <option value="" <?= (($filters['hoatdong'] ?? '') == 'Tất cả') ? 'selected' : ''?>>Tất cả</option>
             <option value="Online" <?= (($filters['hoatdong'] ?? '') == 'Online') ? 'selected' : ''?>>Online</option>
             <option value="Offline" <?= (($filters['hoatdong'] ?? '') == 'Offline') ? 'selected' : ''?>>Offline</option>
         </select>
 
         <label class="block mb-2 text-sm">Trạng thái</label>
-        <select id="trangthai-desktop" class="w-full border rounded-lg p-2 mb-4">
+        <select id="trangthai-desktop" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
             <option value="" <?= (($filters['trangthai'] ?? '') == 'Tất cả') ? 'selected' : ''?>>Tất cả</option>
             <option value="Đang hoạt động" <?= (($filters['trangthai'] ?? '') == 'Đang hoạt động') ? 'selected' : ''?>>Đang hoạt động</option>
             <option value="Chưa kích hoạt" <?= (($filters['trangthai'] ?? '') == 'Chưa kích hoạt') ? 'selected' : ''?>>Chưa kích hoạt</option>
             <option value="Khóa" <?= (($filters['trangthai'] ?? '') == 'Khóa') ? 'selected' : ''?>>Khóa</option>
         </select>
 
-        <label class="block mb-2 text-sm">Vai trò</label>
-        <select id="vaitro-desktop" class="w-full border rounded-lg p-2 mb-4">
-            <option value="" <?= (($filters['vaitro'] ?? '') == 'Tất cả') ? 'selected' : ''?>>Tất cả</option>
-            <option value="Admin" <?= (($filters['vaitro'] ?? '') == 'Admin') ? 'selected' : ''?>>Admin</option>
-            <option value="Moderator" <?= (($filters['vaitro'] ?? '') == 'Moderator') ? 'selected' : ''?>>Moderator</option>
-            <option value="User" <?= (($filters['vaitro'] ?? '') == 'User') ? 'selected' : ''?>>User</option>
-        </select>
-
         <label class="block mb-2 text-sm">Ngày tạo tài khoản trước</label>
-        <input id="ngaytruoc-desktop" value="<?= ($filters['ngaytruoc'] ?? '') ?>" type="date" class="w-full border rounded-lg p-2 mb-4">
+        <input id="ngaytruoc-desktop" value="<?= ($filters['ngaytruoc'] ?? '') ?>" type="date" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
 
         <label class="block mb-2 text-sm">Số đơn lớn hơn</label>
-        <input id="sodon-desktop" value="<?= ($filters['sodon'] ?? '') ?>" type="number" placeholder="Số đơn tối thiểu" class="w-full border rounded-lg p-2 mb-4">
+        <input id="sodon-desktop" value="<?= ($filters['sodon'] ?? '') ?>" type="number" placeholder="Số đơn tối thiểu" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
 
         <div class="flex gap-3 mt-4">
             <!-- Nút áp dụng -->
@@ -142,33 +134,25 @@
             </div>
 
             <label class="block mb-2 text-sm">Hoạt động</label>
-            <select id="hoatdong-mobile" class="w-full border rounded-lg p-2 mb-4">
+            <select id="hoatdong-mobile" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
                 <option value="" <?= (($filters['hoatdong'] ?? '') == 'Tất cả') ? 'selected' : ''?>>Tất cả</option>
                 <option value="Online" <?= (($filters['hoatdong'] ?? '') == 'Online') ? 'selected' : ''?>>Online</option>
                 <option value="Offline" <?= (($filters['hoatdong'] ?? '') == 'Offline') ? 'selected' : ''?>>Offline</option>
             </select>
 
             <label class="block mb-2 text-sm">Trạng thái</label>
-            <select id="trangthai-mobile" class="w-full border rounded-lg p-2 mb-4">
+            <select id="trangthai-mobile" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
                 <option value="" <?= (($filters['trangthai'] ?? '') == 'Tất cả') ? 'selected' : ''?>>Tất cả</option>
                 <option value="Đang hoạt động" <?= (($filters['trangthai'] ?? '') == 'Đang hoạt động') ? 'selected' : ''?>>Đang hoạt động</option>
                 <option value="Chưa kích hoạt" <?= (($filters['trangthai'] ?? '') == 'Chưa kích hoạt') ? 'selected' : ''?>>Chưa kích hoạt</option>
                 <option value="Khóa" <?= (($filters['trangthai'] ?? '') == 'Khóa') ? 'selected' : ''?>>Khóa</option>
             </select>
 
-            <label class="block mb-2 text-sm">Vai trò</label>
-            <select id="vaitro-mobile" class="w-full border rounded-lg p-2 mb-4">
-                <option value="" <?= (($filters['vaitro'] ?? '') == 'Tất cả') ? 'selected' : ''?>>Tất cả</option>
-                <option value="Admin" <?= (($filters['vaitro'] ?? '') == 'Admin') ? 'selected' : ''?>>Admin</option>
-                <option value="Moderator" <?= (($filters['vaitro'] ?? '') == 'Moderator') ? 'selected' : ''?>>Moderator</option>
-                <option value="User" <?= (($filters['vaitro'] ?? '') == 'User') ? 'selected' : ''?>>User</option>
-            </select>
-
             <label class="block mb-2 text-sm">Ngày tạo tài khoản trước</label>
-            <input id="ngaytruoc-mobile" value="<?= ($filters['ngaytruoc'] ?? '') ?>" type="date" class="w-full border rounded-lg p-2 mb-4">
+            <input id="ngaytruoc-mobile" value="<?= ($filters['ngaytruoc'] ?? '') ?>" type="date" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
 
             <label class="block mb-2 text-sm">Số đơn lớn hơn</label>
-            <input id="sodon-mobile" value="<?= ($filters['sodon'] ?? '') ?>" type="number" placeholder="Số đơn tối thiểu" class="w-full border rounded-lg p-2 mb-4">
+            <input id="sodon-mobile" value="<?= ($filters['sodon'] ?? '') ?>" type="number" placeholder="Số đơn tối thiểu" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
 
             <div class="flex gap-3 mt-4">
                 <!-- Nút áp dụng -->
@@ -223,7 +207,6 @@
                         $match = true;
                         if (isset($filters['hoatdong']) && $filters['hoatdong'] !== $u['hoat_dong']) $match = false;
                         if (isset($filters['trangthai']) && $filters['trangthai'] !== $u['trang_thai']) $match = false;
-                        if (isset($filters['vaitro']) && $filters['vaitro'] !== $u['vai_tro']) $match = false;
                         if (isset($filters['ngaytruoc']) && $u['ngay_tao'] > $filters['ngaytruoc']) $match = false;
                         if (isset($filters['sodon']) && $u['so_don'] > $filters['sodon']) $match = false;
                     ?>
@@ -276,7 +259,7 @@
 
 <script>
     function apdungloc(prefix) {
-        const keys = ["hoatdong", "vaitro", "trangthai", "ngaytruoc", "sodon"];
+        const keys = ["hoatdong", "trangthai", "ngaytruoc", "sodon"];
         let filters = {};
 
         keys.forEach(key => {
