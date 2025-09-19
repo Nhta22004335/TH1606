@@ -24,7 +24,7 @@
             COUNT(gd.id) AS so_don
         FROM khach_hang kh
         JOIN nguoi_dung nd ON kh.id_nguoi_dung = nd.id
-        LEFT JOIN giao_dich gd ON kh.id_nguoi_dung = gd.id_khach_hang AND gd.trang_thai = 'hoàn tất'
+        LEFT JOIN giao_dich gd ON kh.id_nguoi_dung = gd.id_khach_hang AND gd.trang_thai = 'hoanthanh'
         GROUP BY 
             kh.id, kh.ho_ten, kh.gioi_tinh, kh.dia_chi, kh.avt, kh.ngay_sinh,
             nd.id, nd.ten_dang_nhap, nd.email, nd.so_dt, nd.vai_tro, nd.trang_thai, nd.hoat_dong, nd.ngay_tao
@@ -55,7 +55,7 @@
             COUNT(gd.id) AS so_don
         FROM khach_hang kh
         JOIN nguoi_dung nd ON kh.id_nguoi_dung = nd.id
-        LEFT JOIN giao_dich gd ON kh.id_nguoi_dung = gd.id_khach_hang AND gd.trang_thai = 'hoàn tất'
+        LEFT JOIN giao_dich gd ON kh.id_nguoi_dung = gd.id_khach_hang AND gd.trang_thai = 'hoanthanh'
         WHERE (kh.ho_ten ILIKE :search OR kh.dia_chi ILIKE :search)
         GROUP BY 
             kh.id, kh.ho_ten, kh.gioi_tinh, kh.dia_chi, kh.avt, kh.ngay_sinh,

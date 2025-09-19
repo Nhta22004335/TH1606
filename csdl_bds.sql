@@ -178,20 +178,26 @@ VALUES
 SELECT * FROM bat_dong_san
 
 -- 6. Bảng hình ảnh sản phẩm
-CREATE TABLE hinh_anh (
-    id SERIAL PRIMARY KEY,
-    id_bds INT,
-    url VARCHAR(300),
-    mo_ta VARCHAR(200)
+CREATE TABLE hinh_anh_bds (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), 
+    id_bds UUID UNIQUE NOT NULL,
+    url TEXT[] NOT NULL,
+    mo_ta VARCHAR(200) DEFAULT 'chuacapnhat',
+    CONSTRAINT fk_hinhanh_bds FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE CASCADE
 );
 
+SELECT * FROM hinh_anh_bds
+
 -- 7. Bảng video sản phẩm
-CREATE TABLE video (
-    id SERIAL PRIMARY KEY,
-    id_bds INT,
-    url VARCHAR(300),
-    mo_ta VARCHAR(200)
+CREATE TABLE video_bds (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id_bds UUID UNIQUE NOT NULL,
+    url TEXT[] NOT NULL,
+    mo_ta VARCHAR(200) DEFAULT 'chuacapnhat',
+	CONSTRAINT fk_video_bds FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE CASCADE
 );
+
+SELECT * FROM video_bds
 
 -- 8. Bảng giao dịch
 CREATE TABLE giao_dich (
