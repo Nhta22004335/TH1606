@@ -10,6 +10,35 @@
         ["id"=>8,"name"=>"Ngô Thị H","email"=>"h.ngo@example.com","phone"=>"0902345678","vaitro"=>"Moderator","hoatdong"=>"Offline","sodon"=>8,"ngaytao"=>"2024-04-10","avatar"=>"https://i.pravatar.cc/150?img=8"],
     ];
 
+    $sql = "
+    SELECT 
+        kh.id,
+        kh.ho_ten,
+        kh.gioi_tinh,
+        kh.dia_chi,
+        kh.avt,
+        kh.ngay_sinh,
+        nd.id,
+        nd.ten_dang_nhap,
+        nd.email,
+        nd.so_dt,
+        nd.vai_tro,
+        nd.trang_thai,
+        nd.hoat_dong,
+        nd.ngay_tao,
+        COUNT(gd.id) AS so_don
+    FROM khach_hang kh
+    JOIN nguoi_dung nd ON kh.id_nguoi_dung = nd.id
+    LEFT JOIN giao_dich gd ON kh.id = gd.id AND gd.trang_thai = 'hoàn tất'
+    GROUP BY 
+        kh.id, kh.ho_ten, kh.gioi_tinh, kh.dia_chi, kh.avt, kh.ngay_sinh,
+        nd.id, nd.ten_dang_nhap, nd.email, nd.so_dt, nd.vai_tro, nd.trang_thai, nd.hoat_dong, nd.ngay_tao
+    ORDER BY so_don DESC
+    ";
+
+    $stmt = $pdo->query($sql);
+    $users = $stmt->fetchAll();
+
     $filters = [];
     if (isset($_GET['boloc'])) {
         $filters = json_decode($_GET['boloc'], true);
@@ -83,15 +112,23 @@
                 <button @click="openFilter=false" class="text-gray-600 hover:text-gray-800"><i class="fas fa-times"></i></button>
             </div>
 
-            <label class="block mb-2 text-sm">Trạng thái</label>
-            <select class="w-full border rounded-lg p-2 mb-4">
+            <label class="block mb-2 text-sm">Hoạt động</label>
+            <select id="hoatdong-mobile" class="w-full border rounded-lg p-2 mb-4">
                 <option value="" <?= (($filters['hoatdong'] ?? '') == 'Tất cả') ? 'selected' : ''?>>Tất cả</option>
                 <option value="Online" <?= (($filters['hoatdong'] ?? '') == 'Online') ? 'selected' : ''?>>Online</option>
                 <option value="Offline" <?= (($filters['hoatdong'] ?? '') == 'Offline') ? 'selected' : ''?>>Offline</option>
             </select>
 
-            <label class="block mb-2 text-sm">Quyền hạn</label>
-            <select class="w-full border rounded-lg p-2 mb-4">
+            <label class="block mb-2 text-sm">Trạng thái</label>
+            <select id="trangthai-mobile" class="w-full border rounded-lg p-2 mb-4">
+                <option value="" <?= (($filters['trangthai'] ?? '') == 'Tất cả') ? 'selected' : ''?>>Tất cả</option>
+                <option value="Đang hoạt động" <?= (($filters['trangthai'] ?? '') == 'Đang hoạt động') ? 'selected' : ''?>>Đang hoạt động</option>
+                <option value="Chưa kích hoạt" <?= (($filters['trangthai'] ?? '') == 'Chưa kích hoạt') ? 'selected' : ''?>>Chưa kích hoạt</option>
+                <option value="Khóa" <?= (($filters['trangthai'] ?? '') == 'Khóa') ? 'selected' : ''?>>Khóa</option>
+            </select>
+
+            <label class="block mb-2 text-sm">Vai trò</label>
+            <select id="vaitro-mobile" class="w-full border rounded-lg p-2 mb-4">
                 <option value="" <?= (($filters['vaitro'] ?? '') == 'Tất cả') ? 'selected' : ''?>>Tất cả</option>
                 <option value="Admin" <?= (($filters['vaitro'] ?? '') == 'Admin') ? 'selected' : ''?>>Admin</option>
                 <option value="Moderator" <?= (($filters['vaitro'] ?? '') == 'Moderator') ? 'selected' : ''?>>Moderator</option>
@@ -99,13 +136,17 @@
             </select>
 
             <label class="block mb-2 text-sm">Ngày tạo tài khoản trước</label>
-            <input id="ngaytruoc-desktop" value="<?= ($filters['ngaytruoc'] ?? '') ?>" type="date" class="w-full border rounded-lg p-2 mb-4">
+            <input id="ngaytruoc-mobile" value="<?= ($filters['ngaytruoc'] ?? '') ?>" type="date" class="w-full border rounded-lg p-2 mb-4">
 
             <label class="block mb-2 text-sm">Số đơn lớn hơn</label>
-            <input id="sodon-desktop" value="<?= ($filters['sodon'] ?? '') ?>" type="number" placeholder="Số đơn tối thiểu" class="w-full border rounded-lg p-2 mb-4">
+            <input id="sodon-mobile" value="<?= ($filters['sodon'] ?? '') ?>" type="number" placeholder="Số đơn tối thiểu" class="w-full border rounded-lg p-2 mb-4">
 
-            <button class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">Áp dụng</button>
-            <button id="btnhuy-desktop" class="flex-1 bg-gray-300 text-gray-800 py-2 rounded-lg hover:bg-gray-400 transition">Hủy</button>
+            <div class="flex gap-3 mt-4">
+                <!-- Nút áp dụng -->
+                <button id="btnloc-mobile" class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">Áp dụng</button>
+                <!-- Nút hủy -->
+                <button id="btnhuy-mobile" class="flex-1 bg-gray-300 text-gray-800 py-2 rounded-lg hover:bg-gray-400 transition">Hủy</button>
+            </div>
         </div>
     </div>
 
@@ -134,7 +175,7 @@
                             <h2 class="mt-2 font-semibold text-gray-800 text-center"><?= $u['name'] ?></h2>
                             <p class="text-gray-500 text-sm text-center"><?= $u['email'] ?></p>
                             <p class="text-gray-500 text-sm text-center"><?= $u['phone'] ?></p>
-                            <span class="mt-2 px-2 py-1 rounded-full text-xs font-semibold <?= $u['hoatdong']=='online'?'bg-green-100 text-green-700':'bg-gray-200 text-gray-700' ?>"><?= ucfirst($u['hoatdong']) ?></span>
+                            <span class="mt-2 px-2 py-1 rounded-full text-xs font-semibold <?= $u['hoatdong']=='Online'?'bg-green-100 text-green-700':'bg-gray-200 text-gray-700' ?>"><?= ucfirst($u['hoatdong']) ?></span>
                             <span class="mt-1 px-2 py-1 rounded-full text-xs font-semibold <?= $u['vaitro']=='Admin'?'bg-red-100 text-red-700':($u['vaitro']=='Moderator'?'bg-blue-100 text-blue-700':'bg-yellow-100 text-yellow-700') ?>"><?= $u['vaitro'] ?></span>
                             <p class="mt-2 text-sm text-gray-600">Đã đặt: <?= $u['sodon'] ?> đơn</p>
                             <p class="mt-1 text-xs text-gray-400">Ngày tạo: <?= date("d/m/Y",strtotime($u['ngaytao'])) ?></p>
@@ -205,6 +246,7 @@
     function huyloc(prefix) {
         window.location.href = "trangchu.php?page=taikhoan";
     }
+
     document.getElementById("btnhuy-desktop").addEventListener("click", () => huyloc("desktop"));
     document.getElementById("btnhuy-mobile").addEventListener("click", () => huyloc("mobile"));
 

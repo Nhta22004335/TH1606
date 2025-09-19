@@ -16,6 +16,30 @@ WHERE table_schema = 'public';
 
 SELECT * FROM public.bat_dong_san;
 
+SELECT 
+        kh.id,
+        kh.ho_ten,
+        kh.gioi_tinh,
+        kh.dia_chi,
+        
+        kh.ngay_sinh,
+        nd.id,
+        nd.ten_dang_nhap,
+        nd.email,
+        nd.so_dt,
+        nd.vai_tro,
+        nd.trang_thai,
+        
+        nd.ngay_tao,
+        COUNT(gd.id) AS so_don
+    FROM khach_hang kh
+    JOIN nguoi_dung nd ON kh.id_nguoi_dung = nd.id
+    LEFT JOIN giao_dich gd ON kh.id_nguoi_dung = gd.id_khach_hang AND gd.trang_thai = 'hoàn tất'
+    GROUP BY 
+        kh.id, kh.ho_ten, kh.gioi_tinh, kh.dia_chi, kh.ngay_sinh,
+        nd.id, nd.ten_dang_nhap, nd.email, nd.so_dt, nd.vai_tro, nd.trang_thai, nd.ngay_tao
+    ORDER BY so_don DESC
+	
 INSERT INTO nguoi_dung (ten_dang_nhap, mat_khau, email, so_dt, vai_tro, trang_thai)
 VALUES
 ('admin1', '22004335', 'admin1@example.com', '0901000001', 'admin', 'hoat_dong'),
