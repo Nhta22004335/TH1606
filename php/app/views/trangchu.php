@@ -60,10 +60,9 @@
             <div class="overflow-x-auto">
                 <ul class="flex space-x-6 py-2 text-sm font-normal text-gray-700 whitespace-nowrap">
                     <li class="relative">
-                        <a class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý tài khoản <i class="fas fa-chevron-right ml-1 transition-transform duration-300"></i></a> 
+                        <a class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý Khách hàng <i class="fas fa-chevron-right ml-1 transition-transform duration-300"></i></a> 
                         <ul class="hidden fixed left-0 top-full bg-white border shadow-md mt-1 sub-menu z-100">
                             <li><a href="trangchu.php?page=taikhoan" class="block px-4 py-2 hover:bg-blue-100">Danh sách tài khoản</a></li>
-                            <li><a href="#" class="block px-4 py-2 hover:bg-blue-100">Hồ sơ cá nhân</a></li>
                             <li><a href="#" class="block px-4 py-2 hover:bg-blue-100">Lịch sử đăng nhập/đăng xuất</a></li>
                         </ul>
                     </li>

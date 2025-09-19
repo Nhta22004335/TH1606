@@ -8,38 +8,9 @@ CREATE TABLE nguoi_dung (
     vai_tro VARCHAR(50), -- admin, khachhang, moigioi
     trang_thai VARCHAR(50),    -- hoat_dong, khoa
     ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+);	
 
-SELECT table_name
-FROM information_schema.tables
-WHERE table_schema = 'public';
-
-SELECT * FROM public.bat_dong_san;
-
-SELECT 
-        kh.id,
-        kh.ho_ten,
-        kh.gioi_tinh,
-        kh.dia_chi,
-        
-        kh.ngay_sinh,
-        nd.id,
-        nd.ten_dang_nhap,
-        nd.email,
-        nd.so_dt,
-        nd.vai_tro,
-        nd.trang_thai,
-        
-        nd.ngay_tao,
-        COUNT(gd.id) AS so_don
-    FROM khach_hang kh
-    JOIN nguoi_dung nd ON kh.id_nguoi_dung = nd.id
-    LEFT JOIN giao_dich gd ON kh.id_nguoi_dung = gd.id_khach_hang AND gd.trang_thai = 'hoàn tất'
-    GROUP BY 
-        kh.id, kh.ho_ten, kh.gioi_tinh, kh.dia_chi, kh.ngay_sinh,
-        nd.id, nd.ten_dang_nhap, nd.email, nd.so_dt, nd.vai_tro, nd.trang_thai, nd.ngay_tao
-    ORDER BY so_don DESC
-	
+		
 INSERT INTO nguoi_dung (ten_dang_nhap, mat_khau, email, so_dt, vai_tro, trang_thai)
 VALUES
 ('admin1', '22004335', 'admin1@example.com', '0901000001', 'admin', 'hoat_dong'),
@@ -76,7 +47,6 @@ CREATE TABLE khach_hang (
     ngay_sinh DATE
 );
 
-select * from khach_hang
 INSERT INTO khach_hang (id_nguoi_dung, ho_ten, gioi_tinh, dia_chi, ngay_sinh)
 VALUES
 (3, 'Lê Văn C', 'Nam', '12 Trần Phú, Hà Nội', '1995-03-10'),
@@ -93,25 +63,6 @@ CREATE TABLE moi_gioi (
     kinh_nghiem INT,
     mo_ta TEXT
 );
-
-select * from moi_gioi
-select * from bat_dong_san
-
-SELECT 
-                bds.tieu_de,
-                bds.mo_ta,
-                bds.gia,
-                bds.dien_tich,
-                bds.dia_chi,
-                bds.loai,
-                bds.khu_vuc,
-                bds.trang_thai,
-                bds.ngay_dang,
-                bds.id_moi_gioi,
-                mg.ho_ten
-            FROM bat_dong_san bds
-            LEFT JOIN moi_gioi mg ON bds.id_moi_gioi = mg.id_nguoi_dung
-			where bds.id = 1;
 			
 INSERT INTO moi_gioi (id_nguoi_dung, ho_ten, gioi_tinh, cty, kinh_nghiem, mo_ta)
 VALUES
@@ -193,11 +144,17 @@ CREATE TABLE giao_dich (
 INSERT INTO giao_dich (id_khach_hang, id_bds, loai, ngay_giao_dich, trang_thai)
 VALUES
 (3, 1, 'mua', '2025-09-16 10:30:00', 'hoàn tất'),
+
 (4, 2, 'mua', '2025-09-17 09:00:00', 'đang xử lý'),
+
 (5, 3, 'thue', '2025-09-18 14:20:00', 'hoàn tất'),
+
 (3, 4, 'mua', '2025-09-15 08:45:00', 'đang xử lý'),
+
 (4, 5, 'thue', '2025-09-16 11:15:00', 'hoàn tất'),
+
 (5, 6, 'mua', '2025-09-17 12:00:00', 'hủy'),
+
 (3, 7, 'mua', '2025-09-16 16:30:00', 'hoàn tất');
 
 -- 9. Bảng thanh toán
@@ -236,10 +193,9 @@ CREATE TABLE danh_gia_bds (
     ngay_dg TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-ALTER TABLE danh_gia_bds
-ADD COLUMN trang_thai VARCHAR(10) DEFAULT 'hiện';
 
 select * from danh_gia_bds
+
 -- 6. Bảng hình ảnh sản phẩm
 CREATE TABLE hinh_anh_danh_gia_bds (
     id SERIAL PRIMARY KEY,

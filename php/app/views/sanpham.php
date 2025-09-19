@@ -3,22 +3,22 @@
     $pdo = ketnoicsdl();
 
     $sql = "
-            SELECT 
-                b.id,
-                b.tieu_de,
-                b.mo_ta,
-                b.gia,
-                b.dien_tich,
-                b.dia_chi,
-                b.loai,
-                b.khu_vuc,
-                b.ngay_dang,
-                b.trang_thai,
-                d.diem as rating
-            FROM public.bat_dong_san b
-            LEFT JOIN danh_gia_bds d ON d.id_bds = b.id
-            ORDER BY b.ngay_dang DESC
-            ";
+        SELECT 
+            b.id,
+            b.tieu_de,
+            b.mo_ta,
+            b.gia,
+            b.dien_tich,
+            b.dia_chi,
+            b.loai,
+            b.khu_vuc,
+            b.ngay_dang,
+            b.trang_thai,
+            d.diem as rating
+        FROM public.bat_dong_san b
+        LEFT JOIN danh_gia_bds d ON d.id_bds = b.id
+        ORDER BY b.ngay_dang DESC
+        ";
     $stmt = $pdo->query($sql);
     $products = $stmt->fetchAll();
 

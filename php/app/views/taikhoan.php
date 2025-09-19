@@ -1,48 +1,77 @@
 <?php
-    $users = [
-        ["id"=>1,"name"=>"Nguyễn Văn A","email"=>"a.nguyen@example.com","phone"=>"0909123456","vaitro"=>"Admin","hoatdong"=>"Online","sodon"=>12,"ngaytao"=>"2024-01-10","avatar"=>"https://i.pravatar.cc/150?img=1"],
-        ["id"=>2,"name"=>"Trần Thị B","email"=>"b.tran@example.com","phone"=>"0912345678","vaitro"=>"User","hoatdong"=>"Offline","sodon"=>3,"ngaytao"=>"2023-11-05","avatar"=>"https://i.pravatar.cc/150?img=2"],
-        ["id"=>3,"name"=>"Lê Văn C","email"=>"c.le@example.com","phone"=>"0987654321","vaitro"=>"User","hoatdong"=>"Online","sodon"=>7,"ngaytao"=>"2024-03-15","avatar"=>"https://i.pravatar.cc/150?img=3"],
-        ["id"=>4,"name"=>"Phạm Thị D","email"=>"d.pham@example.com","phone"=>"0909876543","vaitro"=>"Moderator","hoatdong"=>"Offline","sodon"=>20,"ngaytao"=>"2023-09-20","avatar"=>"https://i.pravatar.cc/150?img=4"],
-        ["id"=>5,"name"=>"Hoàng Văn E","email"=>"e.hoang@example.com","phone"=>"0911987654","vaitro"=>"User","hoatdong"=>"Online","sodon"=>5,"ngaytao"=>"2024-05-12","avatar"=>"https://i.pravatar.cc/150?img=5"],
-        ["id"=>6,"name"=>"Đỗ Thị F","email"=>"f.do@example.com","phone"=>"0905432198","vaitro"=>"User","hoatdong"=>"Offline","sodon"=>0,"ngaytao"=>"2024-02-22","avatar"=>"https://i.pravatar.cc/150?img=6"],
-        ["id"=>7,"name"=>"Vũ Văn G","email"=>"g.vu@example.com","phone"=>"0912765432","vaitro"=>"Admin","hoatdong"=>"Online","sodon"=>15,"ngaytao"=>"2023-12-01","avatar"=>"https://i.pravatar.cc/150?img=7"],
-        ["id"=>8,"name"=>"Ngô Thị H","email"=>"h.ngo@example.com","phone"=>"0902345678","vaitro"=>"Moderator","hoatdong"=>"Offline","sodon"=>8,"ngaytao"=>"2024-04-10","avatar"=>"https://i.pravatar.cc/150?img=8"],
-    ];
+    require_once "../../config/database.php";
+    $pdo = ketnoicsdl();
+
+
+    $page = $_GET['page'] ?? '';
 
     $sql = "
-    SELECT 
-        kh.id,
-        kh.ho_ten,
-        kh.gioi_tinh,
-        kh.dia_chi,
-        kh.avt,
-        kh.ngay_sinh,
-        nd.id,
-        nd.ten_dang_nhap,
-        nd.email,
-        nd.so_dt,
-        nd.vai_tro,
-        nd.trang_thai,
-        nd.hoat_dong,
-        nd.ngay_tao,
-        COUNT(gd.id) AS so_don
-    FROM khach_hang kh
-    JOIN nguoi_dung nd ON kh.id_nguoi_dung = nd.id
-    LEFT JOIN giao_dich gd ON kh.id = gd.id AND gd.trang_thai = 'hoàn tất'
-    GROUP BY 
-        kh.id, kh.ho_ten, kh.gioi_tinh, kh.dia_chi, kh.avt, kh.ngay_sinh,
-        nd.id, nd.ten_dang_nhap, nd.email, nd.so_dt, nd.vai_tro, nd.trang_thai, nd.hoat_dong, nd.ngay_tao
-    ORDER BY so_don DESC
-    ";
+        SELECT 
+            kh.id,
+            kh.ho_ten,
+            kh.gioi_tinh,
+            kh.dia_chi,
+            kh.avt,
+            kh.ngay_sinh,
+            nd.id,
+            nd.ten_dang_nhap,
+            nd.email,
+            nd.so_dt,
+            nd.vai_tro,
+            nd.trang_thai,
+            nd.hoat_dong,
+            nd.ngay_tao,
+            COUNT(gd.id) AS so_don
+        FROM khach_hang kh
+        JOIN nguoi_dung nd ON kh.id_nguoi_dung = nd.id
+        LEFT JOIN giao_dich gd ON kh.id_nguoi_dung = gd.id_khach_hang AND gd.trang_thai = 'hoàn tất'
+        GROUP BY 
+            kh.id, kh.ho_ten, kh.gioi_tinh, kh.dia_chi, kh.avt, kh.ngay_sinh,
+            nd.id, nd.ten_dang_nhap, nd.email, nd.so_dt, nd.vai_tro, nd.trang_thai, nd.hoat_dong, nd.ngay_tao
+        ORDER BY so_don DESC
+        ";
 
     $stmt = $pdo->query($sql);
     $users = $stmt->fetchAll();
+
+    $search = $_GET['search'] ?? '';
+    $keyword = "%" . $search . "%";
+    $sql = "
+            SELECT 
+            kh.id,
+            kh.ho_ten,
+            kh.gioi_tinh,
+            kh.dia_chi,
+            kh.avt,
+            kh.ngay_sinh,
+            nd.id AS id_nguoi_dung,
+            nd.ten_dang_nhap,
+            nd.email,
+            nd.so_dt,
+            nd.vai_tro,
+            nd.trang_thai,
+            nd.hoat_dong,
+            nd.ngay_tao,
+            COUNT(gd.id) AS so_don
+        FROM khach_hang kh
+        JOIN nguoi_dung nd ON kh.id_nguoi_dung = nd.id
+        LEFT JOIN giao_dich gd ON kh.id_nguoi_dung = gd.id_khach_hang AND gd.trang_thai = 'hoàn tất'
+        WHERE (kh.ho_ten ILIKE :search OR kh.dia_chi ILIKE :search)
+        GROUP BY 
+            kh.id, kh.ho_ten, kh.gioi_tinh, kh.dia_chi, kh.avt, kh.ngay_sinh,
+            nd.id, nd.ten_dang_nhap, nd.email, nd.so_dt, nd.vai_tro, nd.trang_thai, nd.hoat_dong, nd.ngay_tao
+        ORDER BY so_don DESC
+    ";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([':search' => $keyword]);
+    $mangtkkhachhang = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     $filters = [];
     if (isset($_GET['boloc'])) {
         $filters = json_decode($_GET['boloc'], true);
     }
+
 ?>
 <!DOCTYPE html>
 <html lang="vi" x-data="{ openFilter:false }">
@@ -156,7 +185,7 @@
         <div class="flex justify-between items-center mb-6">
             <h1 class="flex items-center text-2xl font-bold text-gray-600">
                 <img src="../../public/assets/anhht/0/user.gif" alt="Users" style="width: 50px; height: 50px; margin-right: 10px;">
-                Quản lý tài khoản
+                Quản lý Khách hàng
             </h1>
             <div class="flex gap-2">
                 <button @click="openFilter=true" class="md:hidden mr-4 bg-gray-200 px-3 py-2 rounded-lg shadow hover:bg-gray-300">
@@ -167,18 +196,18 @@
         
         <!-- Grid user card -->
         <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            <?php if (empty($filters)): ?>
+            <?php if (empty($filters)&& empty($mangtkkhachhang)): ?>
                 <?php foreach($users as $u): ?>
                     <div class="bg-white shadow rounded-xl overflow-hidden hover:shadow-lg transition flex flex-col relative">
                         <div class="p-4 flex flex-col items-center">
-                            <img src="<?= $u['avatar'] ?>" alt="<?= $u['name'] ?>" class="w-20 h-20 rounded-full object-cover border-2 border-gray-200">
-                            <h2 class="mt-2 font-semibold text-gray-800 text-center"><?= $u['name'] ?></h2>
+                            <img src="../../public/assets/anhht/0/<?= $u['avt'] ?>" class="w-20 h-20 rounded-full object-cover border-2 border-gray-200">
+                            <h2 class="mt-2 font-semibold text-gray-800 text-center"><?= $u['ho_ten'] ?></h2>
                             <p class="text-gray-500 text-sm text-center"><?= $u['email'] ?></p>
-                            <p class="text-gray-500 text-sm text-center"><?= $u['phone'] ?></p>
-                            <span class="mt-2 px-2 py-1 rounded-full text-xs font-semibold <?= $u['hoatdong']=='Online'?'bg-green-100 text-green-700':'bg-gray-200 text-gray-700' ?>"><?= ucfirst($u['hoatdong']) ?></span>
-                            <span class="mt-1 px-2 py-1 rounded-full text-xs font-semibold <?= $u['vaitro']=='Admin'?'bg-red-100 text-red-700':($u['vaitro']=='Moderator'?'bg-blue-100 text-blue-700':'bg-yellow-100 text-yellow-700') ?>"><?= $u['vaitro'] ?></span>
-                            <p class="mt-2 text-sm text-gray-600">Đã đặt: <?= $u['sodon'] ?> đơn</p>
-                            <p class="mt-1 text-xs text-gray-400">Ngày tạo: <?= date("d/m/Y",strtotime($u['ngaytao'])) ?></p>
+                            <p class="text-gray-500 text-sm text-center"><?= $u['so_dt'] ?></p>
+                            <span class="mt-2 px-2 py-1 rounded-full text-xs font-semibold <?= $u['hoat_dong']=='Online'?'bg-green-100 text-green-700':'bg-gray-200 text-gray-700' ?>"><?= ucfirst($u['hoat_dong']) ?></span>
+                            <span class="mt-1 px-2 py-1 rounded-full text-xs font-semibold <?= $u['vai_tro']=='Admin'?'bg-red-100 text-red-700':($u['vai_tro']=='Moderator'?'bg-blue-100 text-blue-700':'bg-yellow-100 text-yellow-700') ?>"><?= $u['vai_tro'] ?></span>
+                            <p class="mt-2 text-sm text-gray-600">Đã đặt: <?= $u['so_don'] ?> đơn</p>
+                            <p class="mt-1 text-xs text-gray-400">Ngày tạo: <?= date("d/m/Y",strtotime($u['ngay_tao'])) ?></p>
                         </div>
                         <!-- Nút hành động -->
                         <div class="flex justify-around border-t p-2 mt-auto">
@@ -192,23 +221,23 @@
                 <?php foreach($users as $u): ?>
                     <?php
                         $match = true;
-                        if (isset($filters['hoatdong']) && $filters['hoatdong'] !== $u['hoatdong']) $match = false;
-                        if (isset($filters['trangthai']) && $filters['trangthai'] !== $u['trangthai']) $match = false;
-                        if (isset($filters['vaitro']) && $filters['vaitro'] !== $u['vaitro']) $match = false;
-                        if (isset($filters['ngaytruoc']) && $u['ngaytao'] > $filters['ngaytruoc']) $match = false;
-                        if (isset($filters['sodon']) && $u['sodon'] > $filters['sodon']) $match = false;
+                        if (isset($filters['hoatdong']) && $filters['hoatdong'] !== $u['hoat_dong']) $match = false;
+                        if (isset($filters['trangthai']) && $filters['trangthai'] !== $u['trang_thai']) $match = false;
+                        if (isset($filters['vaitro']) && $filters['vaitro'] !== $u['vai_tro']) $match = false;
+                        if (isset($filters['ngaytruoc']) && $u['ngay_tao'] > $filters['ngaytruoc']) $match = false;
+                        if (isset($filters['sodon']) && $u['so_don'] > $filters['sodon']) $match = false;
                     ?>
                     <?php if ($match): ?>
                         <div class="bg-white shadow rounded-xl overflow-hidden hover:shadow-lg transition flex flex-col relative">
                             <div class="p-4 flex flex-col items-center">
-                                <img src="<?= $u['avatar'] ?>" alt="<?= $u['name'] ?>" class="w-20 h-20 rounded-full object-cover border-2 border-gray-200">
-                                <h2 class="mt-2 font-semibold text-gray-800 text-center"><?= $u['name'] ?></h2>
+                                <img src="../../public/assets/anhht/0/<?= $u['avt'] ?>" alt="<?= $u['ho_ten'] ?>" class="w-20 h-20 rounded-full object-cover border-2 border-gray-200">
+                                <h2 class="mt-2 font-semibold text-gray-800 text-center"><?= $u['ho_ten'] ?></h2>
                                 <p class="text-gray-500 text-sm text-center"><?= $u['email'] ?></p>
-                                <p class="text-gray-500 text-sm text-center"><?= $u['phone'] ?></p>
-                                <span class="mt-2 px-2 py-1 rounded-full text-xs font-semibold <?= $u['hoatdong']=='online'?'bg-green-100 text-green-700':'bg-gray-200 text-gray-700' ?>"><?= ucfirst($u['hoatdong']) ?></span>
-                                <span class="mt-1 px-2 py-1 rounded-full text-xs font-semibold <?= $u['vaitro']=='Admin'?'bg-red-100 text-red-700':($u['vaitro']=='Moderator'?'bg-blue-100 text-blue-700':'bg-yellow-100 text-yellow-700') ?>"><?= $u['vaitro'] ?></span>
-                                <p class="mt-2 text-sm text-gray-600">Đã đặt: <?= $u['sodon'] ?> đơn</p>
-                                <p class="mt-1 text-xs text-gray-400">Ngày tạo: <?= date("d/m/Y",strtotime($u['ngaytao'])) ?></p>
+                                <p class="text-gray-500 text-sm text-center"><?= $u['so_dt'] ?></p>
+                                <span class="mt-2 px-2 py-1 rounded-full text-xs font-semibold <?= $u['hoat_dong']=='online'?'bg-green-100 text-green-700':'bg-gray-200 text-gray-700' ?>"><?= ucfirst($u['hoat_dong']) ?></span>
+                                <span class="mt-1 px-2 py-1 rounded-full text-xs font-semibold <?= $u['vai_tro']=='Admin'?'bg-red-100 text-red-700':($u['vai_tro']=='Moderator'?'bg-blue-100 text-blue-700':'bg-yellow-100 text-yellow-700') ?>"><?= $u['vai_tro'] ?></span>
+                                <p class="mt-2 text-sm text-gray-600">Đã đặt: <?= $u['so_don'] ?> đơn</p>
+                                <p class="mt-1 text-xs text-gray-400">Ngày tạo: <?= date("d/m/Y",strtotime($u['ngay_tao'])) ?></p>
                             </div>
                             <!-- Nút hành động -->
                             <div class="flex justify-around border-t p-2 mt-auto">
@@ -218,6 +247,27 @@
                             </div>
                         </div>
                     <?php endif; ?>
+                <?php endforeach; ?>
+            <?php elseif (!empty($mangtkkhachhang)): ?>
+                <?php foreach ($mangtkkhachhang as $m): ?>
+                    <div class="bg-white shadow rounded-xl overflow-hidden hover:shadow-lg transition flex flex-col relative">
+                        <div class="p-4 flex flex-col items-center">
+                            <img src="../../public/assets/anhht/0/<?= $m['avt'] ?>" alt="<?= $m['ho_ten'] ?>" class="w-20 h-20 rounded-full object-cover border-2 border-gray-200">
+                            <h2 class="mt-2 font-semibold text-gray-800 text-center"><?= $m['ho_ten'] ?></h2>
+                            <p class="text-gray-500 text-sm text-center"><?= $m['email'] ?></p>
+                            <p class="text-gray-500 text-sm text-center"><?= $m['so_dt'] ?></p>
+                            <span class="mt-2 px-2 py-1 rounded-full text-xs font-semibold <?= $m['hoat_dong']=='online'?'bg-green-100 text-green-700':'bg-gray-200 text-gray-700' ?>"><?= ucfirst($m['hoat_dong']) ?></span>
+                            <span class="mt-1 px-2 py-1 rounded-full text-xs font-semibold <?= $m['vai_tro']=='Admin'?'bg-red-100 text-red-700':($m['vai_tro']=='Moderator'?'bg-blue-100 text-blue-700':'bg-yellow-100 text-yellow-700') ?>"><?= $m['vai_tro'] ?></span>
+                            <p class="mt-2 text-sm text-gray-600">Đã đặt: <?= $m['so_don'] ?> đơn</p>
+                            <p class="mt-1 text-xs text-gray-400">Ngày tạo: <?= date("d/m/Y",strtotime($m['ngay_tao'])) ?></p>
+                        </div>
+                        <!-- Nút hành động -->
+                        <div class="flex justify-around border-t p-2 mt-auto">
+                            <a href="#" class="text-blue-600 hover:text-blue-800"><i class="fas fa-edit"></i></a>
+                            <a href="#" class="text-red-600 hover:text-red-800"><i class="fas fa-trash-alt"></i></a>
+                            <a href="#" class="text-purple-600 hover:text-purple-800"><i class="fas fa-key"></i></a>
+                        </div>
+                    </div>
                 <?php endforeach; ?>
             <?php endif; ?>
         </div>
