@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cài đặt mật khẩu</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen flex items-center justify-center bg-gray-100">
+
+<div class="bg-white shadow-lg rounded-2xl w-11/12 max-w-md mx-auto px-5 py-5 sm:px-6 sm:py-6">
+    <!-- Logo -->
+    <div class="flex justify-center">
+        <img src="../../../public/assets/anhht/0/logo-homedy.png" alt="Logo hệ thống" class="w-16 h-16 sm:w-20 sm:h-20 object-contain">
+    </div>
+
+    <!-- Slogan -->
+    <p class="text-center text-gray-500 italic text-sm sm:text-base mb-4">Không gian sống lý tưởng cho bạn</p>
+
+    <h2 class="text-lg font-semibold text-center text-gray-800 mb-3">🔐 Cài đặt mật khẩu</h2>
+
+    <!-- Form -->
+    <form id="formMatKhau" class="space-y-3">
+        <input type="text" id="tendangnhap" placeholder="Tên đăng nhập" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-400">
+
+        <input type="password" id="matkhaucu" placeholder="Mật khẩu cũ" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-400">
+        
+        <input type="password" id="matkhaumoi" placeholder="Mật khẩu mới" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-400">
+
+        <!-- Hiển thị mật khẩu -->
+        <label class="flex items-center gap-2 text-sm text-gray-700"> 
+            <input type="checkbox" id="hienthimatkhau" class="w-4 h-4 text-blue-500 rounded border-gray-300 focus:ring-blue-400">
+            <span>Hiển thị mật khẩu</span>
+        </label>
+
+        <input type="email" id="email" placeholder="Email" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-400">
+
+        <!-- Quên mật khẩu -->
+        <label class="flex items-center gap-2 text-sm text-gray-700">
+            <input type="checkbox" id="quenmatkhau" class="w-4 h-4 text-blue-500 rounded border-gray-300 focus:ring-blue-400">
+            <span>Quên mật khẩu</span>
+        </label>
+
+        <!-- Nút -->
+        <button type="button" id="btnThucHien" class="w-full bg-blue-500 text-white text-sm font-medium py-2 rounded-lg hover:bg-blue-600 transition">Thực hiện</button>
+
+        <!-- Link đăng ký -->
+        <p class="text-center text-sm text-gray-600 mt-4">
+            👉 Quay trở lại?
+            <a href="dangnhap.html" class="text-blue-600 hover:text-blue-800 font-medium">Đăng nhập ngay</a>
+        </p>
+
+        <!-- Footer -->
+        <p class="text-center text-xs text-gray-400 mt-6">© 2025 Zolux 4335. All rights reserved.</p>
+    </form>
+</div>
+
+<script>
+    document.getElementById("hienthimatkhau").addEventListener("change", function() {
+        const inputs = [document.getElementById("matkhaucu"), document.getElementById("matkhaumoi")];
+        inputs.forEach(input => input.type = this.checked ? "text" : "password");
+    });
+
+    document.getElementById("email").disabled = true;
+
+    document.getElementById("quenmatkhau").addEventListener("change", function() {
+        const emailInput = document.getElementById("email");
+        const password = document.getElementById("matkhaucu");
+        const newPassword = document.getElementById("matkhaumoi");
+
+        emailInput.disabled = !this.checked;
+        password.disabled = this.checked;
+        newPassword.disabled = this.checked;
+
+        if (!this.checked) emailInput.value = "";
+    });
+
+    document.getElementById('btnThucHien').addEventListener('click', function() {
+        const tendangnhap = document.getElementById('tendangnhap').value.trim();
+        const matkhaucu = document.getElementById('matkhaucu').value.trim();
+        const matkhaumoi = document.getElementById('matkhaumoi').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const isQuenMatKhau = document.getElementById("quenmatkhau").checked;
+
+        if (isQuenMatKhau) {
+        if (!tendangnhap || !email) {
+            alert('Vui lòng nhập đầy đủ thông tin để khôi phục mật khẩu!');
+            return;
+        }
+        window.location.href = '../php/xuly_quen_matkhau.php?tendangnhap=' + tendangnhap + '&email=' + email;
+        return;
+        }
+
+        if (!tendangnhap || !matkhaucu || !matkhaumoi) {
+        alert('Vui lòng nhập đầy đủ thông tin để đổi mật khẩu!');
+        return;
+        }
+        if (matkhaumoi.length < 8) {
+        alert('Mật khẩu phải có ít nhất 8 ký tự!');
+        return;
+        }
+        if (matkhaucu === matkhaumoi) {
+        alert('Mật khẩu mới không được trùng với mật khẩu cũ!');
+        return;
+        }
+
+        fetch('../php/xuly_doi_matkhau.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({tendangnhap, matkhaucu, matkhaumoi, email})
+        })
+        .then(res => res.json())
+        .then(data => alert(data.success ? 'Đổi mật khẩu thành công!' : data.message))
+        .catch(err => console.error('Error:', err));
+    });
+</script>
+</body>
+</html>
