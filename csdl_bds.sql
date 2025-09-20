@@ -432,6 +432,7 @@ CREATE TABLE dang_ky_goi (
     ngay_het TIMESTAMP
 );
 
+
 --CẬP NHẬT CSDL MOI
 -- FILE: full_realestate_marketplace.sql
 -- Mục đích: CSDL cho sàn giao dịch thương mại điện tử bất động sản (phiên bản mở rộng)
@@ -1047,4 +1048,3 @@ EXECUTE FUNCTION fn_after_insert_nguoi_dung();
 -- Nếu muốn mình có thể:
 --  1) xuất file .sql để bạn tải xuống,
 --  2) hoặc thêm sample data đầy đủ hơn cho từng bảng (ví dụ thêm 20 tin BĐS, 10 đánh giá, 5 giao dịch).
-
