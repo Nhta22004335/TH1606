@@ -79,7 +79,7 @@ CREATE TABLE khach_hang (
     -- Ngày sinh phải >= 18 tuổi
     CONSTRAINT chk_khachhang_tuoi CHECK (ngay_sinh <= CURRENT_DATE - INTERVAL '18 years')
 );
-
+hhhhhhhh
 SELECT * FROM khach_hang
 
 -- 4. Bảng môi giới
