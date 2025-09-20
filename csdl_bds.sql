@@ -434,8 +434,8 @@ CREATE TABLE dang_ky_goi (
 
 
 --CẬP NHẬT CSDL MOI
--- FILE: full_realestate_marketplace.sql
--- Mục đích: CSDL cho sàn giao dịch thương mại điện tử bất động sản (phiên bản mở rộng)
+-- FULL SQL: full_realestate_marketplace_full.sql
+-- Mục đích: CSDL cho sàn giao dịch thương mại điện tử bất động sản (phiên bản hoàn chỉnh)
 -- Tổng: 33 bảng
 -- Phân công (tên người phụ trách): Tuấn Anh = ADMIN, Quỳnh = MÔI GIỚI, Đặng = KHÁCH HÀNG
 -- Ghi chú: các comment trước mỗi bảng mô tả vai trò, ý nghĩa và ai phụ trách phần đó.
@@ -455,7 +455,7 @@ CREATE TABLE IF NOT EXISTS nguoi_dung (
     ten_dang_nhap VARCHAR(100) NOT NULL UNIQUE,
     mat_khau VARCHAR(255) NOT NULL,
     email VARCHAR(150) NOT NULL UNIQUE,
-    so_dt VARCHAR(20) UNIQUE DEFAULT 'chuacapnhat',
+    so_dt VARCHAR(20) DEFAULT 'chuacapnhat',
     vai_tro VARCHAR(50) DEFAULT 'khachhang', -- 'khachhang' | 'quantri' | 'moigioi'
     trang_thai VARCHAR(50) DEFAULT 'danghoatdong', -- 'danghoatdong' | 'chuakichhoat' | 'khoa'
     hoat_dong VARCHAR(50) DEFAULT 'offline', -- 'online' | 'offline'
@@ -470,18 +470,16 @@ CREATE TABLE IF NOT EXISTS nguoi_dung (
 -- Mẫu: tạo 3 user chủ chốt nhóm (Tuấn Anh, Quỳnh, Đặng) + một số user demo
 INSERT INTO nguoi_dung (ten_dang_nhap, mat_khau, email, so_dt, vai_tro, trang_thai, hoat_dong)
 VALUES
--- Tuấn Anh: admin (phụ trách admin / quản trị hệ thống)
 ('tuananh', 'demo@123', 'tuan.anh@example.com', '0945671234', 'quantri', 'danghoatdong', 'online'),
--- Quỳnh: môi giới (phụ trách phần môi giới)
 ('quynh', 'demo@123', 'quynh.mg@example.com', '0934567890', 'moigioi', 'danghoatdong', 'online'),
--- Đặng: khách hàng (phụ trách phần chức năng khách hàng, test data)
-('dang', 'demo@123', 'dang.kh@example.com', '0945566778', 'khachhang', 'danghoatdong', 'offline');
+('dang', 'demo@123', 'dang.kh@example.com', '0945566778', 'khachhang', 'danghoatdong', 'offline')
+ON CONFLICT DO NOTHING;
 
--- Thêm các user demo khác (giữ nhẹ, có thể xóa/hoàn thiện sau)
 INSERT INTO nguoi_dung (ten_dang_nhap, mat_khau, email, so_dt, vai_tro)
 VALUES
 ('nguyenvana', 'demo@123', 'vana.nguyen@example.com', '0987654321', 'khachhang'),
-('tranthibich', 'demo@123', 'bich.tran@example.com', '0912345678', 'khachhang');
+('tranthibich', 'demo@123', 'bich.tran@example.com', '0912345678', 'khachhang')
+ON CONFLICT DO NOTHING;
 
 -- ===========================
 -- 1. Bảng quan_tri (profile admin)
@@ -501,9 +499,10 @@ CREATE TABLE IF NOT EXISTS quan_tri (
     CONSTRAINT chk_quantri_tuoi CHECK (ngay_sinh <= CURRENT_DATE - INTERVAL '18 years')
 );
 
--- Tạo profile admin cho user 'tuananh'
+-- Tạo profile admin cho user 'tuananh' (nếu chưa có)
 INSERT INTO quan_tri (id_nguoi_dung, ho_ten, gioi_tinh)
-SELECT id, 'Truong Minh Tuan Anh', 'nam' FROM nguoi_dung WHERE ten_dang_nhap = 'tuananh';
+SELECT id, 'Truong Minh Tuan Anh', 'nam' FROM nguoi_dung WHERE ten_dang_nhap = 'tuananh'
+ON CONFLICT DO NOTHING;
 
 -- ===========================
 -- 2. Bảng khach_hang (profile khách hàng)
@@ -525,7 +524,8 @@ CREATE TABLE IF NOT EXISTS khach_hang (
 
 -- Tạo profile khách hàng cho user 'dang'
 INSERT INTO khach_hang (id_nguoi_dung, ho_ten, gioi_tinh)
-SELECT id, 'Dang Thi Thao', 'nu' FROM nguoi_dung WHERE ten_dang_nhap = 'dang';
+SELECT id, 'Dang Thi Thao', 'nu' FROM nguoi_dung WHERE ten_dang_nhap = 'dang'
+ON CONFLICT DO NOTHING;
 
 -- ===========================
 -- 3. Bảng moi_gioi (profile môi giới)
@@ -547,16 +547,18 @@ CREATE TABLE IF NOT EXISTS moi_gioi (
 
 -- Tạo profile môi giới cho user 'quynh'
 INSERT INTO moi_gioi (id_nguoi_dung, ho_ten, gioi_tinh, cty, kinh_nghiem)
-SELECT id, 'Quynh MG', 'nu', 'Cty MQ Real', 5 FROM nguoi_dung WHERE ten_dang_nhap = 'quynh';
+SELECT id, 'Quynh MG', 'nu', 'Cty MQ Real', 5 FROM nguoi_dung WHERE ten_dang_nhap = 'quynh'
+ON CONFLICT DO NOTHING;
 
 -- ===========================
 -- 4. Bảng bat_dong_san (bất động sản)
 -- Mô tả: các tin đăng BĐS, mỗi BĐS thuộc 1 môi giới (moi_gioi.id)
 -- Phụ trách: Quỳnh (môi giới tạo tin), Tuấn Anh (kiểm duyệt)
+-- Lưu ý: id_moi_gioi cho phép NULL để khi môi giới bị xóa, tin vẫn tồn tại.
 -- ===========================
 CREATE TABLE IF NOT EXISTS bat_dong_san (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    id_moi_gioi UUID NOT NULL, -- FK -> moi_gioi.id
+    id_moi_gioi UUID, -- FK -> moi_gioi.id (có thể NULL)
     tieu_de VARCHAR(200) DEFAULT 'chuacapnhat',
     mo_ta TEXT DEFAULT 'chuacapnhat',
     gia NUMERIC(18,2) CHECK (gia >= 0) DEFAULT 0,
@@ -571,7 +573,7 @@ CREATE TABLE IF NOT EXISTS bat_dong_san (
     CONSTRAINT fk_bds_moigioi FOREIGN KEY (id_moi_gioi) REFERENCES moi_gioi(id) ON DELETE SET NULL
 );
 
--- Thêm một vài tin mẫu do Quỳnh quản lý (lấy id moi_gioi tương ứng)
+-- Thêm một vài tin mẫu do Quỳnh quản lý (nếu chưa có)
 INSERT INTO bat_dong_san (id_moi_gioi, tieu_de, mo_ta, gia, dien_tich, dia_chi, loai, khu_vuc, trang_thai)
 SELECT m.id, 'Căn hộ mẫu Quynh 1', 'Căn hộ 2PN - mẫu', 3500000000, 75.5, 'Quận 1, TP.HCM', 'ban', 'TP.HCM', 'dangban'
 FROM moi_gioi m JOIN nguoi_dung u ON u.id = m.id_nguoi_dung WHERE u.ten_dang_nhap = 'quynh'
@@ -581,7 +583,6 @@ LIMIT 1;
 -- 5. Bảng hinh_anh (ảnh sản phẩm)
 -- Mô tả: ảnh cho bat_dong_san
 -- Phụ trách: Quỳnh (upload ảnh tin)
--- NOTE: id_bds là UUID tham chiếu tới bat_dong_san.id
 -- ===========================
 CREATE TABLE IF NOT EXISTS hinh_anh (
     id SERIAL PRIMARY KEY,
@@ -610,11 +611,12 @@ CREATE TABLE IF NOT EXISTS video (
 -- 7. Bảng danh_gia_bds (đánh giá bất động sản)
 -- Mô tả: khách hàng đánh giá tin BĐS
 -- Phụ trách: Đặng (thu thập, kiểm tra feedback), Tuấn Anh (quản lý)
+-- Lưu ý: id_khach_hang cho phép NULL nếu khách hàng bị xóa nhưng đánh giá muốn giữ.
 -- ===========================
 CREATE TABLE IF NOT EXISTS danh_gia_bds (
     id SERIAL PRIMARY KEY,
-    id_khach_hang UUID NOT NULL, -- FK -> khach_hang.id
-    id_bds UUID NOT NULL,       -- FK -> bat_dong_san.id
+    id_khach_hang UUID,
+    id_bds UUID NOT NULL,
     diem INT CHECK (diem >= 1 AND diem <= 5),
     binh_luan TEXT,
     ngay_dg TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -624,7 +626,6 @@ CREATE TABLE IF NOT EXISTS danh_gia_bds (
 
 -- ===========================
 -- 8. Bảng hinh_anh_danh_gia_bds (ảnh kèm đánh giá)
--- Mô tả: ảnh kèm đánh giá
 -- Phụ trách: Đặng
 -- ===========================
 CREATE TABLE IF NOT EXISTS hinh_anh_danh_gia_bds (
@@ -637,7 +638,6 @@ CREATE TABLE IF NOT EXISTS hinh_anh_danh_gia_bds (
 
 -- ===========================
 -- 9. Bảng video_danh_gia_bds (video kèm đánh giá)
--- Mô tả: video kèm đánh giá
 -- Phụ trách: Đặng
 -- ===========================
 CREATE TABLE IF NOT EXISTS video_danh_gia_bds (
@@ -650,13 +650,12 @@ CREATE TABLE IF NOT EXISTS video_danh_gia_bds (
 
 -- ===========================
 -- 10. Bảng danh_gia_mg (đánh giá môi giới)
--- Mô tả: khách hàng đánh giá môi giới
 -- Phụ trách: Đặng (gửi feedback), Quỳnh (đáp ứng)
 -- ===========================
 CREATE TABLE IF NOT EXISTS danh_gia_mg (
     id SERIAL PRIMARY KEY,
-    id_khach_hang UUID NOT NULL, -- FK -> khach_hang.id
-    id_moi_gioi UUID NOT NULL,   -- FK -> moi_gioi.id
+    id_khach_hang UUID,
+    id_moi_gioi UUID,
     diem INT CHECK (diem >= 1 AND diem <= 5),
     binh_luan TEXT,
     ngay_dg TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -666,13 +665,13 @@ CREATE TABLE IF NOT EXISTS danh_gia_mg (
 
 -- ===========================
 -- 11. Bảng giao_dich (ghi nhận giao dịch mua/bán/thue)
--- Mô tả: giao dịch BĐS (liên kết khach_hang, bat_dong_san)
 -- Phụ trách: Tuấn Anh (quản lý giao dịch), Đặng (kiểm tra thực tế)
+-- Lưu ý: id_khach_hang/id_bds có thể NULL nếu bên liên quan bị xóa nhưng muốn giữ bản ghi giao dịch.
 -- ===========================
 CREATE TABLE IF NOT EXISTS giao_dich (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    id_khach_hang UUID NOT NULL, -- FK -> khach_hang.id
-    id_bds UUID NOT NULL,       -- FK -> bat_dong_san.id
+    id_khach_hang UUID,
+    id_bds UUID,
     loai VARCHAR(50) NOT NULL,  -- 'mua','ban','thue'
     ngay_giao_dich TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     trang_thai VARCHAR(50) DEFAULT 'dang_xu_ly', -- 'dang_xu_ly','hoan_tat','huy'
@@ -681,17 +680,13 @@ CREATE TABLE IF NOT EXISTS giao_dich (
     CONSTRAINT fk_gd_bds FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE SET NULL
 );
 
--- Một vài giao dịch mẫu (nếu có khach_hang/bds tồn tại)
--- (chạy khi đã có dữ liệu phù hợp)
-
 -- ===========================
 -- 12. Bảng thanh_toan (tổng thanh toán liên quan giao dịch)
--- Mô tả: lưu thanh toán cho giao dịch (offline hoặc ghi nhận tạo request)
 -- Phụ trách: Tuấn Anh, Đặng
 -- ===========================
 CREATE TABLE IF NOT EXISTS thanh_toan (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    id_giao_dich UUID NOT NULL, -- FK -> giao_dich.id
+    id_giao_dich UUID NOT NULL,
     tong_tien NUMERIC(18,2) CHECK (tong_tien >= 0),
     ngay_tt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     phuong_thuc VARCHAR(100), -- e.g. 'chuyenkhoan','visa','cod'
@@ -701,13 +696,12 @@ CREATE TABLE IF NOT EXISTS thanh_toan (
 
 -- ===========================
 -- 13. Bảng thanh_toan_ct (chi tiết thanh toán)
--- Mô tả: chi tiết nhiều dòng cho 1 thanh_toan (nếu cần)
 -- Phụ trách: Tuấn Anh
 -- ===========================
 CREATE TABLE IF NOT EXISTS thanh_toan_ct (
     id SERIAL PRIMARY KEY,
-    id_thanh_toan UUID NOT NULL, -- FK -> thanh_toan.id
-    id_bds UUID,                -- FK -> bat_dong_san.id (nếu thanh toán theo sản phẩm)
+    id_thanh_toan UUID NOT NULL,
+    id_bds UUID,
     so_luong INT DEFAULT 1,
     so_tien NUMERIC(18,2) CHECK (so_tien >= 0),
     CONSTRAINT fk_ttc_tt FOREIGN KEY (id_thanh_toan) REFERENCES thanh_toan(id) ON DELETE CASCADE,
@@ -716,12 +710,11 @@ CREATE TABLE IF NOT EXISTS thanh_toan_ct (
 
 -- ===========================
 -- 14. Bảng lich_su_thanh_toan (log thanh toán online)
--- Mô tả: log chi tiết từ cổng thanh toán (id cổng, status code...)
 -- Phụ trách: Đặng (kiểm thử thanh toán), Tuấn Anh (tích hợp)
 -- ===========================
 CREATE TABLE IF NOT EXISTS lich_su_thanh_toan (
     id SERIAL PRIMARY KEY,
-    id_thanh_toan UUID, -- FK -> thanh_toan.id
+    id_thanh_toan UUID,
     provider VARCHAR(100), -- e.g. 'momo','vnpay','stripe'
     provider_transaction_id VARCHAR(200),
     amount NUMERIC(18,2),
@@ -733,7 +726,6 @@ CREATE TABLE IF NOT EXISTS lich_su_thanh_toan (
 
 -- ===========================
 -- 15. Bảng truy_cap_bds (thống kê lượt truy cập)
--- Mô tả: số lượt xem theo ngày cho mỗi BĐS
 -- Phụ trách: Tuấn Anh (analytics)
 -- ===========================
 CREATE TABLE IF NOT EXISTS truy_cap_bds (
@@ -747,13 +739,12 @@ CREATE TABLE IF NOT EXISTS truy_cap_bds (
 
 -- ===========================
 -- 16. Bảng lich_su_xem_bds (lưu lịch sử cá nhân xem BĐS)
--- Mô tả: mỗi hành động xem của user
 -- Phụ trách: Đặng
 -- ===========================
 CREATE TABLE IF NOT EXISTS lich_su_xem_bds (
     id SERIAL PRIMARY KEY,
-    id_nguoi_dung UUID NOT NULL, -- FK -> nguoi_dung.id
-    id_bds UUID NOT NULL,       -- FK -> bat_dong_san.id
+    id_nguoi_dung UUID NOT NULL,
+    id_bds UUID NOT NULL,
     thoi_gian TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_lsx_nguoi FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
     CONSTRAINT fk_lsx_bds FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE CASCADE
@@ -761,7 +752,6 @@ CREATE TABLE IF NOT EXISTS lich_su_xem_bds (
 
 -- ===========================
 -- 17. Bảng lich_su_tim_kiem (lưu lịch sử tìm kiếm)
--- Mô tả: lưu từ khóa + filter user tìm
 -- Phụ trách: Tuấn Anh (analytics)
 -- ===========================
 CREATE TABLE IF NOT EXISTS lich_su_tim_kiem (
@@ -775,13 +765,13 @@ CREATE TABLE IF NOT EXISTS lich_su_tim_kiem (
 
 -- ===========================
 -- 18. Bảng dat_lich (đặt lịch xem)
--- Mô tả: khách đặt lịch xem BĐS
 -- Phụ trách: Quỳnh (sắp xếp lịch), Đặng (khách hàng tạo yêu cầu)
+-- Lưu ý: id_khach_hang có thể NULL nếu khách bị xóa nhưng muốn lưu lịch (lịch có thể được giữ).
 -- ===========================
 CREATE TABLE IF NOT EXISTS dat_lich (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    id_khach_hang UUID NOT NULL, -- FK -> khach_hang.id
-    id_bds UUID NOT NULL,       -- FK -> bat_dong_san.id
+    id_khach_hang UUID,
+    id_bds UUID NOT NULL,
     thoi_gian TIMESTAMP NOT NULL,
     trang_thai VARCHAR(50) DEFAULT 'cho_xac_nhan', -- 'cho_xac_nhan','da_xac_nhan','da_huy'
     ghi_chu TEXT,
@@ -791,14 +781,13 @@ CREATE TABLE IF NOT EXISTS dat_lich (
 
 -- ===========================
 -- 19. Bảng bao_cao (báo cáo vi phạm)
--- Mô tả: khách hàng báo cáo môi giới hoặc tin
 -- Phụ trách: Tuấn Anh (xử lý), Quỳnh (liên quan)
 -- ===========================
 CREATE TABLE IF NOT EXISTS bao_cao (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    id_khach_hang UUID, -- FK -> khach_hang.id (người báo cáo)
-    id_moi_gioi UUID,   -- FK -> moi_gioi.id (nếu liên quan)
-    id_bds UUID,        -- FK -> bat_dong_san.id
+    id_khach_hang UUID,
+    id_moi_gioi UUID,
+    id_bds UUID,
     noi_dung TEXT,
     ngay_bc TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     trang_thai VARCHAR(50) DEFAULT 'cho_xu_ly', -- 'cho_xu_ly','da_xu_ly','khong_xac_thuc'
@@ -809,13 +798,12 @@ CREATE TABLE IF NOT EXISTS bao_cao (
 
 -- ===========================
 -- 20. Bảng tin_nhan (hệ thống tin nhắn giữa users)
--- Mô tả: chat cơ bản giữa người gửi và nhận (tham khảo)
 -- Phụ trách: Đặng (kiểm thử), Tuấn Anh (hạ tầng)
 -- ===========================
 CREATE TABLE IF NOT EXISTS tin_nhan (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    id_gui UUID NOT NULL, -- FK -> nguoi_dung.id
-    id_nhan UUID NOT NULL, -- FK -> nguoi_dung.id
+    id_gui UUID NOT NULL,
+    id_nhan UUID NOT NULL,
     noi_dung TEXT,
     ngay_gui TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_tn_gui FOREIGN KEY (id_gui) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
@@ -824,14 +812,13 @@ CREATE TABLE IF NOT EXISTS tin_nhan (
 
 -- ===========================
 -- 21. Bảng bai_viet (tin tức / blog)
--- Mô tả: bài viết/ tin tức trên sàn
 -- Phụ trách: Tuấn Anh (quản lý nội dung), Quỳnh (viết nội dung môi giới)
 -- ===========================
 CREATE TABLE IF NOT EXISTS bai_viet (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     tieu_de VARCHAR(200),
     noi_dung TEXT,
-    tac_gia UUID, -- FK -> nguoi_dung.id
+    tac_gia UUID,
     loai VARCHAR(50),
     ngay_dang TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_bv_tacgia FOREIGN KEY (tac_gia) REFERENCES nguoi_dung(id) ON DELETE SET NULL
@@ -839,13 +826,12 @@ CREATE TABLE IF NOT EXISTS bai_viet (
 
 -- ===========================
 -- 22. Bảng bai_viet_binh_luan (bình luận bài viết)
--- Mô tả: bình luận user dưới bài viết
 -- Phụ trách: Đặng (quản lý comment)
 -- ===========================
 CREATE TABLE IF NOT EXISTS bai_viet_binh_luan (
     id SERIAL PRIMARY KEY,
-    id_nguoi_dung UUID NOT NULL, -- FK -> nguoi_dung.id
-    id_bai_viet UUID NOT NULL,   -- FK -> bai_viet.id
+    id_nguoi_dung UUID NOT NULL,
+    id_bai_viet UUID NOT NULL,
     noi_dung TEXT,
     ngay_bl TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_bvb_nguoi FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
@@ -854,7 +840,6 @@ CREATE TABLE IF NOT EXISTS bai_viet_binh_luan (
 
 -- ===========================
 -- 23. Bảng bai_viet_yeu_thich (yêu thích bài viết)
--- Mô tả: save bài viết yêu thích user
 -- Phụ trách: Đặng
 -- ===========================
 CREATE TABLE IF NOT EXISTS bai_viet_yeu_thich (
@@ -869,7 +854,6 @@ CREATE TABLE IF NOT EXISTS bai_viet_yeu_thich (
 
 -- ===========================
 -- 24. Bảng banner (slider)
--- Mô tả: banner trên trang chủ
 -- Phụ trách: Tuấn Anh (quản trị giao diện)
 -- ===========================
 CREATE TABLE IF NOT EXISTS banner (
@@ -882,7 +866,6 @@ CREATE TABLE IF NOT EXISTS banner (
 
 -- ===========================
 -- 25. Bảng faq (câu hỏi thường gặp)
--- Mô tả: FAQ hệ thống
 -- Phụ trách: Tuấn Anh
 -- ===========================
 CREATE TABLE IF NOT EXISTS faq (
@@ -893,7 +876,6 @@ CREATE TABLE IF NOT EXISTS faq (
 
 -- ===========================
 -- 26. Bảng thong_bao (thông báo hệ thống)
--- Mô tả: thông báo gửi tới nhóm đối tượng
 -- Phụ trách: Tuấn Anh
 -- ===========================
 CREATE TABLE IF NOT EXISTS thong_bao (
@@ -905,8 +887,7 @@ CREATE TABLE IF NOT EXISTS thong_bao (
 );
 
 -- ===========================
--- 27. Bảng khuyen_mai (chiến dịch/k mã giảm giá)
--- Mô tả: cấu hình khuyến mãi (mã coupon)
+-- 27. Bảng khuyen_mai (chiến dịch/ mã giảm giá)
 -- Phụ trách: Tuấn Anh (xây dựng), Đặng (kiểm thử)
 -- ===========================
 CREATE TABLE IF NOT EXISTS khuyen_mai (
@@ -923,13 +904,12 @@ CREATE TABLE IF NOT EXISTS khuyen_mai (
 
 -- ===========================
 -- 28. Bảng voucher (mã đã phát/thuộc KH)
--- Mô tả: mapping mã tới user, trạng thái sử dụng
 -- Phụ trách: Đặng (khách) quản lý mã khuyến mãi
 -- ===========================
 CREATE TABLE IF NOT EXISTS voucher (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    id_kh UUID, -- FK -> khach_hang.id
-    id_khuyen_mai UUID, -- FK -> khuyen_mai.id
+    id_kh UUID,
+    id_khuyen_mai UUID,
     ma VARCHAR(100),
     ngay_phat TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     ngay_sd TIMESTAMP,
@@ -940,7 +920,6 @@ CREATE TABLE IF NOT EXISTS voucher (
 
 -- ===========================
 -- 29. Bảng goi_dich_vu (gói dịch vụ/trả phí)
--- Mô tả: gói đăng tin, gói nâng cao, quảng cáo...
 -- Phụ trách: Tuấn Anh
 -- ===========================
 CREATE TABLE IF NOT EXISTS goi_dich_vu (
@@ -953,13 +932,12 @@ CREATE TABLE IF NOT EXISTS goi_dich_vu (
 
 -- ===========================
 -- 30. Bảng dang_ky_goi (môi giới đăng ký gói)
--- Mô tả: môi giới mua gói dịch vụ
 -- Phụ trách: Quỳnh (môi giới) / Tuấn Anh (xác nhận)
 -- ===========================
 CREATE TABLE IF NOT EXISTS dang_ky_goi (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    id_moi_gioi UUID NOT NULL, -- FK -> moi_gioi.id
-    id_goi UUID NOT NULL,      -- FK -> goi_dich_vu.id
+    id_moi_gioi UUID NOT NULL,
+    id_goi UUID NOT NULL,
     ngay_dk TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     ngay_het TIMESTAMP,
     trang_thai VARCHAR(50) DEFAULT 'dang_hieu_luc',
@@ -969,16 +947,15 @@ CREATE TABLE IF NOT EXISTS dang_ky_goi (
 
 -- ===========================
 -- 31. Bảng ho_tro (ticket hỗ trợ / CRM)
--- Mô tả: khách hàng mở ticket hỗ trợ, admin xử lý
 -- Phụ trách: Quỳnh (tương tác môi giới), Tuấn Anh (giải quyết kỹ thuật)
 -- ===========================
 CREATE TABLE IF NOT EXISTS ho_tro (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    id_nguoi_dung UUID NOT NULL, -- người tạo ticket -> nguoi_dung.id
+    id_nguoi_dung UUID NOT NULL,
     tieu_de VARCHAR(200),
     noi_dung TEXT,
     trang_thai VARCHAR(50) DEFAULT 'mo', -- 'mo','dang_xu_ly','dong'
-    nguoi_phut_rac UUID, -- id_admin/người phụ trách xử lý
+    nguoi_phut_rac UUID,
     ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     ngay_cap_nhat TIMESTAMP,
     CONSTRAINT fk_hotro_nguoi FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE SET NULL,
@@ -987,7 +964,6 @@ CREATE TABLE IF NOT EXISTS ho_tro (
 
 -- ===========================
 -- 32. Bảng doi_tac (đối tác: ngân hàng, thẩm định, luật sư...)
--- Mô tả: nếu hệ thống liên kết với bên thứ 3
 -- Phụ trách: Quỳnh (quan hệ đối tác), Tuấn Anh (admin hợp tác)
 -- ===========================
 CREATE TABLE IF NOT EXISTS doi_tac (
@@ -1001,12 +977,11 @@ CREATE TABLE IF NOT EXISTS doi_tac (
 
 -- ===========================
 -- 33. Bảng lich_su_he_thong (log hệ thống chung)
--- Mô tả: lưu audit/log quan trọng
 -- Phụ trách: Tuấn Anh
 -- ===========================
 CREATE TABLE IF NOT EXISTS lich_su_he_thong (
     id SERIAL PRIMARY KEY,
-    actor UUID, -- id nguoi_dung
+    actor UUID,
     action VARCHAR(200),
     object_type VARCHAR(100),
     object_id VARCHAR(200),
@@ -1024,11 +999,12 @@ CREATE OR REPLACE FUNCTION fn_after_insert_nguoi_dung()
 RETURNS TRIGGER AS $$
 BEGIN
     IF NEW.vai_tro = 'quantri' THEN
-        INSERT INTO quan_tri (id_nguoi_dung) VALUES (NEW.id);
+        -- bảo đảm không duplicate
+        INSERT INTO quan_tri (id_nguoi_dung) VALUES (NEW.id) ON CONFLICT DO NOTHING;
     ELSIF NEW.vai_tro = 'khachhang' THEN
-        INSERT INTO khach_hang (id_nguoi_dung) VALUES (NEW.id);
+        INSERT INTO khach_hang (id_nguoi_dung) VALUES (NEW.id) ON CONFLICT DO NOTHING;
     ELSIF NEW.vai_tro = 'moigioi' THEN
-        INSERT INTO moi_gioi (id_nguoi_dung) VALUES (NEW.id);
+        INSERT INTO moi_gioi (id_nguoi_dung) VALUES (NEW.id) ON CONFLICT DO NOTHING;
     END IF;
     RETURN NEW;
 END;
@@ -1041,10 +1017,99 @@ FOR EACH ROW
 EXECUTE FUNCTION fn_after_insert_nguoi_dung();
 
 -- ===========================
--- Một vài lưu ý vận hành (comment) - Người chịu trách nhiệm:
--- - Tuấn Anh: quản trị DB, tạo user/admin, xử lý báo cáo, analytics, FAQ, banner, kiểm tra integrity.
--- - Quỳnh: quản lý tin đăng (bat_dong_san), upload hình/video, xử lý lịch xem, tương tác môi giới, quản lý đối tác.
--- - Đặng: kiểm tra chức năng khách hàng (tham gia review, đặt lịch, giao dịch, thanh toán, voucher, ticket support).
--- Nếu muốn mình có thể:
---  1) xuất file .sql để bạn tải xuống,
---  2) hoặc thêm sample data đầy đủ hơn cho từng bảng (ví dụ thêm 20 tin BĐS, 10 đánh giá, 5 giao dịch).
+-- Indexes gợi ý (tùy chọn): tăng tốc truy vấn thường dùng
+-- ===========================
+CREATE INDEX IF NOT EXISTS idx_bds_khuvuc ON bat_dong_san(khu_vuc);
+CREATE INDEX IF NOT EXISTS idx_bds_trangthai ON bat_dong_san(trang_thai);
+CREATE INDEX IF NOT EXISTS idx_truycap_bds_on_date ON truy_cap_bds(id_bds, ngay);
+
+-- ===========================
+-- Seed data mẫu (dữ liệu khởi tạo cho testing)
+-- Lưu ý: chạy phần seed này sau khi đã tạo toàn bộ schema.
+-- ===========================
+-- Gói dịch vụ mẫu
+INSERT INTO goi_dich_vu (id, ten_goi, mo_ta, gia, thoi_han)
+VALUES
+(uuid_generate_v4(), 'Gói Tiêu chuẩn', 'Đăng 10 tin trong 30 ngày', 500000.00, 30),
+(uuid_generate_v4(), 'Gói Nâng cao', 'Đăng 50 tin + ưu tiên hiển thị', 2000000.00, 30)
+ON CONFLICT DO NOTHING;
+
+-- Khuyến mãi mẫu
+INSERT INTO khuyen_mai (id, ma_giam, mo_ta, phan_tram, so_tien, ngay_bd, ngay_kt, dieu_kien, trang_thai)
+VALUES
+(uuid_generate_v4(), 'KM2025NEW', 'Giảm 10% cho khách mới', 10.00, NULL, CURRENT_DATE, CURRENT_DATE + INTERVAL '30 days', '{"min_order":100000}', 'hoat_dong')
+ON CONFLICT DO NOTHING;
+
+-- Banner & FAQ mẫu
+INSERT INTO banner (id, tieu_de, url, vi_tri) VALUES (uuid_generate_v4(), 'Mua bán nhanh', '/images/banner1.jpg', 'top') ON CONFLICT DO NOTHING;
+INSERT INTO faq (cau_hoi, cau_tra_loi) VALUES ('Làm sao để đăng tin?','Đăng nhập -> Tạo tin -> Điền thông tin và gửi kiểm duyệt') ON CONFLICT DO NOTHING;
+
+-- Bài viết mẫu
+INSERT INTO bai_viet (id, tieu_de, noi_dung, tac_gia, loai)
+SELECT uuid_generate_v4(), 'Mẹo mua nhà 2025', 'Nội dung mẫu cho blog...', id, 'blog' FROM nguoi_dung LIMIT 1;
+
+-- Thêm một vài BĐS mẫu liên kết với Quỳnh (nếu có)
+WITH mg AS (
+    SELECT m.id AS id_mg FROM moi_gioi m JOIN nguoi_dung u ON u.id = m.id_nguoi_dung WHERE u.ten_dang_nhap = 'quynh' LIMIT 1
+)
+INSERT INTO bat_dong_san (id, id_moi_gioi, tieu_de, mo_ta, gia, dien_tich, dia_chi, loai, khu_vuc, trang_thai, ngay_dang)
+SELECT uuid_generate_v4(), mg.id_mg, 'Căn hộ mẫu seed A', '2PN, gần trung tâm', 2500000000, 65.0, 'Quận 3, TP.HCM', 'ban', 'TP.HCM', 'dangban', CURRENT_TIMESTAMP
+FROM mg
+ON CONFLICT DO NOTHING;
+
+-- Ảnh & video mẫu cho BĐS vừa tạo
+WITH b AS (SELECT id FROM bat_dong_san ORDER BY ngay_dang DESC LIMIT 1)
+INSERT INTO hinh_anh (id_bds, url, mo_ta) SELECT id, '/images/bds1_1.jpg', 'Ảnh chính' FROM b;
+INSERT INTO video (id_bds, url, mo_ta) SELECT id, '/videos/bds1_walkthru.mp4', 'Video tham quan' FROM b;
+
+-- Tạo một khách hàng demo (nếu chưa có) và một đặt lịch, đánh giá, giao dịch
+WITH kh AS (SELECT id FROM khach_hang LIMIT 1), b AS (SELECT id FROM bat_dong_san LIMIT 1)
+INSERT INTO dat_lich (id, id_khach_hang, id_bds, thoi_gian, trang_thai, ghi_chu)
+SELECT uuid_generate_v4(), kh.id, b.id, CURRENT_TIMESTAMP + INTERVAL '3 days', 'cho_xac_nhan', 'Yêu cầu xem 10h sáng' FROM kh, b;
+
+INSERT INTO danh_gia_bds (id_khach_hang, id_bds, diem, binh_luan)
+SELECT kh.id, b.id, 5, 'Tuyệt vời, thông tin chính xác' FROM kh, b;
+
+INSERT INTO danh_gia_mg (id_khach_hang, id_moi_gioi, diem, binh_luan)
+SELECT kh.id, m.id, 5, 'Môi giới nhiệt tình' FROM kh JOIN moi_gioi m ON TRUE LIMIT 1;
+
+INSERT INTO giao_dich (id, id_khach_hang, id_bds, loai, trang_thai)
+SELECT uuid_generate_v4(), kh.id, b.id, 'mua', 'dang_xu_ly' FROM kh, b;
+
+-- Thanh toán mẫu cho giao dịch (nếu có)
+WITH gd AS (SELECT id FROM giao_dich LIMIT 1)
+INSERT INTO thanh_toan (id, id_giao_dich, tong_tien, phuong_thuc, trang_thai)
+SELECT uuid_generate_v4(), gd.id, 50000000, 'chuyenkhoan', 'mo' FROM gd;
+
+-- Lịch sử xem & truy cập
+WITH b AS (SELECT id FROM bat_dong_san LIMIT 1), u AS (SELECT id FROM nguoi_dung LIMIT 1)
+INSERT INTO lich_su_xem_bds (id_nguoi_dung, id_bds) SELECT u.id, b.id FROM u, b;
+INSERT INTO truy_cap_bds (id_bds, ngay, so_luot) SELECT b.id, CURRENT_DATE, 1 FROM b;
+
+-- Đăng ký gói cho môi giới (nếu có)
+WITH m AS (SELECT id FROM moi_gioi LIMIT 1), g AS (SELECT id FROM goi_dich_vu LIMIT 1)
+INSERT INTO dang_ky_goi (id_moi_gioi, id_goi, ngay_dk, ngay_het, trang_thai)
+SELECT m.id, g.id, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '30 days', 'dang_hieu_luc' FROM m, g;
+
+-- Ticket hỗ trợ mẫu
+WITH u AS (SELECT id FROM nguoi_dung LIMIT 1)
+INSERT INTO ho_tro (id_nguoi_dung, tieu_de, noi_dung, trang_thai) SELECT u.id, 'Lỗi đăng tin', 'Không thể tải ảnh lên', 'mo' FROM u;
+
+-- Đối tác mẫu
+INSERT INTO doi_tac (id, ten_doi_tac, loai, lien_he, dia_chi) VALUES (uuid_generate_v4(), 'Ngân hàng ABC', 'ngan_hang', '{"phone":"024-123456"}', 'Hà Nội') ON CONFLICT DO NOTHING;
+
+-- Log hệ thống mẫu
+WITH u AS (SELECT id FROM nguoi_dung LIMIT 1)
+INSERT INTO lich_su_he_thong (actor, action, object_type, object_id, payload) SELECT u.id, 'seed_insert', 'system', 'seed', '{"info":"seed data"}' FROM u;
+
+-- Kết thúc file
+-- Ghi chú bổ sung:
+-- - Các cột FK có hành vi ON DELETE SET NULL đều cho phép NULL trong thiết kế để tránh lỗi.
+-- - Nếu bạn muốn thay đổi chính sách xóa (ví dụ cascade), hãy cân nhắc nghiệp vụ và sửa tương ứng.
+-- - Muốn thêm sample data, mình có thể thêm script seed tiếp theo.
+
+-- Kết thúc file
+-- Ghi chú bổ sung:
+-- - Các cột FK có hành vi ON DELETE SET NULL đều cho phép NULL trong thiết kế để tránh lỗi.
+-- - Nếu bạn muốn thay đổi chính sách xóa (ví dụ cascade), hãy cân nhắc nghiệp vụ và sửa tương ứng.
+-- - Muốn thêm sample data, mình có thể thêm script seed tiếp theo.
