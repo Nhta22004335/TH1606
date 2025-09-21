@@ -1,96 +1,78 @@
 <?php
-session_start();
-require_once __DIR__ . '/database_mg.php'; // kết nối PDO
+require 'database_mg.php';
 
-if (!isset($_SESSION['user_id'])) {
-    header('Location: login_mg.php');
-    exit;
-}
-
-$error = '';
-$success = '';
-$userId = $_SESSION['user_id'];
+$message = '';
+$success = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $current = $_POST['current_password'] ?? '';
-    $new = $_POST['new_password'] ?? '';
-    $confirm = $_POST['confirm_password'] ?? '';
+    $email = trim($_POST['email'] ?? '');
+    $new_password = $_POST['new_password'] ?? '';
+    $confirm_password = $_POST['confirm_password'] ?? '';
 
-    if (!$current || !$new || !$confirm) {
-        $error = "Vui lòng điền đầy đủ tất cả các trường.";
-    } elseif ($new !== $confirm) {
-        $error = "Mật khẩu mới và xác nhận mật khẩu không khớp.";
+    if ($email === '' || $new_password === '' || $confirm_password === '') {
+        $message = "Vui lòng nhập đầy đủ thông tin!";
+    } elseif ($new_password !== $confirm_password) {
+        $message = "Mật khẩu mới và xác nhận không trùng khớp!";
     } else {
-        $stmt = $pdo->prepare("SELECT matkhau FROM moigioi WHERE id = ?");
-        $stmt->execute([$userId]);
+        $stmt = $pdo->prepare("SELECT id FROM moigioi WHERE email = ?");
+        $stmt->execute([$email]);
         $user = $stmt->fetch();
 
-        if (!$user || !password_verify($current, $user['matkhau'])) {
-            $error = "Mật khẩu hiện tại không đúng.";
+        if ($user) {
+            $new_hash = password_hash($new_password, PASSWORD_DEFAULT);
+            $stmt = $pdo->prepare("UPDATE moigioi SET matkhau = ? WHERE email = ?");
+            $stmt->execute([$new_hash, $email]);
+            $message = "Đổi mật khẩu thành công! Bạn có thể đăng nhập lại.";
+            $success = true;
         } else {
-            $newHash = password_hash($new, PASSWORD_DEFAULT);
-            $update = $pdo->prepare("UPDATE moigioi SET matkhau = ? WHERE id = ?");
-            $update->execute([$newHash, $userId]);
-            $success = "Cập nhật mật khẩu thành công!";
+            $message = "Email không tồn tại trong hệ thống!";
         }
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Cập nhật mật khẩu</title>
+    <title>Quên mật khẩu môi giới</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="h-screen w-screen flex items-center justify-center relative">
+<body class="relative flex items-center justify-center min-h-screen">
 
-    <!-- Ảnh nền -->
+    <!-- Ảnh nền + overlay mờ -->
     <div class="absolute inset-0">
-        <img src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1470&q=80"
-             alt="Nhà cửa tinh tế" class="w-full h-full object-cover">
+        <img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1470&q=80"
+             alt="Nhà hiện đại sang trọng" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-black bg-opacity-20"></div>
     </div>
 
-    <!-- Form -->
-    <div class="relative bg-white bg-opacity-90 backdrop-blur-md p-8 rounded-3xl shadow-xl w-96 z-10">
-        <h2 class="text-3xl font-bold text-center text-blue-600 mb-6">Cập nhật mật khẩu</h2>
+    <!-- Form đổi mật khẩu -->
+    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md relative z-10">
+        <h2 class="text-2xl font-bold text-blue-600 mb-6 text-center">Quên mật khẩu</h2>
 
-        <?php if($error) : ?>
-            <p class="text-red-600 mb-4 text-center font-medium"><?= htmlspecialchars($error) ?></p>
-        <?php endif; ?>
-        <?php if($success) : ?>
-            <p class="text-green-600 mb-4 text-center font-medium"><?= htmlspecialchars($success) ?></p>
-            <div class="text-center">
-                <a href="trangchu_mg.php" 
-                   class="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition font-semibold">
-                   Về trang chính
-                </a>
+        <?php if ($message): ?>
+            <div class="mb-4 px-4 py-3 rounded <?php echo $success ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'; ?>">
+                <?php echo $message; ?>
             </div>
         <?php endif; ?>
 
-        <form method="POST" action="" class="space-y-4">
-            <div>
-                <label class="block mb-1 font-semibold" for="current_password">Mật khẩu hiện tại</label>
-                <input type="password" name="current_password" id="current_password" required 
-                       class="w-full border border-gray-300 px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400">
-            </div>
-            <div>
-                <label class="block mb-1 font-semibold" for="new_password">Mật khẩu mới</label>
-                <input type="password" name="new_password" id="new_password" required
-                       class="w-full border border-gray-300 px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400">
-            </div>
-            <div>
-                <label class="block mb-1 font-semibold" for="confirm_password">Xác nhận mật khẩu mới</label>
-                <input type="password" name="confirm_password" id="confirm_password" required
-                       class="w-full border border-gray-300 px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400">
-            </div>
-            <button type="submit" 
-                    class="w-full bg-blue-600 text-white py-2 rounded-xl hover:bg-blue-700 transition font-semibold">
-                Cập nhật
-            </button>
+        <form method="post" autocomplete="off">
+            <label for="email" class="block mb-2 text-gray-700 font-medium">Email đăng ký</label>
+            <input type="email" id="email" name="email" required class="w-full px-3 py-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400">
+
+            <label for="new_password" class="block mb-2 text-gray-700 font-medium">Mật khẩu mới</label>
+            <input type="password" id="new_password" name="new_password" required class="w-full px-3 py-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400">
+
+            <label for="confirm_password" class="block mb-2 text-gray-700 font-medium">Nhập lại mật khẩu mới</label>
+            <input type="password" id="confirm_password" name="confirm_password" required class="w-full px-3 py-2 mb-6 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400">
+
+            <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded font-semibold hover:bg-blue-700 transition">Đổi mật khẩu</button>
         </form>
-    </div>
 
+        <div class="mt-4 text-center">
+            <a href="login.php" class="text-blue-600 hover:underline">Quay lại đăng nhập</a>
+        </div>
+    </div>
 </body>
 </html>

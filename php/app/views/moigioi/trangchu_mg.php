@@ -44,7 +44,7 @@
                 <a href="?page=hoso_mg" class="flex items-center space-x-2 text-gray-700 hover:text-blue-600">
                     <span>⚙️</span><span>Hồ sơ cá nhân</span>
                 </a>
-                <a href="logout.php" class="flex items-center space-x-2 text-red-600 hover:text-red-800 font-medium">
+                <a href="dangxuat_mg.php" class="flex items-center space-x-2 text-red-600 hover:text-red-800 font-medium">
                     <span>🚪</span><span>Đăng xuất</span>
                 </a>
             </nav>
