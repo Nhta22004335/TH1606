@@ -949,18 +949,22 @@ CREATE TABLE IF NOT EXISTS dang_ky_goi (
 -- 31. Bảng ho_tro (ticket hỗ trợ / CRM)
 -- Phụ trách: Quỳnh (tương tác môi giới), Tuấn Anh (giải quyết kỹ thuật)
 -- ===========================
-CREATE TABLE IF NOT EXISTS ho_tro (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    id_nguoi_dung UUID NOT NULL,
-    tieu_de VARCHAR(200),
-    noi_dung TEXT,
-    trang_thai VARCHAR(50) DEFAULT 'mo', -- 'mo','dang_xu_ly','dong'
-    nguoi_phut_rac UUID,
-    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    ngay_cap_nhat TIMESTAMP,
-    CONSTRAINT fk_hotro_nguoi FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE SET NULL,
-    CONSTRAINT fk_hotro_phutrach FOREIGN KEY (nguoi_phut_rac) REFERENCES nguoi_dung(id) ON DELETE SET NULL
+-- 31. Bảng ho_tro (ticket hỗ trợ khách hàng)
+CREATE TABLE ho_tro (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    nguoi_dung_id UUID NOT NULL,          -- người gửi yêu cầu hỗ trợ
+    nhan_vien_id UUID,                    -- nhân viên hỗ trợ (nếu đã phân công)
+    tieu_de VARCHAR(255) NOT NULL,
+    noi_dung TEXT NOT NULL,
+    muc_do_uu_tien VARCHAR(50) CHECK (muc_do_uu_tien IN ('thap', 'trung_binh', 'cao', 'khẩn cấp')) DEFAULT 'thap',
+    trang_thai VARCHAR(50) CHECK (trang_thai IN ('cho_tiep_nhan', 'dang_xu_ly', 'da_giai_quyet', 'dong')) DEFAULT 'cho_tiep_nhan',
+    thoi_gian_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    thoi_gian_cap_nhat TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_hotro_nguoidung FOREIGN KEY (nguoi_dung_id) REFERENCES nguoi_dung(id),
+    CONSTRAINT fk_hotro_nhanvien FOREIGN KEY (nhan_vien_id) REFERENCES nguoi_dung(id)
 );
+
 
 -- ===========================
 -- 32. Bảng doi_tac (đối tác: ngân hàng, thẩm định, luật sư...)
