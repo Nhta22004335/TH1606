@@ -4,6 +4,11 @@ FROM php:8.3-apache
 RUN apt-get update && apt-get install -y libpq-dev \
     && docker-php-ext-install pdo pdo_pgsql
 
+# Cài thêm Python 3 và pip + thư viện argon2
+RUN apt-get update && apt-get install -y python3 python3-pip python3-venv \
+    && python3 -m venv /opt/venv \
+    && /opt/venv/bin/pip install argon2-cffi
+
 # Copy source code
 COPY ./php/ /var/www/html/
 

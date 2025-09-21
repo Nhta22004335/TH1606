@@ -2,7 +2,6 @@
     require_once "../../config/database.php";
     $pdo = ketnoicsdl();
 
-
     $page = $_GET['page'] ?? '';
 
     $sql = "
@@ -94,25 +93,25 @@
         </h2>
 
         <label class="block mb-2 text-sm">Hoạt động</label>
-        <select id="hoatdong-desktop" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
-            <option value="" <?= (($filters['hoatdong'] ?? '') == 'Tất cả') ? 'selected' : ''?>>Tất cả</option>
-            <option value="Online" <?= (($filters['hoatdong'] ?? '') == 'Online') ? 'selected' : ''?>>Online</option>
-            <option value="Offline" <?= (($filters['hoatdong'] ?? '') == 'Offline') ? 'selected' : ''?>>Offline</option>
+        <select id="hoatdong-desktop" class="w-full border rounded-lg p-2 mb-4 outline-none focus:ring focus:border-blue-400">
+            <option value="" <?= (($filters['hoatdong'] ?? '') == 'tatca') ? 'selected' : ''?>>Tất cả</option>
+            <option value="Online" <?= (($filters['hoatdong'] ?? '') == 'online') ? 'selected' : ''?>>Online</option>
+            <option value="Offline" <?= (($filters['hoatdong'] ?? '') == 'offline') ? 'selected' : ''?>>Offline</option>
         </select>
 
         <label class="block mb-2 text-sm">Trạng thái</label>
-        <select id="trangthai-desktop" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
-            <option value="" <?= (($filters['trangthai'] ?? '') == 'Tất cả') ? 'selected' : ''?>>Tất cả</option>
-            <option value="Đang hoạt động" <?= (($filters['trangthai'] ?? '') == 'Đang hoạt động') ? 'selected' : ''?>>Đang hoạt động</option>
-            <option value="Chưa kích hoạt" <?= (($filters['trangthai'] ?? '') == 'Chưa kích hoạt') ? 'selected' : ''?>>Chưa kích hoạt</option>
-            <option value="Khóa" <?= (($filters['trangthai'] ?? '') == 'Khóa') ? 'selected' : ''?>>Khóa</option>
+        <select id="trangthai-desktop" class="w-full border rounded-lg p-2 mb-4 outline-none focus:ring focus:border-blue-400">
+            <option value="" <?= (($filters['trangthai'] ?? '') == 'tatca') ? 'selected' : ''?>>Tất cả</option>
+            <option value="danghoatdong" <?= (($filters['trangthai'] ?? '') == 'danghoatdong') ? 'selected' : ''?>>Đang hoạt động</option>
+            <option value="chuakichhoat" <?= (($filters['trangthai'] ?? '') == 'chuakichhoat') ? 'selected' : ''?>>Chưa kích hoạt</option>
+            <option value="khoa" <?= (($filters['trangthai'] ?? '') == 'khoa') ? 'selected' : ''?>>Khóa</option>
         </select>
 
         <label class="block mb-2 text-sm">Ngày tạo tài khoản trước</label>
-        <input id="ngaytruoc-desktop" value="<?= ($filters['ngaytruoc'] ?? '') ?>" type="date" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
+        <input id="ngaytruoc-desktop" value="<?= ($filters['ngaytruoc'] ?? '') ?>" type="date" class="w-full border rounded-lg p-2 mb-4 outline-none focus:ring focus:border-blue-400">
 
         <label class="block mb-2 text-sm">Số đơn lớn hơn</label>
-        <input id="sodon-desktop" value="<?= ($filters['sodon'] ?? '') ?>" type="number" placeholder="Số đơn tối thiểu" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
+        <input id="sodon-desktop" value="<?= ($filters['sodon'] ?? '') ?>" type="number" placeholder="Số đơn tối thiểu" class="w-full border rounded-lg p-2 mb-4 outline-none focus:ring focus:border-blue-400">
 
         <div class="flex gap-3 mt-4">
             <!-- Nút áp dụng -->
@@ -134,25 +133,25 @@
             </div>
 
             <label class="block mb-2 text-sm">Hoạt động</label>
-            <select id="hoatdong-mobile" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
-                <option value="" <?= (($filters['hoatdong'] ?? '') == 'Tất cả') ? 'selected' : ''?>>Tất cả</option>
-                <option value="Online" <?= (($filters['hoatdong'] ?? '') == 'Online') ? 'selected' : ''?>>Online</option>
-                <option value="Offline" <?= (($filters['hoatdong'] ?? '') == 'Offline') ? 'selected' : ''?>>Offline</option>
+            <select id="hoatdong-mobile" class="w-full border rounded-lg p-2 mb-4 outline-none focus:ring focus:border-blue-400">
+                <option value="" <?= (($filters['hoatdong'] ?? '') == 'tatca') ? 'selected' : ''?>>Tất cả</option>
+                <option value="online" <?= (($filters['hoatdong'] ?? '') == 'online') ? 'selected' : ''?>>Online</option>
+                <option value="offline" <?= (($filters['hoatdong'] ?? '') == 'offline') ? 'selected' : ''?>>Offline</option>
             </select>
 
             <label class="block mb-2 text-sm">Trạng thái</label>
-            <select id="trangthai-mobile" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
-                <option value="" <?= (($filters['trangthai'] ?? '') == 'Tất cả') ? 'selected' : ''?>>Tất cả</option>
-                <option value="Đang hoạt động" <?= (($filters['trangthai'] ?? '') == 'Đang hoạt động') ? 'selected' : ''?>>Đang hoạt động</option>
-                <option value="Chưa kích hoạt" <?= (($filters['trangthai'] ?? '') == 'Chưa kích hoạt') ? 'selected' : ''?>>Chưa kích hoạt</option>
-                <option value="Khóa" <?= (($filters['trangthai'] ?? '') == 'Khóa') ? 'selected' : ''?>>Khóa</option>
+            <select id="trangthai-mobile" class="w-full border rounded-lg p-2 mb-4 outline-none focus:ring focus:border-blue-400">
+                <option value="" <?= (($filters['trangthai'] ?? '') == 'tatca') ? 'selected' : ''?>>Tất cả</option>
+                <option value="danghoatdong" <?= (($filters['trangthai'] ?? '') == 'danghoatdong') ? 'selected' : ''?>>Đang hoạt động</option>
+                <option value="chuakichhoat" <?= (($filters['trangthai'] ?? '') == 'chuakichhoat') ? 'selected' : ''?>>Chưa kích hoạt</option>
+                <option value="khoa" <?= (($filters['trangthai'] ?? '') == 'khoa') ? 'selected' : ''?>>Khóa</option>
             </select>
 
             <label class="block mb-2 text-sm">Ngày tạo tài khoản trước</label>
-            <input id="ngaytruoc-mobile" value="<?= ($filters['ngaytruoc'] ?? '') ?>" type="date" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
+            <input id="ngaytruoc-mobile" value="<?= ($filters['ngaytruoc'] ?? '') ?>" type="date" class="w-full border rounded-lg p-2 mb-4 outline-none focus:ring focus:border-blue-400">
 
             <label class="block mb-2 text-sm">Số đơn lớn hơn</label>
-            <input id="sodon-mobile" value="<?= ($filters['sodon'] ?? '') ?>" type="number" placeholder="Số đơn tối thiểu" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
+            <input id="sodon-mobile" value="<?= ($filters['sodon'] ?? '') ?>" type="number" placeholder="Số đơn tối thiểu" class="w-full border rounded-lg p-2 mb-4 outline-none focus:ring focus:border-blue-400">
 
             <div class="flex gap-3 mt-4">
                 <!-- Nút áp dụng -->
@@ -193,11 +192,30 @@
                             <p class="mt-2 text-sm text-gray-600">Đã đặt: <?= $u['so_don'] ?> đơn</p>
                             <p class="mt-1 text-xs text-gray-400">Ngày tạo: <?= date("d/m/Y",strtotime($u['ngay_tao'])) ?></p>
                         </div>
-                        <!-- Nút hành động -->
-                        <div class="flex justify-around border-t p-2 mt-auto">
-                            <a href="#" class="text-blue-600 hover:text-blue-800"><i class="fas fa-edit"></i></a>
-                            <a href="#" class="text-red-600 hover:text-red-800"><i class="fas fa-trash-alt"></i></a>
-                            <a href="#" class="text-purple-600 hover:text-purple-800"><i class="fas fa-key"></i></a>
+                        <div x-data="{ openForm: false }" class="relative">
+                            <!-- Nút hành động -->
+                            <div class="flex justify-around border-t p-2 mt-auto">
+                                <a href="javascript:void(0)" @click="openForm = true" class="text-blue-600 hover:text-blue-800"><i class="fas fa-edit"></i></a> 
+                                <a href="#" class="text-red-600 hover:text-red-800"><i class="fas fa-trash-alt"></i></a>
+                                <a href="#" class="text-purple-600 hover:text-purple-800"><i class="fas fa-key"></i></a>
+                            </div>
+                            <!-- Popup form -->
+                            <div x-show="openForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
+                                <div class="bg-white rounded-xl shadow-lg p-6 w-96">
+                                    <h2 class="text-lg font-semibold mb-4">Thông báo</h2>
+
+                                    <label class="block text-sm font-medium mb-1">Tiêu đề</label>
+                                    <input type="text" class="w-full outline-none border rounded-lg p-2 mb-3 focus:ring focus:border-blue-400" placeholder="Nhập tiêu đề...">
+                                    
+                                    <label class="block text-sm font-medium mb-1">Nội dung</label>
+                                    <textarea class="w-full border rounded-lg p-2 mb-3 outline-none focus:ring focus:border-blue-400" rows="3" placeholder="Nhập nội dung..."></textarea>
+                                    
+                                    <div class="flex justify-end space-x-2">
+                                        <button @click="openForm = false" class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">Hủy</button>
+                                        <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Gửi</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -222,11 +240,30 @@
                                 <p class="mt-2 text-sm text-gray-600">Đã đặt: <?= $u['so_don'] ?> đơn</p>
                                 <p class="mt-1 text-xs text-gray-400">Ngày tạo: <?= date("d/m/Y",strtotime($u['ngay_tao'])) ?></p>
                             </div>
-                            <!-- Nút hành động -->
-                            <div class="flex justify-around border-t p-2 mt-auto">
-                                <a href="#" class="text-blue-600 hover:text-blue-800"><i class="fas fa-edit"></i></a>
-                                <a href="#" class="text-red-600 hover:text-red-800"><i class="fas fa-trash-alt"></i></a>
-                                <a href="#" class="text-purple-600 hover:text-purple-800"><i class="fas fa-key"></i></a>
+                            <div x-data="{ openForm: false }" class="relative">
+                                <!-- Nút hành động -->
+                                <div class="flex justify-around border-t p-2 mt-auto">
+                                    <a href="javascript:void(0)" @click="openForm = true" class="text-blue-600 hover:text-blue-800"><i class="fas fa-edit"></i></a> 
+                                    <a href="#" class="text-red-600 hover:text-red-800"><i class="fas fa-trash-alt"></i></a>
+                                    <a href="#" class="text-purple-600 hover:text-purple-800"><i class="fas fa-key"></i></a>
+                                </div>
+                                <!-- Popup form -->
+                                <div x-show="openForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
+                                    <div class="bg-white rounded-xl shadow-lg p-6 w-96">
+                                        <h2 class="text-lg font-semibold mb-4">Thông báo</h2>
+
+                                        <label class="block text-sm font-medium mb-1">Tiêu đề</label>
+                                        <input type="text" class="w-full outline-none border rounded-lg p-2 mb-3 focus:ring focus:border-blue-400" placeholder="Nhập tiêu đề...">
+                                        
+                                        <label class="block text-sm font-medium mb-1">Nội dung</label>
+                                        <textarea class="w-full border rounded-lg p-2 mb-3 outline-none focus:ring focus:border-blue-400" rows="3" placeholder="Nhập nội dung..."></textarea>
+                                        
+                                        <div class="flex justify-end space-x-2">
+                                            <button @click="openForm = false" class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">Hủy</button>
+                                            <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Gửi</button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     <?php endif; ?>
@@ -244,11 +281,30 @@
                             <p class="mt-2 text-sm text-gray-600">Đã đặt: <?= $m['so_don'] ?> đơn</p>
                             <p class="mt-1 text-xs text-gray-400">Ngày tạo: <?= date("d/m/Y",strtotime($m['ngay_tao'])) ?></p>
                         </div>
-                        <!-- Nút hành động -->
-                        <div class="flex justify-around border-t p-2 mt-auto">
-                            <a href="#" class="text-blue-600 hover:text-blue-800"><i class="fas fa-edit"></i></a>
-                            <a href="#" class="text-red-600 hover:text-red-800"><i class="fas fa-trash-alt"></i></a>
-                            <a href="#" class="text-purple-600 hover:text-purple-800"><i class="fas fa-key"></i></a>
+                        <div x-data="{ openForm: false }" class="relative">
+                            <!-- Nút hành động -->
+                            <div class="flex justify-around border-t p-2 mt-auto">
+                                <a href="javascript:void(0)" @click="openForm = true" class="text-blue-600 hover:text-blue-800"><i class="fas fa-edit"></i></a> 
+                                <a href="#" class="text-red-600 hover:text-red-800"><i class="fas fa-trash-alt"></i></a>
+                                <a href="#" class="text-purple-600 hover:text-purple-800"><i class="fas fa-key"></i></a>
+                            </div>
+                            <!-- Popup form -->
+                            <div x-show="openForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
+                                <div class="bg-white rounded-xl shadow-lg p-6 w-96">
+                                    <h2 class="text-lg font-semibold mb-4">Thông báo</h2>
+
+                                    <label class="block text-sm font-medium mb-1">Tiêu đề</label>
+                                    <input type="text" class="w-full outline-none border rounded-lg p-2 mb-3 focus:ring focus:border-blue-400" placeholder="Nhập tiêu đề...">
+                                    
+                                    <label class="block text-sm font-medium mb-1">Nội dung</label>
+                                    <textarea class="w-full border rounded-lg p-2 mb-3 outline-none focus:ring focus:border-blue-400" rows="3" placeholder="Nhập nội dung..."></textarea>
+                                    
+                                    <div class="flex justify-end space-x-2">
+                                        <button @click="openForm = false" class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">Hủy</button>
+                                        <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Gửi</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 <?php endforeach; ?>

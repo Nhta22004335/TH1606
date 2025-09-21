@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="vi" class="bg-gray-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đăng ký</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+<div class="bg-white shadow-lg rounded-2xl w-full max-w-sm px-4 py-3 sm:px-6 sm:py-6">
+    <!-- Logo -->
+    <div class="flex justify-center">
+        <img src="../../../public/assets/anhht/0/logo-homedy.png" alt="Logo hệ thống" class="w-16 h-16 sm:w-20 sm:h-20 object-contain">
+    </div>
+
+    <!-- Slogan -->
+    <p class="text-center text-gray-500 italic text-sm sm:text-base mb-4">Không gian sống lý tưởng cho bạn</p>
+
+    <!-- Tiêu đề -->
+    <h1 class="text-xl sm:text-2xl font-bold text-center text-blue-600 mb-6">Đăng ký tài khoản</h1>
+
+    <form id="formDangKy" method="POST" class="space-y-4">
+
+        <!-- Họ và tên -->
+        <div>
+            <label for="hoten" class="block text-sm font-medium text-gray-700 mb-1">Họ và tên</label>
+            <input type="text" name="hoten" id="hoten" class="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition text-sm sm:text-base" placeholder="Nhập họ và tên">
+        </div>
+
+        <!-- Tên đăng nhập -->
+        <div>
+            <label for="tendangnhap" class="block text-sm font-medium text-gray-700 mb-1">Tên đăng nhập (tự sinh)</label>
+            <input type="text" name="tendangnhap" id="tendangnhap" readonly class="w-full px-4 py-2 border rounded-lg bg-gray-100 text-gray-600 text-sm sm:text-base cursor-not-allowed">
+        </div>
+
+        <!-- Email -->
+        <div>
+            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input type="email" name="email" id="email" class="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition text-sm sm:text-base" placeholder="Nhập email">
+        </div>
+
+        <!-- Số điện thoại -->
+        <div>
+            <label for="sodienthoai" class="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
+            <input type="tel" name="sodienthoai" id="sodienthoai" class="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition text-sm sm:text-base" placeholder="Nhập số điện thoại">
+        </div>
+
+        <!-- Nút đăng ký -->
+        <button type="button" id="btnDangKy" class="w-full py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition text-sm sm:text-base">Đăng ký</button>
+    </form>
+
+    <!-- Link quay lại đăng nhập -->
+    <p class="text-center text-sm text-gray-600 mt-4">
+        👉 Đã có tài khoản?
+        <a href="dangnhap.html" class="text-blue-600 hover:text-blue-800 font-medium">Đăng nhập ngay</a>
+    </p>
+
+    <!-- Footer -->
+    <p class="text-center text-xs text-gray-400 mt-6">© 2025 Zolux 4335. All rights reserved.</p>
+</div>
+
+<script>
+    // Ngăn sửa tên đăng nhập
+    document.getElementById("tendangnhap").addEventListener("focus", function(e) {
+        e.target.blur();
+    });
+
+    // Chặn ký tự đặc biệt trong họ tên
+    document.getElementById("hoten").addEventListener("keypress", function(e) {
+        const c = String.fromCharCode(e.which);
+        const st = "`~!@#$%^&*()_-+=[{|:;'}]?/>.,<0123456789\"\\";
+        if (st.includes(c)) {
+        e.preventDefault();
+        }
+    });
+
+    // Kiểm tra email
+    function isEmail() {
+        let str = document.getElementById("email").value.trim();
+        if (str.indexOf('@') > 0) {
+        let parts = str.split('@');
+        if (parts.length === 2 && parts[1].indexOf('.') > 0) {
+            return true;
+        }
+        }
+        return false;
+    }
+
+    // Kiểm tra số điện thoại
+    function isSDT() {
+        let str = document.getElementById("sodienthoai").value.trim();
+        return !isNaN(str) && (str.length === 10 || str.length === 11);
+    }
+
+    // Chuẩn hóa họ tên
+    function chuanHoaHoTen(str) {
+        return str
+        .trim()
+        .replace(/\s+/g, ' ')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd').replace(/Đ/g, 'D')
+        .toLowerCase();
+    }
+
+    // Sinh tên đăng nhập từ họ tên
+    document.getElementById("hoten").addEventListener("input", function() {
+        let hoten = chuanHoaHoTen(this.value);
+        let parts = hoten.split(" ");
+        if (parts.length >= 2) {
+        let ten = parts[parts.length - 1];
+        let ho = parts[0].charAt(0);
+        let lot = "";
+        if (parts.length > 2) {
+            for (let i = 1; i < parts.length - 1; i++) {
+            lot += parts[i].charAt(0);
+            }
+        }
+        document.getElementById("tendangnhap").value = ten + ho + lot;
+        } else {
+        document.getElementById("tendangnhap").value = "";
+        }
+    });
+
+    // Xử lý submit
+    var url = '../php/xuly_dangky_email.php';
+    document.getElementById("btnDangKy").addEventListener("click", function() {
+        let form = document.getElementById("formDangKy");
+        let hoten = document.getElementById("hoten").value.trim();
+        let email = document.getElementById("email").value.trim();
+        let sodienthoai = document.getElementById("sodienthoai").value.trim();
+
+        if (hoten === '') {
+        alert("Vui lòng nhập họ và tên!");
+        return;
+        }
+
+        if (email !== '' && sodienthoai !== '') {
+        if (isEmail() || isSDT()) {
+            form.action = url;
+            form.submit();
+        } else {
+            alert("Email hoặc Số điện thoại không hợp lệ!");
+        }
+        } else {
+        alert("Vui lòng nhập Email và Số điện thoại!");
+        }
+    });
+</script>
+</body>
+</html>

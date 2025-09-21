@@ -83,14 +83,14 @@
         </h2>
 
         <label class="block mb-2 text-sm">Hoạt động</label>
-        <select id="hoatdong-desktop" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
+        <select id="hoatdong-desktop" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
             <option value="" <?= (($filters['hoatdong'] ?? '') == 'Tất cả') ? 'selected' : ''?>>Tất cả</option>
             <option value="Online" <?= (($filters['hoatdong'] ?? '') == 'Online') ? 'selected' : ''?>>Online</option>
             <option value="Offline" <?= (($filters['hoatdong'] ?? '') == 'Offline') ? 'selected' : ''?>>Offline</option>
         </select>
 
         <label class="block mb-2 text-sm">Trạng thái</label>
-        <select id="trangthai-desktop" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
+        <select id="trangthai-desktop" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
             <option value="" <?= (($filters['trangthai'] ?? '') == 'Tất cả') ? 'selected' : ''?>>Tất cả</option>
             <option value="Đang hoạt động" <?= (($filters['trangthai'] ?? '') == 'Đang hoạt động') ? 'selected' : ''?>>Đang hoạt động</option>
             <option value="Chưa kích hoạt" <?= (($filters['trangthai'] ?? '') == 'Chưa kích hoạt') ? 'selected' : ''?>>Chưa kích hoạt</option>
@@ -98,13 +98,13 @@
         </select>
 
         <label class="block mb-2 text-sm">Ngày tạo tài khoản trước</label>
-        <input id="ngaytruoc-desktop" value="<?= ($filters['ngaytruoc'] ?? '') ?>" type="date" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
+        <input id="ngaytruoc-desktop" value="<?= ($filters['ngaytruoc'] ?? '') ?>" type="date" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
 
         <label class="block mb-2 text-sm">Kinh nghiệm</label>
-        <input id="kinhnghiem-desktop" value="<?= ($filters['kinhnghiem'] ?? '') ?>" type="number" placeholder="Số năm" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
+        <input id="kinhnghiem-desktop" value="<?= ($filters['kinhnghiem'] ?? '') ?>" type="number" placeholder="Số năm" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
 
         <label class="block mb-2 text-sm">Uy tín</label>
-        <input id="uytin-desktop" value="<?= ($filters['uytin'] ?? '') ?>" type="number" placeholder="Điểm uy tín" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
+        <input id="uytin-desktop" value="<?= ($filters['uytin'] ?? '') ?>" type="number" placeholder="Điểm uy tín" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
 
         <div class="flex gap-3 mt-4">
             <!-- Nút áp dụng -->
@@ -126,14 +126,14 @@
             </div>
 
             <label class="block mb-2 text-sm">Hoạt động</label>
-            <select id="hoatdong-mobile" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
+            <select id="hoatdong-mobile" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
                 <option value="" <?= (($filters['hoatdong'] ?? '') == 'Tất cả') ? 'selected' : ''?>>Tất cả</option>
                 <option value="Online" <?= (($filters['hoatdong'] ?? '') == 'Online') ? 'selected' : ''?>>Online</option>
                 <option value="Offline" <?= (($filters['hoatdong'] ?? '') == 'Offline') ? 'selected' : ''?>>Offline</option>
             </select>
 
             <label class="block mb-2 text-sm">Trạng thái</label>
-            <select id="trangthai-mobile" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
+            <select id="trangthai-mobile" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
                 <option value="" <?= (($filters['trangthai'] ?? '') == 'Tất cả') ? 'selected' : ''?>>Tất cả</option>
                 <option value="Đang hoạt động" <?= (($filters['trangthai'] ?? '') == 'Đang hoạt động') ? 'selected' : ''?>>Đang hoạt động</option>
                 <option value="Chưa kích hoạt" <?= (($filters['trangthai'] ?? '') == 'Chưa kích hoạt') ? 'selected' : ''?>>Chưa kích hoạt</option>
@@ -141,13 +141,13 @@
             </select>
 
             <label class="block mb-2 text-sm">Ngày tạo tài khoản trước</label>
-            <input id="ngaytruoc-mobile" value="<?= ($filters['ngaytruoc'] ?? '') ?>" type="date" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
+            <input id="ngaytruoc-mobile" value="<?= ($filters['ngaytruoc'] ?? '') ?>" type="date" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
 
              <label class="block mb-2 text-sm">Kinh nghiệm</label>
-            <input id="kinhnghiem-desktop" value="<?= ($filters['kinhnghiem'] ?? '') ?>" type="number" placeholder="Số năm" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
+            <input id="kinhnghiem-desktop" value="<?= ($filters['kinhnghiem'] ?? '') ?>" type="number" placeholder="Số năm" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
 
             <label class="block mb-2 text-sm">Uy tín</label>
-            <input id="uytin-desktop" value="<?= ($filters['uytin'] ?? '') ?>" type="number" placeholder="Điểm uy tín" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
+            <input id="uytin-desktop" value="<?= ($filters['uytin'] ?? '') ?>" type="number" placeholder="Điểm uy tín" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
 
             <div class="flex gap-3 mt-4">
                 <!-- Nút áp dụng -->

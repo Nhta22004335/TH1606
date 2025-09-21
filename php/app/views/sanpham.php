@@ -90,7 +90,7 @@
         </h2>
 
         <label class="block mb-2 text-sm">Loại BĐS</label>
-        <select id="loai-desktop" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
+        <select id="loai-desktop" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
             <option value="" <?= (($filters['loai'] ?? '') == 'Tất cả') ? 'selected' : ''?>>Tất cả</option>
             <option value="Căn hộ" <?= (($filters['loai'] ?? '') == 'Căn hộ') ? 'selected' : ''?>>Căn hộ</option>
             <option value="Nhà phố" <?= (($filters['loai'] ?? '') == 'Nhà phố') ? 'selected' : ''?>>Nhà phố</option>
@@ -99,7 +99,7 @@
         </select>
 
         <label class="block mb-2 text-sm">Khu vực</label>
-        <select id="khuvuc-desktop" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
+        <select id="khuvuc-desktop" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
             <option value="" <?= (($filters['khuvuc'] ?? '') == 'Tất cả') ? 'selected' : ''?>>Tất cả</option>
             <?php
             $lines = file("../../storage/documents/tinhthanh.txt", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
@@ -111,7 +111,7 @@
         </select>
 
         <label class="block mb-2 text-sm">Tình trạng</label>
-        <select id="trangthai-desktop" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
+        <select id="trangthai-desktop" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
             <option value="" <?= (($filters['trangthai'] ?? '') == 'Tất cả') ? 'selected' : ''?>>Tất cả</option>
             <option value="Còn bán" <?= (($filters['trangthai'] ?? '') == 'Còn bán') ? 'selected' : ''?>>Còn bán</option>
             <option value="Đã bán" <?= (($filters['trangthai'] ?? '') == 'Đã bán') ? 'selected' : ''?>>Đã bán</option>
@@ -119,18 +119,18 @@
 
         <label class="block mb-2 text-sm">Giá (VNĐ)</label>
         <div class="flex gap-2 mb-4">
-            <input id="giatu-desktop" type="number" placeholder="Từ" class="w-1/2 border rounded-lg p-2 focus:outline-none">
-            <input id="giaden-desktop" type="number" placeholder="Đến" class="w-1/2 border rounded-lg p-2 focus:outline-none">
+            <input id="giatu-desktop" type="number" placeholder="Từ" class="w-1/2 border rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-400">
+            <input id="giaden-desktop" type="number" placeholder="Đến" class="w-1/2 border rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-400">
         </div>
 
         <label class="block mb-2 text-sm">Diện tích (m²)</label>
         <div class="flex gap-2 mb-4">
-            <input id="dientu-desktop" type="number" placeholder="Từ" class="w-1/2 border rounded-lg p-2 focus:outline-none">
-            <input id="dienden-desktop" type="number" placeholder="Đến" class="w-1/2 border rounded-lg p-2 focus:outline-none">
+            <input id="dientu-desktop" type="number" placeholder="Từ" class="w-1/2 border rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-400">
+            <input id="dienden-desktop" type="number" placeholder="Đến" class="w-1/2 border rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-400">
         </div>
 
         <label class="block mb-2 text-sm">Đánh giá</label>
-        <select id="rating-desktop" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
+        <select id="rating-desktop" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
             <option value="">Tất cả</option>
             <option value="5" <?= (($filters['rating'] ?? '') == '5') ? 'selected' : '' ?>>⭐⭐⭐⭐⭐</option>
             <option value="4" <?= (($filters['rating'] ?? '') == '4') ? 'selected' : '' ?>>⭐⭐⭐⭐</option>
@@ -159,7 +159,7 @@
             </div>
         
             <label class="block mb-2 text-sm">Loại BĐS</label>
-            <select id="loai-mobile" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
+            <select id="loai-mobile" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
                 <option value="" <?= (($filters['loai'] ?? '') == 'Tất cả') ? 'selected' : ''?>>Tất cả</option>
                 <option value="Căn hộ" <?= (($filters['loai'] ?? '') == 'Căn hộ') ? 'selected' : ''?>>Căn hộ</option>
                 <option value="Nhà phố" <?= (($filters['loai'] ?? '') == 'Nhà phố') ? 'selected' : ''?>>Nhà phố</option>
@@ -168,7 +168,7 @@
             </select>
 
             <label class="block mb-2 text-sm">Khu vực</label>
-            <select id="khuvuc-mobile" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
+            <select id="khuvuc-mobile" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
                 <option value="" <?= (($filters['khuvuc'] ?? '') == 'Tất cả') ? 'selected' : ''?>>Tất cả</option>
                 <?php
                 $lines = file("../../storage/documents/tinhthanh.txt", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
@@ -180,7 +180,7 @@
             </select>
 
             <label class="block mb-2 text-sm">Tình trạng</label>
-            <select id="trangthai-mobile" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
+            <select id="trangthai-mobile" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
                 <option value="" <?= (($filters['trangthai'] ?? '') == 'Tất cả') ? 'selected' : ''?>>Tất cả</option>
                 <option value="Còn bán" <?= (($filters['trangthai'] ?? '') == 'Còn bán') ? 'selected' : ''?>>Còn bán</option>
                 <option value="Đã bán" <?= (($filters['trangthai'] ?? '') == 'Đã bán') ? 'selected' : ''?>>Đã bán</option>
@@ -188,18 +188,18 @@
 
             <label class="block mb-2 text-sm">Giá (VNĐ)</label>
             <div class="flex gap-2 mb-4">
-                <input id="giatu-mobile" type="number" placeholder="Từ" class="w-1/2 border rounded-lg p-2 focus:outline-none">
-                <input id="giaden-mobile" type="number" placeholder="Đến" class="w-1/2 border rounded-lg p-2 focus:outline-none">
+                <input id="giatu-mobile" type="number" placeholder="Từ" class="w-1/2 border rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-400">
+                <input id="giaden-mobile" type="number" placeholder="Đến" class="w-1/2 border rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-400">
             </div>
 
             <label class="block mb-2 text-sm">Diện tích (m²)</label>
             <div class="flex gap-2 mb-4">
-                <input id="dientu-mobile" type="number" placeholder="Từ" class="w-1/2 border rounded-lg p-2 focus:outline-none">
-                <input id="dienden-mobile" type="number" placeholder="Đến" class="w-1/2 border rounded-lg p-2 focus:outline-none">
+                <input id="dientu-mobile" type="number" placeholder="Từ" class="w-1/2 border rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-400">
+                <input id="dienden-mobile" type="number" placeholder="Đến" class="w-1/2 border rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-400">
             </div>
 
             <label class="block mb-2 text-sm">Đánh giá</label>
-            <select id="rating-mobile" class="w-full border rounded-lg p-2 mb-4 focus:outline-none">
+            <select id="rating-mobile" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
                 <option value="">Tất cả</option>
                 <option value="5" <?= (($filters['rating'] ?? '') == '5') ? 'selected' : '' ?>>⭐⭐⭐⭐⭐</option>
                 <option value="4" <?= (($filters['rating'] ?? '') == '4') ? 'selected' : '' ?>>⭐⭐⭐⭐</option>
