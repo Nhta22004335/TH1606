@@ -44,19 +44,24 @@ $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <title>Tin đăng của tôi</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="min-h-screen relative flex flex-col items-center justify-start pt-10">
+<body class="min-h-screen relative flex flex-col">
 
     <!-- Ảnh nền -->
     <div class="absolute inset-0 -z-10">
         <img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1470&q=80" 
              alt="Nhà cửa" class="w-full h-full object-cover">
-        <div class="absolute inset-0 bg-black bg-opacity-20"></div>
+        <div class="absolute inset-0 bg-black/30"></div>
     </div>
 
-    <div class="w-full max-w-3xl px-4">
+    <!-- Nội dung -->
+    <main class="flex-1 w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-10">
 
-        <h2 class="text-3xl font-bold text-center text-white mb-6">Tin đăng của tôi</h2>
+        <!-- Tiêu đề -->
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl sm:text-3xl font-bold text-white">Tin đăng của tôi</h2>
+        </div>
 
+        <!-- Thông báo -->
         <?php if ($error): ?>
             <p class="text-red-500 mb-4 text-center font-medium bg-white/80 p-2 rounded"><?= htmlspecialchars($error) ?></p>
         <?php endif; ?>
@@ -65,8 +70,8 @@ $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php endif; ?>
 
         <!-- Form đăng tin mới -->
-        <form method="POST" class="mb-8 bg-white bg-opacity-90 p-6 rounded-2xl shadow-md backdrop-blur">
-            <h3 class="text-xl font-semibold mb-4">Đăng tin mới</h3>
+        <form method="POST" class="mb-8 bg-white bg-opacity-90 p-4 sm:p-6 rounded-2xl shadow-md backdrop-blur">
+            <h3 class="text-lg sm:text-xl font-semibold mb-4">Đăng tin mới</h3>
             <div class="mb-3">
                 <label class="block mb-1 font-medium">Tiêu đề</label>
                 <input type="text" name="title" class="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-blue-400 focus:outline-none" required />
@@ -75,13 +80,15 @@ $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <label class="block mb-1 font-medium">Mô tả</label>
                 <textarea name="description" rows="4" class="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-blue-400 focus:outline-none"></textarea>
             </div>
-            <div class="mb-3">
-                <label class="block mb-1 font-medium">Giá (VNĐ)</label>
-                <input type="number" name="price" min="0" class="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-blue-400 focus:outline-none" />
-            </div>
-            <div class="mb-3">
-                <label class="block mb-1 font-medium">Địa chỉ</label>
-                <input type="text" name="address" class="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-blue-400 focus:outline-none" />
+            <div class="mb-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block mb-1 font-medium">Giá (VNĐ)</label>
+                    <input type="number" name="price" min="0" class="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-blue-400 focus:outline-none" />
+                </div>
+                <div>
+                    <label class="block mb-1 font-medium">Địa chỉ</label>
+                    <input type="text" name="address" class="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-blue-400 focus:outline-none" />
+                </div>
             </div>
             <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-xl hover:bg-blue-700 transition font-semibold">Đăng tin</button>
         </form>
@@ -92,12 +99,12 @@ $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php else: ?>
             <div class="space-y-4">
                 <?php foreach ($posts as $post): ?>
-                    <div class="bg-white bg-opacity-90 p-4 rounded-2xl shadow-md backdrop-blur">
-                        <h3 class="text-lg font-semibold mb-1"><?= htmlspecialchars($post['tieu_de']) ?></h3>
-                        <p class="text-gray-700 mb-1"><?= nl2br(htmlspecialchars($post['mo_ta'])) ?></p>
-                        <p class="text-sm text-gray-500 mb-1">
-                            Giá: <?= $post['gia'] !== null ? number_format($post['gia'], 0, ',', '.') . " VNĐ" : "Liên hệ" ?> |
-                            Địa chỉ: <?= htmlspecialchars($post['dia_chi'] ?: 'Chưa cập nhật') ?>
+                    <div class="bg-white bg-opacity-90 p-4 sm:p-6 rounded-2xl shadow-md backdrop-blur">
+                        <h3 class="text-lg sm:text-xl font-semibold mb-1"><?= htmlspecialchars($post['tieu_de']) ?></h3>
+                        <p class="text-gray-700 mb-2"><?= nl2br(htmlspecialchars($post['mo_ta'])) ?></p>
+                        <p class="text-sm text-gray-600 mb-2">
+                            <span class="font-medium">Giá:</span> <?= $post['gia'] !== null ? number_format($post['gia'], 0, ',', '.') . " VNĐ" : "Liên hệ" ?><br>
+                            <span class="font-medium">Địa chỉ:</span> <?= htmlspecialchars($post['dia_chi'] ?: 'Chưa cập nhật') ?>
                         </p>
                         <p class="text-xs text-gray-400">Ngày đăng: <?= $post['ngay_dang'] ?></p>
                     </div>
@@ -105,7 +112,9 @@ $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
         <?php endif; ?>
 
-    </div>
+    </main>
+
+   
 
 </body>
 </html>
