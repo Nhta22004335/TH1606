@@ -141,7 +141,7 @@ EXECUTE FUNCTION fn_after_insert_nguoi_dung();
 CREATE TABLE phien_dang_nhap (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),              
     id_nguoi_dung UUID NOT NULL,           
-    token VARCHAR(255) NOT NULL UNIQUE,   
+    token_phien VARCHAR(255) NOT NULL UNIQUE,   
     dia_chi_ip VARCHAR(45),              
     thiet_bi TEXT,                        
     bat_dau TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  

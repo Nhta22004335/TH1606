@@ -27,20 +27,20 @@ function kiemTraHoatDong($pdo, $id, $ten_dang_nhap) {
 function luuPhienVaoCSDL($pdo, $id_nguoi_dung) {
     try {
         $het_han = date('Y-m-d H:i:s', strtotime('+7 days')); 
-        $token = bin2hex(random_bytes(16));
+        $token_phien = bin2hex(random_bytes(16));
 
-        $stmt = $pdo->prepare("INSERT INTO phien_dang_nhap (id_nguoi_dung, token, het_han) 
-                                VALUES (:id_nguoi_dung, :token, :het_han) RETURNING id");
+        $stmt = $pdo->prepare("INSERT INTO phien_dang_nhap (id_nguoi_dung, token_phien, het_han) 
+                                VALUES (:id_nguoi_dung, :token_phien, :het_han) RETURNING id");
 
-        $stmt->execute([':id_nguoi_dung' => $id_nguoi_dung, ':token' => $token, ':het_han' => $het_han]);
+        $stmt->execute([':id_nguoi_dung' => $id_nguoi_dung, ':token_phien' => $token_phien, ':het_han' => $het_han]);
 
         $id = $stmt->fetchColumn();
 
-        setcookie("token", $token, time() + (86400 * 7), "/", "", true, true); 
+        setcookie("token_phien", $token_phien, time() + (86400 * 7), "/", "", true, true); 
         setcookie("id_nguoi_dung", $id_nguoi_dung, time() + (86400 * 7), "/", "", true, true);
 
         $_SESSION['id_phien'] = $id;
-        $_SESSION['token'] = $token;
+        $_SESSION['token_phien'] = $token_phien;
         $_SESSION['id_nguoi_dung'] = $id_nguoi_dung;
 
     } catch (PDOException $e) {
