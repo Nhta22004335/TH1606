@@ -36,11 +36,11 @@ function luuPhienVaoCSDL($pdo, $id_nguoi_dung) {
 
         $id = $stmt->fetchColumn();
 
-        setcookie("tokenphien", $token, time() + (86400 * 7), "/", "", true, true); 
-        setcookie("idtaikhoan", $id_nguoi_dung, time() + (86400 * 7), "/", "", true, true);
+        setcookie("token", $token, time() + (86400 * 7), "/", "", true, true); 
+        setcookie("id_nguoi_dung", $id_nguoi_dung, time() + (86400 * 7), "/", "", true, true);
 
         $_SESSION['id_phien'] = $id;
-        $_SESSION['token_phien'] = $token;
+        $_SESSION['token'] = $token;
         $_SESSION['id_nguoi_dung'] = $id_nguoi_dung;
 
     } catch (PDOException $e) {

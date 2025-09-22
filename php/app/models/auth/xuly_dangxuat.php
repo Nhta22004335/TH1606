@@ -1,14 +1,12 @@
 <?php
-require_once '../../config.php';
+require_once "../../../config/database.php";
+$pdo = ketnoicsdl();
 
-$db   = new Database();
-$conn = $db->connect();
-
-$id   = $_SESSION['idtaikhoan'] ?? null;
+$id   = $_SESSION['id_nguoi_dung'] ?? null;
 
 if ($id) {
     try {
-        $sql = "DELETE FROM phien_dang_nhap WHERE idtaikhoan = :id";
+        $sql = "DELETE FROM phien_dang_nhap WHERE id_nguoi_dung = :id";
         $stmt = $conn->prepare($sql);
         $stmt->bindParam(':id', $id, PDO::PARAM_STR);
         $stmt->execute();
@@ -31,6 +29,6 @@ if (isset($_COOKIE['remember_token'])) {
     setcookie('remember_token', '', time() - 3600, '/');
 }
 
-header("Location: ../html/dangnhap.html");
+header("Location: ../../views/auth/dangnhap.html");
 exit;
 ?>

@@ -17,7 +17,7 @@
         <div class="flex items-center space-x-4">
             <input type="text" placeholder="Tìm kiếm..." class="px-3 py-2 border rounded-lg focus:ring focus:ring-blue-300" />
             <button class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">Đăng tin</button>
-            <img src="/public/avatar.png" alt="Avatar" class="h-10 w-10 rounded-full border" />
+            <img src="../../../../public/assets/auth/0/logo-homedy.png" alt="Avatar" class="h-10 w-10 rounded-full border" />
         </div>
     </header>
 

@@ -1,63 +1,49 @@
 <?php
-// date_default_timezone_set('Asia/Ho_Chi_Minh');
-// require_once "../../../config/database.php";
-// $pdo = ketnoicsdl();
+date_default_timezone_set('Asia/Ho_Chi_Minh');
+require_once "../../../config/database.php";
+$pdo = ketnoicsdl();
 
-// if (!isset($_GET['tokenotp'])) {
-//     die("Thiếu token!");
-// }
+if (!isset($_GET['tokenotp'])) {
+    die("Thiếu token!");
+}
 
-// $token_code = trim($_GET['tokenotp']);
+$token_code = trim($_GET['tokenotp']);
 
-// // Kiểm tra token trong DB
-// $sql = "SELECT * FROM yeu_cau_otp WHERE token_code = :token_code LIMIT 1";
-// $stmt = $pdo->prepare($sql);
-// $stmt->execute([':token_code' => $token_code]);
-// $otpData = $stmt->fetch(PDO::FETCH_ASSOC);
+// Kiểm tra token trong DB
+$sql = "SELECT * FROM yeu_cau_otp WHERE token_code = :token_code LIMIT 1";
+$stmt = $pdo->prepare($sql);
+$stmt->execute([':token_code' => $token_code]);
+$otpData = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// if (!$otpData) {
-//     die("Token không hợp lệ!");
-// }
+if (!$otpData) {
+    die("Token không hợp lệ!");
+}
 
-// // Kiểm tra thời gian hết hạn
-// if (strtotime($otpData['het_han']) < time()) {
-//     echo "Mã OTP đã hết hạn!";
-//     echo "<br> <a href='yeucau_otp.php?tokenotp=". $token_code ."'>Gửi lại OTP</a>";
-//     exit;
-// }
+// Kiểm tra thời gian hết hạn
+if (strtotime($otpData['het_han']) < time()) {
+    echo "Mã OTP đã hết hạn!";
+    echo "<br> <a href='yeucau_otp.php?tokenotp=". $token_code ."'>Gửi lại OTP</a>";
+    exit;
+}
 
-// function xoaYeuCauOTP($pdo, $token_code, $otp_code) {
-//     $sql = "DELETE FROM yeu_cau_otp WHERE token_code = :token_code AND otp_code = :otp_code";
-//     $stmt = $pdo->prepare($sql);
-//     $stmt->execute([':token_code' => $token_code, ':otp_code' => $otp_code]);
-// }
+function xoaYeuCauOTP($pdo, $token_code, $otp_code) {
+    $sql = "DELETE FROM yeu_cau_otp WHERE token_code = :token_code AND otp_code = :otp_code";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([':token_code' => $token_code, ':otp_code' => $otp_code]);
+}
 
-// // Kiểm tra mã OTP
-// if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['otp'])) {
-//     $otp_code = trim($_POST['otp'] ?? '');
-//     if ($otp_code !== $otpData['otp_code']) {
-//         echo "<script>alert('Mã OTP không đúng!');</script>";
-//     } else {
-//         xoaYeuCauOTP($pdo, $token_code, $otp_code);
-//         header("Location: ../../views/auth/dangnhap.html");
-//         exit();
-//     }
-// }
+// Kiểm tra mã OTP
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['otp'])) {
+    $otp_code = trim($_POST['otp'] ?? '');
+    if ($otp_code !== $otpData['otp_code']) {
+        echo "<script>alert('Mã OTP không đúng!');</script>";
+    } else {
+        xoaYeuCauOTP($pdo, $token_code, $otp_code);
+        header("Location: ../../views/auth/dangnhap.html");
+        exit();
+    }
+}
 ?>
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zolux 4335 - Xác nhận OTP</title>
-</head>
-<body>
-    <form action="" method="POST" id="formXacNhan">
-        <input type="text" id="otp" name="otp" placeholder="Nhập mã OTP">
-        <button type="submit" id="btnXacNhan">Xác nhận</button>
-    </form>
-</body>
-</html> -->
 
 <!DOCTYPE html>
 <html lang="vi">

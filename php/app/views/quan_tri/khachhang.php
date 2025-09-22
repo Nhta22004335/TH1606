@@ -192,12 +192,12 @@
                             <p class="mt-2 text-sm text-gray-600">Đã đặt: <?= $u['so_don'] ?> đơn</p>
                             <p class="mt-1 text-xs text-gray-400">Ngày tạo: <?= date("d/m/Y",strtotime($u['ngay_tao'])) ?></p>
                         </div>
-                        <div x-data="{ openForm: false }" class="relative">
+                        <div x-data="{ openForm: false, openOption: false}" class="relative">
                             <!-- Nút hành động -->
                             <div class="flex justify-around border-t p-2 mt-auto">
                                 <a href="javascript:void(0)" @click="openForm = true" class="text-blue-600 hover:text-blue-800"><i class="fas fa-edit"></i></a> 
                                 <a href="#" class="text-red-600 hover:text-red-800"><i class="fas fa-trash-alt"></i></a>
-                                <a href="#" class="text-purple-600 hover:text-purple-800"><i class="fas fa-key"></i></a>
+                                <a href="javascript:void(0)" @click="openOption = true" class="text-purple-600 hover:text-purple-800"><i class="fas fa-key"></i></a>
                             </div>
                             <!-- Popup form -->
                             <div x-show="openForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
@@ -213,6 +213,22 @@
                                     <div class="flex justify-end space-x-2">
                                         <button @click="openForm = false" class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">Hủy</button>
                                         <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Gửi</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Popup Lựa chọn -->
+                            <div x-show="openOption" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
+                                <div class="bg-white rounded-xl shadow-lg p-6 w-80">
+                                    <h2 class="text-lg font-semibold mb-4 text-blue-600">Lựa chọn</h2>
+                                    <select class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
+                                        <option>Kích hoạt</option>
+                                        <option>Tạm ngừng</option>
+                                        <option>Khóa</option>
+                                    </select>
+                                    <div class="flex justify-end space-x-2">
+                                        <button @click="openOption = false" class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">Hủy</button>
+                                        <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Lưu</button>
                                     </div>
                                 </div>
                             </div>
@@ -240,13 +256,14 @@
                                 <p class="mt-2 text-sm text-gray-600">Đã đặt: <?= $u['so_don'] ?> đơn</p>
                                 <p class="mt-1 text-xs text-gray-400">Ngày tạo: <?= date("d/m/Y",strtotime($u['ngay_tao'])) ?></p>
                             </div>
-                            <div x-data="{ openForm: false }" class="relative">
+                            <div x-data="{ openForm: false, openOption: false }" class="relative">
                                 <!-- Nút hành động -->
                                 <div class="flex justify-around border-t p-2 mt-auto">
                                     <a href="javascript:void(0)" @click="openForm = true" class="text-blue-600 hover:text-blue-800"><i class="fas fa-edit"></i></a> 
                                     <a href="#" class="text-red-600 hover:text-red-800"><i class="fas fa-trash-alt"></i></a>
-                                    <a href="#" class="text-purple-600 hover:text-purple-800"><i class="fas fa-key"></i></a>
+                                    <a href="javascript:void(0)" @click="openOption = true" class="text-purple-600 hover:text-purple-800"><i class="fas fa-key"></i></a>
                                 </div>
+
                                 <!-- Popup form -->
                                 <div x-show="openForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
                                     <div class="bg-white rounded-xl shadow-lg p-6 w-96">
@@ -261,6 +278,22 @@
                                         <div class="flex justify-end space-x-2">
                                             <button @click="openForm = false" class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">Hủy</button>
                                             <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Gửi</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Popup Lựa chọn -->
+                                <div x-show="openOption" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
+                                    <div class="bg-white rounded-xl shadow-lg p-6 w-80">
+                                        <h2 class="text-lg font-semibold mb-4 text-blue-600">Lựa chọn</h2>
+                                        <select class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
+                                            <option>Kích hoạt</option>
+                                            <option>Tạm ngừng</option>
+                                            <option>Khóa</option>
+                                        </select>
+                                        <div class="flex justify-end space-x-2">
+                                            <button @click="openOption = false" class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">Hủy</button>
+                                            <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Lưu</button>
                                         </div>
                                     </div>
                                 </div>
@@ -281,13 +314,17 @@
                             <p class="mt-2 text-sm text-gray-600">Đã đặt: <?= $m['so_don'] ?> đơn</p>
                             <p class="mt-1 text-xs text-gray-400">Ngày tạo: <?= date("d/m/Y",strtotime($m['ngay_tao'])) ?></p>
                         </div>
-                        <div x-data="{ openForm: false }" class="relative">
+                        <div x-data="{ openForm: false, openOption: false }" class="relative">
                             <!-- Nút hành động -->
                             <div class="flex justify-around border-t p-2 mt-auto">
                                 <a href="javascript:void(0)" @click="openForm = true" class="text-blue-600 hover:text-blue-800"><i class="fas fa-edit"></i></a> 
                                 <a href="#" class="text-red-600 hover:text-red-800"><i class="fas fa-trash-alt"></i></a>
-                                <a href="#" class="text-purple-600 hover:text-purple-800"><i class="fas fa-key"></i></a>
+                                <!-- Nút lựa chọn -->
+                                <a href="javascript:void(0)" @click="openOption = true" class="text-purple-600 hover:text-purple-800">
+                                    <i class="fas fa-key"></i>
+                                </a>
                             </div>
+
                             <!-- Popup form -->
                             <div x-show="openForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
                                 <div class="bg-white rounded-xl shadow-lg p-6 w-96">
@@ -302,6 +339,22 @@
                                     <div class="flex justify-end space-x-2">
                                         <button @click="openForm = false" class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">Hủy</button>
                                         <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Gửi</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Popup Lựa chọn -->
+                            <div x-show="openOption" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
+                                <div class="bg-white rounded-xl shadow-lg p-6 w-80">
+                                    <h2 class="text-lg font-semibold mb-4 text-blue-600">Lựa chọn</h2>
+                                    <select class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
+                                        <option>Kích hoạt</option>
+                                        <option>Tạm ngừng</option>
+                                        <option>Khóa</option>
+                                    </select>
+                                    <div class="flex justify-end space-x-2">
+                                        <button @click="openOption = false" class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">Hủy</button>
+                                        <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Lưu</button>
                                     </div>
                                 </div>
                             </div>

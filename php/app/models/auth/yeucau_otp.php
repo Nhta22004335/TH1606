@@ -25,10 +25,10 @@ function generateToken($length = 32) {
     return bin2hex(random_bytes($length / 2));
 }
 
-function ckYeuCauOTP($pdo, $tokenotp, $email, $sodienthoai) {
+function ckYeuCauOTP($pdo, $token_code, $email, $so_dt) {
     $sql = "SELECT * FROM yeu_cau_otp WHERE token_code = :token_code AND (email = :email OR so_dt = :so_dt) LIMIT 1";
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([':token_code' => $tokenotp, ':email' => $email, ':so_dt' => $sodienthoai]);
+    $stmt->execute([':token_code' => $token_code, ':email' => $email, ':so_dt' => $so_dt]);
     $otpData = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($otpData) {
@@ -38,15 +38,15 @@ function ckYeuCauOTP($pdo, $tokenotp, $email, $sodienthoai) {
     }
 }
 
-function capNhatYeuCauOTP($pdo, $email, $sodienthoai, $otp, $tokenotp, $expire_time) {
-    $sql = "UPDATE otp_requests SET otp_code = :otp, token_code = :tokenotp, het_han = :expire_time 
-            WHERE so_dt = :sodienthoai OR email = :email";
-    $stmt = $conn->prepare($sql);
+function capNhatYeuCauOTP($pdo, $email, $so_dt, $otp, $tokenotp, $het_han) {
+    $sql = "UPDATE yeu_cau_otp SET otp_code = :otp_code, token_code = :token_code, het_han = :het_han 
+            WHERE so_dt = :so_dt OR email = :email";
+    $stmt = $pdo->prepare($sql);
     $stmt->execute([
-        ':otp' => $otp,
-        ':tokenotp' => $tokenotp,
-        ':expire_time' => $expire_time,
-        ':sodienthoai' => $sodienthoai,
+        ':otp_code' => $otp_code,
+        ':token_code' => $token_code,
+        ':het_han' => $het_han,
+        ':so_dt' => $so_dt,
         ':email' => $email
     ]);
 }
@@ -54,14 +54,14 @@ function capNhatYeuCauOTP($pdo, $email, $sodienthoai, $otp, $tokenotp, $expire_t
 /**
  * Gửi OTP qua email kèm link xác nhận
  */
-function sendOTPEmail($mailer, $email, $otp, $tokenotp, $expire_time) {
+function sendOTPEmail($mailer, $email, $otp_code, $token_code, $het_han) {
     $subject = "Cấp lại mã xác thực OTP của bạn";
 
-    $verify_link = "http://localhost:8080/app/models/auth/xacnhan_otp.php?tokenotp=" . urlencode($tokenotp);
+    $verify_link = "http://localhost:8080/app/models/auth/xacnhan_otp.php?tokenotp=" . urlencode($token_code);
 
     $body = "Xin chào bạn!,\n\n"
-          . "Mã OTP của bạn là: $otp\n"
-          . "Mã có hiệu lực đến: $expire_time\n\n"
+          . "Mã OTP của bạn là: $otp_code\n"
+          . "Mã có hiệu lực đến: $het_han\n\n"
           . "Vui lòng bấm vào liên kết dưới đây để xác nhận OTP:\n$verify_link\n\n"
           . "Trân trọng.";
 
@@ -85,16 +85,16 @@ function sendOTPEmail($mailer, $email, $otp, $tokenotp, $expire_time) {
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['btnGuiLaiOTP'])) {
 
     $email = trim($_POST['email'] ?? '');
-    $sodienthoai = trim($_POST['sodienthoai'] ?? '');
-    $expire_time = date('Y-m-d H:i:s', strtotime('+5 minutes'));
-    $tokenotp = trim($_GET['tokenotp']);
-    $otp = generateOTP();
+    $so_dt = trim($_POST['sodienthoai'] ?? '');
+    $het_han = date('Y-m-d H:i:s', strtotime('+5 minutes'));
+    $token_code = trim($_GET['tokenotp']);
+    $otp_code = generateOTP();
     $tokenotpnew = generateToken();
 
-    if (ckYeuCauOTP($conn, $tokenotp, $email, $sodienthoai)) {
+    if (ckYeuCauOTP($pdo, $token_code, $email, $so_dt)) {
         echo "Ok!";
-        capNhatYeuCauOTP($conn, $email, $sodienthoai, $otp, $tokenotpnew, $expire_time);
-        sendOTPEmail($mailer, $email, $otp, $tokenotpnew, $expire_time);
+        capNhatYeuCauOTP($pdo, $email, $so_dt, $otp_code, $tokenotpnew, $het_han);
+        sendOTPEmail($mailer, $email, $otp_code, $tokenotpnew, $het_han);
     } else {
         echo "Dữ liệu mà bạn cung cấp không hợp lệ!";
     }

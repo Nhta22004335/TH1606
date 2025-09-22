@@ -1,5 +1,5 @@
 <?php
-    require_once "../../config/database.php";
+    require_once "../../../config/database.php";
     $pdo = ketnoicsdl();
 
     $sql = "
@@ -66,7 +66,7 @@
     <title>Quản lý sản phẩm BDS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/alpinejs" defer></script>
-    <link rel="stylesheet" href="../../public/assets/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="../../../public/assets/fontawesome/css/all.min.css">
     <style>
         .scrollbar-hide::-webkit-scrollbar {
             display: none;
@@ -85,24 +85,24 @@
     <!-- Bộ lọc (Desktop) -->
     <div class="hidden md:block w-64 bg-white shadow rounded-xl p-4 h-fit">
         <h2 class="flex items-center text-lg font-semibold">
-            <img src="../../public/assets/anhht/0/filter.gif" alt="Quản lý sản phẩm" style="width: 40px; height: 40px; margin-right: 10px;">
+            <img src="../../../public/assets/anhht/0/filter.gif" alt="Quản lý sản phẩm" style="width: 40px; height: 40px; margin-right: 10px;">
             Bộ lọc
         </h2>
 
         <label class="block mb-2 text-sm">Loại BĐS</label>
         <select id="loai-desktop" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
-            <option value="" <?= (($filters['loai'] ?? '') == 'Tất cả') ? 'selected' : ''?>>Tất cả</option>
-            <option value="Căn hộ" <?= (($filters['loai'] ?? '') == 'Căn hộ') ? 'selected' : ''?>>Căn hộ</option>
-            <option value="Nhà phố" <?= (($filters['loai'] ?? '') == 'Nhà phố') ? 'selected' : ''?>>Nhà phố</option>
-            <option value="Đất nền" <?= (($filters['loai'] ?? '') == 'Đất nền') ? 'selected' : ''?>>Đất nền</option>
-            <option value="Biệt thự" <?= (($filters['loai'] ?? '') == 'Biệt thự') ? 'selected' : ''?>>Biệt thự</option>
+            <option value="" <?= (($filters['loai'] ?? '') == 'tatca') ? 'selected' : ''?>>Tất cả</option>
+            <option value="canho" <?= (($filters['loai'] ?? '') == 'canho') ? 'selected' : ''?>>Căn hộ</option>
+            <option value="nhapho" <?= (($filters['loai'] ?? '') == 'nhapho') ? 'selected' : ''?>>Nhà phố</option>
+            <option value="datnen" <?= (($filters['loai'] ?? '') == 'datnen') ? 'selected' : ''?>>Đất nền</option>
+            <option value="bietthu" <?= (($filters['loai'] ?? '') == 'bietthu') ? 'selected' : ''?>>Biệt thự</option>
         </select>
 
         <label class="block mb-2 text-sm">Khu vực</label>
         <select id="khuvuc-desktop" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
-            <option value="" <?= (($filters['khuvuc'] ?? '') == 'Tất cả') ? 'selected' : ''?>>Tất cả</option>
+            <option value="" <?= (($filters['khuvuc'] ?? '') == 'tatca') ? 'selected' : ''?>>Tất cả</option>
             <?php
-            $lines = file("../../storage/documents/tinhthanh.txt", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            $lines = file("../../../storage/documents/tinhthanh.txt", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
             foreach ($lines as $line):
                 $selected = (($filters['khuvuc'] ?? '') == $line) ? 'selected' : '';
                 echo "<option value=\"$line\" $selected>$line</option>";
@@ -112,21 +112,21 @@
 
         <label class="block mb-2 text-sm">Tình trạng</label>
         <select id="trangthai-desktop" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
-            <option value="" <?= (($filters['trangthai'] ?? '') == 'Tất cả') ? 'selected' : ''?>>Tất cả</option>
-            <option value="Còn bán" <?= (($filters['trangthai'] ?? '') == 'Còn bán') ? 'selected' : ''?>>Còn bán</option>
-            <option value="Đã bán" <?= (($filters['trangthai'] ?? '') == 'Đã bán') ? 'selected' : ''?>>Đã bán</option>
+            <option value="" <?= (($filters['trangthai'] ?? '') == 'tatca') ? 'selected' : ''?>>Tất cả</option>
+            <option value="conban" <?= (($filters['trangthai'] ?? '') == 'conban') ? 'selected' : ''?>>Còn bán</option>
+            <option value="daban" <?= (($filters['trangthai'] ?? '') == 'daban') ? 'selected' : ''?>>Đã bán</option>
         </select>
 
         <label class="block mb-2 text-sm">Giá (VNĐ)</label>
         <div class="flex gap-2 mb-4">
-            <input id="giatu-desktop" type="number" placeholder="Từ" class="w-1/2 border rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-400">
-            <input id="giaden-desktop" type="number" placeholder="Đến" class="w-1/2 border rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-400">
+            <input id="giatu-desktop" value="<?= ($filters['giatu'] ?? '') ?>" type="number" placeholder="Từ" class="w-1/2 border rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-400">
+            <input id="giaden-desktop" value="<?= ($filters['giaden'] ?? '') ?>" type="number" placeholder="Đến" class="w-1/2 border rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-400">
         </div>
 
         <label class="block mb-2 text-sm">Diện tích (m²)</label>
         <div class="flex gap-2 mb-4">
-            <input id="dientu-desktop" type="number" placeholder="Từ" class="w-1/2 border rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-400">
-            <input id="dienden-desktop" type="number" placeholder="Đến" class="w-1/2 border rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-400">
+            <input id="dientu-desktop" value="<?= ($filters['dientu'] ?? '') ?>" type="number" placeholder="Từ" class="w-1/2 border rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-400">
+            <input id="dienden-desktop" value="<?= ($filters['dienden'] ?? '') ?>" type="number" placeholder="Đến" class="w-1/2 border rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-400">
         </div>
 
         <label class="block mb-2 text-sm">Đánh giá</label>
@@ -152,7 +152,7 @@
         <div class="bg-white w-64 h-full p-4 shadow-lg overflow-y-auto" @click.away="openFilter = false">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="flex items-center text-lg font-semibold">
-                    <img src="../../public/assets/anhht/0/filter.gif" alt="Quản lý sản phẩm" style="width: 40px; height: 40px; margin-right: 10px;">
+                    <img src="../../../public/assets/anhht/0/filter.gif" alt="Quản lý sản phẩm" style="width: 40px; height: 40px; margin-right: 10px;">
                     Bộ lọc
                 </h2>
                 <button @click="openFilter=false" class="text-gray-600 hover:text-gray-800"><i class="fas fa-times"></i></button>
@@ -160,18 +160,18 @@
         
             <label class="block mb-2 text-sm">Loại BĐS</label>
             <select id="loai-mobile" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
-                <option value="" <?= (($filters['loai'] ?? '') == 'Tất cả') ? 'selected' : ''?>>Tất cả</option>
-                <option value="Căn hộ" <?= (($filters['loai'] ?? '') == 'Căn hộ') ? 'selected' : ''?>>Căn hộ</option>
-                <option value="Nhà phố" <?= (($filters['loai'] ?? '') == 'Nhà phố') ? 'selected' : ''?>>Nhà phố</option>
-                <option value="Đất nền" <?= (($filters['loai'] ?? '') == 'Đất nền') ? 'selected' : ''?>>Đất nền</option>
-                <option value="Biệt thự" <?= (($filters['loai'] ?? '') == 'Biệt thự') ? 'selected' : ''?>>Biệt thự</option>
+                <option value="" <?= (($filters['loai'] ?? '') == 'tatca') ? 'selected' : ''?>>Tất cả</option>
+                <option value="canho" <?= (($filters['loai'] ?? '') == 'canho') ? 'selected' : ''?>>Căn hộ</option>
+                <option value="nhapho" <?= (($filters['loai'] ?? '') == 'nhapho') ? 'selected' : ''?>>Nhà phố</option>
+                <option value="datnen" <?= (($filters['loai'] ?? '') == 'datnen') ? 'selected' : ''?>>Đất nền</option>
+                <option value="bietthu" <?= (($filters['loai'] ?? '') == 'bietthu') ? 'selected' : ''?>>Biệt thự</option>
             </select>
 
             <label class="block mb-2 text-sm">Khu vực</label>
             <select id="khuvuc-mobile" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
                 <option value="" <?= (($filters['khuvuc'] ?? '') == 'Tất cả') ? 'selected' : ''?>>Tất cả</option>
                 <?php
-                $lines = file("../../storage/documents/tinhthanh.txt", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+                $lines = file("../../../storage/documents/tinhthanh.txt", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
                 foreach ($lines as $line):
                     $selected = (($filters['khuvuc'] ?? '') == $line) ? 'selected' : '';
                     echo "<option value=\"$line\" $selected>$line</option>";
@@ -182,20 +182,20 @@
             <label class="block mb-2 text-sm">Tình trạng</label>
             <select id="trangthai-mobile" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
                 <option value="" <?= (($filters['trangthai'] ?? '') == 'Tất cả') ? 'selected' : ''?>>Tất cả</option>
-                <option value="Còn bán" <?= (($filters['trangthai'] ?? '') == 'Còn bán') ? 'selected' : ''?>>Còn bán</option>
-                <option value="Đã bán" <?= (($filters['trangthai'] ?? '') == 'Đã bán') ? 'selected' : ''?>>Đã bán</option>
+                <option value="conban" <?= (($filters['trangthai'] ?? '') == 'Còn bán') ? 'selected' : ''?>>Còn bán</option>
+                <option value="daban" <?= (($filters['trangthai'] ?? '') == 'Đã bán') ? 'selected' : ''?>>Đã bán</option>
             </select>
 
             <label class="block mb-2 text-sm">Giá (VNĐ)</label>
             <div class="flex gap-2 mb-4">
-                <input id="giatu-mobile" type="number" placeholder="Từ" class="w-1/2 border rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-400">
-                <input id="giaden-mobile" type="number" placeholder="Đến" class="w-1/2 border rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-400">
+                <input id="giatu-mobile" value="<?= ($filters['giatu'] ?? '') ?>" type="number" placeholder="Từ" class="w-1/2 border rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-400">
+                <input id="giaden-mobile" value="<?= ($filters['giaden'] ?? '') ?>" type="number" placeholder="Đến" class="w-1/2 border rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-400">
             </div>
 
             <label class="block mb-2 text-sm">Diện tích (m²)</label>
             <div class="flex gap-2 mb-4">
-                <input id="dientu-mobile" type="number" placeholder="Từ" class="w-1/2 border rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-400">
-                <input id="dienden-mobile" type="number" placeholder="Đến" class="w-1/2 border rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-400">
+                <input id="dientu-mobile" value="<?= ($filters['dientu'] ?? '') ?>" type="number" placeholder="Từ" class="w-1/2 border rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-400">
+                <input id="dienden-mobile" value="<?= ($filters['dienden'] ?? '') ?>" type="number" placeholder="Đến" class="w-1/2 border rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-400">
             </div>
 
             <label class="block mb-2 text-sm">Đánh giá</label>
@@ -241,8 +241,25 @@
                             <p class="text-red-600 font-bold mt-2"><?= number_format($p['gia'], 0, ',', '.') ?> đ</p>
                             <p class="mt-1 text-xs text-gray-600">Diện tích: <?= $p['dien_tich'] ?> m²</p>
                             <p class="mt-1 text-xs text-gray-600"><?= $p['dia_chi'] ?></p>
-                            <p class="mt-1 text-xs text-gray-600"><?= $p['loai'] ?> - <?= $p['khu_vuc'] ?></p>
-                            <p class="mt-1 text-xs text-gray-600 font-semibold">Trạng thái: <?= $p['trang_thai'] ?></p>
+                            <p class="mt-1 text-xs text-gray-600">
+                                <?php
+                                    $loai = [
+                                        'ban' => 'Bán',
+                                        'thue' => 'Thuê',
+                                        'duan' => 'Dự án'
+                                    ];
+                                    echo $loai[$p['loai']] ?? 'Chưa cập nhật';
+                                ?> - <?= $p['khu_vuc'] ?>
+                            </p>
+                            <?php
+                                $trangThai = [
+                                    'choduyet' => 'Chờ duyệt',
+                                    'dangban'  => 'Đang bán',
+                                    'daban'    => 'Đã bán',
+                                    'dathue'   => 'Đã thuê'
+                                ];
+                            ?>
+                            <p class="mt-1 text-xs text-gray-600 font-semibold">Trạng thái: <?= $trangThai[$p['trang_thai']]?></p>
                             <p class="mt-1 text-[10px] text-gray-400">Ngày đăng: <?= date("d/m/Y", strtotime($p['ngay_dang'])) ?></p>
                             <div class="flex items-center gap-1 text-yellow-400 mt-1">
                                 <?php for ($i = 1; $i <= 5; $i++): ?>
@@ -252,10 +269,10 @@
                                         <i class="far fa-star"></i>
                                     <?php endif; ?>
                                 <?php endfor; ?>
-                                <span class="text-gray-500 text-xs ml-1">(<?= $p['rating'] ?>/5)</span>
+                                <span class="text-gray-500 text-xs ml-1">(<?= $p['rating'] ?? 0 ?>/5)</span>
                             </div>
                             <div class="flex justify-between items-center mt-auto pt-4">
-                                <a href="#" class="text-blue-600 hover:text-blue-800 text-sm"><i class="fas fa-edit"></i> Sửa </a>
+                                <a href="#" class="text-blue-600 hover:text-blue-800 text-sm"><i class="fas fa-edit"></i> Chi tiết</a>
                                 <a href="#" class="text-red-600 hover:text-red-800 text-sm"><i class="fas fa-trash-alt"></i> Xóa </a>
                             </div>
                         </div>
@@ -283,7 +300,25 @@
                                 <p class="text-red-600 font-bold mt-2"><?= number_format($p['gia'], 0, ',', '.') ?> đ</p>
                                 <p class="mt-1 text-xs text-gray-600">Diện tích: <?= $p['dien_tich'] ?> m²</p>
                                 <p class="mt-1 text-xs text-gray-600"><?= $p['dia_chi'] ?></p>
-                                <p class="mt-1 text-xs text-gray-600"><?= $p['loai'] ?> - <?= $p['khu_vuc'] ?></p>
+                                <p class="mt-1 text-xs text-gray-600">
+                                    <?php
+                                        $loai = [
+                                            'ban' => 'Bán',
+                                            'thue' => 'Thuê',
+                                            'duan' => 'Dự án'
+                                        ];
+                                        echo $loai[$p['loai']] ?? 'Chưa cập nhật';
+                                    ?> - <?= $p['khu_vuc'] ?>
+                                </p>
+                                <?php
+                                    $trangThai = [
+                                        'choduyet' => 'Chờ duyệt',
+                                        'dangban'  => 'Đang bán',
+                                        'daban'    => 'Đã bán',
+                                        'dathue'   => 'Đã thuê'
+                                    ];
+                                ?>
+                                <p class="mt-1 text-xs text-gray-600 font-semibold">Trạng thái: <?= $trangThai[$p['trang_thai']]?></p>
                                 <p class="mt-1 text-[10px] text-gray-400">Ngày đăng: <?= date("d/m/Y", strtotime($p['ngay_dang'])) ?></p>
                                 <div class="flex items-center gap-1 text-yellow-400 mt-1">
                                     <?php for ($i = 1; $i <= 5; $i++): ?>
@@ -293,10 +328,10 @@
                                             <i class="far fa-star"></i>
                                         <?php endif; ?>
                                     <?php endfor; ?>
-                                    <span class="text-gray-500 text-xs ml-1">(<?= $p['rating'] ?>/5)</span>
+                                    <span class="text-gray-500 text-xs ml-1">(<?= $p['rating'] ?? 0 ?>/5)</span>
                                 </div>
                                 <div class="flex justify-between items-center mt-auto pt-4">
-                                    <a href="#" class="text-blue-600 hover:text-blue-800 text-sm"><i class="fas fa-edit"></i> Sửa </a>
+                                    <a href="#" class="text-blue-600 hover:text-blue-800 text-sm"><i class="fas fa-edit"></i> Chi tiết</a>
                                     <a href="#" class="text-red-600 hover:text-red-800 text-sm"><i class="fas fa-trash-alt"></i> Xóa </a>
                                 </div>
                             </div>
@@ -312,7 +347,25 @@
                             <p class="text-red-600 font-bold mt-2"><?= number_format($m['gia'], 0, ',', '.') ?> đ</p>
                             <p class="mt-1 text-xs text-gray-600">Diện tích: <?= $m['dien_tich'] ?> m²</p>
                             <p class="mt-1 text-xs text-gray-600"><?= $m['dia_chi'] ?></p>
-                            <p class="mt-1 text-xs text-gray-600"><?= $m['loai'] ?> - <?= $m['khu_vuc'] ?></p>
+                            <p class="mt-1 text-xs text-gray-600">
+                                <?php
+                                    $loai = [
+                                        'ban' => 'Bán',
+                                        'thue' => 'Thuê',
+                                        'duan' => 'Dự án'
+                                    ];
+                                    echo $loai[$m['loai']] ?? 'Chưa cập nhật';
+                                ?> - <?= $m['khu_vuc'] ?>
+                            </p>
+                            <?php
+                                $trangThai = [
+                                    'choduyet' => 'Chờ duyệt',
+                                    'dangban'  => 'Đang bán',
+                                    'daban'    => 'Đã bán',
+                                    'dathue'   => 'Đã thuê'
+                                ];
+                            ?>
+                            <p class="mt-1 text-xs text-gray-600 font-semibold">Trạng thái: <?= $trangThai[$p['trang_thai']]?></p>
                             <p class="mt-1 text-[10px] text-gray-400">Ngày đăng: <?= date("d/m/Y", strtotime($m['ngay_dang'])) ?></p>
                             <div class="flex items-center gap-1 text-yellow-400 mt-1">
                                 <?php for ($i = 1; $i <= 5; $i++): ?>
@@ -322,10 +375,10 @@
                                         <i class="far fa-star"></i>
                                     <?php endif; ?>
                                 <?php endfor; ?>
-                                <span class="text-gray-500 text-xs ml-1">(<?= $m['rating'] ?>/5)</span>
+                                <span class="text-gray-500 text-xs ml-1">(<?= $m['rating'] ?? 0 ?>/5)</span>
                             </div>
                             <div class="flex justify-between items-center mt-auto pt-4">
-                                <a href="#" class="text-blue-600 hover:text-blue-800 text-sm"><i class="fas fa-edit"></i> Sửa </a>
+                                <a href="#" class="text-blue-600 hover:text-blue-800 text-sm"><i class="fas fa-edit"></i> Chi tiết</a>
                                 <a href="#" class="text-red-600 hover:text-red-800 text-sm"><i class="fas fa-trash-alt"></i> Xóa </a>
                             </div>
                         </div>

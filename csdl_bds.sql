@@ -251,26 +251,36 @@ CREATE TABLE IF NOT EXISTS video (
 -- Lưu ý: id_khach_hang cho phép NULL nếu khách hàng bị xóa nhưng đánh giá muốn giữ.
 -- ===========================
 CREATE TABLE IF NOT EXISTS danh_gia_bds (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     id_khach_hang UUID,
     id_bds UUID NOT NULL,
     diem INT CHECK (diem >= 1 AND diem <= 5),
     binh_luan TEXT,
+	trang_thai VARCHAR(10) DEFAULT 'hien',
     ngay_dg TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_dg_kh FOREIGN KEY (id_khach_hang) REFERENCES khach_hang(id) ON DELETE SET NULL,
+	CONSTRAINT chk_dg_bds_tt CHECK (trang_thai IN ('hien','an')),
+    CONSTRAINT fk_dg_kh FOREIGN KEY (id_khach_hang) REFERENCES khach_hang(id_nguoi_dung) ON DELETE SET NULL,
     CONSTRAINT fk_dg_bds FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE CASCADE
 );
+
+INSERT INTO danh_gia_bds (id_khach_hang, id_bds, diem, binh_luan)
+VALUES
+('d1bea336-e8d7-4aeb-b3d3-0f16de994702', '7ed814f1-1119-4704-b8ed-05f8964204aa', 5, 'Bất động sản đẹp, vị trí thuận lợi.');
+
+select * from khach_hang
+select * from danh_gia_bds
+select * from bat_dong_san
 
 -- ===========================
 -- 8. Bảng hinh_anh_danh_gia_bds (ảnh kèm đánh giá)
 -- Phụ trách: Đặng
 -- ===========================
 CREATE TABLE IF NOT EXISTS hinh_anh_danh_gia_bds (
-    id SERIAL PRIMARY KEY,
-    id_danh_gia_bds INT NOT NULL,
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id_dg_bds UUID NOT NULL,
     url VARCHAR(300),
     mo_ta VARCHAR(200),
-    CONSTRAINT fk_hinh_dg FOREIGN KEY (id_danh_gia_bds) REFERENCES danh_gia_bds(id) ON DELETE CASCADE
+    CONSTRAINT fk_hinh_dg FOREIGN KEY (id_dg_bds) REFERENCES danh_gia_bds(id) ON DELETE CASCADE
 );
 
 -- ===========================
@@ -278,11 +288,11 @@ CREATE TABLE IF NOT EXISTS hinh_anh_danh_gia_bds (
 -- Phụ trách: Đặng
 -- ===========================
 CREATE TABLE IF NOT EXISTS video_danh_gia_bds (
-    id SERIAL PRIMARY KEY,
-    id_danh_gia_bds INT NOT NULL,
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id_dg_bds UUID NOT NULL,
     url VARCHAR(300),
     mo_ta VARCHAR(200),
-    CONSTRAINT fk_video_dg FOREIGN KEY (id_danh_gia_bds) REFERENCES danh_gia_bds(id) ON DELETE CASCADE
+    CONSTRAINT fk_video_dg FOREIGN KEY (id_dg_bds) REFERENCES danh_gia_bds(id) ON DELETE CASCADE
 );
 
 -- ===========================

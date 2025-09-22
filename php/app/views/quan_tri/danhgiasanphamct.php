@@ -1,10 +1,10 @@
 <?php
     // Dữ liệu demo sản phẩm với nhiều ảnh
-    require_once "../../config/database.php";
+    require_once "../../../config/database.php";
     $pdo = ketnoicsdl();
 
     // Lấy id từ URL
-    $id_bds = isset($_GET['id']) ? intval($_GET['id']) : 0;
+    $id = isset($_GET['id']) ? $_GET['id'] : null;
 
     $sql = "SELECT 
             bds.id,
@@ -21,10 +21,10 @@
             mg.ho_ten
         FROM bat_dong_san bds
         LEFT JOIN moi_gioi mg ON bds.id_moi_gioi = mg.id_nguoi_dung
-        WHERE bds.id = :id_bds";
+        WHERE bds.id = :id";
 
     $stmt = $pdo->prepare($sql);
-    $stmt->bindValue(':id_bds', $id_bds, PDO::PARAM_INT); // nếu id là số thì dùng PARAM_INT
+    $stmt->bindValue(':id', $id, PDO::PARAM_STR); 
     $stmt->execute();
 
     $sanpham = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -34,9 +34,9 @@
         exit;
     }
 
-    $sql = "SELECT COUNT(*) as dem FROM danh_gia_bds WHERE id_bds = :id_bds";
+    $sql = "SELECT COUNT(*) as dem FROM danh_gia_bds WHERE id_bds = :id";
     $stmt = $pdo->prepare($sql);
-    $stmt->bindValue(':id_bds', $id_bds, PDO::PARAM_INT);
+    $stmt->bindValue(':id', $id, PDO::PARAM_STR);
     $stmt->execute();
 
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -63,16 +63,16 @@
             ARRAY_AGG(DISTINCT ha.url) FILTER (WHERE ha.url IS NOT NULL) AS ds_hinh_anh,
             ARRAY_AGG(DISTINCT vd.url) FILTER (WHERE vd.url IS NOT NULL) AS ds_video
         FROM danh_gia_bds dg
-        LEFT JOIN hinh_anh_danh_gia_bds ha ON dg.id = ha.id_danh_gia_bds
-        LEFT JOIN video_danh_gia_bds vd ON dg.id = vd.id_danh_gia_bds
+        LEFT JOIN hinh_anh_danh_gia_bds ha ON dg.id = ha.id_dg_bds
+        LEFT JOIN video_danh_gia_bds vd ON dg.id = vd.id_dg_bds
         LEFT JOIN khach_hang kh ON kh.id_nguoi_dung = dg.id_khach_hang
-        WHERE dg.id_bds = :id_bds
+        WHERE dg.id_bds = :id
         GROUP BY dg.id, dg.id_bds, dg.id_khach_hang, dg.diem, dg.binh_luan, dg.ngay_dg, kh.ho_ten
         ORDER BY dg.ngay_dg DESC
     ";
 
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([':id_bds' => $id_bds]);
+    $stmt->execute([':id' => $id]);
     $danhgia = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
 ?>
@@ -98,7 +98,7 @@
 
 <header class="bg-white shadow p-4 flex items-center justify-between">
     <div class="flex items-center">
-        <img src="../../public/assets/anhht/0/danhgia.gif" class="w-10 h-10 mr-3">
+        <img src="../../../public/assets/anhht/0/danhgia.gif" class="w-10 h-10 mr-3">
         <h1 class="flex items-center text-2xl font-bold text-gray-600">Chi tiết đánh giá</h1>
     </div>
     <a href="trangchu.php?page=danhgiasanpham" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition text-sm md:text-base">
@@ -141,7 +141,7 @@
     <!-- Danh sách đánh giá -->
 <div class="space-y-4">
     <div class="flex items-center mb-4">
-        <img src="../../public/assets/anhht/0/danhgia01.gif" alt="Đánh giá" class="w-10 h-10 mr-2">
+        <img src="../../../public/assets/anhht/0/danhgia01.gif" alt="Đánh giá" class="w-10 h-10 mr-2">
         <h3 class="text-lg font-semibold">Đánh giá của khách hàng</h3>
     </div>
 

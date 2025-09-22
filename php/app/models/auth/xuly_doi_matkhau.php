@@ -1,24 +1,23 @@
 <?php
 header('Content-Type: application/json');
-require_once '../../config.php'; // file kết nối database
+require_once "../../../config/database.php";
+$pdo = ketnoicsdl();
 
 // Nhận dữ liệu JSON từ client
 $rawData = file_get_contents("php://input");
 $data = json_decode($rawData, true);
 
-$tendangnhap = trim($data['tendangnhap'] ?? '');
+$ten_dang_nhap = trim($data['tendangnhap'] ?? '');
 $matkhaucu = trim($data['matkhaucu'] ?? '');
 $matkhaumoi = trim($data['matkhaumoi'] ?? '');
 
 $response = ['success' => false, 'message' => ''];
 
 try {
-    $db = new Database();
-    $conn = $db->connect();
 
     // Kiểm tra tài khoản tồn tại
-    $stmt = $conn->prepare("SELECT * FROM taikhoan WHERE tendangnhap = :tendangnhap LIMIT 1");
-    $stmt->execute(['tendangnhap' => $tendangnhap]);
+    $stmt = $dpo->prepare("SELECT * FROM nguoi_dung WHERE ten_dang_nhap = :ten_dang_nhap LIMIT 1");
+    $stmt->execute([':ten_dang_nhap' => $ten_dang_nhap]);
     $tk = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$tk) {
@@ -27,7 +26,7 @@ try {
         exit;
     }
 
-    $command = "python ../../xuly_matkhau.py " . escapeshellarg($matkhaucu) . " " . escapeshellarg($tk['matkhau']);
+    $command = "/opt/venv/bin/python ../../helpers/xuly_matkhau.py " . escapeshellarg($matkhaucu) . " " . escapeshellarg($tk['mat_khau']);
     $result = shell_exec($command);
 
     if (trim($result) !== 'true') {
@@ -36,19 +35,19 @@ try {
         exit;
     }
 
-    if ($matkhaucu == $tk['matkhau']) {
+    if ($matkhaucu == $tk['mat_khau']) {
         $response['message'] = 'Mật khẩu mới phải khác mật khẩu cũ!';
         echo json_encode($response);
         exit;
     }    
 
-    $command = "python ../../xuly_matkhau.py " . escapeshellarg($matkhaumoi);
+    $command = "/opt/venv/bin/python ../../helpers/xuly_matkhau.py " . escapeshellarg($matkhaumoi);
     $result = shell_exec($command);
     $mknew = trim($result);
 
     // Cập nhật mật khẩu mới vào database
-    $stmt = $conn->prepare("UPDATE taikhoan SET matkhau = :matkhaumoi WHERE tendangnhap = :tendangnhap");
-    $stmt->execute(['matkhaumoi' => $mknew, 'tendangnhap' => $tk['tendangnhap']]);
+    $stmt = $conn->prepare("UPDATE nguoi_dung SET mat_khau = :mknew WHERE ten_dang_nhap = :ten_dang_nhap");
+    $stmt->execute(['mknew' => $mknew, 'ten_dang_nhap' => $tk['ten_dang_nhap']]);
 
     $response['success'] = true;
     $response['message'] = 'Đổi mật khẩu thành công!';

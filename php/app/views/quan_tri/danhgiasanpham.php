@@ -1,39 +1,23 @@
 <?php
-    // Dữ liệu demo
-    $danhgiasanpham = [
-        [
-            'id' => 1,
-            'ten_san_pham' => 'Căn hộ Sunshine',
-            'loai' => 'Căn hộ',
-            'trang_thai' => 'Đã bán',
-            'so_luong_danh_gia' => 12,
-            'so_luong_binh_luan' => 5
-        ],
-        [
-            'id' => 2,
-            'ten_san_pham' => 'Biệt thự Vinhomes',
-            'loai' => 'Biệt thự',
-            'trang_thai' => 'Đã bán',
-            'so_luong_danh_gia' => 8,
-            'so_luong_binh_luan' => 3
-        ],
-        [
-            'id' => 3,
-            'ten_san_pham' => 'Nhà phố Cityland',
-            'loai' => 'Nhà phố',
-            'trang_thai' => 'Đã bán',
-            'so_luong_danh_gia' => 5,
-            'so_luong_binh_luan' => 2
-        ],
-        [
-            'id' => 4,
-            'ten_san_pham' => 'Đất nền Phú Mỹ',
-            'loai' => 'Đất nền',
-            'trang_thai' => 'Đã bán',
-            'so_luong_danh_gia' => 10,
-            'so_luong_binh_luan' => 4
-        ]
-    ];
+    // Dữ liệu demo sản phẩm với nhiều ảnh
+    require_once "../../../config/database.php";
+    $pdo = ketnoicsdl();
+
+    $sql = "
+        SELECT 
+            bds.id,
+            bds.loai,
+            bds.tieu_de AS ten_san_pham,
+            bds.trang_thai,
+            COUNT(dg.id) AS so_luong_danh_gia,
+            COUNT(dg.binh_luan) FILTER (WHERE dg.binh_luan IS NOT NULL AND dg.binh_luan <> '') AS so_luong_binh_luan
+        FROM bat_dong_san bds
+        LEFT JOIN danh_gia_bds dg ON bds.id = dg.id_bds
+        GROUP BY bds.id, bds.loai, bds.tieu_de, bds.trang_thai
+    ";
+
+    $stmt = $pdo->query($sql);
+    $danhgiasanpham = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -47,7 +31,7 @@
 
 <div class="bg-white shadow rounded-lg p-6">
     <h2 class="flex items-center text-2xl font-bold text-gray-600">
-        <img src="../../public/assets/anhht/0/list.gif" class="w-10 h-10 mr-3">
+        <img src="../../../../public/assets/anhht/0/list.gif" class="w-10 h-10 mr-3">
         Danh sách đánh giá
     </h2>
     
