@@ -1,15 +1,17 @@
-<div>
-    <h2 class="text-3xl font-bold mb-6 text-blue-600">Khách hàng quan tâm</h2>
+<div class="w-full px-2 sm:px-4">
+    <h2 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-blue-600 text-center sm:text-left">
+        Khách hàng quan tâm
+    </h2>
 
-    <div class="overflow-x-auto rounded shadow bg-white">
-        <table class="min-w-full table-auto">
+    <div class="overflow-x-auto rounded-lg shadow bg-white w-full">
+        <table class="w-full table-auto text-xs sm:text-sm md:text-base border-collapse">
             <thead class="bg-blue-100 text-left text-gray-700">
                 <tr>
-                    <th class="py-3 px-6 font-semibold">Tên khách hàng</th>
-                    <th class="py-3 px-6 font-semibold">Số điện thoại</th>
-                    <th class="py-3 px-6 font-semibold">Email</th>
-                    <th class="py-3 px-6 font-semibold">Quan tâm đến</th>
-                    <th class="py-3 px-6 font-semibold">Ngày quan tâm</th>
+                    <th class="py-2 px-2 sm:px-4 font-semibold">Tên khách hàng</th>
+                    <th class="py-2 px-2 sm:px-4 font-semibold">Số điện thoại</th>
+                    <th class="py-2 px-2 sm:px-4 font-semibold">Email</th>
+                    <th class="py-2 px-2 sm:px-4 font-semibold">Quan tâm đến</th>
+                    <th class="py-2 px-2 sm:px-4 font-semibold">Ngày quan tâm</th>
                 </tr>
             </thead>
             <tbody>
@@ -22,11 +24,11 @@
 
                 foreach ($khach_hang as $kh) {
                     echo "<tr class='border-t hover:bg-gray-50'>
-                            <td class='py-3 px-6'>{$kh['name']}</td>
-                            <td class='py-3 px-6'>{$kh['phone']}</td>
-                            <td class='py-3 px-6'>{$kh['email']}</td>
-                            <td class='py-3 px-6'>{$kh['interest']}</td>
-                            <td class='py-3 px-6'>{$kh['date']}</td>
+                            <td class='py-2 px-2 sm:px-4 break-words'>{$kh['name']}</td>
+                            <td class='py-2 px-2 sm:px-4 break-words'>{$kh['phone']}</td>
+                            <td class='py-2 px-2 sm:px-4 break-words'>{$kh['email']}</td>
+                            <td class='py-2 px-2 sm:px-4 break-words'>{$kh['interest']}</td>
+                            <td class='py-2 px-2 sm:px-4 break-words'>{$kh['date']}</td>
                           </tr>";
                 }
                 ?>
