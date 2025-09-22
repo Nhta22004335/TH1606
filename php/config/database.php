@@ -1,5 +1,5 @@
 <?php
-    session_start();
+    
     function ketnoicsdl() {
         $host = "host.docker.internal"; 
         $port = "5432";

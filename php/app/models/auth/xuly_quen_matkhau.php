@@ -1,20 +1,18 @@
 <?php
 date_default_timezone_set('Asia/Ho_Chi_Minh');
-require_once '../../config.php'; 
+require_once "../../../config/database.php";
+$pdo = ketnoicsdl();
 
-$tendangnhap = trim($_GET['tendangnhap'] ?? '');
+require_once '../../../config/email.php';
+$mailer = createmailer();
+
+$ten_dang_nhap = trim($_GET['tendangnhap'] ?? '');
 $email = trim($_GET['email'] ?? '');
 
 try {
-    $db = new Database();
-    $conn = $db->connect();
-
-    $em = new Email();
-    $mailer = $em->createMailer();
-
     // Kiểm tra tài khoản tồn tại
-    $stmt = $conn->prepare("SELECT * FROM taikhoan WHERE tendangnhap = :tendangnhap");
-    $stmt->execute(['tendangnhap' => $tendangnhap]);
+    $stmt = $pdo->prepare("SELECT * FROM nguoi_dung WHERE ten_dang_nhap = :ten_dang_nhap");
+    $stmt->execute(['ten_dang_nhap' => $ten_dang_nhap]);
     $tk = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$tk) {
@@ -47,36 +45,36 @@ try {
     }
 
     // Cập nhật mật khẩu tạm thời vào database
-    $expire_time = date('Y-m-d H:i:s', strtotime('+5 minutes'));
-    $otp = generateOTP();
-    $tokenotp = generateToken();
-    $sql = "INSERT INTO otp_requests (email, otp, tokenotp, expire_time) 
-            VALUES (:email, :otp, :tokenotp, :expire_time)";
-    $stmt = $conn->prepare($sql);
+    $het_han = date('Y-m-d H:i:s', strtotime('+5 minutes'));
+    $otp_code = generateOTP();
+    $token_code = generateToken();
+    $sql = "INSERT INTO yeu_cau_otp (email, otp_code, token_code, het_han) 
+            VALUES (:email, :otp_code, :token_code, :het_han)";
+    $stmt = $pdo->prepare($sql);
     $stmt->execute([
         ':email'       => $email,
-        ':otp'         => $otp,
-        ':tokenotp'    => $tokenotp,
-        ':expire_time' => $expire_time
+        ':otp_code'         => $otp_code,
+        ':token_code'    => $token_code,
+        ':het_han' => $het_han
     ]);
 
     /**
      * Gửi OTP qua email kèm link xác nhận
      */
-    function sendOTPEmail($mailer, $email, $tendangnhap, $otp, $tokenotp, $expire_time) {
+    function sendOTPEmail($mailer, $email, $ten_dang_nhap, $otp_code, $token_code, $het_han) {
         $subject = "Mã xác thực OTP của bạn";
 
-        $verify_link = "http://localhost/4335/auth/php/xacnhan_otp.php?tokenotp=" . urlencode($tokenotp);
+        $verify_link = "http://localhost:8080/app/models/auth/xacnhan_otp.php?tokenotp=" . urlencode($token_code);
 
-        $body = "Xin chào $tendangnhap,\n\n"
-            . "Mã OTP của bạn là: $otp\n"
-            . "Mã có hiệu lực đến: $expire_time\n\n"
+        $body = "Xin chào $ten_dang_nhap,\n\n"
+            . "Mã OTP của bạn là: $otp_code\n"
+            . "Mã có hiệu lực đến: $het_han\n\n"
             . "Vui lòng bấm vào liên kết dưới đây để xác nhận OTP:\n$verify_link\n\n"
             . "Trân trọng.";
 
         try {
             $mailer->clearAddresses();
-            $mailer->addAddress($email, $tendangnhap);
+            $mailer->addAddress($email, $ten_dang_nhap);
             $mailer->Subject = $subject;
             $mailer->Body    = nl2br(htmlspecialchars($body));
             $mailer->AltBody = $body;
@@ -91,7 +89,7 @@ try {
         }
     }
     
-    $sendResult = sendOTPEmail($mailer, $email, $tendangnhap, $otp, $tokenotp, $expire_time);
+    $sendResult = sendOTPEmail($mailer, $email, $ten_dang_nhap, $otp_code, $token_code, $het_han);
 
     if ($sendResult) {
         echo "<script>alert('Mã OTP đã được gửi đến email của bạn. Vui lòng kiểm tra email để xác nhận.');</script>";

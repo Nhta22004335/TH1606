@@ -1,5 +1,5 @@
 <?php
-session_start();
+//session_start();
 require_once __DIR__ . '/database_mg.php'; // file kết nối PDO
 
 if (!isset($_SESSION['user_id'])) {

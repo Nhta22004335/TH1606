@@ -1,4 +1,4 @@
 <?php
-    header("Location: /app/views/trangchu.php");
+    header("Location: /app/views/quan_tri/trangchu.php");
     exit();
 ?>

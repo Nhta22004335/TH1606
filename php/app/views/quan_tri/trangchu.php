@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bất động sản</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="../../public/assets/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="../../../public/assets/fontawesome/css/all.min.css">
 </head>
 <body>
 
@@ -17,7 +17,7 @@
             <!-- Logo + slogan -->
             <div class="flex items-center justify-between w-full md:w-auto">
                 <div class="flex items-center space-x-3">
-                <img src="../../public/assets/anhht/0/logo-homedy.png" alt="Logo" class="h-10">
+                <img src="../../../public/assets/anhht/0/logo-homedy.png" alt="Logo" class="h-10">
                 <span class="text-xs sm:text-sm text-gray-500 italic">
                     Không gian sống lý tưởng cho bạn
                 </span>
@@ -43,7 +43,7 @@
                 </a>
 
                 <div class="flex items-center space-x-2 cursor-pointer">
-                    <img src="../../public/assets/anhht/0/avt.png" alt="Avatar" class="w-9 h-9 rounded-full border border-gray-300">
+                    <img src="../../../public/assets/anhht/0/avt.png" alt="Avatar" class="w-9 h-9 rounded-full border border-gray-300">
                     <span class="text-sm text-gray-700">Nguyễn Văn A</span>
                 </div>
 

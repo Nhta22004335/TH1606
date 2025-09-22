@@ -6,7 +6,7 @@
   <title>Cài đặt mật khẩu</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="min-h-screen flex items-center justify-center bg-gray-100">
+<body class="flex items-center justify-center min-h-screen p-4 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1505691723518-36a5ac3be353?auto=format&fit=crop&w=1350&q=80');">
 
 <div class="bg-white shadow-lg rounded-2xl w-11/12 max-w-md mx-auto px-5 py-5 sm:px-6 sm:py-6">
     <!-- Logo -->
@@ -87,7 +87,7 @@
             alert('Vui lòng nhập đầy đủ thông tin để khôi phục mật khẩu!');
             return;
         }
-        window.location.href = '../php/xuly_quen_matkhau.php?tendangnhap=' + tendangnhap + '&email=' + email;
+        window.location.href = '../../models/auth/xuly_quen_matkhau.php?tendangnhap=' + tendangnhap + '&email=' + email;
         return;
         }
 
@@ -104,7 +104,7 @@
         return;
         }
 
-        fetch('../php/xuly_doi_matkhau.php', {
+        fetch('../../models/auth/xuly_doi_matkhau.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({tendangnhap, matkhaucu, matkhaumoi, email})

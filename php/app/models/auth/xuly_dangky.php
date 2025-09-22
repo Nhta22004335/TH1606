@@ -1,12 +1,10 @@
 <?php
 date_default_timezone_set('Asia/Ho_Chi_Minh');
-require_once '../../config.php';
+require_once "../../../config/database.php";
+$pdo = ketnoicsdl();
 
-$em = new Email();
-$mailer = $em->createMailer();
-
-$db = new Database();
-$conn = $db->connect();
+require_once '../../../config/email.php';
+$mailer = createmailer();
 
 /**
  * Tạo mã OTP gồm chữ và số
@@ -36,14 +34,14 @@ function ckTaiKhoan($pdo, $email, $so_dt, $ten_dang_nhap) {
     $stmt->execute([':email' => $email, ':so_dt' => $so_dt, ':ten_dang_nhap' => $ten_dang_nhap]);
     $taikhoan = $stmt->fetchColumn();
     if ($taikhoan == 0) {
-        $sql = "SELECT COUNT(*) FROM otp_requests WHERE email = :email OR so_dt = :so_dt";
-        $stmt = $conn->prepare($sql);
+        $sql = "SELECT COUNT(*) FROM yeu_cau_otp WHERE email = :email OR so_dt = :so_dt";
+        $stmt = $pdo->prepare($sql);
         $stmt->execute([':email' => $email, ':so_dt' => $so_dt]);
-        $otp_requests = $stmt->fetchColumn();
-        if ($otp_requests > 0) {
+        $yeu_cau_otp = $stmt->fetchColumn();
+        if ($yeu_cau_otp > 0) {
             return ['success' => false, 'error' => 'Tài khoản này đã gửi yêu cầu!'];
         } else {
-            return ['success' => true];
+            return ['success' => true, 'tb' => 'OK!'];
         }
     } else {
         return ['success' => false, 'error' => 'Tài khoản đã tồn tại!'];
@@ -53,20 +51,21 @@ function ckTaiKhoan($pdo, $email, $so_dt, $ten_dang_nhap) {
 /**
  * Lưu OTP vào PostgreSQL
  */
-function saveOTPToDatabase($conn, $email, $sodienthoai, $otp, $tokenotp) {
+function saveOTPToDatabase($pdo, $email, $so_dt, $otp_code, $token_code) {
     try {
-        $expire_time = date('Y-m-d H:i:s', strtotime('+5 minutes'));
+        $het_han = date('Y-m-d H:i:s', strtotime('+5 minutes'));
 
-        $sql = "INSERT INTO otp_requests (email, sodienthoai, otp, tokenotp, expire_time) 
-                VALUES (:email, :sodienthoai, :otp, :tokenotp, :expire_time)";
-        $stmt = $conn->prepare($sql);
+        $sql = "INSERT INTO yeu_cau_otp (email, so_dt, otp_code, token_code, het_han) 
+                VALUES (:email, :so_dt, :otp_code, :token_code, :het_han)";
+        $stmt = $pdo->prepare($sql);
         $stmt->execute([
             ':email'       => $email,
-            ':sodienthoai' => $sodienthoai,
-            ':otp'         => $otp,
-            ':tokenotp'       => $tokenotp,
-            ':expire_time' => $expire_time
+            ':so_dt' => $so_dt,
+            ':otp_code'         => $otp_code,
+            ':token_code'       => $token_code,
+            ':het_han' => $het_han
         ]);
+
         return ['success' => true];
     } catch (Exception $e) {
         return ['success' => false, 'error' => 'Lỗi cơ sở dữ liệu!'];
@@ -76,40 +75,41 @@ function saveOTPToDatabase($conn, $email, $sodienthoai, $otp, $tokenotp) {
 /**
  * Lưu thông tin cơ bản vào PostgreSQL
  */
-function saveUserInfo($conn, $hoten, $tendangnhap, $email, $sodienthoai) {
+function saveUserInfo($pdo, $ho_ten, $ten_dang_nhap, $email, $so_dt) {
     try {
-        $conn->beginTransaction();
+        $pdo->beginTransaction();
 
-        $command = "python ../../xuly_matkhau.py " . escapeshellarg("Demo@123");
+        $command = "/opt/venv/bin/python ../../helpers/xuly_matkhau.py " . escapeshellarg("Demo@123");
         $result = shell_exec($command);
 
         // 1. Thêm vào bảng taikhoan và lấy id vừa thêm
-        $sql1 = "INSERT INTO taikhoan (tendangnhap, matkhau, email, sodienthoai, trangthai)
-                 VALUES (:tendangnhap, :matkhau, :email, :sodienthoai, 'chuakichhoat')
-                 RETURNING idtaikhoan";
-        $stmt1 = $conn->prepare($sql1);
-        $stmt1->execute([
-            ':tendangnhap' => $tendangnhap,
-            ':matkhau'     => trim($result), 
+        $sql = "INSERT INTO nguoi_dung (ten_dang_nhap, mat_khau, email, so_dt)
+                VALUES (:ten_dang_nhap, :mat_khau, :email, :so_dt)
+                RETURNING id";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            ':ten_dang_nhap' => $ten_dang_nhap,
+            ':mat_khau'     => trim($result), 
             ':email'       => $email,
-            ':sodienthoai' => $sodienthoai
+            ':so_dt' => $so_dt
         ]);
         
-        $idtaikhoan = $stmt1->fetchColumn();
+        $id = $stmt->fetchColumn();
 
-        // 2. Thêm vào bảng nguoidung
-        $sql2 = "INSERT INTO nguoidung (idtaikhoan, hoten, anhdaidien)
-                 VALUES (:idtaikhoan, :hoten, 'user.png')";
-        $stmt2 = $conn->prepare($sql2);
-        $stmt2->execute([
-            ':idtaikhoan' => $idtaikhoan,
-            ':hoten'      => $hoten
+        //2. Thêm vào bảng nguoidung
+        $sql_update = "UPDATE khach_hang 
+               SET ho_ten = :ho_ten 
+               WHERE id_nguoi_dung = :id";
+        $stmt = $pdo->prepare($sql_update);
+        $stmt->execute([
+            ':ho_ten' => $ho_ten,
+            ':id' => $id
         ]);
 
-        $conn->commit();
+        $pdo->commit();
         return ['success' => true];
     } catch (Exception $e) {
-        $conn->rollBack();
+        $pdo->rollBack();
         return ['success' => false, 'error' => 'Lỗi lưu thông tin người dùng!'];
     }
 }
@@ -117,20 +117,20 @@ function saveUserInfo($conn, $hoten, $tendangnhap, $email, $sodienthoai) {
 /**
  * Gửi OTP qua email kèm link xác nhận
  */
-function sendOTPEmail($mailer, $email, $tendangnhap, $otp, $tokenotp, $expire_time) {
+function sendOTPEmail($mailer, $email, $ten_dang_nhap, $otp_code, $token_code, $het_han) {
     $subject = "Mã xác thực OTP của bạn";
 
-    $verify_link = "http://localhost/4335/auth/php/xacnhan_otp.php?tokenotp=" . urlencode($tokenotp);
+    $verify_link = "http://localhost:8080/app/models/auth/xacnhan_otp.php?tokenotp=" . urlencode($token_code);
 
-    $body = "Xin chào $tendangnhap,\n\n"
-          . "Mã OTP của bạn là: $otp\n"
-          . "Mã có hiệu lực đến: $expire_time\n\n"
+    $body = "Xin chào $ten_dang_nhap,\n\n"
+          . "Mã OTP của bạn là: $otp_code\n"
+          . "Mã có hiệu lực đến: $het_han\n\n"
           . "Vui lòng bấm vào liên kết dưới đây để xác nhận OTP:\n$verify_link\n\n"
           . "Trân trọng.";
 
     try {
         $mailer->clearAddresses();
-        $mailer->addAddress($email, $tendangnhap);
+        $mailer->addAddress($email, $ten_dang_nhap);
         $mailer->Subject = $subject;
         $mailer->Body    = nl2br(htmlspecialchars($body));
         $mailer->AltBody = $body;
@@ -146,39 +146,38 @@ function sendOTPEmail($mailer, $email, $tendangnhap, $otp, $tokenotp, $expire_ti
 }
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $hoten       = trim($_POST['hoten'] ?? '');
-    $tendangnhap = trim($_POST['tendangnhap'] ?? '');
+    $ho_ten       = trim($_POST['hoten'] ?? '');
+    $ten_dang_nhap = trim($_POST['tendangnhap'] ?? '');
     $email       = trim($_POST['email'] ?? '');
-    $sodienthoai = trim($_POST['sodienthoai'] ?? '');
+    $so_dt = trim($_POST['sodienthoai'] ?? '');
 
-    $otp = generateOTP();
-    $tokenotp = generateToken();
-    $expire_time = date('Y-m-d H:i:s', strtotime('+5 minutes'));
+    $otp_code = generateOTP();
+    $token_code = generateToken();
+    $het_han = date('Y-m-d H:i:s', strtotime('+5 minutes'));
 
-    $result = ckTaiKhoan($conn, $email, $sodienthoai, $tendangnhap);
+    
+    $result = ckTaiKhoan($pdo, $email, $so_dt, $ten_dang_nhap);
     if (!$result['success']) {
         echo $result['error'];
         exit;
     }
 
-    $result2 = saveUserInfo($conn, $hoten, $tendangnhap, $email, $sodienthoai);
-    if (!$result2['success']) {
-        echo $result1['error'];
-        exit;
-    }
-
-    $result1 = saveOTPToDatabase($conn, $email, $sodienthoai, $otp, $tokenotp);
+    $result1 = saveUserInfo($pdo, $ho_ten, $ten_dang_nhap, $email, $so_dt);
     if (!$result1['success']) {
         echo $result1['error'];
         exit;
     }
 
-    $result3 = sendOTPEmail($mailer, $email, $tendangnhap, $otp, $tokenotp, $expire_time);
+    $result2 = saveOTPToDatabase($pdo, $email, $so_dt, $otp_code, $token_code);
+    if (!$result2['success']) {
+        echo $result2['error'];
+        exit;
+    }
+
+    $result3 = sendOTPEmail($mailer, $email, $ten_dang_nhap, $otp_code, $token_code, $het_han);
     if (!$result3['success']) {
         echo $result3['error'];
         exit;
     }
-
-    $db->closeConnection();
 }
 ?>

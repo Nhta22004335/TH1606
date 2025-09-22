@@ -30,6 +30,8 @@ CREATE TABLE IF NOT EXISTS nguoi_dung (
 );
 
 SELECT * FROM nguoi_dung
+SELECT * FROM khach_hang
+select * from yeu_cau_otp
 
 INSERT INTO nguoi_dung (ten_dang_nhap, mat_khau, email, so_dt, vai_tro, trang_thai, hoat_dong)
 VALUES
@@ -148,7 +150,18 @@ CREATE TABLE phien_dang_nhap (
     FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE
 );
 
-select * from phien_dang_nhap
+CREATE TABLE yeu_cau_otp (
+    id SERIAL PRIMARY KEY,
+    so_dt VARCHAR(20) NULL,
+    email VARCHAR(255) NULL,
+    otp_code VARCHAR(10) NOT NULL,
+    status VARCHAR(20) DEFAULT 'pending', -- pending, verified, expired
+    het_han TIMESTAMP NOT NULL,
+    bat_dau TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    cap_nhat TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
 -- ===========================
 -- 4. Bảng bat_dong_san (bất động sản)
 -- Mô tả: Môi giới sẽ tạo ra các sp bds, để đăng bán

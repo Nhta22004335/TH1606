@@ -1,5 +1,5 @@
 <?php
-    require_once "../../config/database.php";
+    require_once "../../../config/database.php";
     $pdo = ketnoicsdl();
 
     $page = $_GET['page'] ?? '';
@@ -80,7 +80,7 @@
 <title>Quản lý khách hàng</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/alpinejs" defer></script>
-<link rel="stylesheet" href="../../public/assets/fontawesome/css/all.min.css">
+<link rel="stylesheet" href="../../../public/assets/fontawesome/css/all.min.css">
 </head>
 <body>
 
@@ -88,15 +88,15 @@
     <!-- Bộ lọc Desktop -->
     <div class="hidden md:block w-64 bg-white shadow rounded-xl p-4 h-fit">
         <h2 class="flex items-center text-lg font-semibold mb-4">
-            <img src="../../public/assets/anhht/0/filter.gif" alt="Filter" class="w-10 h-10 mr-2">
+            <img src="../../../public/assets/anhht/0/filter.gif" alt="Filter" class="w-10 h-10 mr-2">
             Bộ lọc
         </h2>
 
         <label class="block mb-2 text-sm">Hoạt động</label>
         <select id="hoatdong-desktop" class="w-full border rounded-lg p-2 mb-4 outline-none focus:ring focus:border-blue-400">
             <option value="" <?= (($filters['hoatdong'] ?? '') == 'tatca') ? 'selected' : ''?>>Tất cả</option>
-            <option value="Online" <?= (($filters['hoatdong'] ?? '') == 'online') ? 'selected' : ''?>>Online</option>
-            <option value="Offline" <?= (($filters['hoatdong'] ?? '') == 'offline') ? 'selected' : ''?>>Offline</option>
+            <option value="online" <?= (($filters['hoatdong'] ?? '') == 'online') ? 'selected' : ''?>>Online</option>
+            <option value="offline" <?= (($filters['hoatdong'] ?? '') == 'offline') ? 'selected' : ''?>>Offline</option>
         </select>
 
         <label class="block mb-2 text-sm">Trạng thái</label>
@@ -126,7 +126,7 @@
         <div class="bg-white w-64 h-full p-4 shadow-lg overflow-y-auto" @click.away="openFilter=false">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="flex items-center text-lg font-semibold">
-                    <img src="../../public/assets/anhht/0/filter.gif" alt="Quản lý sản phẩm" style="width: 40px; height: 40px; margin-right: 10px;">
+                    <img src="../../../public/assets/anhht/0/filter.gif" alt="Quản lý sản phẩm" style="width: 40px; height: 40px; margin-right: 10px;">
                     Bộ lọc
                 </h2>
                 <button @click="openFilter=false" class="text-gray-600 hover:text-gray-800"><i class="fas fa-times"></i></button>
@@ -167,7 +167,7 @@
         <!-- Header + mobile filter -->
         <div class="flex justify-between items-center mb-6">
             <h1 class="flex items-center text-2xl font-bold text-gray-600">
-                <img src="../../public/assets/anhht/0/user.gif" alt="Users" style="width: 50px; height: 50px; margin-right: 10px;">
+                <img src="../../../public/assets/anhht/0/user.gif" alt="Users" style="width: 50px; height: 50px; margin-right: 10px;">
                 Quản lý Khách hàng
             </h1>
             <div class="flex gap-2">
@@ -183,7 +183,7 @@
                 <?php foreach($users as $u): ?>
                     <div class="bg-white shadow rounded-xl overflow-hidden hover:shadow-lg transition flex flex-col relative">
                         <div class="p-4 flex flex-col items-center">
-                            <img src="../../public/assets/anhht/0/<?= $u['avt'] ?>" class="w-20 h-20 rounded-full object-cover border-2 border-gray-200">
+                            <img src="../../../public/assets/anhht/0/<?= $u['avt'] ?>" class="w-20 h-20 rounded-full object-cover border-2 border-gray-200">
                             <h2 class="mt-2 font-semibold text-gray-800 text-center"><?= $u['ho_ten'] ?></h2>
                             <p class="text-gray-500 text-sm text-center"><?= $u['email'] ?></p>
                             <p class="text-gray-500 text-sm text-center"><?= $u['so_dt'] ?></p>
@@ -231,7 +231,7 @@
                     <?php if ($match): ?>
                         <div class="bg-white shadow rounded-xl overflow-hidden hover:shadow-lg transition flex flex-col relative">
                             <div class="p-4 flex flex-col items-center">
-                                <img src="../../public/assets/anhht/0/<?= $u['avt'] ?>" alt="<?= $u['ho_ten'] ?>" class="w-20 h-20 rounded-full object-cover border-2 border-gray-200">
+                                <img src="../../../public/assets/anhht/0/<?= $u['avt'] ?>" alt="<?= $u['ho_ten'] ?>" class="w-20 h-20 rounded-full object-cover border-2 border-gray-200">
                                 <h2 class="mt-2 font-semibold text-gray-800 text-center"><?= $u['ho_ten'] ?></h2>
                                 <p class="text-gray-500 text-sm text-center"><?= $u['email'] ?></p>
                                 <p class="text-gray-500 text-sm text-center"><?= $u['so_dt'] ?></p>
@@ -272,7 +272,7 @@
                 <?php foreach ($mangtkkhachhang as $m): ?>
                     <div class="bg-white shadow rounded-xl overflow-hidden hover:shadow-lg transition flex flex-col relative">
                         <div class="p-4 flex flex-col items-center">
-                            <img src="../../public/assets/anhht/0/<?= $m['avt'] ?>" alt="<?= $m['ho_ten'] ?>" class="w-20 h-20 rounded-full object-cover border-2 border-gray-200">
+                            <img src="../../../public/assets/anhht/0/<?= $m['avt'] ?>" alt="<?= $m['ho_ten'] ?>" class="w-20 h-20 rounded-full object-cover border-2 border-gray-200">
                             <h2 class="mt-2 font-semibold text-gray-800 text-center"><?= $m['ho_ten'] ?></h2>
                             <p class="text-gray-500 text-sm text-center"><?= $m['email'] ?></p>
                             <p class="text-gray-500 text-sm text-center"><?= $m['so_dt'] ?></p>
@@ -305,6 +305,7 @@
                                     </div>
                                 </div>
                             </div>
+                            
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -326,14 +327,14 @@
         });
 
         const boloc = encodeURIComponent(JSON.stringify(filters));
-        window.location.href = "trangchu.php?page=taikhoan&boloc=" + boloc;
+        window.location.href = "trangchu.php?page=khachhang&boloc=" + boloc;
     }
 
     document.getElementById("btnloc-desktop").addEventListener("click", () => apdungloc("desktop"));
     document.getElementById("btnloc-mobile").addEventListener("click", () => apdungloc("mobile"));
 
     function huyloc(prefix) {
-        window.location.href = "trangchu.php?page=taikhoan";
+        window.location.href = "trangchu.php?page=khachhang";
     }
 
     document.getElementById("btnhuy-desktop").addEventListener("click", () => huyloc("desktop"));

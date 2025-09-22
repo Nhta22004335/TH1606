@@ -1,12 +1,10 @@
 <?php
 date_default_timezone_set('Asia/Ho_Chi_Minh');
-require_once '../../config.php';
+require_once "../../../config/database.php";
+$pdo = ketnoicsdl();
 
-$db = new Database();
-$conn = $db->connect();
-
-$em = new Email();
-$mailer = $em->createMailer();
+require_once '../../../config/email.php';
+$mailer = createmailer();
 
 /**
  * Tạo mã OTP gồm chữ và số
@@ -27,10 +25,10 @@ function generateToken($length = 32) {
     return bin2hex(random_bytes($length / 2));
 }
 
-function ckYeuCauOTP($conn, $tokenotp, $email, $sodienthoai) {
-    $sql = "SELECT * FROM otp_requests WHERE tokenotp = :tokenotp AND (email = :email OR sodienthoai = :sodienthoai) LIMIT 1";
-    $stmt = $conn->prepare($sql);
-    $stmt->execute([':tokenotp' => $tokenotp, ':email' => $email, ':sodienthoai' => $sodienthoai]);
+function ckYeuCauOTP($pdo, $tokenotp, $email, $sodienthoai) {
+    $sql = "SELECT * FROM yeu_cau_otp WHERE token_code = :token_code AND (email = :email OR so_dt = :so_dt) LIMIT 1";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([':token_code' => $tokenotp, ':email' => $email, ':so_dt' => $sodienthoai]);
     $otpData = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($otpData) {
@@ -40,9 +38,9 @@ function ckYeuCauOTP($conn, $tokenotp, $email, $sodienthoai) {
     }
 }
 
-function capNhatYeuCauOTP($conn, $email, $sodienthoai, $otp, $tokenotp, $expire_time) {
-    $sql = "UPDATE otp_requests SET otp = :otp, tokenotp = :tokenotp, expire_time = :expire_time 
-            WHERE sodienthoai = :sodienthoai OR email = :email";
+function capNhatYeuCauOTP($pdo, $email, $sodienthoai, $otp, $tokenotp, $expire_time) {
+    $sql = "UPDATE otp_requests SET otp_code = :otp, token_code = :tokenotp, het_han = :expire_time 
+            WHERE so_dt = :sodienthoai OR email = :email";
     $stmt = $conn->prepare($sql);
     $stmt->execute([
         ':otp' => $otp,
@@ -59,7 +57,7 @@ function capNhatYeuCauOTP($conn, $email, $sodienthoai, $otp, $tokenotp, $expire_
 function sendOTPEmail($mailer, $email, $otp, $tokenotp, $expire_time) {
     $subject = "Cấp lại mã xác thực OTP của bạn";
 
-    $verify_link = "http://localhost/4335/auth/php/xacnhan_otp.php?tokenotp=" . urlencode($tokenotp);
+    $verify_link = "http://localhost:8080/app/models/auth/xacnhan_otp.php?tokenotp=" . urlencode($tokenotp);
 
     $body = "Xin chào bạn!,\n\n"
           . "Mã OTP của bạn là: $otp\n"
@@ -102,18 +100,43 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['btnGuiLaiOTP'])) {
     }
 }
 ?>
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zolux 4335 - Gửi lại OTP</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zolux 4335 - Gửi lại OTP</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <form action="" method="POST" id="formGuiLaiOTP">
-        <input type="email" name="email" id="email" placeholder="Nhập email của bạn">
-        <input type="text" name="sodienthoai" id="sodienthoai" placeholder="Nhập số điện thoại của bạn">
-        <button type="submit" name="btnGuiLaiOTP" id="btnGuiLaiOTP">Gửi lại OTP</button>
+<body class="min-h-screen flex items-center justify-center bg-gradient-to-r from-indigo-100 via-white to-indigo-50">
+  <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+    <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Gửi lại OTP</h1>
+    <form action="" method="POST" id="formGuiLaiOTP" class="space-y-5">
+      <!-- Email -->
+      <div>
+        <label for="email" class="block text-sm font-medium text-gray-600 mb-2">Email</label>
+        <input type="email" id="email" name="email" placeholder="Nhập email của bạn"
+          class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent" />
+      </div>
+
+      <!-- Số điện thoại -->
+      <div>
+        <label for="sodienthoai" class="block text-sm font-medium text-gray-600 mb-2">Số điện thoại</label>
+        <input type="text" id="sodienthoai" name="sodienthoai" placeholder="Nhập số điện thoại của bạn"
+          class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent" />
+      </div>
+
+      <!-- Button -->
+      <button type="submit" id="btnGuiLaiOTP" name="btnGuiLaiOTP"
+        class="w-full bg-indigo-600 text-white font-semibold py-3 rounded-xl hover:bg-indigo-700 transition duration-300 shadow-md">
+        Gửi lại OTP
+      </button>
     </form>
+
+    <p class="text-sm text-gray-500 text-center mt-6">
+      Đã nhớ OTP? <a href="xacnhan_otp.php" class="text-indigo-600 hover:underline">Xác nhận ngay</a>
+    </p>
+  </div>
 </body>
 </html>
