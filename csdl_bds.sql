@@ -136,6 +136,19 @@ AFTER INSERT ON nguoi_dung
 FOR EACH ROW
 EXECUTE FUNCTION fn_after_insert_nguoi_dung();
 
+CREATE TABLE phien_dang_nhap (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),              
+    id_nguoi_dung UUID NOT NULL,           
+    token VARCHAR(255) NOT NULL UNIQUE,   
+    dia_chi_ip VARCHAR(45),              
+    thiet_bi TEXT,                        
+    bat_dau TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  
+    het_han TIMESTAMP,         
+    dang_hoat_dong BOOLEAN DEFAULT TRUE, 
+    FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE
+);
+
+select * from phien_dang_nhap
 -- ===========================
 -- 4. Bảng bat_dong_san (bất động sản)
 -- Mô tả: Môi giới sẽ tạo ra các sp bds, để đăng bán

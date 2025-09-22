@@ -6,7 +6,8 @@
   <title>Đăng nhập</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="flex items-center justify-center min-h-screen px-4">
+<body class="h-screen w-screen bg-cover bg-center flex items-center justify-center"
+  style="background-image: url('https://images.unsplash.com/photo-1505691723518-36a5ac3be353?auto=format&fit=crop&w=1350&q=80');">
 
 <div class="bg-white shadow-lg rounded-2xl w-full max-w-md px-6 py-6 sm:px-8 sm:py-10">
     <!-- Logo -->
@@ -88,8 +89,8 @@
         alert('Vui lòng nhập đầy đủ thông tin!');
         return;
       }
-
-      fetch('../php/xuly_dangnhap.php', {
+      
+      fetch('../../models/auth/xuly_dangnhap.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tendangnhap, matkhau })
@@ -98,7 +99,7 @@
         .then(data => {
           if (data.success) {
             // window.location.href = '../../index.php';
-            alert('Thành công!')
+            alert(data.message);
           } else {
             alert(data.message);
           }

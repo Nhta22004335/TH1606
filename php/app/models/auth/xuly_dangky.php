@@ -30,15 +30,15 @@ function generateToken($length = 32) {
 /**
  * Kiểm tra xem email có hợp lệ không
  */
-function ckTaiKhoan($conn, $email, $sodienthoai, $tendangnhap) {
-    $sql = "SELECT COUNT(*) FROM taikhoan WHERE email = :email OR sodienthoai = :sodienthoai OR tendangnhap = :tendangnhap";
-    $stmt = $conn->prepare($sql);
-    $stmt->execute([':email' => $email, ':sodienthoai' => $sodienthoai, ':tendangnhap' => $tendangnhap]);
+function ckTaiKhoan($pdo, $email, $so_dt, $ten_dang_nhap) {
+    $sql = "SELECT COUNT(*) FROM nguoi_dung WHERE email = :email OR so_dt = :so_dt OR ten_dang_nhap = :ten_dang_nhap";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([':email' => $email, ':so_dt' => $so_dt, ':ten_dang_nhap' => $ten_dang_nhap]);
     $taikhoan = $stmt->fetchColumn();
     if ($taikhoan == 0) {
-        $sql = "SELECT COUNT(*) FROM otp_requests WHERE email = :email OR sodienthoai = :sodienthoai";
+        $sql = "SELECT COUNT(*) FROM otp_requests WHERE email = :email OR so_dt = :so_dt";
         $stmt = $conn->prepare($sql);
-        $stmt->execute([':email' => $email, ':sodienthoai' => $sodienthoai]);
+        $stmt->execute([':email' => $email, ':so_dt' => $so_dt]);
         $otp_requests = $stmt->fetchColumn();
         if ($otp_requests > 0) {
             return ['success' => false, 'error' => 'Tài khoản này đã gửi yêu cầu!'];
