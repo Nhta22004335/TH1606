@@ -7,6 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 font-sans flex flex-col min-h-screen">
+
   <!-- Header -->
   <header class="bg-white shadow-md px-4 sm:px-8 py-3 flex justify-between items-center">
   <!-- Logo + Tên thương hiệu -->
@@ -15,7 +16,6 @@
     <div class="flex flex-col leading-tight">
       <span class="text-2xl font-bold text-blue-600 tracking-wide">Nhà Đất 24h</span>
      <span class="text-sm text-gray-500">Kiến tạo giá trị vàng - Nâng tầm cuộc sống</span>
-
     </div>
   </div>
 
