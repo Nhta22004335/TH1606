@@ -1,3 +1,15 @@
+<?php
+    session_start();
+    require_once "../../../config/database.php";
+    $pdo = ketnoicsdl();
+
+    $id = $_SESSION['id_nguoi_dung'];
+
+    $sql = "SELECT * FROM quan_tri WHERE id_nguoi_dung = :id";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute(['id' => $id]);
+    $tk = $stmt->fetch(PDO::FETCH_ASSOC);
+?>
 <!DOCTYPE html>
 <html lang="vi" x-data="{ openFilter:false }">
 <head>
@@ -5,7 +17,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bất động sản</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs" defer></script>
     <link rel="stylesheet" href="../../../public/assets/fontawesome/css/all.min.css">
+    <style>[x-cloak] { display: none !important; }</style>
 </head>
 <body>
 
@@ -42,11 +56,26 @@
                     <i class="fas fa-map-marked-alt mr-2 text-blue-600"></i> Bản đồ
                 </a>
 
-                <div class="flex items-center space-x-2 cursor-pointer">
-                    <img src="../../../public/assets/anhht/0/avt.png" alt="Avatar" class="w-9 h-9 rounded-full border border-gray-300">
-                    <span class="text-sm text-gray-700">Nguyễn Văn A</span>
-                </div>
+                <div x-data="{ open: false }" class="relative">
+                    <!-- Nút avatar + tên -->
+                    <div @click="open = !open" class="flex items-center space-x-2 cursor-pointer">
+                        <img src="../../../public/assets/anhht/0/<?= $tk['avt'] ?>" alt="Avatar" class="w-9 h-9 rounded-full border border-gray-300">
+                        <span class="text-sm text-gray-700"><?= $tk['ho_ten'] ?></span>
+                    </div>
 
+                    <!-- Dropdown -->
+                    <div x-show="open" x-cloak @click.outside="open = false" x-transition class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2" style="z-index: 10;">
+                    <div class="px-4 py-2 flex items-center space-x-2 border-b">
+                        <img src="../../../public/assets/anhht/0/<?= $tk['avt'] ?>" alt="Avatar" class="w-10 h-10 rounded-full border">
+                        <div>
+                            <p class="text-sm font-medium text-gray-800"><?= $tk['ho_ten'] ?></p>
+                            <p class="text-xs text-gray-500">Tài khoản cá nhân</p>
+                        </div>
+                    </div>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Trang cá nhân</a>
+                        <a href="../../models/auth/xuly_dangxuat.php" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Đăng xuất</a>
+                    </div>
+                </div>
                 <a href="#" class="px-3 py-1.5 border border-gray-400 text-gray-600 text-xs sm:text-sm rounded-md font-normal hover:bg-gray-200 transition">
                     Đăng tin
                 </a>
@@ -68,7 +97,7 @@
                 <a class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý Khách hàng <i class="fas fa-chevron-right ml-1 transition-transform duration-300"></i></a> 
                 <ul class="hidden absolute left-0 top-full bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
                     <li><a href="trangchu.php?page=khachhang" class="block px-4 py-2 hover:bg-blue-100">Danh sách khách hàng</a></li>
-                    <li><a href="#" class="block px-4 py-2 hover:bg-blue-100">Lịch sử đăng nhập/đăng xuất</a></li>
+                    <li><a href="trangchu.php?page=lichsuauth" class="block px-4 py-2 hover:bg-blue-100">Lịch sử đăng nhập/đăng xuất</a></li>
                 </ul>
             </li>
             <li class="relative ">
@@ -88,7 +117,7 @@
             <li class="relative"><a class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý sản phẩm bds<i class="fas fa-chevron-right ml-2 transition-transform duration-300"></i></a>
                 <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
                     <li><a href="trangchu.php?page=sanpham" class="block px-4 py-2 hover:bg-blue-100">Danh sách sản phẩm bds</a></li>
-                    <li><a href="#" class="block px-4 py-2 hover:bg-blue-100">Quản lý hình ảnh/videos</a></li>
+                    <li><a href="trangchu.php?page=ql_anh_video_bds" class="block px-4 py-2 hover:bg-blue-100">Quản lý hình ảnh/videos</a></li>
                     <li><a href="trangchu.php?page=danhgiasanpham" class="block px-4 py-2 hover:bg-blue-100">Quản lý đánh giá</a></li>
                 </ul>
             </li>
@@ -303,7 +332,7 @@
 
 <?php
     $page = isset($_GET['page']) ? $_GET['page'] : 'trangchu';
-    $allowed_pages = ['sanpham', 'danhgiasanpham', 'danhgiasanphamct', 'khachhang', 'moigioi'];
+    $allowed_pages = ['sanpham', 'danhgiasanpham', 'danhgiasanphamct', 'khachhang', 'moigioi', 'lichsuauth', 'ql_anh_video_bds'];
     $showHome = ($page === 'trangchu');
 ?>
 

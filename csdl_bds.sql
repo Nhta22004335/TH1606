@@ -30,8 +30,10 @@ CREATE TABLE IF NOT EXISTS nguoi_dung (
 );
 
 SELECT * FROM nguoi_dung
-SELECT * FROM khach_hang
+SELECT * FROM quan_tri
 select * from yeu_cau_otp
+select * from phien_dang_nhap
+select * from lich_su_dn_dx
 
 INSERT INTO nguoi_dung (ten_dang_nhap, mat_khau, email, so_dt, vai_tro, trang_thai, hoat_dong)
 VALUES
@@ -141,14 +143,23 @@ EXECUTE FUNCTION fn_after_insert_nguoi_dung();
 CREATE TABLE phien_dang_nhap (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),              
     id_nguoi_dung UUID NOT NULL,           
-    token_phien VARCHAR(255) NOT NULL UNIQUE,   
-    dia_chi_ip VARCHAR(45),              
-    thiet_bi TEXT,                        
+    token_phien VARCHAR(255) NOT NULL UNIQUE,             
     bat_dau TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  
     het_han TIMESTAMP,         
     dang_hoat_dong BOOLEAN DEFAULT TRUE, 
     FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS lich_su_dn_dx (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id_nguoi_dung UUID NOT NULL,
+    thoi_gian_dang_nhap TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    thoi_gian_dang_xuat TIMESTAMP,
+    dia_chi_ip VARCHAR(45),              
+    user_agent TEXT, 
+    CONSTRAINT fk_lichsu_nguoidung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE
+);
+
 
 CREATE TABLE yeu_cau_otp (
     id SERIAL PRIMARY KEY,
