@@ -65,12 +65,13 @@
 <!DOCTYPE html>
 <html lang="vi" x-data="{ openFilter:false }">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quản lý môi giới</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://unpkg.com/alpinejs" defer></script>
-<link rel="stylesheet" href="../../../public/assets/fontawesome/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý môi giới</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs" defer></script>
+    <link rel="stylesheet" href="../../../public/assets/fontawesome/css/all.min.css">
+    <style>[x-cloak] { display: none !important; }</style>
 </head>
 <body>
 
@@ -204,7 +205,7 @@
                                 <a href="#?id=<?= $m['id'] ?>" class="text-green-600 hover:text-green-800"><i class="fas fa-eye"></i></a>
                             </div>
                             <!-- Popup form -->
-                            <div x-show="openForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
+                            <div x-show="openForm" x-cloak class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
                                 <div class="bg-white rounded-xl shadow-lg p-6 w-96">
                                     <h2 class="text-lg font-semibold mb-4">Thông báo</h2>
 
@@ -221,7 +222,7 @@
                                 </div>
                             </div>
                             <!-- Popup Lựa chọn -->
-                            <div x-show="openOption" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
+                            <div x-show="openOption" x-cloak class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
                                 <div class="bg-white rounded-xl shadow-lg p-6 w-80">
                                     <h2 class="text-lg font-semibold mb-4 text-blue-600">Lựa chọn</h2>
                                     <select class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
@@ -275,7 +276,7 @@
                                     <a href="#?id=<?= $m['id'] ?>" class="text-green-600 hover:text-green-800"><i class="fas fa-eye"></i></a>
                                 </div>
                                 <!-- Popup form -->
-                                <div x-show="openForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
+                                <div x-show="openForm" x-cloak class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
                                     <div class="bg-white rounded-xl shadow-lg p-6 w-96">
                                         <h2 class="text-lg font-semibold mb-4">Thông báo</h2>
 
@@ -292,7 +293,7 @@
                                     </div>
                                 </div>
                                 <!-- Popup Lựa chọn -->
-                                <div x-show="openOption" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
+                                <div x-show="openOption" x-cloak class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
                                     <div class="bg-white rounded-xl shadow-lg p-6 w-80">
                                         <h2 class="text-lg font-semibold mb-4 text-blue-600">Lựa chọn</h2>
                                         <select class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
@@ -338,7 +339,7 @@
                                 <a href="#?id=<?= $m['id'] ?>" class="text-green-600 hover:text-green-800"><i class="fas fa-eye"></i></a>
                             </div>
                             <!-- Popup form -->
-                            <div x-show="openForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
+                            <div x-show="openForm" x-cloak class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
                                 <div class="bg-white rounded-xl shadow-lg p-6 w-96">
                                     <h2 class="text-lg font-semibold mb-4">Thông báo</h2>
 
@@ -356,7 +357,7 @@
                             </div>
 
                             <!-- Popup Lựa chọn -->
-                            <div x-show="openOption" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
+                            <div x-show="openOption" x-cloak class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
                                 <div class="bg-white rounded-xl shadow-lg p-6 w-80">
                                     <h2 class="text-lg font-semibold mb-4 text-blue-600">Lựa chọn</h2>
                                     <select class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">

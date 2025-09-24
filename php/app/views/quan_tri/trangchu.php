@@ -64,7 +64,7 @@
                     </div>
 
                     <!-- Dropdown -->
-                    <div x-show="open" x-cloak @click.outside="open = false" x-transition class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2" style="z-index: 10;">
+                    <div x-show="open" x-cloak @click.outside="open = false" x-transition class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2" style="z-index: 20;">
                     <div class="px-4 py-2 flex items-center space-x-2 border-b">
                         <img src="../../../public/assets/anhht/0/<?= $tk['avt'] ?>" alt="Avatar" class="w-10 h-10 rounded-full border">
                         <div>
@@ -97,7 +97,7 @@
                 <a class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý Khách hàng <i class="fas fa-chevron-right ml-1 transition-transform duration-300"></i></a> 
                 <ul class="hidden absolute left-0 top-full bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
                     <li><a href="trangchu.php?page=khachhang" class="block px-4 py-2 hover:bg-blue-100">Danh sách khách hàng</a></li>
-                    <li><a href="trangchu.php?page=lichsuauth" class="block px-4 py-2 hover:bg-blue-100">Lịch sử đăng nhập/đăng xuất</a></li>
+                    <li><a href="trangchu.php?page=lichsuxacthuc" class="block px-4 py-2 hover:bg-blue-100">Lịch sử đăng nhập/đăng xuất</a></li>
                 </ul>
             </li>
             <li class="relative ">
@@ -133,7 +133,7 @@
                 <a class="hover:text-blue-600 menu-btn inline-flex items-center">Thông báo & chat<i class="fas fa-chevron-right ml-2 transition-transform duration-300"></i></a>
                 <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
                     <li><a href="#" class="block px-4 py-2 hover:bg-blue-100">Gửi thông báo</a></li>
-                    <li><a href="#" class="block px-4 py-2 hover:bg-blue-100">Quản lý hộp thoại chat</a></li>
+                    <li><a href="trangchu.php?page=ql_hop_thoai_chat" class="block px-4 py-2 hover:bg-blue-100">Quản lý hộp thoại chat</a></li>
                     <li><a href="#" class="block px-4 py-2 hover:bg-blue-100">Quản lý thông báo</a></li>
                 </ul>
             </li>
@@ -223,7 +223,7 @@
                 </button>
                 <ul class="hidden flex-col bg-gray-50">
                     <li><a href="#" class="block px-6 py-2 hover:bg-blue-100">Gửi thông báo</a></li>
-                    <li><a href="#" class="block px-6 py-2 hover:bg-blue-100">Quản lý hộp thoại chat</a></li>
+                    <li><a href="trangchu.php?page=ql_hop_thoai_chat" class="block px-6 py-2 hover:bg-blue-100">Quản lý hộp thoại chat</a></li>
                     <li><a href="#" class="block px-6 py-2 hover:bg-blue-100">Quản lý thông báo</a></li>
                 </ul>
             </li>
@@ -332,7 +332,8 @@
 
 <?php
     $page = isset($_GET['page']) ? $_GET['page'] : 'trangchu';
-    $allowed_pages = ['sanpham', 'danhgiasanpham', 'danhgiasanphamct', 'khachhang', 'moigioi', 'lichsuauth', 'ql_anh_video_bds'];
+    $allowed_pages = ['sanpham', 'danhgiasanpham', 'danhgiasanphamct', 'khachhang', 'moigioi', 'lichsuxacthuc', 'ql_anh_video_bds',
+                     'ql_hop_thoai_chat'];
     $showHome = ($page === 'trangchu');
 ?>
 
@@ -341,6 +342,129 @@
         if(in_array($page, $allowed_pages) && $page != 'trangchu') include $page . '.php';
     ?>
 </div>
+
+<!-- Section App Landing -->
+<div class="bg-blue-0 text-gray-900 py-12 mt-4">
+    <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+        
+        <!-- Hình ảnh App -->
+        <div class="flex justify-center md:justify-start">
+            <img class="lazy w-72 h-auto rounded-lg shadow-lg" alt="app demo" src="https://static.homedy.com/src/images/social/app.png">
+        </div>
+
+        <!-- Nội dung Text -->
+        <div class="text-center md:text-left">
+            <p class="text-sm font-semibold text-blue-700 mb-2">TÌM KIẾM - LỰA CHỌN BẤT ĐỘNG SẢN</p>
+            <p class="text-lg font-bold text-blue-900 mb-4">MỌI LÚC MỌI NƠI</p>
+            <p class="text-sm text-gray-700 leading-relaxed">
+                Cài đặt ứng dụng Homedy trên điện thoại để tìm kiếm nhà đất bán - cho thuê nhanh chóng, xem thông tin đầy đủ tất cả các dự án mới, tin tức mới nhất về thị trường nhà đất được cập nhật liên tục.
+            </p>
+        </div>
+
+        <!-- QR Code + Link Store -->
+        <div class="flex flex-col items-center md:items-end space-y-4">
+            <div class="mb-4">
+                <img class="lazy w-32 h-auto" alt="qr" src="https://static.homedy.com/src/images/social/qr.png">
+            </div>
+            <div class="flex flex-col space-y-2 md:space-y-0 md:flex-row md:space-x-2">
+                <a href="https://apps.apple.com/vn/app/b%E1%BA%A5t-%C4%91%E1%BB%99ng-s%E1%BA%A3n-homedy/id1438315559/?l=vi" title="Homedy trên App Store">
+                    <img class="lazy w-36 h-auto" alt="app-store" src="https://static.homedy.com/src/images/social/app-store.png">
+                </a>
+                <a href="https://play.google.com/store/apps/details?id=com.homedyapp.android" title="Homedy trên Google Play">
+                    <img class="lazy w-36 h-auto" alt="google-play" src="https://static.homedy.com/src/images/social/google-play.png">
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- Footer chi tiết cho sàn BĐS - nền trắng -->
+<footer class="bg-white text-gray-800 border-t border-gray-300">
+    <div class="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-5 gap-8">
+        
+        <!-- Logo + mô tả + liên hệ nhanh -->
+        <div>
+            <img src="../../../public/assets/anhht/0/logo-homedy.png" alt="Logo" class="h-12 mb-4">
+            <p class="text-sm leading-relaxed text-gray-600 mb-4">
+                Sàn giao dịch bất động sản uy tín, cung cấp thông tin chính xác, dịch vụ tư vấn chuyên nghiệp 
+                và hỗ trợ khách hàng trong việc mua, bán, cho thuê bất động sản.
+            </p>
+        </div>
+
+        <!-- Về chúng tôi -->
+        <div>
+            <h3 class="text-gray-900 font-semibold mb-4">Về chúng tôi</h3>
+            <ul class="space-y-2 text-sm">
+                <li><a href="trangchu.php?page=gioithieuvesan" class="hover:text-blue-500">Giới thiệu sàn</a></li>
+                <li><a href="trangchu.php?page=danhmucduan" class="hover:text-blue-500">Dự án nổi bật</a></li>
+                <li><a href="trangchu.php?page=kinhnghiemdau tu" class="hover:text-blue-500">Kinh nghiệm đầu tư</a></li>
+                <li><a href="trangchu.php?page=blog" class="hover:text-blue-500">Blog & Tin tức</a></li>
+            </ul>
+        </div>
+
+        <!-- Hỗ trợ khách hàng -->
+        <div>
+            <h3 class="text-gray-900 font-semibold mb-4">Hỗ trợ khách hàng</h3>
+            <ul class="space-y-2 text-sm">
+                <li><a href="trangchu.php?page=lienhe" class="hover:text-blue-500">Liên hệ tư vấn</a></li>
+                <li><a href="trangchu.php?page=huongdandaugia" class="hover:text-blue-500">Hướng dẫn mua/bán</a></li>
+                <li><a href="trangchu.php?page=cauhoithuonggap" class="hover:text-blue-500">Câu hỏi thường gặp</a></li>
+                <li><a href="trangchu.php?page=gopy" class="hover:text-blue-500">Góp ý - khiếu nại</a></li>
+            </ul>
+        </div>
+
+        <!-- Dự án nổi bật / Liên kết nhanh -->
+        <div>
+            <h3 class="text-gray-900 font-semibold mb-4">Dự án nổi bật</h3>
+            <ul class="space-y-2 text-sm">
+                <li><a href="#" class="hover:text-blue-500">VinHomes Central Park</a></li>
+                <li><a href="#" class="hover:text-blue-500">Sunshine City</a></li>
+                <li><a href="#" class="hover:text-blue-500">Masteri Thảo Điền</a></li>
+                <li><a href="#" class="hover:text-blue-500">The Manor Central Park</a></li>
+                <li><a href="#" class="hover:text-blue-500">Gem Riverside</a></li>
+            </ul>
+        </div>
+
+        <!-- Mạng xã hội + giờ làm việc -->
+        <div>
+            <h3 class="text-gray-900 font-semibold mb-4">Kết nối với chúng tôi</h3>
+            <div class="flex space-x-4 text-lg mb-3">
+                <a href="#" class="hover:text-blue-500"><i class="fab fa-facebook"></i></a>
+                <a href="#" class="hover:text-blue-400"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="hover:text-blue-300"><i class="fab fa-linkedin"></i></a>
+                <a href="#" class="hover:text-red-500"><i class="fab fa-youtube"></i></a>
+            </div>
+
+            <!-- Giờ làm việc -->
+            <p class="text-sm text-gray-600 leading-relaxed">
+                ⏰ Thời gian làm việc: <br>
+                <span class="text-gray-900">Thứ 2 - Thứ 6:</span> 8:00 - 18:00 <br>
+                <span class="text-gray-900">Thứ 7:</span> 9:00 - 15:00 <br>
+                <span class="text-gray-900">Chủ nhật:</span> Nghỉ
+            </p>
+        </div>
+
+    </div>
+
+    <!-- Bản quyền, điều khoản & thông tin liên hệ nhanh -->
+    <div class="bg-gray-100 text-center text-sm py-6 border-t border-gray-300 space-y-2">
+        <p class="text-gray-700">
+            © 2025 Sàn BĐS 4335. Mọi quyền được bảo lưu. Trang web này cung cấp thông tin về các dự án bất động sản, dịch vụ mua bán, cho thuê nhà đất, và các tin tức liên quan đến thị trường bất động sản Việt Nam. 
+            Vui lòng đọc <a href="trangchu.php?page=dieukhoan" class="hover:text-blue-500">Điều khoản & Điều kiện</a> trước khi sử dụng dịch vụ.
+        </p>
+        <p class="text-gray-700">
+            📞 Hotline: <a href="tel:19001234" class="hover:text-blue-500">1900 1234</a> &nbsp;|&nbsp; 
+            ✉ Email: <a href="mailto:support@homedy.com" class="hover:text-blue-500">hotro@bds.com</a> &nbsp;|&nbsp; 
+            📍 Địa chỉ: 72, phường Long Châu, Nguyễn Huệ, Vĩnh Long
+        </p>
+    </div>
+</footer>
+
+
+
+
 
 </body>
 </html>

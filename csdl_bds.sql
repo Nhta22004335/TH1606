@@ -9,6 +9,20 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- ===========================
+-- 20. Bảng tin_nhan (hệ thống tin nhắn giữa users)
+-- Phụ trách: Đặng (kiểm thử), Tuấn Anh (hạ tầng)
+-- ===========================
+CREATE TABLE IF NOT EXISTS tin_nhan (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id_gui UUID NOT NULL,
+    id_nhan UUID NOT NULL,
+    noi_dung TEXT,
+    ngay_gui TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_tn_gui FOREIGN KEY (id_gui) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
+    CONSTRAINT fk_tn_nhan FOREIGN KEY (id_nhan) REFERENCES nguoi_dung(id) ON DELETE CASCADE
+);
+
+-- ===========================
 -- 0. Bảng nguoi_dung
 -- Mô tả: Lưu thông tin đăng nhập chung cho tất cả nhóm người dùng (quản trị, môi giới, khách hàng)
 -- Phụ trách: Tuấn Anh (tổng quản lý dữ liệu người dùng)
@@ -452,20 +466,6 @@ CREATE TABLE IF NOT EXISTS bao_cao (
     CONSTRAINT fk_baocao_kh FOREIGN KEY (id_khach_hang) REFERENCES khach_hang(id) ON DELETE SET NULL,
     CONSTRAINT fk_baocao_mg FOREIGN KEY (id_moi_gioi) REFERENCES moi_gioi(id) ON DELETE SET NULL,
     CONSTRAINT fk_baocao_bds FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE SET NULL
-);
-
--- ===========================
--- 20. Bảng tin_nhan (hệ thống tin nhắn giữa users)
--- Phụ trách: Đặng (kiểm thử), Tuấn Anh (hạ tầng)
--- ===========================
-CREATE TABLE IF NOT EXISTS tin_nhan (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    id_gui UUID NOT NULL,
-    id_nhan UUID NOT NULL,
-    noi_dung TEXT,
-    ngay_gui TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_tn_gui FOREIGN KEY (id_gui) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
-    CONSTRAINT fk_tn_nhan FOREIGN KEY (id_nhan) REFERENCES nguoi_dung(id) ON DELETE CASCADE
 );
 
 -- ===========================

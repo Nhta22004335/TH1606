@@ -231,7 +231,7 @@
         </div>
 
         <!-- Grid -->
-        <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[600px] overflow-y-auto scrollbar-hide">
+        <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[500px] overflow-y-auto scrollbar-hide p-2">
             <?php if (empty($filters) && empty($mangtksanpham)): ?>
                 <?php foreach($products as $p): ?>
                     <div class="bg-white shadow rounded-xl overflow-hidden hover:shadow-lg transition flex flex-col">

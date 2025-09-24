@@ -26,25 +26,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý đánh giá BĐS</title>
     <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        .scrollbar-hide {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+    </style>
 </head>
 <body>
 
-<div class="bg-white shadow rounded-lg p-6">
-    <h2 class="flex items-center text-2xl font-bold text-gray-600">
+<div class="bg-white p-6">
+    <h2 class="flex items-center text-2xl font-bold text-gray-600 mb-4">
         <img src="../../../../public/assets/anhht/0/list.gif" class="w-10 h-10 mr-3">
         Danh sách đánh giá
     </h2>
-    
-    <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+
+    <div class="overflow-y-scroll h-96 scrollbar-hide">
+        <table class="min-w-full divide-y divide-gray-200 table-fixed">
+            <thead class="bg-gray-50 sticky top-0 z-5">
                 <tr>
-                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Tên sản phẩm</th>
-                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Loại</th>
-                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Trạng thái</th>
-                    <th class="px-4 py-2 text-center text-sm font-medium text-gray-700">Số lượng đánh giá</th>
-                    <th class="px-4 py-2 text-center text-sm font-medium text-gray-700">Số lượng bình luận</th>
-                    <th class="px-4 py-2 text-center text-sm font-medium text-gray-700">Hành động</th>
+                    <th class="w-2/6 px-4 py-2 text-left text-sm font-medium text-gray-700">Tên sản phẩm</th>
+                    <th class="w-1/6 px-4 py-2 text-left text-sm font-medium text-gray-700">Loại</th>
+                    <th class="w-1/6 px-4 py-2 text-left text-sm font-medium text-gray-700">Trạng thái</th>
+                    <th class="w-1/12 px-4 py-2 text-center text-sm font-medium text-gray-700">Đánh giá</th>
+                    <th class="w-1/12 px-4 py-2 text-center text-sm font-medium text-gray-700">Bình luận</th>
+                    <th class="w-1/6 px-4 py-2 text-center text-sm font-medium text-gray-700">Hành động</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
@@ -67,6 +77,8 @@
         </table>
     </div>
 </div>
+
+
 
 </body>
 </html>

@@ -1,26 +1,41 @@
 FROM php:8.3-apache
 
-# Cài PDO và PostgreSQL driver
-RUN apt-get update && apt-get install -y libpq-dev \
-    && docker-php-ext-install pdo pdo_pgsql
+# --- Cài PDO, PostgreSQL, Python venv + thư viện hệ thống cần thiết ---
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    python3-venv \
+    python3-pip \
+    git \
+    wget \
+    unzip \
+    libgl1 \
+    libglib2.0-0 \
+    && docker-php-ext-install pdo pdo_pgsql \
+    && rm -rf /var/lib/apt/lists/*
 
-# Cài thêm Python 3 và pip + thư viện argon2
-RUN apt-get update && apt-get install -y python3 python3-pip python3-venv \
-    && python3 -m venv /opt/venv \
-    && /opt/venv/bin/pip install argon2-cffi
+# --- Tạo Python virtualenv ---
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
-# Copy source code
+# --- Cài torch CPU + ultralytics + OpenCV + Pillow + numpy ---
+RUN pip install --upgrade pip \
+    && pip install argon2-cffi \
+    && pip install "torch>=2.5.0" "torchvision>=0.15.0" "torchaudio>=2.5.0" --index-url https://download.pytorch.org/whl/cpu \
+    && pip install ultralytics opencv-python pillow numpy
+
+# --- Copy PHP source code ---
 COPY ./php/ /var/www/html/
 
-# Cho phép Apache đọc toàn bộ thư mục
+# --- Tải YOLO model ---
+RUN wget -O /var/www/html/yolov8n.pt https://github.com/ultralytics/assets/releases/download/v0.0.0/yolov8n.pt
+
+# --- Apache config & permissions ---
 RUN echo '<Directory "/var/www/html">\n\
     Options Indexes FollowSymLinks\n\
     AllowOverride All\n\
     Require all granted\n\
 </Directory>' > /etc/apache2/conf-available/html.conf \
     && a2enconf html
-
-# Set quyền cho Apache
 RUN chown -R www-data:www-data /var/www/html
 
 EXPOSE 80
