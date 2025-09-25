@@ -65,13 +65,13 @@
 
                     <!-- Dropdown -->
                     <div x-show="open" x-cloak @click.outside="open = false" x-transition class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2" style="z-index: 20;">
-                    <div class="px-4 py-2 flex items-center space-x-2 border-b">
-                        <img src="../../../public/assets/anhht/0/<?= $tk['avt'] ?>" alt="Avatar" class="w-10 h-10 rounded-full border">
-                        <div>
-                            <p class="text-sm font-medium text-gray-800"><?= $tk['ho_ten'] ?></p>
-                            <p class="text-xs text-gray-500">Tài khoản cá nhân</p>
+                        <div class="px-4 py-2 flex items-center space-x-2 border-b">
+                            <img src="../../../public/assets/anhht/0/<?= $tk['avt'] ?>" alt="Avatar" class="w-10 h-10 rounded-full border">
+                            <div>
+                                <p class="text-sm font-medium text-gray-800"><?= $tk['ho_ten'] ?></p>
+                                <p class="text-xs text-gray-500">Tài khoản cá nhân</p>
+                            </div>
                         </div>
-                    </div>
                         <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Trang cá nhân</a>
                         <a href="../../models/auth/xuly_dangxuat.php" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Đăng xuất</a>
                     </div>
@@ -104,7 +104,7 @@
                 <a class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý môi giới<i class="fas fa-chevron-right ml-2 transition-transform duration-300"></i></a>
                 <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
                     <li><a href="trangchu.php?page=moigioi" class="block px-4 py-2 hover:bg-blue-100">Danh sách môi giới</a></li>
-                    <li><a href="#" class="block px-4 py-2 hover:bg-blue-100">Quản lý biểu mẫu</a></li>
+                    <li><a href="trangchu.php?page=ql_bieu_mau" class="block px-4 py-2 hover:bg-blue-100">Quản lý biểu mẫu</a></li>
                 </ul>
             </li>
             <li class="relative">
@@ -132,7 +132,7 @@
             <li class="relative">
                 <a class="hover:text-blue-600 menu-btn inline-flex items-center">Thông báo & chat<i class="fas fa-chevron-right ml-2 transition-transform duration-300"></i></a>
                 <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
-                    <li><a href="#" class="block px-4 py-2 hover:bg-blue-100">Gửi thông báo</a></li>
+                    <li><a href="trangchu.php?page=guithongbao" class="block px-4 py-2 hover:bg-blue-100">Gửi thông báo</a></li>
                     <li><a href="trangchu.php?page=ql_hop_thoai_chat" class="block px-4 py-2 hover:bg-blue-100">Quản lý hộp thoại chat</a></li>
                     <li><a href="#" class="block px-4 py-2 hover:bg-blue-100">Quản lý thông báo</a></li>
                 </ul>
@@ -333,7 +333,7 @@
 <?php
     $page = isset($_GET['page']) ? $_GET['page'] : 'trangchu';
     $allowed_pages = ['sanpham', 'danhgiasanpham', 'danhgiasanphamct', 'khachhang', 'moigioi', 'lichsuxacthuc', 'ql_anh_video_bds',
-                     'ql_hop_thoai_chat'];
+                     'ql_hop_thoai_chat', 'guithongbao', 'ql_bieu_mau'];
     $showHome = ($page === 'trangchu');
 ?>
 

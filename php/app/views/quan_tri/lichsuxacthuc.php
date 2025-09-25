@@ -32,17 +32,35 @@
     $totalRows = $totalStmt->fetchColumn();
     $totalPages = ceil($totalRows / $limit);
 
-    $stmt = $pdo->prepare("
-        SELECT lsdx.*, nd.ten_dang_nhap
-        FROM lich_su_dn_dx lsdx
-        JOIN nguoi_dung nd ON nd.id = lsdx.id_nguoi_dung
-        ORDER BY lsdx.thoi_gian_dang_nhap DESC
-        LIMIT :limit OFFSET :offset
-    ");
+    $search = $_GET['search'] ?? '';
+    if ($search !== '') {
+        $sql = "
+            SELECT lsdx.*, nd.ten_dang_nhap
+            FROM lich_su_dn_dx lsdx
+            JOIN nguoi_dung nd ON nd.id = lsdx.id_nguoi_dung
+            WHERE nd.ten_dang_nhap ILIKE :searchPattern
+            ORDER BY lsdx.thoi_gian_dang_nhap DESC
+            LIMIT :limit OFFSET :offset
+        ";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':searchPattern', "%$search%", PDO::PARAM_STR);
+    } else {
+            // Không có từ khóa, lấy tất cả
+        $sql = "
+            SELECT lsdx.*, nd.ten_dang_nhap
+            FROM lich_su_dn_dx lsdx
+            JOIN nguoi_dung nd ON nd.id = lsdx.id_nguoi_dung
+            ORDER BY lsdx.thoi_gian_dang_nhap DESC
+            LIMIT :limit OFFSET :offset
+        ";
+        $stmt = $pdo->prepare($sql);
+    }
+
     $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
     $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
     $stmt->execute();
     $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 ?>
 
 <!DOCTYPE html>
