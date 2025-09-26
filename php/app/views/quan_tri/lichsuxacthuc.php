@@ -45,7 +45,6 @@
         $stmt = $pdo->prepare($sql);
         $stmt->bindValue(':searchPattern', "%$search%", PDO::PARAM_STR);
     } else {
-            // Không có từ khóa, lấy tất cả
         $sql = "
             SELECT lsdx.*, nd.ten_dang_nhap
             FROM lich_su_dn_dx lsdx

@@ -140,12 +140,15 @@
             <li class="relative">
                 <a class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý đặt lịch<i class="fas fa-chevron-right ml-2 transition-transform duration-300"></i></a>
                 <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
-                    <li><a href="#" class="block px-4 py-2 hover:bg-blue-100">Danh sách lịch đặt</a></li>
-                    <li><a href="#" class="block px-4 py-2 hover:bg-blue-100">Xử lý xung đột</a></li>
-                    <li><a href="#" class="block px-4 py-2 hover:bg-blue-100">Nhắc nhở</a></li>
+                    <li><a href="trangchu.php?page=datlich" class="block px-4 py-2 hover:bg-blue-100">Danh sách lịch đặt</a></li>
                 </ul>
             </li>
-            <li><a href="#" class="hover:text-blue-600">Quản lý vi phạm</a></li>
+            <li class="relative">
+                <a href="#" class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý vi phạm<i class="fas fa-chevron-right ml-2 transition-transform duration-300"></i></a>
+                <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
+                    <li><a href="£" class="block px-4 py-2 hover:bg-blue-100">Danh sách vi phạm</a></li>
+                </ul>
+            </li>
         </ul>
     </nav>
 
@@ -333,7 +336,7 @@
 <?php
     $page = isset($_GET['page']) ? $_GET['page'] : 'trangchu';
     $allowed_pages = ['sanpham', 'danhgiasanpham', 'danhgiasanphamct', 'khachhang', 'moigioi', 'lichsuxacthuc', 'ql_anh_video_bds',
-                     'ql_hop_thoai_chat', 'guithongbao', 'ql_bieu_mau'];
+                     'ql_hop_thoai_chat', 'guithongbao', 'ql_bieu_mau', 'datlich'];
     $showHome = ($page === 'trangchu');
 ?>
 
