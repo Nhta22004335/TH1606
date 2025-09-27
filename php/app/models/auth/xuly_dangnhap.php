@@ -53,16 +53,17 @@ function luuPhienVaoCSDL($pdo, $id_nguoi_dung) {
     }
 }
 
-function luuLichSuNguoiDung($pdo, $id_nguoi_dung) {
+function luuLichSuNguoiDung($pdo, $id_nguoi_dung, $loai_su_kien = 'dangnhap') {
     $stmt = $pdo->prepare("
-        INSERT INTO lich_su_dn_dx (id_nguoi_dung, dia_chi_ip, user_agent)
-        VALUES (:id_nguoi_dung, :dia_chi_ip, :user_agent)
+        INSERT INTO lich_su_xac_thuc (id_nguoi_dung, loai_su_kien, dia_chi_ip, user_agent)
+        VALUES (:id_nguoi_dung, :loai_su_kien, :dia_chi_ip, :user_agent)
         RETURNING id
     ");
     $stmt->execute([
         ':id_nguoi_dung' => $id_nguoi_dung,
-        ':dia_chi_ip'    => $_SERVER['REMOTE_ADDR'],
-        ':user_agent'    => $_SERVER['HTTP_USER_AGENT']
+        ':loai_su_kien'  => $loai_su_kien,
+        ':dia_chi_ip'    => $_SERVER['REMOTE_ADDR'] ?? null,
+        ':user_agent'    => $_SERVER['HTTP_USER_AGENT'] ?? null
     ]);
     $idlichsu = $stmt->fetchColumn();
     $_SESSION['id_lich_su'] = $idlichsu;
@@ -71,7 +72,6 @@ function luuLichSuNguoiDung($pdo, $id_nguoi_dung) {
 if ($user) {
     $command = "/opt/venv/bin/python ../../helpers/xuly_matkhau.py " . escapeshellarg($mat_khau) . " " . escapeshellarg($user['mat_khau']);
     $result = shell_exec($command);
-
     if (trim($result) === 'true') {
         $kq = kiemTraHoatDong($pdo, $user['id'], $user['ten_dang_nhap']);
         if (!$kq) {

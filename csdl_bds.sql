@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS yeu_cau_otp (
     so_dt VARCHAR(20) NULL,
     email VARCHAR(255) NULL,
     otp_code VARCHAR(10) NOT NULL,
-    trang_thai DEFAULT 'choxacnhan',
+    trang_thai VARCHAR(20) DEFAULT 'choxacnhan',
     bat_dau TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     het_han TIMESTAMP NOT NULL,
     cap_nhat TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -163,6 +163,72 @@ CREATE TABLE IF NOT EXISTS danh_gia_bds (
 	CONSTRAINT chk_danh_gia_bds_trang_thai CHECK (trang_thai IN ('hien','an')),
     CONSTRAINT fk_danh_gia_bds_khach_hang FOREIGN KEY (id_khach_hang) REFERENCES khach_hang(id_nguoi_dung) ON DELETE SET NULL,
     CONSTRAINT fk_danh_gia_bds_bat_dong_san FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE CASCADE
+);
+
+-- 11. Bảng giao_dich (ghi nhận giao dịch mua/bán/thue)
+CREATE TABLE IF NOT EXISTS giao_dich (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id_khach_hang UUID,
+    id_bds UUID,
+    loai VARCHAR(50) NOT NULL, 
+    ngay_giao_dich TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    trang_thai VARCHAR(50) DEFAULT 'dang_xu_ly', 
+    CONSTRAINT chk_giao_dich_loai CHECK (loai IN ('mua','ban','thue')),
+    CONSTRAINT fk_giao_dich_kh FOREIGN KEY (id_khach_hang) REFERENCES khach_hang(id_nguoi_dung) ON DELETE SET NULL,
+    CONSTRAINT fk_giao_dich_bds FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE SET NULL
+);
+
+-- 12. Bảng thanh_toan (tổng thanh toán liên quan giao dịch)
+CREATE TABLE IF NOT EXISTS thanh_toan (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id_giao_dich UUID NOT NULL,
+    tong_tien NUMERIC(18,2) CHECK (tong_tien >= 0),
+    ngay_tt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    phuong_thuc VARCHAR(100), 
+    trang_thai VARCHAR(50) DEFAULT 'mo',
+    CONSTRAINT fk_tt_gd FOREIGN KEY (id_giao_dich) REFERENCES giao_dich(id) ON DELETE CASCADE
+);
+
+-- 13. Bảng thanh_toan_ct (chi tiết thanh toán)
+CREATE TABLE IF NOT EXISTS thanh_toan_ct (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id_thanh_toan UUID NOT NULL,
+    id_bds UUID,
+    so_luong INT DEFAULT 1,
+    so_tien NUMERIC(18,2) CHECK (so_tien >= 0),
+    CONSTRAINT fk_ttc_tt FOREIGN KEY (id_thanh_toan) REFERENCES thanh_toan(id) ON DELETE CASCADE,
+    CONSTRAINT fk_ttc_bds FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE SET NULL
+);
+
+-- 14. Bảng thong_bao
+CREATE TABLE IF NOT EXISTS thong_bao (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id_nguoi_dung UUID NOT NULL,
+    loai VARCHAR(50) NOT NULL,
+    tieu_de VARCHAR(255) NOT NULL,
+    noi_dung TEXT NOT NULL,
+    thoi_gian_gui TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    trang_thai VARCHAR(20) DEFAULT 'chuaxem',
+    CONSTRAINT fk_thong_bao_nguoi_dung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
+    CONSTRAINT chk_thong_bao_loai CHECK (loai IN (
+        'capnhatthongtin',
+        'doimatkhau',
+        'khoataikhoan',
+        'xoataikhoan'
+    )),
+    CONSTRAINT chk_thong_bao_trang_thai CHECK (trang_thai IN ('chuaxem','daxem'))
+);
+
+-- 15. Bảng danh_gia_mg (đánh giá môi giới)
+CREATE TABLE IF NOT EXISTS danh_gia_mg (
+    id SERIAL PRIMARY KEY,
+    id_khach_hang UUID,
+    id_moi_gioi UUID,
+    diem INT CHECK (diem >= 1 AND diem <= 5),
+    binh_luan TEXT,
+    ngay_dg TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_danh_gia_mg_kh FOREIGN KEY (id_khach_hang) REFERENCES khach_hang(id_nguoi_dung) ON DELETE SET NULL,
+    CONSTRAINT fk_danh_gia_mg_mg FOREIGN KEY (id_moi_gioi) REFERENCES moi_gioi(id_nguoi_dung) ON DELETE SET NULL
 );
 
 -- Sự kiện: 

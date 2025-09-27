@@ -29,7 +29,7 @@
         <div class="flex flex-col md:flex-row md:items-center md:justify-between py-3 space-y-3 md:space-y-0">
             
             <!-- Logo + slogan -->
-            <div class="flex items-center justify-between w-full md:w-auto">
+            <div class="flex items-center justify-between w-full md:w-auto cursor-pointer">
                 <div class="flex items-center space-x-3">
                 <img src="../../../public/assets/anhht/0/logo-homedy.png" alt="Logo" class="h-10">
                 <span class="text-xs sm:text-sm text-gray-500 italic">
@@ -91,7 +91,7 @@
     </div>
 
     <!-- Menu ngang -->
-    <nav class="bg-gray-50 border-t hidden md:block">
+    <nav class="bg-gray-50 border-t hidden md:block cursor-pointer">
         <ul class="flex space-x-6 py-2 text-sm font-normal text-gray-700 whitespace-nowrap justify-evenly">
             <li class="relative">
                 <a class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý Khách hàng <i class="fas fa-chevron-right ml-1 transition-transform duration-300"></i></a> 
@@ -336,7 +336,7 @@
 <?php
     $page = isset($_GET['page']) ? $_GET['page'] : 'trangchu';
     $allowed_pages = ['sanpham', 'danhgiasanpham', 'danhgiasanphamct', 'khachhang', 'moigioi', 'lichsuxacthuc', 'ql_anh_video_bds',
-                     'ql_hop_thoai_chat', 'guithongbao', 'ql_bieu_mau', 'datlich'];
+                     'ql_hop_thoai_chat', 'guithongbao', 'ql_bieu_mau', 'datlich', 'xem_ct_mg'];
     $showHome = ($page === 'trangchu');
 ?>
 
@@ -347,7 +347,7 @@
 </div>
 
 <!-- Section App Landing -->
-<div class="bg-blue-0 text-gray-900 py-12 mt-4 border-t border-gray-300">
+<div class="bg-gray-50 text-gray-900 py-12 mt-4 border-t border-gray-300">
     <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
         
         <!-- Hình ảnh App -->

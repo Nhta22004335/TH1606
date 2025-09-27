@@ -71,7 +71,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/alpinejs" defer></script>
     <link rel="stylesheet" href="../../../public/assets/fontawesome/css/all.min.css">
-    <style>[x-cloak] { display: none !important; }</style>
+    <style>
+        [x-cloak] { display: none !important; }
+        .option.active {
+            background-color: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+    </style>
 </head>
 <body>
 
@@ -202,36 +209,71 @@
                                 <a href="javascript:void(0)" @click="openForm = true" class="text-blue-600 hover:text-blue-800"><i class="fas fa-edit"></i></a>
                                 <a href="#" class="text-red-600 hover:text-red-800"><i class="fas fa-trash-alt"></i></a>
                                 <a href="javascript:void(0)" @click="openOption = true" class="text-purple-600 hover:text-purple-800" title="Đổi mật khẩu"><i class="fas fa-key"></i></a>
-                                <a href="#?id=<?= $m['id'] ?>" class="text-green-600 hover:text-green-800"><i class="fas fa-eye"></i></a>
+                                <a href="trangchu.php?page=xem_ct_mg&id=<?= $m['id'] ?>" class="text-green-600 hover:text-green-800"><i class="fas fa-eye"></i></a>
                             </div>
                             <!-- Popup form -->
                             <div x-show="openForm" x-cloak class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
                                 <div class="bg-white rounded-xl shadow-lg p-6 w-96">
-                                    <h2 class="text-lg font-semibold mb-4">Thông báo</h2>
+                                    <h2 class="text-lg font-semibold mb-4 text-blue-600">Gửi thông báo</h2>
 
-                                    <label class="block text-sm font-medium mb-1">Tiêu đề</label>
-                                    <input type="text" class="w-full outline-none border rounded-lg p-2 mb-3 focus:ring focus:border-blue-400" placeholder="Nhập tiêu đề...">
-                                    
-                                    <label class="block text-sm font-medium mb-1">Nội dung</label>
-                                    <textarea class="w-full border rounded-lg p-2 mb-3 outline-none focus:ring focus:border-blue-400" rows="3" placeholder="Nhập nội dung..."></textarea>
-                                    
+                                    <!-- ẩn id người dùng -->
+                                    <input type="hidden" id="idnguoidung" value="<?= htmlspecialchars($mg['id_nguoi_dung']) ?>">
+
+                                    <label class="block text-sm font-medium mb-1 text-gray-700">Loại thông báo</label>
+                                    <select id="loaithongbao" class="w-full border rounded-lg p-2 mb-3 outline-none focus:ring focus:border-blue-400">
+                                        <option value="capnhatthongtin">Yêu cầu cập nhật thông tin cá nhân</option>
+                                        <option value="doimatkhau">Yêu cầu đổi mật khẩu</option>
+                                        <option value="khoataikhoan">Yêu cầu khóa tài khoản</option>
+                                        <option value="xoataikhoan">Yêu cầu xóa tài khoản</option>
+                                    </select>
+
+                                    <label class="block text-sm font-medium mb-1 text-gray-700">Tiêu đề</label>
+                                    <input type="text" id="tieude"
+                                        class="w-full outline-none border rounded-lg p-2 mb-3 focus:ring focus:border-blue-400" 
+                                        placeholder="Nhập tiêu đề...">
+
+                                    <label class="block text-sm font-medium mb-1 text-gray-700">Nội dung</label>
+                                    <textarea id="noidung"
+                                            class="w-full border rounded-lg p-2 mb-3 outline-none focus:ring focus:border-blue-400" 
+                                            rows="3" placeholder="Nhập nội dung..."></textarea>
+
                                     <div class="flex justify-end space-x-2">
-                                        <button @click="openForm = false" class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">Hủy</button>
-                                        <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Gửi</button>
+                                        <button @click="openForm = false"
+                                                class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">Hủy</button>
+                                        <button id="btnguithongbao"
+                                                class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Gửi</button>
                                     </div>
                                 </div>
                             </div>
+
                             <!-- Popup Lựa chọn -->
                             <div x-show="openOption" x-cloak class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
                                 <div class="bg-white rounded-xl shadow-lg p-6 w-80">
                                     <h2 class="text-lg font-semibold mb-4 text-blue-600">Lựa chọn</h2>
-                                    <select class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
-                                        <option>Tạm ngừng</option>
-                                        <option>Khóa</option>
-                                    </select>
-                                    <div class="flex justify-end space-x-2">
+                                    <div class="w-full">
+                                        <label class="block text-sm font-medium mb-1 text-gray-700">Trạng thái</label>
+                                        <div id="trangthai" 
+                                            class="w-full border rounded-lg overflow-hidden divide-y divide-gray-200">
+                                            <div data-value="danghoatdong" 
+                                                class="option px-4 py-2 cursor-pointer hover:bg-blue-50">
+                                            Kích hoạt
+                                            </div>
+                                            <div data-value="chuakichhoat" 
+                                                class="option px-4 py-2 cursor-pointer hover:bg-blue-50">
+                                            Tạm ngừng
+                                            </div>
+                                            <div data-value="khoa" 
+                                                class="option px-4 py-2 cursor-pointer hover:bg-blue-50">
+                                            Khóa
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <input type="hidden" id="trangthai-value" name="trangthai" value="danghoatdong">
+
+                                    <div class="flex justify-end space-x-2 mt-2">
                                         <button @click="openOption = false" class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">Hủy</button>
-                                        <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Lưu</button>
+                                        <button onclick="capnhattrangthai('<?= $mg['id_nguoi_dung'] ?>')" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Lưu</button>
                                     </div>
                                 </div>
                             </div>
@@ -273,36 +315,71 @@
                                     <a href="javascript:void(0)" @click="openForm = true" class="text-blue-600 hover:text-blue-800"><i class="fas fa-edit"></i></a>
                                     <a href="#" class="text-red-600 hover:text-red-800"><i class="fas fa-trash-alt"></i></a>
                                     <a href="javascript:void(0)" @click="openOption = true" class="text-purple-600 hover:text-purple-800" title="Đổi mật khẩu"><i class="fas fa-key"></i></a>
-                                    <a href="#?id=<?= $m['id'] ?>" class="text-green-600 hover:text-green-800"><i class="fas fa-eye"></i></a>
+                                    <a href="trangchu.php?page=xem_ct_mg&id=<?= $m['id'] ?>" class="text-green-600 hover:text-green-800"><i class="fas fa-eye"></i></a>
                                 </div>
                                 <!-- Popup form -->
                                 <div x-show="openForm" x-cloak class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
                                     <div class="bg-white rounded-xl shadow-lg p-6 w-96">
-                                        <h2 class="text-lg font-semibold mb-4">Thông báo</h2>
+                                        <h2 class="text-lg font-semibold mb-4 text-blue-600">Gửi thông báo</h2>
 
-                                        <label class="block text-sm font-medium mb-1">Tiêu đề</label>
-                                        <input type="text" class="w-full outline-none border rounded-lg p-2 mb-3 focus:ring focus:border-blue-400" placeholder="Nhập tiêu đề...">
-                                        
-                                        <label class="block text-sm font-medium mb-1">Nội dung</label>
-                                        <textarea class="w-full border rounded-lg p-2 mb-3 outline-none focus:ring focus:border-blue-400" rows="3" placeholder="Nhập nội dung..."></textarea>
-                                        
+                                        <!-- ẩn id người dùng -->
+                                        <input type="hidden" id="idnguoidung" value="<?= htmlspecialchars($mg['id_nguoi_dung']) ?>">
+
+                                        <label class="block text-sm font-medium mb-1 text-gray-700">Loại thông báo</label>
+                                        <select id="loaithongbao" class="w-full border rounded-lg p-2 mb-3 outline-none focus:ring focus:border-blue-400">
+                                            <option value="capnhatthongtin">Yêu cầu cập nhật thông tin cá nhân</option>
+                                            <option value="doimatkhau">Yêu cầu đổi mật khẩu</option>
+                                            <option value="khoataikhoan">Yêu cầu khóa tài khoản</option>
+                                            <option value="xoataikhoan">Yêu cầu xóa tài khoản</option>
+                                        </select>
+
+                                        <label class="block text-sm font-medium mb-1 text-gray-700">Tiêu đề</label>
+                                        <input type="text" id="tieude"
+                                            class="w-full outline-none border rounded-lg p-2 mb-3 focus:ring focus:border-blue-400" 
+                                            placeholder="Nhập tiêu đề...">
+
+                                        <label class="block text-sm font-medium mb-1 text-gray-700">Nội dung</label>
+                                        <textarea id="noidung"
+                                                class="w-full border rounded-lg p-2 mb-3 outline-none focus:ring focus:border-blue-400" 
+                                                rows="3" placeholder="Nhập nội dung..."></textarea>
+
                                         <div class="flex justify-end space-x-2">
-                                            <button @click="openForm = false" class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">Hủy</button>
-                                            <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Gửi</button>
+                                            <button @click="openForm = false"
+                                                    class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">Hủy</button>
+                                            <button id="btnguithongbao"
+                                                    class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Gửi</button>
                                         </div>
                                     </div>
                                 </div>
+
                                 <!-- Popup Lựa chọn -->
                                 <div x-show="openOption" x-cloak class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
                                     <div class="bg-white rounded-xl shadow-lg p-6 w-80">
                                         <h2 class="text-lg font-semibold mb-4 text-blue-600">Lựa chọn</h2>
-                                        <select class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
-                                            <option>Tạm ngừng</option>
-                                            <option>Khóa</option>
-                                        </select>
-                                        <div class="flex justify-end space-x-2">
+                                        <div class="w-full">
+                                            <label class="block text-sm font-medium mb-1 text-gray-700">Trạng thái</label>
+                                            <div id="trangthai" 
+                                                class="w-full border rounded-lg overflow-hidden divide-y divide-gray-200">
+                                                <div data-value="danghoatdong" 
+                                                    class="option px-4 py-2 cursor-pointer hover:bg-blue-50">
+                                                Kích hoạt
+                                                </div>
+                                                <div data-value="chuakichhoat" 
+                                                    class="option px-4 py-2 cursor-pointer hover:bg-blue-50">
+                                                Tạm ngừng
+                                                </div>
+                                                <div data-value="khoa" 
+                                                    class="option px-4 py-2 cursor-pointer hover:bg-blue-50">
+                                                Khóa
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <input type="hidden" id="trangthai-value" name="trangthai" value="danghoatdong">
+
+                                        <div class="flex justify-end space-x-2 mt-2">
                                             <button @click="openOption = false" class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">Hủy</button>
-                                            <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Lưu</button>
+                                            <button onclick="capnhattrangthai('<?= $mg['id_nguoi_dung'] ?>')" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Lưu</button>
                                         </div>
                                     </div>
                                 </div>
@@ -336,22 +413,39 @@
                                 <a href="javascript:void(0)" @click="openForm = true" class="text-blue-600 hover:text-blue-800"><i class="fas fa-edit"></i></a>
                                 <a href="#" class="text-red-600 hover:text-red-800"><i class="fas fa-trash-alt"></i></a>
                                 <a href="javascript:void(0)" @click="openOption = true" class="text-purple-600 hover:text-purple-800" title="Đổi mật khẩu"><i class="fas fa-key"></i></a>
-                                <a href="#?id=<?= $m['id'] ?>" class="text-green-600 hover:text-green-800"><i class="fas fa-eye"></i></a>
+                                <a href="trangchu.php?page=xem_ct_mg&id=<?= $m['id'] ?>" class="text-green-600 hover:text-green-800"><i class="fas fa-eye"></i></a>
                             </div>
                             <!-- Popup form -->
                             <div x-show="openForm" x-cloak class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
                                 <div class="bg-white rounded-xl shadow-lg p-6 w-96">
-                                    <h2 class="text-lg font-semibold mb-4">Thông báo</h2>
+                                    <h2 class="text-lg font-semibold mb-4 text-blue-600">Gửi thông báo</h2>
 
-                                    <label class="block text-sm font-medium mb-1">Tiêu đề</label>
-                                    <input type="text" class="w-full outline-none border rounded-lg p-2 mb-3 focus:ring focus:border-blue-400" placeholder="Nhập tiêu đề...">
-                                    
-                                    <label class="block text-sm font-medium mb-1">Nội dung</label>
-                                    <textarea class="w-full border rounded-lg p-2 mb-3 outline-none focus:ring focus:border-blue-400" rows="3" placeholder="Nhập nội dung..."></textarea>
-                                    
+                                    <!-- ẩn id người dùng -->
+                                    <input type="hidden" id="idnguoidung" value="<?= htmlspecialchars($m['id_nguoi_dung']) ?>">
+
+                                    <label class="block text-sm font-medium mb-1 text-gray-700">Loại thông báo</label>
+                                    <select id="loaithongbao" class="w-full border rounded-lg p-2 mb-3 outline-none focus:ring focus:border-blue-400">
+                                        <option value="capnhatthongtin">Yêu cầu cập nhật thông tin cá nhân</option>
+                                        <option value="doimatkhau">Yêu cầu đổi mật khẩu</option>
+                                        <option value="khoataikhoan">Yêu cầu khóa tài khoản</option>
+                                        <option value="xoataikhoan">Yêu cầu xóa tài khoản</option>
+                                    </select>
+
+                                    <label class="block text-sm font-medium mb-1 text-gray-700">Tiêu đề</label>
+                                    <input type="text" id="tieude"
+                                        class="w-full outline-none border rounded-lg p-2 mb-3 focus:ring focus:border-blue-400" 
+                                        placeholder="Nhập tiêu đề...">
+
+                                    <label class="block text-sm font-medium mb-1 text-gray-700">Nội dung</label>
+                                    <textarea id="noidung"
+                                            class="w-full border rounded-lg p-2 mb-3 outline-none focus:ring focus:border-blue-400" 
+                                            rows="3" placeholder="Nhập nội dung..."></textarea>
+
                                     <div class="flex justify-end space-x-2">
-                                        <button @click="openForm = false" class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">Hủy</button>
-                                        <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Gửi</button>
+                                        <button @click="openForm = false"
+                                                class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">Hủy</button>
+                                        <button id="btnguithongbao"
+                                                class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Gửi</button>
                                     </div>
                                 </div>
                             </div>
@@ -360,13 +454,30 @@
                             <div x-show="openOption" x-cloak class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
                                 <div class="bg-white rounded-xl shadow-lg p-6 w-80">
                                     <h2 class="text-lg font-semibold mb-4 text-blue-600">Lựa chọn</h2>
-                                    <select class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
-                                        <option>Tạm ngừng</option>
-                                        <option>Khóa</option>
-                                    </select>
-                                    <div class="flex justify-end space-x-2">
+                                    <div class="w-full">
+                                        <label class="block text-sm font-medium mb-1 text-gray-700">Trạng thái</label>
+                                        <div id="trangthai" 
+                                            class="w-full border rounded-lg overflow-hidden divide-y divide-gray-200">
+                                            <div data-value="danghoatdong" 
+                                                class="option px-4 py-2 cursor-pointer hover:bg-blue-50">
+                                            Kích hoạt
+                                            </div>
+                                            <div data-value="chuakichhoat" 
+                                                class="option px-4 py-2 cursor-pointer hover:bg-blue-50">
+                                            Tạm ngừng
+                                            </div>
+                                            <div data-value="khoa" 
+                                                class="option px-4 py-2 cursor-pointer hover:bg-blue-50">
+                                            Khóa
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <input type="hidden" id="trangthai-value" name="trangthai" value="danghoatdong">
+
+                                    <div class="flex justify-end space-x-2 mt-2">
                                         <button @click="openOption = false" class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">Hủy</button>
-                                        <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Lưu</button>
+                                        <button onclick="capnhattrangthai('<?= $m['id_nguoi_dung'] ?>')" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Lưu</button>
                                     </div>
                                 </div>
                             </div>
@@ -404,6 +515,67 @@
     document.getElementById("btnhuy-desktop").addEventListener("click", () => huyloc("desktop"));
     document.getElementById("btnhuy-mobile").addEventListener("click", () => huyloc("mobile"));
 
+    document.querySelectorAll('#trangthai .option').forEach(opt => {
+        opt.addEventListener('click', function() {
+            document.querySelectorAll('#trangthai .option').forEach(o => o.classList.remove('active'));
+            this.classList.add('active');
+            document.getElementById('trangthai-value').value = this.dataset.value;
+        });
+    });
+
+    async function capnhattrangthai(id) {
+        let trangthai = document.getElementById("trangthai-value").value;
+        fetch('../../models/capnhat_tt_kh.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, trangthai })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Đã xảy ra lỗi khi đăng nhập.');
+        });
+    }
+
+    document.getElementById("btnguithongbao").addEventListener("click", function () {
+        const idnguoidung = document.getElementById("idnguoidung").value;
+        const loaithongbao = document.getElementById("loaithongbao").value;
+        const tieude       = document.getElementById("tieude").value.trim();
+        const noidung      = document.getElementById("noidung").value.trim();
+
+        if (!tieude || !noidung) {
+            alert("Vui lòng nhập đầy đủ tiêu đề và nội dung!");
+            return;
+        }
+
+        fetch("../../models/gui_tb_nd.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                loai: loaithongbao,
+                tieude: tieude,
+                noidung: noidung,
+                id: idnguoidung
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                window.location.reload();
+            } else {
+                alert("Có lỗi xảy ra: " + data.message);
+            }
+        })
+        .catch(err => console.error(err));
+    });
 </script>
 
 </body>

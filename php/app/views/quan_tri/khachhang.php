@@ -12,7 +12,7 @@
             kh.dia_chi,
             kh.avt,
             kh.ngay_sinh,
-            nd.id,
+            nd.id AS id_nguoi_dung,
             nd.ten_dang_nhap,
             nd.email,
             nd.so_dt,
@@ -91,6 +91,11 @@
             -ms-overflow-style: none;
         }
         [x-cloak] { display: none !important; }
+        .option.active {
+            background-color: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
     </style>
 </head>
 <body>
@@ -104,14 +109,14 @@
         </h2>
 
         <label class="block mb-2 text-sm">Hoạt động</label>
-        <select id="hoatdong-desktop" class="w-full border rounded-lg p-2 mb-4 outline-none focus:ring focus:border-blue-400">
+        <select id="hoatdong-desktop" class="w-full border rounded-lg p-2 mb-4 outline-none focus:ring focus:border-blue-400 cursor-pointer">
             <option value="" <?= (($filters['hoatdong'] ?? '') == 'tatca') ? 'selected' : ''?>>Tất cả</option>
             <option value="online" <?= (($filters['hoatdong'] ?? '') == 'online') ? 'selected' : ''?>>Online</option>
             <option value="offline" <?= (($filters['hoatdong'] ?? '') == 'offline') ? 'selected' : ''?>>Offline</option>
         </select>
 
         <label class="block mb-2 text-sm">Trạng thái</label>
-        <select id="trangthai-desktop" class="w-full border rounded-lg p-2 mb-4 outline-none focus:ring focus:border-blue-400">
+        <select id="trangthai-desktop" class="w-full border rounded-lg p-2 mb-4 outline-none focus:ring focus:border-blue-400 cursor-pointer">
             <option value="" <?= (($filters['trangthai'] ?? '') == 'tatca') ? 'selected' : ''?>>Tất cả</option>
             <option value="danghoatdong" <?= (($filters['trangthai'] ?? '') == 'danghoatdong') ? 'selected' : ''?>>Đang hoạt động</option>
             <option value="chuakichhoat" <?= (($filters['trangthai'] ?? '') == 'chuakichhoat') ? 'selected' : ''?>>Chưa kích hoạt</option>
@@ -119,12 +124,12 @@
         </select>
 
         <label class="block mb-2 text-sm">Ngày tạo tài khoản trước</label>
-        <input id="ngaytruoc-desktop" value="<?= ($filters['ngaytruoc'] ?? '') ?>" type="date" class="w-full border rounded-lg p-2 mb-4 outline-none focus:ring focus:border-blue-400">
+        <input id="ngaytruoc-desktop" value="<?= ($filters['ngaytruoc'] ?? '') ?>" type="date" class="w-full border rounded-lg p-2 mb-4 outline-none focus:ring focus:border-blue-400 cursor-pointer">
 
         <label class="block mb-2 text-sm">Số đơn lớn hơn</label>
-        <input id="sodon-desktop" value="<?= ($filters['sodon'] ?? '') ?>" type="number" placeholder="Số đơn tối thiểu" class="w-full border rounded-lg p-2 mb-4 outline-none focus:ring focus:border-blue-400">
+        <input id="sodon-desktop" value="<?= ($filters['sodon'] ?? '') ?>" type="number" placeholder="Số đơn tối thiểu" class="w-full border rounded-lg p-2 mb-4 outline-none focus:ring focus:border-blue-400 cursor-pointer">
 
-        <div class="flex gap-3 mt-4">
+        <div class="flex gap-3 mt-4 cursor-pointer">
             <!-- Nút áp dụng -->
             <button id="btnloc-desktop" class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">Áp dụng</button>
             <!-- Nút hủy -->
@@ -193,14 +198,36 @@
             <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 <?php if (empty($filters)&& empty($mangtkkhachhang)): ?>
                     <?php foreach($users as $u): ?>
-                        <div class="bg-white shadow rounded-xl overflow-hidden hover:shadow-lg transition flex flex-col relative">
+                        <div class="bg-blue-50 border border-blue-200 rounded-xl overflow-hidden transition flex flex-col relative cursor-pointer">
                             <div class="p-4 flex flex-col items-center">
                                 <img src="../../../public/assets/anhht/0/<?= $u['avt'] ?>" class="w-20 h-20 rounded-full object-cover border-2 border-gray-200">
                                 <h2 class="mt-2 font-semibold text-gray-800 text-center"><?= $u['ho_ten'] ?></h2>
                                 <p class="text-gray-500 text-sm text-center"><?= $u['email'] ?></p>
                                 <p class="text-gray-500 text-sm text-center"><?= $u['so_dt'] ?></p>
-                                <span class="mt-2 px-2 py-1 rounded-full text-xs font-semibold <?= $u['hoat_dong']=='Online'?'bg-green-100 text-green-700':'bg-gray-200 text-gray-700' ?>"><?= ucfirst($u['hoat_dong']) ?></span>
-                                <span class="mt-1 px-2 py-1 rounded-full text-xs font-semibold <?= $u['vai_tro']=='Admin'?'bg-red-100 text-red-700':($u['vai_tro']=='Moderator'?'bg-blue-100 text-blue-700':'bg-yellow-100 text-yellow-700') ?>"><?= $u['vai_tro'] ?></span>
+                                <span class="mt-2 px-2 py-1 rounded-full text-xs font-semibold <?= $u['hoat_dong']=='online'?'bg-green-100 text-green-700':'bg-gray-200 text-gray-700' ?>"><?= ucfirst($u['hoat_dong']) ?></span>
+                                <?php
+                                    $labelvaitro = [
+                                        'quantri' => 'Quản trị',
+                                        'moigioi' => 'Môi giới',
+                                        'khachhang' => 'Khách hàng'
+                                    ];
+                                ?>
+                                <span class="mt-1 px-2 py-1 rounded-full text-xs font-semibold <?= $u['vai_tro']=='quantri'?'bg-red-100 text-red-700':($u['vai_tro']=='moigioi'?'bg-blue-100 text-blue-700':'bg-yellow-100 text-yellow-700') ?>"><?= $labelvaitro[$u['vai_tro']] ?></span>
+                                <?php
+                                    $labeltrangthai = [
+                                        'danghoatdong' => 'Đang hoạt động',
+                                        'chuakichhoat' => 'Chưa kích hoạt',
+                                        'khoa'         => 'Đã khóa'
+                                    ];
+                                ?>
+                                <span class="mt-1 px-2 py-1 rounded-full text-xs font-semibold 
+                                    <?= $u['trang_thai']=='danghoatdong'
+                                        ?'bg-green-50 text-green-600'
+                                        :($u['trang_thai']=='chuakichhoat'
+                                            ?'bg-yellow-50 text-yellow-600'
+                                            :'bg-red-50 text-red-600') ?>">
+                                    <?= $labeltrangthai[$u['trang_thai']] ?>
+                                </span>
                                 <p class="mt-2 text-sm text-gray-600">Đã đặt: <?= $u['so_don'] ?> đơn</p>
                                 <p class="mt-1 text-xs text-gray-400">Ngày tạo: <?= date("d/m/Y",strtotime($u['ngay_tao'])) ?></p>
                             </div>
@@ -208,7 +235,6 @@
                                 <!-- Nút hành động -->
                                 <div class="flex justify-around border-t p-2 mt-auto">
                                     <a href="javascript:void(0)" @click="openForm = true" class="text-blue-600 hover:text-blue-800"><i class="fas fa-edit"></i></a> 
-                                    <a href="#" class="text-red-600 hover:text-red-800"><i class="fas fa-trash-alt"></i></a>
                                     <a href="javascript:void(0)" @click="openOption = true" class="text-purple-600 hover:text-purple-800"><i class="fas fa-key"></i></a>
                                 </div>
                                 <!-- Popup form -->
@@ -216,15 +242,32 @@
                                     <div class="bg-white rounded-xl shadow-lg p-6 w-96">
                                         <h2 class="text-lg font-semibold mb-4">Thông báo</h2>
 
+                                        <!-- ẩn id người dùng -->
+                                        <input type="hidden" id="idnguoidung" value="<?= htmlspecialchars($m['id_nguoi_dung']) ?>">
+
+                                        <label class="block text-sm font-medium mb-1">Loại thông báo</label>
+                                        <select id="loaithongbao" class="w-full border rounded-lg p-2 mb-3 outline-none focus:ring focus:border-blue-400">
+                                            <option value="capnhatthongtin">Yêu cầu cập nhật thông tin cá nhân</option>
+                                            <option value="doimatkhau">Yêu cầu đổi mật khẩu</option>
+                                            <option value="khoataikhoan">Yêu cầu khóa tài khoản</option>
+                                            <option value="xoataikhoan">Yêu cầu xóa tài khoản</option>
+                                        </select>
+
                                         <label class="block text-sm font-medium mb-1">Tiêu đề</label>
-                                        <input type="text" class="w-full outline-none border rounded-lg p-2 mb-3 focus:ring focus:border-blue-400" placeholder="Nhập tiêu đề...">
-                                        
+                                        <input type="text" id="tieude"
+                                            class="w-full outline-none border rounded-lg p-2 mb-3 focus:ring focus:border-blue-400" 
+                                            placeholder="Nhập tiêu đề...">
+
                                         <label class="block text-sm font-medium mb-1">Nội dung</label>
-                                        <textarea class="w-full border rounded-lg p-2 mb-3 outline-none focus:ring focus:border-blue-400" rows="3" placeholder="Nhập nội dung..."></textarea>
-                                        
+                                        <textarea id="noidung"
+                                                class="w-full border rounded-lg p-2 mb-3 outline-none focus:ring focus:border-blue-400" 
+                                                rows="3" placeholder="Nhập nội dung..."></textarea>
+
                                         <div class="flex justify-end space-x-2">
-                                            <button @click="openForm = false" class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">Hủy</button>
-                                            <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Gửi</button>
+                                            <button @click="openForm = false"
+                                                    class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">Hủy</button>
+                                            <button id="btnguithongbao"
+                                                    class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Gửi</button>
                                         </div>
                                     </div>
                                 </div>
@@ -233,14 +276,28 @@
                                 <div x-show="openOption" x-cloak class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
                                     <div class="bg-white rounded-xl shadow-lg p-6 w-80">
                                         <h2 class="text-lg font-semibold mb-4 text-blue-600">Lựa chọn</h2>
-                                        <select class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
-                                            <option>Kích hoạt</option>
-                                            <option>Tạm ngừng</option>
-                                            <option>Khóa</option>
-                                        </select>
+                                        <div class="w-full">
+                                            <label class="block mb-2 text-gray-700">Trạng thái</label>
+                                            <div id="trangthai" 
+                                                class="w-full border rounded-lg overflow-hidden divide-y divide-gray-200">
+                                                <div data-value="danghoatdong" 
+                                                    class="option px-4 py-2 cursor-pointer hover:bg-blue-50">
+                                                Kích hoạt
+                                                </div>
+                                                <div data-value="chuakichhoat" 
+                                                    class="option px-4 py-2 cursor-pointer hover:bg-blue-50">
+                                                Tạm ngừng
+                                                </div>
+                                                <div data-value="khoa" 
+                                                    class="option px-4 py-2 cursor-pointer hover:bg-blue-50">
+                                                Khóa
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" id="trangthai-value" name="trangthai" value="danghoatdong">
                                         <div class="flex justify-end space-x-2">
                                             <button @click="openOption = false" class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">Hủy</button>
-                                            <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Lưu</button>
+                                            <button onclick="capnhattrangthai('<?= $m['id_nguoi_dung'] ?>')" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Lưu</button>
                                         </div>
                                     </div>
                                 </div>
@@ -257,14 +314,37 @@
                             if (isset($filters['sodon']) && $u['so_don'] > $filters['sodon']) $match = false;
                         ?>
                         <?php if ($match): ?>
-                            <div class="bg-white shadow rounded-xl overflow-hidden hover:shadow-lg transition flex flex-col relative">
+                            <div class="bg-blue-50 border border-blue-200 rounded-xl overflow-hidden transition flex flex-col relative cursor-pointer">
                                 <div class="p-4 flex flex-col items-center">
                                     <img src="../../../public/assets/anhht/0/<?= $u['avt'] ?>" alt="<?= $u['ho_ten'] ?>" class="w-20 h-20 rounded-full object-cover border-2 border-gray-200">
                                     <h2 class="mt-2 font-semibold text-gray-800 text-center"><?= $u['ho_ten'] ?></h2>
                                     <p class="text-gray-500 text-sm text-center"><?= $u['email'] ?></p>
                                     <p class="text-gray-500 text-sm text-center"><?= $u['so_dt'] ?></p>
                                     <span class="mt-2 px-2 py-1 rounded-full text-xs font-semibold <?= $u['hoat_dong']=='online'?'bg-green-100 text-green-700':'bg-gray-200 text-gray-700' ?>"><?= ucfirst($u['hoat_dong']) ?></span>
-                                    <span class="mt-1 px-2 py-1 rounded-full text-xs font-semibold <?= $u['vai_tro']=='Admin'?'bg-red-100 text-red-700':($u['vai_tro']=='Moderator'?'bg-blue-100 text-blue-700':'bg-yellow-100 text-yellow-700') ?>"><?= $u['vai_tro'] ?></span>
+                                    <?php
+                                        $labelvaitro = [
+                                            'quantri' => 'Quản trị',
+                                            'moigioi' => 'Môi giới',
+                                            'khachhang' => 'Khách hàng'
+                                        ];
+                                    ?>
+                                    <span class="mt-1 px-2 py-1 rounded-full text-xs font-semibold <?= $u['vai_tro']=='quantri'?'bg-red-100 text-red-700':($u['vai_tro']=='moigioi'?'bg-blue-100 text-blue-700':'bg-yellow-100 text-yellow-700') ?>"><?= $labelvaitro[$u['vai_tro']] ?></span>
+                                    <!-- trạng thái tài khoản -->
+                                    <?php
+                                        $labeltrangthai = [
+                                            'danghoatdong' => 'Đang hoạt động',
+                                            'chuakichhoat' => 'Chưa kích hoạt',
+                                            'khoa'         => 'Đã khóa'
+                                        ];
+                                    ?>
+                                    <span class="mt-1 px-2 py-1 rounded-full text-xs font-semibold 
+                                        <?= $u['trang_thai']=='danghoatdong'
+                                            ?'bg-green-50 text-green-600'
+                                            :($u['trang_thai']=='chuakichhoat'
+                                                ?'bg-yellow-50 text-yellow-600'
+                                                :'bg-red-50 text-red-600') ?>">
+                                        <?= $labeltrangthai[$u['trang_thai']] ?>
+                                    </span>
                                     <p class="mt-2 text-sm text-gray-600">Đã đặt: <?= $u['so_don'] ?> đơn</p>
                                     <p class="mt-1 text-xs text-gray-400">Ngày tạo: <?= date("d/m/Y",strtotime($u['ngay_tao'])) ?></p>
                                 </div>
@@ -272,7 +352,6 @@
                                     <!-- Nút hành động -->
                                     <div class="flex justify-around border-t p-2 mt-auto">
                                         <a href="javascript:void(0)" @click="openForm = true" class="text-blue-600 hover:text-blue-800"><i class="fas fa-edit"></i></a> 
-                                        <a href="#" class="text-red-600 hover:text-red-800"><i class="fas fa-trash-alt"></i></a>
                                         <a href="javascript:void(0)" @click="openOption = true" class="text-purple-600 hover:text-purple-800"><i class="fas fa-key"></i></a>
                                     </div>
 
@@ -281,15 +360,32 @@
                                         <div class="bg-white rounded-xl shadow-lg p-6 w-96">
                                             <h2 class="text-lg font-semibold mb-4">Thông báo</h2>
 
+                                            <!-- ẩn id người dùng -->
+                                            <input type="hidden" id="idnguoidung" value="<?= htmlspecialchars($m['id_nguoi_dung']) ?>">
+
+                                            <label class="block text-sm font-medium mb-1">Loại thông báo</label>
+                                            <select id="loaithongbao" class="w-full border rounded-lg p-2 mb-3 outline-none focus:ring focus:border-blue-400">
+                                                <option value="capnhatthongtin">Yêu cầu cập nhật thông tin cá nhân</option>
+                                                <option value="doimatkhau">Yêu cầu đổi mật khẩu</option>
+                                                <option value="khoataikhoan">Yêu cầu khóa tài khoản</option>
+                                                <option value="xoataikhoan">Yêu cầu xóa tài khoản</option>
+                                            </select>
+
                                             <label class="block text-sm font-medium mb-1">Tiêu đề</label>
-                                            <input type="text" class="w-full outline-none border rounded-lg p-2 mb-3 focus:ring focus:border-blue-400" placeholder="Nhập tiêu đề...">
-                                            
+                                            <input type="text" id="tieude"
+                                                class="w-full outline-none border rounded-lg p-2 mb-3 focus:ring focus:border-blue-400" 
+                                                placeholder="Nhập tiêu đề...">
+
                                             <label class="block text-sm font-medium mb-1">Nội dung</label>
-                                            <textarea class="w-full border rounded-lg p-2 mb-3 outline-none focus:ring focus:border-blue-400" rows="3" placeholder="Nhập nội dung..."></textarea>
-                                            
+                                            <textarea id="noidung"
+                                                    class="w-full border rounded-lg p-2 mb-3 outline-none focus:ring focus:border-blue-400" 
+                                                    rows="3" placeholder="Nhập nội dung..."></textarea>
+
                                             <div class="flex justify-end space-x-2">
-                                                <button @click="openForm = false" class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">Hủy</button>
-                                                <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Gửi</button>
+                                                <button @click="openForm = false"
+                                                        class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">Hủy</button>
+                                                <button id="btnguithongbao"
+                                                        class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Gửi</button>
                                             </div>
                                         </div>
                                     </div>
@@ -298,14 +394,28 @@
                                     <div x-show="openOption" x-cloak class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
                                         <div class="bg-white rounded-xl shadow-lg p-6 w-80">
                                             <h2 class="text-lg font-semibold mb-4 text-blue-600">Lựa chọn</h2>
-                                            <select class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
-                                                <option>Kích hoạt</option>
-                                                <option>Tạm ngừng</option>
-                                                <option>Khóa</option>
-                                            </select>
+                                            <div class="w-full">
+                                                <label class="block mb-2 text-gray-700">Trạng thái</label>
+                                                <div id="trangthai" 
+                                                    class="w-full border rounded-lg overflow-hidden divide-y divide-gray-200">
+                                                    <div data-value="danghoatdong" 
+                                                        class="option px-4 py-2 cursor-pointer hover:bg-blue-50">
+                                                    Kích hoạt
+                                                    </div>
+                                                    <div data-value="chuakichhoat" 
+                                                        class="option px-4 py-2 cursor-pointer hover:bg-blue-50">
+                                                    Tạm ngừng
+                                                    </div>
+                                                    <div data-value="khoa" 
+                                                        class="option px-4 py-2 cursor-pointer hover:bg-blue-50">
+                                                    Khóa
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <input type="hidden" id="trangthai-value" name="trangthai" value="danghoatdong">
                                             <div class="flex justify-end space-x-2">
                                                 <button @click="openOption = false" class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">Hủy</button>
-                                                <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Lưu</button>
+                                                <button onclick="capnhattrangthai('<?= $m['id_nguoi_dung'] ?>')" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Lưu</button>
                                             </div>
                                         </div>
                                     </div>
@@ -315,14 +425,36 @@
                     <?php endforeach; ?>
                 <?php elseif (!empty($mangtkkhachhang)): ?>
                     <?php foreach ($mangtkkhachhang as $m): ?>
-                        <div class="bg-white shadow rounded-xl overflow-hidden hover:shadow-lg transition flex flex-col relative">
+                        <div class="bg-blue-50 border border-blue-200 rounded-xl overflow-hidden transition flex flex-col relative cursor-pointer">
                             <div class="p-4 flex flex-col items-center">
                                 <img src="../../../public/assets/anhht/0/<?= $m['avt'] ?>" alt="<?= $m['ho_ten'] ?>" class="w-20 h-20 rounded-full object-cover border-2 border-gray-200">
                                 <h2 class="mt-2 font-semibold text-gray-800 text-center"><?= $m['ho_ten'] ?></h2>
                                 <p class="text-gray-500 text-sm text-center"><?= $m['email'] ?></p>
                                 <p class="text-gray-500 text-sm text-center"><?= $m['so_dt'] ?></p>
                                 <span class="mt-2 px-2 py-1 rounded-full text-xs font-semibold <?= $m['hoat_dong']=='online'?'bg-green-100 text-green-700':'bg-gray-200 text-gray-700' ?>"><?= ucfirst($m['hoat_dong']) ?></span>
-                                <span class="mt-1 px-2 py-1 rounded-full text-xs font-semibold <?= $m['vai_tro']=='Admin'?'bg-red-100 text-red-700':($m['vai_tro']=='Moderator'?'bg-blue-100 text-blue-700':'bg-yellow-100 text-yellow-700') ?>"><?= $m['vai_tro'] ?></span>
+                                <?php
+                                    $labelvaitro = [
+                                        'quantri' => 'Quản trị',
+                                        'moigioi' => 'Môi giới',
+                                        'khachhang' => 'Khách hàng'
+                                    ];
+                                ?>
+                                <span class="mt-1 px-2 py-1 rounded-full text-xs font-semibold <?= $m['vai_tro']=='quantri'?'bg-red-100 text-red-700':($m['vai_tro']=='moigioi'?'bg-blue-100 text-blue-700':'bg-yellow-100 text-yellow-700') ?>"><?= $labelvaitro[$m['vai_tro']] ?></span>
+                                <?php
+                                    $labeltrangthai = [
+                                        'danghoatdong' => 'Đang hoạt động',
+                                        'chuakichhoat' => 'Chưa kích hoạt',
+                                        'khoa'         => 'Đã khóa'
+                                    ];
+                                ?>
+                                <span class="mt-1 px-2 py-1 rounded-full text-xs font-semibold 
+                                    <?= $m['trang_thai']=='danghoatdong'
+                                        ?'bg-green-50 text-green-600'
+                                        :($m['trang_thai']=='chuakichhoat'
+                                            ?'bg-yellow-50 text-yellow-600'
+                                            :'bg-red-50 text-red-600') ?>">
+                                    <?= $labeltrangthai[$m['trang_thai']] ?>
+                                </span>
                                 <p class="mt-2 text-sm text-gray-600">Đã đặt: <?= $m['so_don'] ?> đơn</p>
                                 <p class="mt-1 text-xs text-gray-400">Ngày tạo: <?= date("d/m/Y",strtotime($m['ngay_tao'])) ?></p>
                             </div>
@@ -330,9 +462,8 @@
                                 <!-- Nút hành động -->
                                 <div class="flex justify-around border-t p-2 mt-auto">
                                     <a href="javascript:void(0)" @click="openForm = true" class="text-blue-600 hover:text-blue-800"><i class="fas fa-edit"></i></a> 
-                                    <a href="#" class="text-red-600 hover:text-red-800"><i class="fas fa-trash-alt"></i></a>
                                     <!-- Nút lựa chọn -->
-                                    <a href="javascript:void(0)" @click="openOption = true" class="text-purple-600 hover:text-purple-800">
+                                    <a href="javascript:void(0)" @click="openOption = true" class="text-red-600 hover:text-purple-800">
                                         <i class="fas fa-key"></i>
                                     </a>
                                 </div>
@@ -340,17 +471,34 @@
                                 <!-- Popup form -->
                                 <div x-show="openForm" x-cloak class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
                                     <div class="bg-white rounded-xl shadow-lg p-6 w-96">
-                                        <h2 class="text-lg font-semibold mb-4">Thông báo</h2>
+                                        <h2 class="text-lg font-semibold mb-4 text-blue-600">Gửi thông báo</h2>
 
-                                        <label class="block text-sm font-medium mb-1">Tiêu đề</label>
-                                        <input type="text" class="w-full outline-none border rounded-lg p-2 mb-3 focus:ring focus:border-blue-400" placeholder="Nhập tiêu đề...">
-                                        
-                                        <label class="block text-sm font-medium mb-1">Nội dung</label>
-                                        <textarea class="w-full border rounded-lg p-2 mb-3 outline-none focus:ring focus:border-blue-400" rows="3" placeholder="Nhập nội dung..."></textarea>
-                                        
+                                        <!-- ẩn id người dùng -->
+                                        <input type="hidden" id="idnguoidung" value="<?= htmlspecialchars($m['id_nguoi_dung']) ?>">
+
+                                        <label class="block text-sm font-medium mb-1 text-gray-700">Loại thông báo</label>
+                                        <select id="loaithongbao" class="w-full border rounded-lg p-2 mb-3 outline-none focus:ring focus:border-blue-400">
+                                            <option value="capnhatthongtin">Yêu cầu cập nhật thông tin cá nhân</option>
+                                            <option value="doimatkhau">Yêu cầu đổi mật khẩu</option>
+                                            <option value="khoataikhoan">Yêu cầu khóa tài khoản</option>
+                                            <option value="xoataikhoan">Yêu cầu xóa tài khoản</option>
+                                        </select>
+
+                                        <label class="block text-sm font-medium mb-1 text-gray-700">Tiêu đề</label>
+                                        <input type="text" id="tieude"
+                                            class="w-full outline-none border rounded-lg p-2 mb-3 focus:ring focus:border-blue-400" 
+                                            placeholder="Nhập tiêu đề...">
+
+                                        <label class="block text-sm font-medium mb-1 text-gray-700">Nội dung</label>
+                                        <textarea id="noidung"
+                                                class="w-full border rounded-lg p-2 mb-3 outline-none focus:ring focus:border-blue-400" 
+                                                rows="3" placeholder="Nhập nội dung..."></textarea>
+
                                         <div class="flex justify-end space-x-2">
-                                            <button @click="openForm = false" class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">Hủy</button>
-                                            <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Gửi</button>
+                                            <button @click="openForm = false"
+                                                    class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">Hủy</button>
+                                            <button id="btnguithongbao"
+                                                    class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Gửi</button>
                                         </div>
                                     </div>
                                 </div>
@@ -359,14 +507,31 @@
                                 <div x-show="openOption" x-cloak class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
                                     <div class="bg-white rounded-xl shadow-lg p-6 w-80">
                                         <h2 class="text-lg font-semibold mb-4 text-blue-600">Lựa chọn</h2>
-                                        <select class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
-                                            <option>Kích hoạt</option>
-                                            <option>Tạm ngừng</option>
-                                            <option>Khóa</option>
-                                        </select>
-                                        <div class="flex justify-end space-x-2">
+
+                                        <div class="w-full">
+                                            <label class="block mb-2 font-medium text-gray-700">Trạng thái</label>
+                                            <div id="trangthai" 
+                                                class="w-full border rounded-lg overflow-hidden divide-y divide-gray-200">
+                                                <div data-value="danghoatdong" 
+                                                    class="option px-4 py-2 cursor-pointer hover:bg-blue-50">
+                                                Kích hoạt
+                                                </div>
+                                                <div data-value="chuakichhoat" 
+                                                    class="option px-4 py-2 cursor-pointer hover:bg-blue-50">
+                                                Tạm ngừng
+                                                </div>
+                                                <div data-value="khoa" 
+                                                    class="option px-4 py-2 cursor-pointer hover:bg-blue-50">
+                                                Khóa
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <input type="hidden" id="trangthai-value" name="trangthai" value="danghoatdong">
+
+                                        <div class="flex justify-end space-x-2 mt-2">
                                             <button @click="openOption = false" class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">Hủy</button>
-                                            <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Lưu</button>
+                                            <button onclick="capnhattrangthai('<?= $m['id_nguoi_dung'] ?>')" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Lưu</button>
                                         </div>
                                     </div>
                                 </div>
@@ -405,6 +570,68 @@
 
     document.getElementById("btnhuy-desktop").addEventListener("click", () => huyloc("desktop"));
     document.getElementById("btnhuy-mobile").addEventListener("click", () => huyloc("mobile"));
+
+    document.querySelectorAll('#trangthai .option').forEach(opt => {
+        opt.addEventListener('click', function() {
+            document.querySelectorAll('#trangthai .option').forEach(o => o.classList.remove('active'));
+            this.classList.add('active');
+            document.getElementById('trangthai-value').value = this.dataset.value;
+        });
+    });
+
+    async function capnhattrangthai(id) {
+        let trangthai = document.getElementById("trangthai-value").value;
+        fetch('../../models/capnhat_tt_kh.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, trangthai })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Đã xảy ra lỗi khi đăng nhập.');
+        });
+    }
+
+    document.getElementById("btnguithongbao").addEventListener("click", function () {
+        const idnguoidung = document.getElementById("idnguoidung").value;
+        const loaithongbao = document.getElementById("loaithongbao").value;
+        const tieude       = document.getElementById("tieude").value.trim();
+        const noidung      = document.getElementById("noidung").value.trim();
+
+        if (!tieude || !noidung) {
+            alert("Vui lòng nhập đầy đủ tiêu đề và nội dung!");
+            return;
+        }
+
+        fetch("../../models/gui_tb_nd.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                loai: loaithongbao,
+                tieude: tieude,
+                noidung: noidung,
+                id: idnguoidung
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                window.location.reload();
+            } else {
+                alert("Có lỗi xảy ra: " + data.message);
+            }
+        })
+        .catch(err => console.error(err));
+    });
 
 </script>
 
