@@ -5,10 +5,26 @@
 
     $id = $_SESSION['id_nguoi_dung'];
 
-    $sql = "SELECT * FROM quan_tri WHERE id_nguoi_dung = :id";
+    $sql = "
+        SELECT q.vai_tro
+        FROM phan_quyen pq
+        JOIN quyen q ON pq.id_quyen = q.id
+        WHERE pq.id_nguoi_dung = :id_nguoi_dung
+    ";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':id_nguoi_dung', $id, PDO::PARAM_STR); 
+    $stmt->execute();
+    $dsQuyen = $stmt->fetchAll(PDO::FETCH_COLUMN); 
+
+    $sql = "SELECT * FROM info_nguoi_dung WHERE id_nguoi_dung = :id";
     $stmt = $pdo->prepare($sql);
     $stmt->execute(['id' => $id]);
-    $tk = $stmt->fetch(PDO::FETCH_ASSOC);
+    $ind = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $sql = "SELECT * FROM nguoi_dung WHERE id = :id";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute(['id' => $id]);
+    $nd = $stmt->fetch(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="vi" x-data="{ openFilter:false }">
@@ -59,16 +75,16 @@
                 <div x-data="{ open: false }" class="relative">
                     <!-- Nút avatar + tên -->
                     <div @click="open = !open" class="flex items-center space-x-2 cursor-pointer">
-                        <img src="../../../public/assets/anhht/0/<?= $tk['avt'] ?>" alt="Avatar" class="w-9 h-9 rounded-full border border-gray-300">
-                        <span class="text-sm text-gray-700"><?= $tk['ho_ten'] ?></span>
+                        <img src="../../../public/assets/anhht/0/<?= $nd['avt'] ?>" alt="Avatar" class="w-9 h-9 rounded-full border border-gray-300">
+                        <span class="text-sm text-gray-700"><?= $ind['ho_ten'] ?></span>
                     </div>
 
                     <!-- Dropdown -->
                     <div x-show="open" x-cloak @click.outside="open = false" x-transition class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2" style="z-index: 20;">
                         <div class="px-4 py-2 flex items-center space-x-2 border-b">
-                            <img src="../../../public/assets/anhht/0/<?= $tk['avt'] ?>" alt="Avatar" class="w-10 h-10 rounded-full border">
+                            <img src="../../../public/assets/anhht/0/<?= $nd['avt'] ?>" alt="Avatar" class="w-10 h-10 rounded-full border">
                             <div>
-                                <p class="text-sm font-medium text-gray-800"><?= $tk['ho_ten'] ?></p>
+                                <p class="text-sm font-medium text-gray-800"><?= $ind['ho_ten'] ?></p>
                                 <p class="text-xs text-gray-500">Tài khoản cá nhân</p>
                             </div>
                         </div>
@@ -76,9 +92,11 @@
                         <a href="../../models/auth/xuly_dangxuat.php" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Đăng xuất</a>
                     </div>
                 </div>
-                <a href="#" class="px-3 py-1.5 border border-gray-400 text-gray-600 text-xs sm:text-sm rounded-md font-normal hover:bg-gray-200 transition">
-                    Đăng tin
-                </a>
+                <?php if (in_array('moigioi', $dsQuyen)): ?>
+                    <a href="#" class="px-3 py-1.5 border border-gray-400 text-gray-600 text-xs sm:text-sm rounded-md font-normal hover:bg-gray-200 transition">
+                        Đăng tin
+                    </a>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -90,68 +108,113 @@
         </button>
     </div>
 
-    <!-- Menu ngang -->
+    <!-- Menu ngang Desktop-->
     <nav class="bg-gray-50 border-t hidden md:block cursor-pointer">
         <ul class="flex space-x-6 py-2 text-sm font-normal text-gray-700 whitespace-nowrap justify-evenly">
-            <li class="relative">
-                <a class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý Khách hàng <i class="fas fa-chevron-right ml-1 transition-transform duration-300"></i></a> 
-                <ul class="hidden absolute left-0 top-full bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
-                    <li><a href="trangchu.php?page=khachhang" class="block px-4 py-2 hover:bg-blue-100">Danh sách khách hàng</a></li>
-                    <li><a href="trangchu.php?page=lichsuxacthuc" class="block px-4 py-2 hover:bg-blue-100">Lịch sử đăng nhập/đăng xuất</a></li>
-                </ul>
-            </li>
-            <li class="relative ">
-                <a class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý môi giới<i class="fas fa-chevron-right ml-2 transition-transform duration-300"></i></a>
-                <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
-                    <li><a href="trangchu.php?page=moigioi" class="block px-4 py-2 hover:bg-blue-100">Danh sách môi giới</a></li>
-                    <li><a href="trangchu.php?page=ql_bieu_mau" class="block px-4 py-2 hover:bg-blue-100">Quản lý biểu mẫu</a></li>
-                </ul>
-            </li>
-            <li class="relative">
-                <a class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý đơn hàng<i class="fas fa-chevron-right ml-2 transition-transform duration-300"></i></a>
-                <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
-                    <li><a href="#" class="block px-4 py-2 hover:bg-blue-100">Theo dõi các y.c mua/bán/thuê</a>
-                    <li><a href="#" class="block px-4 py-2 hover:bg-blue-100">Quản lý thanh toán</a></li>
-                </ul>
-            </li>
-            <li class="relative"><a class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý sản phẩm bds<i class="fas fa-chevron-right ml-2 transition-transform duration-300"></i></a>
-                <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
-                    <li><a href="trangchu.php?page=sanpham" class="block px-4 py-2 hover:bg-blue-100">Danh sách sản phẩm bds</a></li>
-                    <li><a href="trangchu.php?page=ql_anh_video_bds" class="block px-4 py-2 hover:bg-blue-100">Quản lý hình ảnh/videos</a></li>
-                    <li><a href="trangchu.php?page=danhgiasanpham" class="block px-4 py-2 hover:bg-blue-100">Quản lý đánh giá</a></li>
-                </ul>
-            </li>
-            <li class="relative">
-                <a class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý CMS<i class="fas fa-chevron-right ml-2 transition-transform duration-300"></i></a>
-                <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
-                    <li><a href="#" class="block px-4 py-2 hover:bg-blue-100">Quản lý tin tức</a></li>
-                    <li><a href="#" class="block px-4 py-2 hover:bg-blue-100">Quản lý bài đăng</a></li>
-                    <li><a href="#" class="block px-4 py-2 hover:bg-blue-100">Quản lý FAQ/hướng dẫn sử dụng web</a></li>
-                </ul>
-            </li>
-            <li class="relative">
-                <a class="hover:text-blue-600 menu-btn inline-flex items-center">Thông báo & chat<i class="fas fa-chevron-right ml-2 transition-transform duration-300"></i></a>
-                <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
-                    <li><a href="trangchu.php?page=guithongbao" class="block px-4 py-2 hover:bg-blue-100">Gửi thông báo</a></li>
-                    <li><a href="trangchu.php?page=ql_hop_thoai_chat" class="block px-4 py-2 hover:bg-blue-100">Quản lý hộp thoại chat</a></li>
-                    <li><a href="#" class="block px-4 py-2 hover:bg-blue-100">Quản lý thông báo</a></li>
-                </ul>
-            </li>
-            <li class="relative">
-                <a class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý đặt lịch<i class="fas fa-chevron-right ml-2 transition-transform duration-300"></i></a>
-                <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
-                    <li><a href="trangchu.php?page=datlich" class="block px-4 py-2 hover:bg-blue-100">Danh sách lịch đặt</a></li>
-                </ul>
-            </li>
-            <li class="relative">
-                <a href="#" class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý vi phạm<i class="fas fa-chevron-right ml-2 transition-transform duration-300"></i></a>
-                <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
-                    <li><a href="£" class="block px-4 py-2 hover:bg-blue-100">Danh sách vi phạm</a></li>
-                </ul>
-            </li>
+            <?php if (in_array('quantri', $dsQuyen) || in_array('moigioi', $dsQuyen)): ?>
+                <li class="relative">
+                    <a class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý người dùng <i class="fas fa-chevron-right ml-1 transition-transform duration-300"></i></a> 
+                    <ul class="hidden absolute left-0 top-full bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
+                        <?php if (in_array('quantri', $dsQuyen)): ?>
+                            <li><a href="trangchu.php?page=ds_nguoi_dung" class="block px-4 py-2 hover:bg-blue-100">Danh sách người dùng</a></li>
+                            <li><a href="trangchu.php?page=ls_xacthuc" class="block px-4 py-2 hover:bg-blue-100">Lịch sử xác thực</a></li>
+                        <?php endif; ?>
+                            <li><a href="trangchu.php?page=ql_bieu_mau" class="block px-4 py-2 hover:bg-blue-100">Quản lý biểu mẫu</a></li>
+                    </ul>
+                </li>
+            <?php endif; ?>
+
+            <?php if (in_array('moigioi', $dsQuyen)): ?>
+                <li class="relative">
+                    <a class="hover:text-blue-600 menu-btn inline-flex items-center">Khách hàng tiềm năng<i class="fas fa-chevron-right ml-1 transition-transform duration-300"></i></a> 
+                    <ul class="hidden absolute left-0 top-full bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
+                        <li><a href="trangchu.php?page=kh_quantam" class="block px-4 py-2 hover:bg-blue-100">Khách hàng quan tâm</a></li>
+                        <li><a href="trangchu.php?page=kh_damua" class="block px-4 py-2 hover:bg-blue-100">Khách hàng đã mua</a></li>
+                    </ul>
+                </li>
+            <?php endif; ?>
+
+            <?php if (in_array('quantri', $dsQuyen) || in_array('moigioi', $dsQuyen)): ?>
+                <li class="relative">
+                    <a class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý đơn hàng<i class="fas fa-chevron-right ml-2 transition-transform duration-300"></i></a>
+                    <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
+                        <?php if (in_array('quantri', $dsQuyen)): ?>
+                            <li><a href="trangchu.php?page=td_yeucau_mbt" class="block px-4 py-2 hover:bg-blue-100">Theo dõi các y.c mua/bán/thuê</a>
+                            <li><a href="trangchu.php?page=ql_thanhtoan" class="block px-4 py-2 hover:bg-blue-100">Quản lý thanh toán</a></li>
+                        <?php endif; ?>
+                        <?php if (in_array('moigioi', $dsQuyen)): ?>
+                            <li><a href="trangchu.php?page=gd_canhan" class="block px-4 py-2 hover:bg-blue-100">Giao dịch cá nhân</a></li>
+                            <li><a href="trangchu.php?page=td_tiendo_gd" class="block px-4 py-2 hover:bg-blue-100">Theo dõi tiến độ giao dịch</a></li>
+                        <?php endif; ?>
+                    </ul>
+                </li>
+            <?php endif; ?>
+
+            <?php if (!in_array('khachhang', $dsQuyen)): ?>
+                <li class="relative"><a class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý sản phẩm bds<i class="fas fa-chevron-right ml-2 transition-transform duration-300"></i></a>
+                    <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
+                        <?php if (in_array('quantri', $dsQuyen)): ?>
+                            <li><a href="trangchu.php?page=ds_sanpham_bds" class="block px-4 py-2 hover:bg-blue-100">Danh sách sản phẩm bds</a></li>
+                            <li><a href="trangchu.php?page=ql_anh_video_bds" class="block px-4 py-2 hover:bg-blue-100">Quản lý hình ảnh/videos</a></li>
+                            <li><a href="trangchu.php?page=ql_danhgia" class="block px-4 py-2 hover:bg-blue-100">Quản lý đánh giá</a></li>
+                        <?php endif; ?>
+                        <?php if (in_array('moigioi', $dsQuyen)): ?>
+                            <li><a href="trangchu.php?page=sp_canhan" class="block px-4 py-2 hover:bg-blue-100">Sản phẩm cá nhân</a></li>
+                        <?php endif; ?>
+                    </ul>
+                </li>
+            <?php endif; ?>
+
+            <?php if (in_array('quantri', $dsQuyen)): ?>
+                <li class="relative">
+                    <a class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý CMS<i class="fas fa-chevron-right ml-2 transition-transform duration-300"></i></a>
+                    <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
+                        <li><a href="trangchu.php?page=ql_tintuc" class="block px-4 py-2 hover:bg-blue-100">Quản lý tin tức</a></li>
+                        <li><a href="trangchu.php?page=ql_baidang" class="block px-4 py-2 hover:bg-blue-100">Quản lý bài đăng</a></li>
+                    </ul>
+                </li>
+            <?php endif; ?>
+
+            <?php if (in_array('quantri', $dsQuyen) || in_array('moigioi', $dsQuyen)): ?>
+                <li class="relative">
+                    <a class="hover:text-blue-600 menu-btn inline-flex items-center">Thông báo & chat<i class="fas fa-chevron-right ml-2 transition-transform duration-300"></i></a>
+                    <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
+                        <?php if (in_array('quantri', $dsQuyen)): ?>
+                            <li><a href="trangchu.php?page=g_thongbao" class="block px-4 py-2 hover:bg-blue-100">Gửi thông báo</a></li>
+                            <li><a href="trangchu.php?page=ql_hopthoai" class="block px-4 py-2 hover:bg-blue-100">Quản lý hộp thoại</a></li>
+                        <?php endif; ?>
+                        <li><a href="#" class="block px-4 py-2 hover:bg-blue-100">Quản lý thông báo</a></li>
+                        <?php if (in_array('moigioi', $dsQuyen)): ?>
+                            <li><a href="trangchu.php?page=g_thongbao_kh" class="block px-4 py-2 hover:bg-blue-100">Gửi thông báo khách hàng</a></li>
+                        <?php endif; ?>
+                    </ul>
+                </li>
+            <?php endif; ?>
+
+            <?php if (in_array('quantri', $dsQuyen) || in_array('moigioi', $dsQuyen)): ?>
+                <li class="relative">
+                    <a class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý đặt lịch<i class="fas fa-chevron-right ml-2 transition-transform duration-300"></i></a>
+                    <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
+                        <?php if (in_array('quantri', $dsQuyen)): ?>
+                            <li><a href="trangchu.php?page=ds_datlich" class="block px-4 py-2 hover:bg-blue-100">Danh sách lịch đặt</a></li>
+                        <?php endif; ?>
+                        <?php if (in_array('moigioi', $dsQuyen)): ?>
+                            <li><a href="trangchu.php?page=lt_canhan" class="block px-4 py-2 hover:bg-blue-100">Lịch trình cá nhân</a></li>
+                        <?php endif; ?>
+                    </ul>
+                </li>
+            <?php endif; ?>
+
+            <?php if (in_array('quantri', $dsQuyen)): ?>
+                <li class="relative">
+                    <a href="#" class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý vi phạm<i class="fas fa-chevron-right ml-2 transition-transform duration-300"></i></a>
+                    <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
+                        <li><a href="trangchu.php?page=ds_vipham" class="block px-4 py-2 hover:bg-blue-100">Danh sách vi phạm</a></li>
+                    </ul>
+                </li>
+            <?php endif; ?>
         </ul>
     </nav>
-
 
     <!-- Menu mobile dạng overlay -->
     <div id="mobileMenu" class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform -translate-x-full transition-transform duration-300 z-50 md:hidden overflow-y-auto">
@@ -335,14 +398,12 @@
 
 <?php
     $page = isset($_GET['page']) ? $_GET['page'] : 'trangchu';
-    $allowed_pages = ['sanpham', 'danhgiasanpham', 'danhgiasanphamct', 'khachhang', 'moigioi', 'lichsuxacthuc', 'ql_anh_video_bds',
-                     'ql_hop_thoai_chat', 'guithongbao', 'ql_bieu_mau', 'datlich', 'xem_ct_mg'];
     $showHome = ($page === 'trangchu');
 ?>
 
 <div id="main-content">
     <?php
-        if(in_array($page, $allowed_pages) && $page != 'trangchu') include $page . '.php';
+        if($page != 'trangchu') include $page . '.php';
     ?>
 </div>
 

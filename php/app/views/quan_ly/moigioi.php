@@ -187,7 +187,7 @@
                 <?php foreach($moigioi as $mg): ?>
                     <div class="bg-white shadow rounded-xl overflow-hidden hover:shadow-lg transition flex flex-col relative">
                         <div class="p-4 flex flex-col items-center">
-                            <img src="../../../public/assets/anhht/0/<?= $mg['avt'] ?>" class="w-20 h-20 rounded-full object-cover border-2 border-gray-200">
+                            <img src="../../../storage/pictures/avt/<?= $mg['avt'] ?>" class="w-20 h-20 rounded-full object-cover border-2 border-gray-200">
                             <h2 class="mt-2 font-semibold text-gray-800 text-center"><?= $mg['ho_ten'] ?></h2>
                             <p class="text-gray-500 text-sm text-center"><?= $mg['email'] ?></p>
                             <p class="text-gray-500 text-sm text-center"><?= $mg['so_dt'] ?></p>
@@ -391,13 +391,20 @@
                 <?php foreach ($mangtkmoigioi as $m): ?>
                     <div class="bg-white shadow rounded-xl overflow-hidden hover:shadow-lg transition flex flex-col relative">
                         <div class="p-4 flex flex-col items-center">
-                            <img src="../../../public/assets/anhht/0/<?= $m['avt'] ?>" alt="<?= $m['ho_ten'] ?>" class="w-20 h-20 rounded-full object-cover border-2 border-gray-200">
+                            <img src="../../../storage/pictures/avt/<?= $m['avt'] ?>" alt="<?= $m['ho_ten'] ?>" class="w-20 h-20 rounded-full object-cover border-2 border-gray-200">
                             <h2 class="mt-2 font-semibold text-gray-800 text-center"><?= $m['ho_ten'] ?></h2>
                             <p class="text-gray-500 text-sm text-center"><?= $m['email'] ?></p>
                             <p class="text-gray-500 text-sm text-center"><?= $m['so_dt'] ?></p>
                             <div class="flex items-center gap-2">
                                 <span class="mt-2 px-2 py-1 rounded-full text-xs font-semibold <?= $m['hoat_dong']=='online'?'bg-green-100 text-green-700':'bg-gray-200 text-gray-700' ?>"><?= ucfirst($m['hoat_dong']) ?></span>
-                                <span class="mt-1 px-2 py-1 rounded-full text-xs font-semibold <?= $m['vai_tro']=='Admin'?'bg-red-100 text-red-700':($m['vai_tro']=='Moderator'?'bg-blue-100 text-blue-700':'bg-yellow-100 text-yellow-700') ?>"><?= $m['vai_tro'] ?></span>
+                                <?php
+                                    $labelvaitro = [
+                                        'quantri' => 'Quản trị',
+                                        'moigioi' => 'Môi giới',
+                                        'khachhang' => 'Khách hàng'
+                                    ];
+                                ?>
+                                <span class="mt-2 px-2 py-1 rounded-full text-xs font-semibold <?= $m['vai_tro']=='quantri'?'bg-red-100 text-red-700':($m['vai_tro']=='moigioi'?'bg-blue-100 text-blue-700':'bg-yellow-100 text-yellow-700') ?>"><?= $labelvaitro[$m['vai_tro']] ?></span>
                             </div>
                             <!-- Năm kinh nghiệm + Điểm đánh giá -->
                             <div class="mt-2 text-sm text-gray-600">

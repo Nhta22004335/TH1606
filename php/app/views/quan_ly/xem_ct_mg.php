@@ -77,10 +77,11 @@
 
     <!-- Ảnh bìa -->
     <div class="relative h-56">
-      <img src="../../../public/assets/anhht/0/<?= htmlspecialchars($moigioi['avt']) ?>" alt="Ảnh bìa" class="w-full h-full object-cover">
+      <img src="../../../storage/pictures/bia/<?= htmlspecialchars($moigioi['anh_bia']) ?>" alt="Ảnh bìa" class="w-full h-full object-cover">
         <!-- Nút camera cập nhật ảnh bìa --> 
-        <form method="POST" enctype="multipart/form-data" class="absolute top-3 right-3"> 
+        <form action="../../models/capnhat_anh_bia.php" method="POST" enctype="multipart/form-data" class="absolute top-3 right-3"> 
             <label for="uploadBia" class="cursor-pointer"> <i class="fas fa-camera text-blue-500"></i> </label> 
+            <input type="hidden" name="idnguoidung" value="<?= $moigioi['id_nguoi_dung'] ?>">
             <input type="file" id="uploadBia" name="bia" class="hidden" onchange="this.form.submit()"> 
         </form>
     </div>
@@ -89,22 +90,26 @@
     <div class="relative px-6">
       <div class="flex items-center absolute -top-16 left-6 z-10">
         <div class="relative">
-            <img src="../../../public/assets/anhht/0/<?= htmlspecialchars($moigioi['avt']) ?>" alt="Avatar" class="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover">
+            <img src="../../../storage/pictures/avt/<?= htmlspecialchars($moigioi['avt']) ?>" alt="Avatar" class="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover">
             <!-- Nút camera cập nhật avatar --> 
-            <form method="POST" enctype="multipart/form-data" class="absolute bottom-0 right-0"> 
+            <form action="../../models/capnhat_avt.php" method="POST" enctype="multipart/form-data" class="absolute bottom-0 right-0"> 
                 <label for="uploadAvt" class="cursor-pointer"> <i class="fas fa-camera text-blue-500"></i> </label> 
+                <input type="hidden" name="idnguoidung" value="<?= $moigioi['id_nguoi_dung'] ?>">
                 <input type="file" id="uploadAvt" name="avt" class="hidden" onchange="this.form.submit()"> 
             </form>
         </div>
         <div class="ml-4">
-          <h2 class="text-2xl font-bold text-gray-800">
-            <?= htmlspecialchars($moigioi['ho_ten']) ?>
-          </h2>
-          <p class="text-gray-600">@<?= htmlspecialchars($moigioi['ten_dang_nhap']) ?></p>
-          <span class="inline-block mt-1 px-3 py-1 text-sm rounded-lg 
-            <?= $moigioi['hoat_dong'] === 'online' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600' ?>">
-            <?= ucfirst($moigioi['hoat_dong']) ?>
-          </span>
+            <div class="bg-white/70 backdrop-blur-sm p-4 rounded-lg shadow">
+                <h2 class="text-2xl font-bold text-gray-600">
+                    <?= htmlspecialchars($moigioi['ho_ten']) ?>
+                </h2>
+                <p class="text-gray-600">@<?= htmlspecialchars($moigioi['ten_dang_nhap']) ?></p>
+                <span class="inline-block mt-1 px-3 py-1 text-sm rounded-lg 
+                    <?= $moigioi['hoat_dong'] === 'online' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600' ?>">
+                    <?= ucfirst($moigioi['hoat_dong']) ?>
+                </span> 
+            </div>
+            
         </div>
       </div>
     </div>

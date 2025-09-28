@@ -37,12 +37,18 @@
     }
 
     function ckQuyenTaiKhoan($pdo, $id_nguoi_dung) {
-        $sql = "SELECT vai_tro FROM nguoi_dung WHERE id = :id_nguoi_dung LIMIT 1";
+        $sql = "
+            SELECT q.vai_tro
+            FROM phan_quyen pq
+            JOIN quyen q ON pq.id_quyen = q.id
+            WHERE pq.id_nguoi_dung = :id_nguoi_dung
+        ";
         $stmt = $pdo->prepare($sql);
-        $stmt->bindParam(':id_nguoi_dung', $id_nguoi_dung, PDO::PARAM_INT);
+        $stmt->bindParam(':id_nguoi_dung', $id_nguoi_dung, PDO::PARAM_STR); 
         $stmt->execute();
-        return $stmt->fetchColumn(); 
+        return $stmt->fetchAll(PDO::FETCH_COLUMN); 
     }
+
 
     try {
         $stmt = $pdo->prepare("SELECT 1 
@@ -55,16 +61,13 @@
         $stmt->bindParam(':token_phien', $_SESSION['token_phien'], PDO::PARAM_STR);
         $stmt->execute();
 
+        $dsQuyen = ckQuyenTaiKhoan($pdo, $id_nguoi_dung);
         if ($stmt->fetch()) {
-            if (ckQuyenTaiKhoan($pdo, $id_nguoi_dung) === 'quantri') {
-                header("Location: app/views/quan_tri/trangchu.php");
+            if (in_array('quantri', $dsQuyen) || in_array('moigioi', $dsQuyen)) {
+                header("Location: app/views/quan_ly/trangchu.php");
                 exit;
             } 
-            if (ckQuyenTaiKhoan($pdo, $id_nguoi_dung) === 'moigioi')
-            {
-                header("Location: app/views/moigioi/trangchu.php");
-                exit;
-            } else {
+            else {
                 header("Location: app/views/khachhang/trangchu.php");
                 exit;
             }

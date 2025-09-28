@@ -6,29 +6,31 @@
 
     $sql = "
         SELECT 
-            kh.id,
-            kh.ho_ten,
-            kh.gioi_tinh,
-            kh.dia_chi,
-            kh.avt,
-            kh.ngay_sinh,
-            nd.id AS id_nguoi_dung,
+            i.ho_ten,
+            i.gioi_tinh,
+            i.dia_chi,
+            nd.avt,
+            i.ngay_sinh,
+            nd.id,
             nd.ten_dang_nhap,
             nd.email,
             nd.so_dt,
-            nd.vai_tro,
             nd.trang_thai,
             nd.hoat_dong,
             nd.ngay_tao,
-            COUNT(gd.id) AS so_don
-        FROM khach_hang kh
-        JOIN nguoi_dung nd ON kh.id_nguoi_dung = nd.id
-        LEFT JOIN giao_dich gd ON kh.id_nguoi_dung = gd.id_khach_hang AND gd.trang_thai = 'hoanthanh'
+            COUNT(gd.id) AS so_don,
+            ARRAY_AGG(q.vai_tro) AS danh_sach_quyen
+        FROM info_nguoi_dung i
+        JOIN nguoi_dung nd ON i.id_nguoi_dung = nd.id
+        LEFT JOIN giao_dich gd ON nd.id = gd.id_nguoi_dung AND gd.trang_thai = 'hoanthanh'
+        LEFT JOIN phan_quyen pq ON nd.id = pq.id_nguoi_dung
+        LEFT JOIN quyen q ON pq.id_quyen = q.id
         GROUP BY 
-            kh.id, kh.ho_ten, kh.gioi_tinh, kh.dia_chi, kh.avt, kh.ngay_sinh,
-            nd.id, nd.ten_dang_nhap, nd.email, nd.so_dt, nd.vai_tro, nd.trang_thai, nd.hoat_dong, nd.ngay_tao
+            i.ho_ten, i.gioi_tinh, i.dia_chi, nd.avt, i.ngay_sinh,
+            nd.id, nd.ten_dang_nhap, nd.email, nd.so_dt, nd.trang_thai, nd.hoat_dong, nd.ngay_tao
         ORDER BY so_don DESC
-        ";
+    ";
+
 
     $stmt = $pdo->query($sql);
     $users = $stmt->fetchAll();
@@ -37,28 +39,29 @@
     $keyword = "%" . $search . "%";
     $sql = "
             SELECT 
-            kh.id,
-            kh.ho_ten,
-            kh.gioi_tinh,
-            kh.dia_chi,
-            kh.avt,
-            kh.ngay_sinh,
-            nd.id AS id_nguoi_dung,
+            i.ho_ten,
+            i.gioi_tinh,
+            i.dia_chi,
+            nd.avt,
+            i.ngay_sinh,
+            nd.id,
             nd.ten_dang_nhap,
             nd.email,
             nd.so_dt,
-            nd.vai_tro,
             nd.trang_thai,
             nd.hoat_dong,
             nd.ngay_tao,
-            COUNT(gd.id) AS so_don
-        FROM khach_hang kh
-        JOIN nguoi_dung nd ON kh.id_nguoi_dung = nd.id
-        LEFT JOIN giao_dich gd ON kh.id_nguoi_dung = gd.id_khach_hang AND gd.trang_thai = 'hoanthanh'
-        WHERE (kh.ho_ten ILIKE :search OR kh.dia_chi ILIKE :search)
+            COUNT(gd.id) AS so_don,
+            ARRAY_AGG(q.vai_tro) AS danh_sach_quyen
+        FROM info_nguoi_dung i
+        JOIN nguoi_dung nd ON i.id_nguoi_dung = nd.id
+        LEFT JOIN giao_dich gd ON nd.id = gd.id_nguoi_dung AND gd.trang_thai = 'hoanthanh'
+        LEFT JOIN phan_quyen pq ON nd.id = pq.id_nguoi_dung
+        LEFT JOIN quyen q ON pq.id_quyen = q.id
+        WHERE (i.ho_ten ILIKE :search OR i.dia_chi ILIKE :search)
         GROUP BY 
-            kh.id, kh.ho_ten, kh.gioi_tinh, kh.dia_chi, kh.avt, kh.ngay_sinh,
-            nd.id, nd.ten_dang_nhap, nd.email, nd.so_dt, nd.vai_tro, nd.trang_thai, nd.hoat_dong, nd.ngay_tao
+            nd.id, i.ho_ten, i.gioi_tinh, i.dia_chi, nd.avt, i.ngay_sinh,
+            nd.id, nd.ten_dang_nhap, nd.email, nd.so_dt, nd.trang_thai, nd.hoat_dong, nd.ngay_tao
         ORDER BY so_don DESC
     ";
 
@@ -70,6 +73,11 @@
     if (isset($_GET['boloc'])) {
         $filters = json_decode($_GET['boloc'], true);
     }
+
+//     echo '<pre>'; // cho dễ đọc
+// print_r($mangtkkhachhang);
+// echo '</pre>';
+   // echo $mangtkkhachhang;
 
 ?>
 <!DOCTYPE html>
@@ -206,13 +214,28 @@
                                 <p class="text-gray-500 text-sm text-center"><?= $u['so_dt'] ?></p>
                                 <span class="mt-2 px-2 py-1 rounded-full text-xs font-semibold <?= $u['hoat_dong']=='online'?'bg-green-100 text-green-700':'bg-gray-200 text-gray-700' ?>"><?= ucfirst($u['hoat_dong']) ?></span>
                                 <?php
+                                    $chuoiQuyen = $u['danh_sach_quyen']; 
+                                    $dsQuyenArray = explode(',', trim($chuoiQuyen, '{}'));  
+                                    $roleColors = [
+                                        'quantri' => 'bg-red-100 text-red-700',
+                                        'moigioi' => 'bg-blue-100 text-blue-700',
+                                        'khachhang' => 'bg-yellow-100 text-yellow-700'
+                                    ];
+
                                     $labelvaitro = [
                                         'quantri' => 'Quản trị',
                                         'moigioi' => 'Môi giới',
                                         'khachhang' => 'Khách hàng'
                                     ];
                                 ?>
-                                <span class="mt-1 px-2 py-1 rounded-full text-xs font-semibold <?= $u['vai_tro']=='quantri'?'bg-red-100 text-red-700':($u['vai_tro']=='moigioi'?'bg-blue-100 text-blue-700':'bg-yellow-100 text-yellow-700') ?>"><?= $labelvaitro[$u['vai_tro']] ?></span>
+
+                                <div class="flex flex-wrap gap-1">
+                                    <?php foreach ($dsQuyenArray as $vai_tro): ?>
+                                        <span class="mt-1 px-2 py-1 rounded-full text-xs font-semibold <?= $roleColors[$vai_tro] ?? 'bg-gray-100 text-gray-700' ?>">
+                                            <?= $labelvaitro[$vai_tro] ?? $vai_tro ?>
+                                        </span>
+                                    <?php endforeach; ?>
+                                </div>
                                 <?php
                                     $labeltrangthai = [
                                         'danghoatdong' => 'Đang hoạt động',
@@ -243,7 +266,7 @@
                                         <h2 class="text-lg font-semibold mb-4">Thông báo</h2>
 
                                         <!-- ẩn id người dùng -->
-                                        <input type="hidden" id="idnguoidung" value="<?= htmlspecialchars($m['id_nguoi_dung']) ?>">
+                                        <input type="hidden" id="idnguoidung" value="<?= htmlspecialchars($u['id']) ?>">
 
                                         <label class="block text-sm font-medium mb-1">Loại thông báo</label>
                                         <select id="loaithongbao" class="w-full border rounded-lg p-2 mb-3 outline-none focus:ring focus:border-blue-400">
@@ -297,7 +320,7 @@
                                         <input type="hidden" id="trangthai-value" name="trangthai" value="danghoatdong">
                                         <div class="flex justify-end space-x-2">
                                             <button @click="openOption = false" class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">Hủy</button>
-                                            <button onclick="capnhattrangthai('<?= $m['id_nguoi_dung'] ?>')" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Lưu</button>
+                                            <button onclick="capnhattrangthai('<?= $u['id'] ?>')" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Lưu</button>
                                         </div>
                                     </div>
                                 </div>
@@ -322,13 +345,29 @@
                                     <p class="text-gray-500 text-sm text-center"><?= $u['so_dt'] ?></p>
                                     <span class="mt-2 px-2 py-1 rounded-full text-xs font-semibold <?= $u['hoat_dong']=='online'?'bg-green-100 text-green-700':'bg-gray-200 text-gray-700' ?>"><?= ucfirst($u['hoat_dong']) ?></span>
                                     <?php
+                                        $chuoiQuyen = $u['danh_sach_quyen']; 
+                                        $dsQuyenArray = explode(',', trim($chuoiQuyen, '{}'));  
+                                        $roleColors = [
+                                            'quantri' => 'bg-red-100 text-red-700',
+                                            'moigioi' => 'bg-blue-100 text-blue-700',
+                                            'khachhang' => 'bg-yellow-100 text-yellow-700'
+                                        ];
+
                                         $labelvaitro = [
                                             'quantri' => 'Quản trị',
                                             'moigioi' => 'Môi giới',
                                             'khachhang' => 'Khách hàng'
                                         ];
                                     ?>
-                                    <span class="mt-1 px-2 py-1 rounded-full text-xs font-semibold <?= $u['vai_tro']=='quantri'?'bg-red-100 text-red-700':($u['vai_tro']=='moigioi'?'bg-blue-100 text-blue-700':'bg-yellow-100 text-yellow-700') ?>"><?= $labelvaitro[$u['vai_tro']] ?></span>
+
+                                    <div class="flex flex-wrap gap-1">
+                                        <?php foreach ($dsQuyenArray as $vai_tro): ?>
+                                            <span class="mt-1 px-2 py-1 rounded-full text-xs font-semibold <?= $roleColors[$vai_tro] ?? 'bg-gray-100 text-gray-700' ?>">
+                                                <?= $labelvaitro[$vai_tro] ?? $vai_tro ?>
+                                            </span>
+                                        <?php endforeach; ?>
+                                    </div>
+
                                     <!-- trạng thái tài khoản -->
                                     <?php
                                         $labeltrangthai = [
@@ -361,7 +400,7 @@
                                             <h2 class="text-lg font-semibold mb-4">Thông báo</h2>
 
                                             <!-- ẩn id người dùng -->
-                                            <input type="hidden" id="idnguoidung" value="<?= htmlspecialchars($m['id_nguoi_dung']) ?>">
+                                            <input type="hidden" id="idnguoidung" value="<?= htmlspecialchars($u['id']) ?>">
 
                                             <label class="block text-sm font-medium mb-1">Loại thông báo</label>
                                             <select id="loaithongbao" class="w-full border rounded-lg p-2 mb-3 outline-none focus:ring focus:border-blue-400">
@@ -415,7 +454,7 @@
                                             <input type="hidden" id="trangthai-value" name="trangthai" value="danghoatdong">
                                             <div class="flex justify-end space-x-2">
                                                 <button @click="openOption = false" class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">Hủy</button>
-                                                <button onclick="capnhattrangthai('<?= $m['id_nguoi_dung'] ?>')" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Lưu</button>
+                                                <button onclick="capnhattrangthai('<?= $u['id'] ?>')" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Lưu</button>
                                             </div>
                                         </div>
                                     </div>
@@ -433,13 +472,29 @@
                                 <p class="text-gray-500 text-sm text-center"><?= $m['so_dt'] ?></p>
                                 <span class="mt-2 px-2 py-1 rounded-full text-xs font-semibold <?= $m['hoat_dong']=='online'?'bg-green-100 text-green-700':'bg-gray-200 text-gray-700' ?>"><?= ucfirst($m['hoat_dong']) ?></span>
                                 <?php
+                                    $chuoiQuyen = $m['danh_sach_quyen']; 
+                                    $dsQuyenArray = explode(',', trim($chuoiQuyen, '{}'));  
+                                    $roleColors = [
+                                        'quantri' => 'bg-red-100 text-red-700',
+                                        'moigioi' => 'bg-blue-100 text-blue-700',
+                                        'khachhang' => 'bg-yellow-100 text-yellow-700'
+                                    ];
+
                                     $labelvaitro = [
                                         'quantri' => 'Quản trị',
                                         'moigioi' => 'Môi giới',
                                         'khachhang' => 'Khách hàng'
                                     ];
                                 ?>
-                                <span class="mt-1 px-2 py-1 rounded-full text-xs font-semibold <?= $m['vai_tro']=='quantri'?'bg-red-100 text-red-700':($m['vai_tro']=='moigioi'?'bg-blue-100 text-blue-700':'bg-yellow-100 text-yellow-700') ?>"><?= $labelvaitro[$m['vai_tro']] ?></span>
+
+                                <div class="flex flex-wrap gap-1">
+                                    <?php foreach ($dsQuyenArray as $vai_tro): ?>
+                                        <span class="mt-1 px-2 py-1 rounded-full text-xs font-semibold <?= $roleColors[$vai_tro] ?? 'bg-gray-100 text-gray-700' ?>">
+                                            <?= $labelvaitro[$vai_tro] ?? $vai_tro ?>
+                                        </span>
+                                    <?php endforeach; ?>
+                                </div>
+
                                 <?php
                                     $labeltrangthai = [
                                         'danghoatdong' => 'Đang hoạt động',
@@ -463,7 +518,7 @@
                                 <div class="flex justify-around border-t p-2 mt-auto">
                                     <a href="javascript:void(0)" @click="openForm = true" class="text-blue-600 hover:text-blue-800"><i class="fas fa-edit"></i></a> 
                                     <!-- Nút lựa chọn -->
-                                    <a href="javascript:void(0)" @click="openOption = true" class="text-red-600 hover:text-purple-800">
+                                    <a href="javascript:void(0)" @click="openOption = true" class="text-red-600 hover:text-red-800">
                                         <i class="fas fa-key"></i>
                                     </a>
                                 </div>
@@ -474,7 +529,7 @@
                                         <h2 class="text-lg font-semibold mb-4 text-blue-600">Gửi thông báo</h2>
 
                                         <!-- ẩn id người dùng -->
-                                        <input type="hidden" id="idnguoidung" value="<?= htmlspecialchars($m['id_nguoi_dung']) ?>">
+                                        <input type="hidden" id="idnguoidung" value="<?= htmlspecialchars($m['id']) ?>">
 
                                         <label class="block text-sm font-medium mb-1 text-gray-700">Loại thông báo</label>
                                         <select id="loaithongbao" class="w-full border rounded-lg p-2 mb-3 outline-none focus:ring focus:border-blue-400">
@@ -531,7 +586,7 @@
 
                                         <div class="flex justify-end space-x-2 mt-2">
                                             <button @click="openOption = false" class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">Hủy</button>
-                                            <button onclick="capnhattrangthai('<?= $m['id_nguoi_dung'] ?>')" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Lưu</button>
+                                            <button onclick="capnhattrangthai('<?= $m['id'] ?>')" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Lưu</button>
                                         </div>
                                     </div>
                                 </div>
