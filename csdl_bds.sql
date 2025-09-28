@@ -201,7 +201,7 @@ SELECT * FROM bat_dong_san;
 9b17fb30-8c6e-4494-920a-cbdd1621ee20
 ba11e8d1-b68b-42e9-b35d-40eaea043fc3
 6c064758-3b9f-4ab0-af99-bcdbb8efa989
-
++
 -- 10. Bảng danh_gia_bds (khách hàng đánh giá các sản phẩm BĐS mà môi giới rao bán)
 CREATE TABLE IF NOT EXISTS danh_gia_bds (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -220,6 +220,22 @@ INSERT INTO danh_gia_bds (id_nguoi_dung, id_bds, diem, binh_luan) VALUES
 ('7a6fa374-5628-4870-be48-a4ea18aef621', '9b17fb30-8c6e-4494-920a-cbdd1621ee20', '4', 'Mọi thứ điều rất tốt!');
 
 SELECT * FROM danh_gia_bds;
+
+CREATE TABLE IF NOT EXISTS hinh_anh_danh_gia_bds (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id_dg_bds UUID NOT NULL,
+    url VARCHAR(300),
+    mo_ta VARCHAR(200),
+    CONSTRAINT fk_hinh_dg FOREIGN KEY (id_dg_bds) REFERENCES danh_gia_bds(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS video_danh_gia_bds (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id_dg_bds UUID NOT NULL,
+    url VARCHAR(300),
+    mo_ta VARCHAR(200),
+    CONSTRAINT fk_video_dg FOREIGN KEY (id_dg_bds) REFERENCES danh_gia_bds(id) ON DELETE CASCADE
+);
 
 -- 11. Bảng giao_dich (ghi nhận giao dịch mua/bán/thue)
 CREATE TABLE IF NOT EXISTS giao_dich (
