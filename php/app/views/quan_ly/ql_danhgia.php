@@ -66,7 +66,7 @@
                         <td class="px-4 py-2 text-center"><?= $sp['so_luong_danh_gia'] ?></td>
                         <td class="px-4 py-2 text-center"><?= $sp['so_luong_binh_luan'] ?></td>
                         <td class="px-4 py-2 text-center">
-                            <a href="trangchu.php?page=danhgiasanphamct&id=<?= $sp['id'] ?>" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm">
+                            <a href="trangchu.php?page=ql_danhgia_ct&id=<?= $sp['id'] ?>" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm">
                                 Xem chi tiết
                             </a>
                             <button class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm ml-2">Xóa</button>

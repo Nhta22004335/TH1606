@@ -3,6 +3,26 @@
 -- 20. Bảng tin_nhan (hệ thống tin nhắn giữa users)
 -- Phụ trách: Đặng (kiểm thử), Tuấn Anh (hạ tầng)
 -- ===========================
+-- 8. Bảng hinh_anh (lưu hình ảnh sản phẩm bất động sản)
+CREATE TABLE IF NOT EXISTS hinh_anh_bds (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id_bds UUID NOT NULL,
+    url VARCHAR(300),
+    mo_ta VARCHAR(200),
+    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_hinh_anh_bds_bds FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE CASCADE
+);
+
+-- 9. Bảng video (video sản phẩm bất động sản)
+CREATE TABLE IF NOT EXISTS video_bds (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id_bds UUID NOT NULL,
+    url VARCHAR(300),
+    mo_ta VARCHAR(200),
+    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_video_bds_bds FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS tin_nhan (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     id_gui UUID NOT NULL,

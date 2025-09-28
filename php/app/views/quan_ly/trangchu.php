@@ -116,10 +116,10 @@
                     <a class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý người dùng <i class="fas fa-chevron-right ml-1 transition-transform duration-300"></i></a> 
                     <ul class="hidden absolute left-0 top-full bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
                         <?php if (in_array('quantri', $dsQuyen)): ?>
-                            <li><a href="trangchu.php?page=ds_nguoi_dung" class="block px-4 py-2 hover:bg-blue-100">Danh sách người dùng</a></li>
+                            <li><a href="trangchu.php?page=ds_nguoidung" class="block px-4 py-2 hover:bg-blue-100">Danh sách người dùng</a></li>
                             <li><a href="trangchu.php?page=ls_xacthuc" class="block px-4 py-2 hover:bg-blue-100">Lịch sử xác thực</a></li>
                         <?php endif; ?>
-                            <li><a href="trangchu.php?page=ql_bieu_mau" class="block px-4 py-2 hover:bg-blue-100">Quản lý biểu mẫu</a></li>
+                            <li><a href="trangchu.php?page=ql_bieumau" class="block px-4 py-2 hover:bg-blue-100">Quản lý biểu mẫu</a></li>
                     </ul>
                 </li>
             <?php endif; ?>
@@ -183,7 +183,7 @@
                             <li><a href="trangchu.php?page=g_thongbao" class="block px-4 py-2 hover:bg-blue-100">Gửi thông báo</a></li>
                             <li><a href="trangchu.php?page=ql_hopthoai" class="block px-4 py-2 hover:bg-blue-100">Quản lý hộp thoại</a></li>
                         <?php endif; ?>
-                        <li><a href="#" class="block px-4 py-2 hover:bg-blue-100">Quản lý thông báo</a></li>
+                        <li><a href="trangchu.php?page=ql_thongbao" class="block px-4 py-2 hover:bg-blue-100">Quản lý thông báo</a></li>
                         <?php if (in_array('moigioi', $dsQuyen)): ?>
                             <li><a href="trangchu.php?page=g_thongbao_kh" class="block px-4 py-2 hover:bg-blue-100">Gửi thông báo khách hàng</a></li>
                         <?php endif; ?>

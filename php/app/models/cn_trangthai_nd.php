@@ -10,36 +10,17 @@
     require_once "../../config/database.php";
     $pdo = ketnoicsdl();
 
-    $id    = trim($data['id']    ?? '');
-    $field = trim($data['field'] ?? '');
-    $value = trim($data['value'] ?? '');
-
-    if (!$id || !$field || !$value) {
-        echo json_encode($response);
-        exit;
-    }
-
-    $mapfield = [
-        'vaitro' => 'vai_tro',
-        'trangthai' => 'trang_thai'
-    ];
-
-    $vaitromap = [
-        'moigioi' => 'Môi giới',
-        'quantri' => 'Quản trị',
-        'khachhang' => 'Khách hàng'
-    ];
+    $id = trim($data['id'] ?? '');
+    $trang_thai = trim($data['trangthai'] ?? '');
 
     try {
-        $stmt = $pdo->prepare("UPDATE nguoi_dung SET {$mapfield[$field]} = :value WHERE id = :id");
-        $stmt->execute([':value' => $value, ':id' => $id]);
+        $stmt = $pdo->prepare("UPDATE nguoi_dung SET trang_thai = :trang_thai WHERE id = :id");
+        $stmt->execute([':trang_thai' => $trang_thai, ':id' => $id]);
 
         if ($stmt->rowCount() > 0) {
-            // Map giá trị hiển thị
             echo json_encode([
                 'success' => true,
-                'message' => 'Cập nhật thành công!',
-                'newValue' => $vaitromap[$value]
+                'message' => 'Cập nhật thành công!'
             ]);
         } else {
             echo json_encode([
@@ -54,4 +35,4 @@
             'message' => 'Cập nhật không thành công!'
         ]);
     }
-?>
+?>  

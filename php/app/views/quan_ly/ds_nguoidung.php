@@ -516,11 +516,13 @@
                             <div x-data="{ openForm: false, openOption: false }" class="relative">
                                 <!-- Nút hành động -->
                                 <div class="flex justify-around border-t p-2 mt-auto">
+                                    <a href="#" class="text-red-600 hover:text-red-800"><i class="fas fa-trash-alt"></i></a>
                                     <a href="javascript:void(0)" @click="openForm = true" class="text-blue-600 hover:text-blue-800"><i class="fas fa-edit"></i></a> 
                                     <!-- Nút lựa chọn -->
-                                    <a href="javascript:void(0)" @click="openOption = true" class="text-red-600 hover:text-red-800">
+                                    <a href="javascript:void(0)" @click="openOption = true" class="text-yellow-600 hover:text-yellow-800">
                                         <i class="fas fa-key"></i>
                                     </a>
+                                    <a href="trangchu.php?page=ct_nguoidung&id=<?= $m['id'] ?>" class="text-green-600 hover:text-green-800"><i class="fas fa-eye"></i></a>
                                 </div>
 
                                 <!-- Popup form -->

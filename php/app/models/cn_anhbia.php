@@ -21,7 +21,7 @@
             // Di chuyển file upload vào thư mục
             $duongDan = $uploadDir . $tenFileMoi;
             if (move_uploaded_file($file['tmp_name'], $duongDan)) {
-                $stmt = $pdo->prepare("UPDATE moi_gioi SET anh_bia = :anh_bia WHERE id_nguoi_dung = :id");
+                $stmt = $pdo->prepare("UPDATE nguoi_dung SET anh_bia = :anh_bia WHERE id = :id");
                 $stmt->execute([
                     ':anh_bia' => $tenFileMoi,
                     ':id' => $id

@@ -17,10 +17,11 @@
             bds.khu_vuc,
             bds.trang_thai,
             bds.ngay_dang,
-            bds.id_moi_gioi,
-            mg.ho_ten
+            bds.id_nguoi_dung,
+            info.ho_ten
         FROM bat_dong_san bds
-        LEFT JOIN moi_gioi mg ON bds.id_moi_gioi = mg.id_nguoi_dung
+        LEFT JOIN nguoi_dung nd ON bds.id_nguoi_dung = nd.id
+        LEFT JOIN info_nguoi_dung info ON info.id_nguoi_dung = bds.id_nguoi_dung
         WHERE bds.id = :id";
 
     $stmt = $pdo->prepare($sql);
@@ -54,21 +55,22 @@
         SELECT 
             dg.id AS id_danh_gia,
             dg.id_bds,
-            dg.id_khach_hang,
+            dg.id_nguoi_dung,
             dg.diem,
             dg.binh_luan,
-            dg.ngay_dg,
+            dg.ngay_tao,
             dg.trang_thai,
-            kh.ho_ten,
+            info.ho_ten,
             ARRAY_AGG(DISTINCT ha.url) FILTER (WHERE ha.url IS NOT NULL) AS ds_hinh_anh,
             ARRAY_AGG(DISTINCT vd.url) FILTER (WHERE vd.url IS NOT NULL) AS ds_video
         FROM danh_gia_bds dg
         LEFT JOIN hinh_anh_danh_gia_bds ha ON dg.id = ha.id_dg_bds
         LEFT JOIN video_danh_gia_bds vd ON dg.id = vd.id_dg_bds
-        LEFT JOIN khach_hang kh ON kh.id_nguoi_dung = dg.id_khach_hang
+        LEFT JOIN nguoi_dung nd ON nd.id = dg.id_nguoi_dung
+        LEFT JOIN info_nguoi_dung info ON info.id_nguoi_dung = dg.id_nguoi_dung
         WHERE dg.id_bds = :id
-        GROUP BY dg.id, dg.id_bds, dg.id_khach_hang, dg.diem, dg.binh_luan, dg.ngay_dg, kh.ho_ten
-        ORDER BY dg.ngay_dg DESC
+        GROUP BY dg.id, dg.id_bds, dg.id_nguoi_dung, dg.diem, dg.binh_luan, dg.ngay_tao, info.ho_ten
+        ORDER BY dg.ngay_tao DESC
     ";
 
     $stmt = $pdo->prepare($sql);
@@ -101,7 +103,7 @@
         <img src="../../../public/assets/anhht/0/danhgia.gif" class="w-10 h-10 mr-3">
         <h1 class="flex items-center text-2xl font-bold text-gray-600">Chi tiết đánh giá</h1>
     </div>
-    <a href="trangchu.php?page=danhgiasanpham" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition text-sm md:text-base">
+    <a href="trangchu.php?page=ql_danhgia" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition text-sm md:text-base">
         Quay lại
     </a>
 </header>
@@ -150,7 +152,7 @@
         <?php foreach($danhgia as $dg): ?>
             <div class="flex space-x-4 items-start">
                 <div class="flex-shrink-0">
-                    <img src="https://i.pravatar.cc/50?u=<?= urlencode($dg['id_khach_hang']) ?>" class="w-12 h-12 rounded-full object-cover">
+                    <img src="https://i.pravatar.cc/50?u=<?= urlencode($dg['id_nguoi_dung']) ?>" class="w-12 h-12 rounded-full object-cover">
                 </div>
                 <div class="flex-1">
                     <div class="flex justify-between items-center mb-1">
@@ -161,7 +163,7 @@
                     </div>
                     <p class="text-gray-700 text-sm mb-1"><?= $dg['binh_luan'] ?></p>
                     <div class="flex justify-between items-center">
-                        <p class="text-gray-400 text-xs"><?= htmlspecialchars($dg['ngay_dg']) ?></p>
+                        <p class="text-gray-400 text-xs"><?= htmlspecialchars($dg['ngay_tao']) ?></p>
                         <span class="px-2 py-0.5 rounded text-xs 
                             <?= $dg['trang_thai'] === 'hiện' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' ?>">
                             <?= ucfirst($dg['trang_thai']) ?>

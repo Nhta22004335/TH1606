@@ -113,8 +113,8 @@
         <label class="block mb-2 text-sm">Tình trạng</label>
         <select id="trangthai-desktop" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
             <option value="" <?= (($filters['trangthai'] ?? '') == 'tatca') ? 'selected' : ''?>>Tất cả</option>
-            <option value="conban" <?= (($filters['trangthai'] ?? '') == 'conban') ? 'selected' : ''?>>Còn bán</option>
-            <option value="daban" <?= (($filters['trangthai'] ?? '') == 'daban') ? 'selected' : ''?>>Đã bán</option>
+            <option value="chuaduyet" <?= (($filters['trangthai'] ?? '') == 'chuaduyet') ? 'selected' : ''?>>Chưa duyệt</option>
+            <option value="daduyet" <?= (($filters['trangthai'] ?? '') == 'daduyet') ? 'selected' : ''?>>Đã duyệt</option>
         </select>
 
         <label class="block mb-2 text-sm">Giá (VNĐ)</label>
@@ -182,8 +182,8 @@
             <label class="block mb-2 text-sm">Tình trạng</label>
             <select id="trangthai-mobile" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
                 <option value="" <?= (($filters['trangthai'] ?? '') == 'Tất cả') ? 'selected' : ''?>>Tất cả</option>
-                <option value="conban" <?= (($filters['trangthai'] ?? '') == 'Còn bán') ? 'selected' : ''?>>Còn bán</option>
-                <option value="daban" <?= (($filters['trangthai'] ?? '') == 'Đã bán') ? 'selected' : ''?>>Đã bán</option>
+                <option value="chuaduyet" <?= (($filters['trangthai'] ?? '') == 'chuaduyet') ? 'selected' : ''?>>Chưa duyệt</option>
+                <option value="daduyet" <?= (($filters['trangthai'] ?? '') == 'daduyet') ? 'selected' : ''?>>Đã duyệt</option>
             </select>
 
             <label class="block mb-2 text-sm">Giá (VNĐ)</label>
@@ -253,10 +253,8 @@
                             </p>
                             <?php
                                 $trangThai = [
-                                    'choduyet' => 'Chờ duyệt',
-                                    'dangban'  => 'Đang bán',
-                                    'daban'    => 'Đã bán',
-                                    'dathue'   => 'Đã thuê'
+                                    'chuaduyet' => 'Chờ duyệt',
+                                    'daduyet'  => 'Đã duyệt'
                                 ];
                             ?>
                             <p class="mt-1 text-xs text-gray-600 font-semibold">Trạng thái: <?= $trangThai[$p['trang_thai']]?></p>

@@ -13,6 +13,13 @@ CREATE TABLE IF NOT EXISTS quyen (
     vai_tro VARCHAR(50) NOT NULL UNIQUE
 );
 
+INSERT INTO quyen (vai_tro) VALUES ('quantri'), ('moigioi'), ('khachhang');
+
+SELECT * FROM quyen;
+bd8fc7f4-7941-4bae-80c4-ede4e907a904 qt
+21ea2b50-e9d2-4894-bc4a-a9818ef226b1 mg
+6bc0b436-c0ab-4970-82b0-b0907136c9f0 kh
+
 -- 0. Bảng nguoi_dung
 CREATE TABLE IF NOT EXISTS nguoi_dung (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -30,12 +37,15 @@ CREATE TABLE IF NOT EXISTS nguoi_dung (
     CONSTRAINT chk_nguoi_dung_so_dt CHECK (so_dt ~ '^[0-9]{1,11}$' OR so_dt = 'chuacapnhat')
 );
 
-select * from nguoi_dung
-
 INSERT INTO nguoi_dung (ten_dang_nhap, mat_khau, email, so_dt, trang_thai, hoat_dong) VALUES
 ('anhnt', '$argon2id$v=19$m=65536,t=3,p=4$l4ptltIvcKNyDeuOZ2dfDg$XBg6sR18fXH+1Uj7DcfbXg08dz6tb61tko1U+JyIzIE', '22004335@st.vlute.edu.vn', '0702804594', 'danghoatdong', 'online'),
 ('quynhln', '$argon2id$v=19$m=65536,t=3,p=4$l4ptltIvcKNyDeuOZ2dfDg$XBg6sR18fXH+1Uj7DcfbXg08dz6tb61tko1U+JyIzIE', '22004013@st.vlute.edu.vn', '0987654321', 'danghoatdong', 'online'),
-('dangtq', '$argon2id$v=19$m=65536,t=3,p=4$l4ptltIvcKNyDeuOZ2dfDg$XBg6sR18fXH+1Uj7DcfbXg08dz6tb61tko1U+JyIzIE', '22004069@st.vlute.edu.vn', '0897654321', 'danghoatdong', 'offline');
+('dangtq', '$argon2id$v=19$m=65536,t=3,p=4$l4ptltIvcKNyDeuOZ2dfDg$XBg6sR18fXH+1Uj7DcfbXg08dz6tb61tko1U+JyIzIE', '22004069@st.vlute.edu.vn', '0897654321', 'danghoatdong', 'online');
+
+SELECT * FROM nguoi_dung;
+ab76fa3c-893e-487d-983f-d8429ee95436 anhnt
+ea5c0d77-9ce2-4309-b0e7-cbe579f9209d quynhln
+7a6fa374-5628-4870-be48-a4ea18aef621 dangtq
 
 CREATE TABLE IF NOT EXISTS phan_quyen (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -46,14 +56,12 @@ CREATE TABLE IF NOT EXISTS phan_quyen (
     UNIQUE (id_nguoi_dung, id_quyen) 
 );
 
-select * from nguoi_dung
-select * from phan_quyen
+INSERT INTO  phan_quyen (id_nguoi_dung, id_quyen) VALUES 
+('ab76fa3c-893e-487d-983f-d8429ee95436', '21ea2b50-e9d2-4894-bc4a-a9818ef226b1'),
+('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', '21ea2b50-e9d2-4894-bc4a-a9818ef226b1'),
+('7a6fa374-5628-4870-be48-a4ea18aef621', '6bc0b436-c0ab-4970-82b0-b0907136c9f0');
 
-INSERT INTO phan_quyen (id_nguoi_dung, id_quyen) VALUES
-('cc7498ed-4a15-4fe8-874d-b5abf1e39c5b', '77d22c02-4a3c-45a9-8e5d-fd3c31ccc4e4'),
-('cc7498ed-4a15-4fe8-874d-b5abf1e39c5b', '321fe420-e46a-46ef-8f6b-b051b94fd2d8'),
-('f68177f0-49b4-43f7-9bf5-0fde15cd6ed3', '321fe420-e46a-46ef-8f6b-b051b94fd2d8'),
-('e3b09cae-196c-4812-be90-667225397789', '46f3ecd3-187f-4b8a-a9e9-bd8ae3ff4b6b');
+SELECT * FROM phan_quyen;
 
 CREATE TABLE IF NOT EXISTS info_nguoi_dung (
 	id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -62,65 +70,21 @@ CREATE TABLE IF NOT EXISTS info_nguoi_dung (
 	gioi_tinh VARCHAR(20) DEFAULT 'chuacapnhat',
 	dia_chi TEXT DEFAULT 'chuacapnhat',
 	ngay_sinh DATE DEFAULT (CURRENT_DATE - INTERVAL '18 years'),
+	mo_ta TEXT DEFAULT 'chuacapnhat',
 	CONSTRAINT fk_info_nd FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
     CONSTRAINT chk_quan_tri_gioi_tinh CHECK (gioi_tinh IN ('nam','nu','khac','chuacapnhat')),
     CONSTRAINT chk_quan_tri_tuoi CHECK (ngay_sinh <= CURRENT_DATE - INTERVAL '18 years')
 )
-cc7498ed-4a15-4fe8-874d-b5abf1e39c5b 
-f68177f0-49b4-43f7-9bf5-0fde15cd6ed3
-e3b09cae-196c-4812-be90-667225397789
 
-INSERT INTO info_nguoi_dung (id_nguoi_dung, ho_ten, gioi_tinh, dia_chi, ngay_sinh)
-VALUES 
-('cc7498ed-4a15-4fe8-874d-b5abf1e39c5b', 'Nguyễn Văn A', 'nam', 'Hà Nội', '1990-05-15'),
-('f68177f0-49b4-43f7-9bf5-0fde15cd6ed3', 'Trần Thị B', 'nu', 'TP. Hồ Chí Minh', '1995-08-22'),
-('e3b09cae-196c-4812-be90-667225397789', 'Lê Văn C', 'khac', 'Đà Nẵng', '2000-12-10');
+ALTER TABLE info_nguoi_dung
+ADD COLUMN mo_ta TEXT DEFAULT 'chuacapnhat';
 
+INSERT INTO info_nguoi_dung (id_nguoi_dung, ho_ten, gioi_tinh, dia_chi, ngay_sinh) VALUES
+('ab76fa3c-893e-487d-983f-d8429ee95436', 'Nguyễn Tuấn Anh', 'nam', 'Cà Mau', '2004-09-21'),
+('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Lê Ngọc Quỳnh', 'nu', 'Vĩnh Long', '2003-1-1'),
+('7a6fa374-5628-4870-be48-a4ea18aef621', 'Trương Quốc Đặng', 'nam', 'Cần Thơ', '2004-1-1');
 
--- 1. Bảng quan_tri (profile quản trị)
-CREATE TABLE IF NOT EXISTS quan_tri (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    id_nguoi_dung UUID UNIQUE NOT NULL,
-    ho_ten VARCHAR(150) DEFAULT 'chuacapnhat',
-    gioi_tinh VARCHAR(20) DEFAULT 'chuacapnhat',
-    avt TEXT DEFAULT 'avt.png',
-    dia_chi TEXT DEFAULT 'chuacapnhat',
-    ngay_sinh DATE DEFAULT (CURRENT_DATE - INTERVAL '18 years'),
-    CONSTRAINT fk_quan_tri_nguoi_dung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
-    CONSTRAINT chk_quan_tri_gioi_tinh CHECK (gioi_tinh IN ('nam','nu','khac','chuacapnhat')),
-    CONSTRAINT chk_quan_tri_tuoi CHECK (ngay_sinh <= CURRENT_DATE - INTERVAL '18 years')
-);
-
--- 2. Bảng khach_hang (profile khách hàng)
-CREATE TABLE IF NOT EXISTS khach_hang (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    id_nguoi_dung UUID UNIQUE NOT NULL,
-    ho_ten VARCHAR(150) DEFAULT 'chuacapnhat',
-    gioi_tinh VARCHAR(20) DEFAULT 'chuacapnhat',
-    avt TEXT DEFAULT 'avt.png',
-    dia_chi TEXT DEFAULT 'chuacapnhat',
-    ngay_sinh DATE DEFAULT (CURRENT_DATE - INTERVAL '18 years'),
-    CONSTRAINT fk_khach_hang_nguoi_dung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
-    CONSTRAINT chk_khach_hang_gioi_tinh CHECK (gioi_tinh IN ('nam','nu','khac','chuacapnhat')),
-    CONSTRAINT chk_khach_hang_tuoi CHECK (ngay_sinh <= CURRENT_DATE - INTERVAL '18 years')
-);
-
--- 3. Bảng moi_gioi (profile môi giới)
-CREATE TABLE IF NOT EXISTS moi_gioi (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    id_nguoi_dung UUID UNIQUE NOT NULL,
-    ho_ten VARCHAR(150) DEFAULT 'chuacapnhat',
-    avt TEXT DEFAULT 'avt.png',
-	anh_bia TEXT DEFAULT 'anhbia.jpg',
-    gioi_tinh VARCHAR(20) DEFAULT 'chuacapnhat',
-    cty VARCHAR(200) DEFAULT 'chuacapnhat',
-    kinh_nghiem INT CHECK (kinh_nghiem >= 0) DEFAULT 0,
-    mo_ta TEXT DEFAULT 'chuacapnhat',
-    CONSTRAINT fk_moi_gioi_nguoi_dung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
-    CONSTRAINT chk_moi_gioi_gioi_tinh CHECK (gioi_tinh IN ('nam','nu','khac','chuacapnhat'))
-);
-
-select * from nguoi_dung
+SELECT * FROM info_nguoi_dung;
 
 -- 4. Bảng phien_dang_nhap (lưu lại phiên làm việc của người dùng)
 CREATE TABLE IF NOT EXISTS phien_dang_nhap (
@@ -134,6 +98,8 @@ CREATE TABLE IF NOT EXISTS phien_dang_nhap (
     CONSTRAINT chk_phien_dang_nhap_time_range CHECK (het_han IS NULL OR het_han > bat_dau),
     CONSTRAINT chk_phien_dang_nhap_token_nonempty CHECK (length(trim(token_phien)) > 0)
 );
+
+SELECT * FROM phien_dang_nhap;
 
 -- 5. Bảng yeu_cau_otp (quản lý các mã OTP (One-Time Password) phục vụ cho xác thực người dùng trong hệ thống)
 CREATE TABLE IF NOT EXISTS yeu_cau_otp (
@@ -171,7 +137,7 @@ CREATE TABLE IF NOT EXISTS lich_su_xac_thuc (
 -- 7. Bảng bat_dong_san (lưu thống tin các sản phẩm bất động sản)
 CREATE TABLE IF NOT EXISTS bat_dong_san (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    id_moi_gioi UUID, 
+    id_nguoi_dung UUID, 
     tieu_de VARCHAR(200) DEFAULT 'chuacapnhat',
     mo_ta TEXT DEFAULT 'chuacapnhat',
     gia NUMERIC(18,2) CHECK (gia >= 0) DEFAULT 0,
@@ -179,46 +145,81 @@ CREATE TABLE IF NOT EXISTS bat_dong_san (
     dia_chi TEXT DEFAULT 'chuacapnhat',
     loai VARCHAR(100) DEFAULT 'chuacapnhat',
     khu_vuc VARCHAR(100) DEFAULT 'chuacapnhat',
-    trang_thai VARCHAR(50) DEFAULT 'choduyet',
+	trang_thai VARCHAR(50) DEFAULT 'chuaduyet',
     ngay_dang TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT chk_bat_dong_san_loai CHECK (loai IN ('ban','thue','duan','chuacapnhat')),
-    CONSTRAINT chk_bat_dong_san_trang_thai CHECK (trang_thai IN ('choduyet','dangban','daban','dathue')),
-    CONSTRAINT fk_bds_moi_gioi FOREIGN KEY (id_moi_gioi) REFERENCES moi_gioi(id) ON DELETE CASCADE
+    CONSTRAINT fk_bds_nguoi_dung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE
 );
 
--- 8. Bảng hinh_anh (lưu hình ảnh sản phẩm bất động sản)
-CREATE TABLE IF NOT EXISTS hinh_anh_bds (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    id_bds UUID NOT NULL,
-    url VARCHAR(300),
-    mo_ta VARCHAR(200),
-    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_hinh_anh_bds_bat_dong_san FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE CASCADE
+INSERT INTO bat_dong_san (id_nguoi_dung, tieu_de, mo_ta, gia, dien_tich, dia_chi, loai, khu_vuc)
+VALUES (
+    'ea5c0d77-9ce2-4309-b0e7-cbe579f9209d',
+    'Bán nhà vườn tại Vĩnh Long',
+    'Căn nhà vườn rộng rãi nằm ngay trung tâm Vĩnh Long, cách chợ khoảng 5 phút đi xe. 
+     Không gian thoáng mát, có sân trước và vườn sau trồng nhiều loại cây ăn trái. 
+     Nhà xây dựng kiên cố, thiết kế 1 trệt 1 lầu với 3 phòng ngủ, 2 nhà vệ sinh. 
+     Khu vực dân cư yên tĩnh, an ninh tốt, thích hợp cho gia đình định cư lâu dài 
+     hoặc đầu tư cho thuê nghỉ dưỡng cuối tuần.',
+    2800000000,
+    200.0,
+    'Phường 2, TP. Vĩnh Long, tỉnh Vĩnh Long',
+    'ban',
+    'Vĩnh Long'
 );
 
--- 9. Bảng video (video sản phẩm bất động sản)
-CREATE TABLE IF NOT EXISTS video_bds (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    id_bds UUID NOT NULL,
-    url VARCHAR(300),
-    mo_ta VARCHAR(200),
-    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_video_bds_bat_dong_san FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE CASCADE
+INSERT INTO bat_dong_san (id_nguoi_dung, tieu_de, mo_ta, gia, dien_tich, dia_chi, loai, khu_vuc)
+VALUES (
+    'ea5c0d77-9ce2-4309-b0e7-cbe579f9209d',
+    'Dự án đất nền ven sông Vĩnh Long',
+    'Khu đất nền ven sông Vĩnh Long với vị trí đắc địa, gần trung tâm hành chính 
+     và trường học. Pháp lý minh bạch, sổ hồng riêng từng nền. Đường nội bộ 
+     rộng 8m, hạ tầng hoàn thiện với điện nước đầy đủ. Thích hợp để xây nhà ở 
+     hoặc đầu tư dài hạn do khu vực đang phát triển mạnh.',
+    950000000,
+    100.0,
+    'Xã Tân Hạnh, Long Hồ, Vĩnh Long',
+    'duan',
+    'Vĩnh Long'
 );
+
+INSERT INTO bat_dong_san (id_nguoi_dung, tieu_de, mo_ta, gia, dien_tich, dia_chi, loai, khu_vuc)
+VALUES (
+    'ea5c0d77-9ce2-4309-b0e7-cbe579f9209d',
+    'Cho thuê nhà phố Vĩnh Long',
+    'Nhà phố 1 trệt 2 lầu ngay mặt tiền đường chính, gần siêu thị Coopmart 
+     và bến xe Vĩnh Long. Diện tích sử dụng rộng rãi, gồm 4 phòng ngủ, 1 phòng 
+     khách và bếp. Nội thất cơ bản, có sẵn máy lạnh và tủ bếp. Thích hợp mở văn phòng, 
+     cửa hàng kinh doanh hoặc gia đình ở lâu dài.',
+    12000000,
+    150.0,
+    'Đường Phạm Hùng, Phường 9, TP. Vĩnh Long',
+    'thue',
+    'Vĩnh Long'
+);
+
+SELECT * FROM bat_dong_san;
+9b17fb30-8c6e-4494-920a-cbdd1621ee20
+ba11e8d1-b68b-42e9-b35d-40eaea043fc3
+6c064758-3b9f-4ab0-af99-bcdbb8efa989
 
 -- 10. Bảng danh_gia_bds (khách hàng đánh giá các sản phẩm BĐS mà môi giới rao bán)
 CREATE TABLE IF NOT EXISTS danh_gia_bds (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    id_khach_hang UUID,
+    id_nguoi_dung UUID,
     id_bds UUID NOT NULL,
     diem INT CHECK (diem >= 1 AND diem <= 5),
     binh_luan TEXT,
 	trang_thai VARCHAR(10) DEFAULT 'hien',
     ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	CONSTRAINT chk_danh_gia_bds_trang_thai CHECK (trang_thai IN ('hien','an')),
-    CONSTRAINT fk_danh_gia_bds_khach_hang FOREIGN KEY (id_khach_hang) REFERENCES khach_hang(id_nguoi_dung) ON DELETE SET NULL,
-    CONSTRAINT fk_danh_gia_bds_bat_dong_san FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE CASCADE
+    CONSTRAINT fk_danh_gia_bds_nd FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE SET NULL,
+    CONSTRAINT fk_danh_gia_bds_bds FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE CASCADE
 );
+
+INSERT INTO danh_gia_bds (id_nguoi_dung, id_bds, diem, binh_luan) VALUES
+('7a6fa374-5628-4870-be48-a4ea18aef621', '9b17fb30-8c6e-4494-920a-cbdd1621ee20', '4', 'Mọi thứ điều rất tốt!');
+
+SELECT * FROM danh_gia_bds;
 
 -- 11. Bảng giao_dich (ghi nhận giao dịch mua/bán/thue)
 CREATE TABLE IF NOT EXISTS giao_dich (
@@ -227,11 +228,18 @@ CREATE TABLE IF NOT EXISTS giao_dich (
     id_bds UUID,
     loai VARCHAR(50) NOT NULL, 
     ngay_giao_dich TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    trang_thai VARCHAR(50) DEFAULT 'dang_xu_ly', 
+    trang_thai VARCHAR(50) DEFAULT 'choxuly', 
+	CONSTRAINT chk_giao_dich_tt CHECK (trang_thai IN ('choxuly', 'dangxuly','hoantat','dahuy')),
     CONSTRAINT chk_giao_dich_loai CHECK (loai IN ('mua','ban','thue')),
-    CONSTRAINT fk_giao_dich_kh FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE SET NULL,
+    CONSTRAINT fk_giao_dich_nd FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE SET NULL,
     CONSTRAINT fk_giao_dich_bds FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE SET NULL
 );
+
+INSERT INTO giao_dich (id_nguoi_dung, id_bds, loai) VALUES
+('7a6fa374-5628-4870-be48-a4ea18aef621', '9b17fb30-8c6e-4494-920a-cbdd1621ee20', 'ban');
+
+SELECT * FROM giao_dich;
+d4b0ccdd-4554-4456-b0d8-c1fc783b0cc1
 
 -- 12. Bảng thanh_toan (tổng thanh toán liên quan giao dịch)
 CREATE TABLE IF NOT EXISTS thanh_toan (
@@ -240,9 +248,15 @@ CREATE TABLE IF NOT EXISTS thanh_toan (
     tong_tien NUMERIC(18,2) CHECK (tong_tien >= 0),
     ngay_tt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     phuong_thuc VARCHAR(100), 
-    trang_thai VARCHAR(50) DEFAULT 'mo',
+    trang_thai VARCHAR(50) DEFAULT 'dathanhtoan',
     CONSTRAINT fk_tt_gd FOREIGN KEY (id_giao_dich) REFERENCES giao_dich(id) ON DELETE CASCADE
 );
+
+INSERT INTO thanh_toan (id_giao_dich, tong_tien, phuong_thuc) VALUES
+('d4b0ccdd-4554-4456-b0d8-c1fc783b0cc1', '2800000000', 'ck');
+
+SELECT * FROM thanh_toan;
+437a2754-0c15-4225-be14-cd319b06dacb
 
 -- 13. Bảng thanh_toan_ct (chi tiết thanh toán)
 CREATE TABLE IF NOT EXISTS thanh_toan_ct (
@@ -255,6 +269,11 @@ CREATE TABLE IF NOT EXISTS thanh_toan_ct (
     CONSTRAINT fk_ttc_bds FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE SET NULL
 );
 
+INSERT INTO thanh_toan_ct (id_thanh_toan, id_bds, so_luong, so_tien) VALUES 
+('437a2754-0c15-4225-be14-cd319b06dacb', '9b17fb30-8c6e-4494-920a-cbdd1621ee20', '1', '2800000000');
+
+SELECT * FROM thanh_toan_ct;
+
 -- 14. Bảng thong_bao
 CREATE TABLE IF NOT EXISTS thong_bao (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -264,7 +283,7 @@ CREATE TABLE IF NOT EXISTS thong_bao (
     noi_dung TEXT NOT NULL,
     thoi_gian_gui TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     trang_thai VARCHAR(20) DEFAULT 'chuaxem',
-    CONSTRAINT fk_thong_bao_nguoi_dung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
+    CONSTRAINT fk_thong_bao_nd FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
     CONSTRAINT chk_thong_bao_loai CHECK (loai IN (
         'capnhatthongtin',
         'doimatkhau',
@@ -277,34 +296,19 @@ CREATE TABLE IF NOT EXISTS thong_bao (
 -- 15. Bảng danh_gia_mg (đánh giá môi giới)
 CREATE TABLE IF NOT EXISTS danh_gia_mg (
     id SERIAL PRIMARY KEY,
-    id_khach_hang UUID,
-    id_moi_gioi UUID,
+    id_khach_hang UUID NOT NULL,
+    id_moi_gioi UUID NOT NULL,
     diem INT CHECK (diem >= 1 AND diem <= 5),
     binh_luan TEXT,
     ngay_dg TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_danh_gia_mg_kh FOREIGN KEY (id_khach_hang) REFERENCES khach_hang(id_nguoi_dung) ON DELETE SET NULL,
-    CONSTRAINT fk_danh_gia_mg_mg FOREIGN KEY (id_moi_gioi) REFERENCES moi_gioi(id_nguoi_dung) ON DELETE SET NULL
+    CONSTRAINT fk_danh_gia_kh_nd FOREIGN KEY (id_khach_hang) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
+    CONSTRAINT fk_danh_gia_mg_nd FOREIGN KEY (id_moi_gioi) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
+    CONSTRAINT chk_kh_mg_khacnhau CHECK (id_khach_hang <> id_moi_gioi)
 );
 
--- Sự kiện: 
-CREATE OR REPLACE FUNCTION fn_after_insert_nguoi_dung()
-RETURNS TRIGGER AS $$
-BEGIN
-    -- Nếu là quản trị viên
-    IF NEW.vai_tro = 'quantri' THEN
-        INSERT INTO quan_tri (id_nguoi_dung) VALUES (NEW.id);
-    -- Nếu là khách hàng
-    ELSIF NEW.vai_tro = 'khachhang' THEN
-        INSERT INTO khach_hang (id_nguoi_dung) VALUES (NEW.id);
-    -- Nếu là môi giới
-    ELSIF NEW.vai_tro = 'moigioi' THEN
-        INSERT INTO moi_gioi (id_nguoi_dung) VALUES (NEW.id);
-    END IF;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+INSERT INTO danh_gia_mg (id_khach_hang, id_moi_gioi, diem, binh_luan) VALUES 
+('7a6fa374-5628-4870-be48-a4ea18aef621', 'ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 5, 
+'Môi giới hỗ trợ rất nhiệt tình, giải thích rõ ràng và làm việc chuyên nghiệp.');
 
-CREATE TRIGGER trg_after_insert_nguoi_dung
-AFTER INSERT ON nguoi_dung
-FOR EACH ROW
-EXECUTE FUNCTION fn_after_insert_nguoi_dung();
+
+
