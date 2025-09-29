@@ -118,8 +118,9 @@
                         <?php if (in_array('quantri', $dsQuyen)): ?>
                             <li><a href="trangchu.php?page=ds_nguoidung" class="block px-4 py-2 hover:bg-blue-100">Danh sách người dùng</a></li>
                             <li><a href="trangchu.php?page=ls_xacthuc" class="block px-4 py-2 hover:bg-blue-100">Lịch sử xác thực</a></li>
-                        <?php endif; ?>
                             <li><a href="trangchu.php?page=ql_bieumau" class="block px-4 py-2 hover:bg-blue-100">Quản lý biểu mẫu</a></li>
+                        <?php endif; ?>
+                        <li><a href="trangchu.php?page=ql_hoso" class="block px-4 py-2 hover:bg-blue-100">Quản lý hồ sơ</a></li>
                     </ul>
                 </li>
             <?php endif; ?>
@@ -182,9 +183,11 @@
                         <?php if (in_array('quantri', $dsQuyen)): ?>
                             <li><a href="trangchu.php?page=g_thongbao" class="block px-4 py-2 hover:bg-blue-100">Gửi thông báo</a></li>
                             <li><a href="trangchu.php?page=ql_hopthoai" class="block px-4 py-2 hover:bg-blue-100">Quản lý hộp thoại</a></li>
+                            <li><a href="trangchu.php?page=ql_thongbao" class="block px-4 py-2 hover:bg-blue-100">Quản lý thông báo</a></li>
                         <?php endif; ?>
-                        <li><a href="trangchu.php?page=ql_thongbao" class="block px-4 py-2 hover:bg-blue-100">Quản lý thông báo</a></li>
+                        
                         <?php if (in_array('moigioi', $dsQuyen)): ?>
+                            <li><a href="trangchu.php?page=ql_thongbao_mg" class="block px-4 py-2 hover:bg-blue-100">Quản lý thông báo</a></li>
                             <li><a href="trangchu.php?page=g_thongbao_kh" class="block px-4 py-2 hover:bg-blue-100">Gửi thông báo khách hàng</a></li>
                         <?php endif; ?>
                     </ul>

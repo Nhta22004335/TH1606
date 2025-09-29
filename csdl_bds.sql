@@ -313,7 +313,7 @@ SELECT * FROM thong_bao;
 
 -- 15. Bảng danh_gia_mg (đánh giá môi giới)
 CREATE TABLE IF NOT EXISTS danh_gia_mg (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     id_khach_hang UUID NOT NULL,
     id_moi_gioi UUID NOT NULL,
     diem INT CHECK (diem >= 1 AND diem <= 5),
@@ -328,5 +328,22 @@ INSERT INTO danh_gia_mg (id_khach_hang, id_moi_gioi, diem, binh_luan) VALUES
 ('7a6fa374-5628-4870-be48-a4ea18aef621', 'ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 5, 
 'Môi giới hỗ trợ rất nhiệt tình, giải thích rõ ràng và làm việc chuyên nghiệp.');
 
+CREATE TABLE bieu_mau (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),           
+    tieu_de VARCHAR(255) NOT NULL,    
+    loai VARCHAR(100) NOT NULL,        -- loại (ví dụ: Hợp đồng, Biên bản, ...)
+    ben_mua UUID NOT NULL,       -- bên mua
+    ben_ban UUID NOT NULL,      -- bên bán
+    trang_thai VARCHAR(50) DEFAULT 'choduyet', 
+    tep_dk VARCHAR(255),               
+    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+    ngay_cn TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	CONSTRAINT fk_benmua FOREIGN KEY (ben_mua) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
+    CONSTRAINT fk_benban FOREIGN KEY (ben_ban) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
+	CONSTRAINT chk_trangthai CHECK (trang_thai IN ('choduyet','daduyet', 'daky', 'huy'))
+);
 
+INSERT INTO bieu_mau (tieu_de, loai, ben_mua, ben_ban, trang_thai, tep_dk) VALUES 
+('Hợp đồng mua bán nhà', 'Hợp đồng', '7a6fa374-5628-4870-be48-a4ea18aef621', 'ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'choduyet', 'hopdong1.pdf');
 
+SELECT * FROM bieu_mau;

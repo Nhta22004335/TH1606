@@ -60,7 +60,7 @@ $currentChat = $_GET['chat'] ?? null;
                     $active = ($currentChat == $id) ? 'bg-blue-100' : 'hover:bg-blue-50';
 
                     ?>
-                    <a href="trangchu.php?page=ql_hop_thoai_chat&chat=<?= urlencode($id) ?>"
+                    <a href="trangchu.php?page=ql_hopthoai&chat=<?= urlencode($id) ?>"
                        class="flex items-center p-2 rounded-lg cursor-pointer transition <?= $active ?>">
                         <?php foreach ($participants as $pid):
                             $u = $users[array_search($pid, array_column($users,'id'))]; ?>

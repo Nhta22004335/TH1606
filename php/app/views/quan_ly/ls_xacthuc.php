@@ -109,9 +109,9 @@
     <div class="mb-4 flex justify-between items-center">
         <a href="lichsuauth.php?export=csv" class="px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700">Xuất CSV</a>
         <form method="POST" class="flex space-x-2 items-center">
-            <input type="date" name="delete_from" class="border rounded-lg p-2" required>
+            <input type="date" name="delete_from" class="border rounded-lg p-2 focus:outline-none" required>
             <span>đến</span>
-            <input type="date" name="delete_to" class="border rounded-lg p-2" required>
+            <input type="date" name="delete_to" class="border rounded-lg p-2 focus:outline-none" required>
             <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg shadow hover:bg-red-700">Xóa</button>
         </form>
     </div>
