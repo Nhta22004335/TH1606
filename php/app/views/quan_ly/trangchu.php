@@ -108,7 +108,7 @@
         </button>
     </div>
 
-    <!-- Menu ngang Desktop-->
+    <!-- Menu Desktop-->
     <nav class="bg-gray-50 border-t hidden md:block cursor-pointer">
         <ul class="flex space-x-6 py-2 text-sm font-normal text-gray-700 whitespace-nowrap justify-evenly">
             <?php if (in_array('quantri', $dsQuyen) || in_array('moigioi', $dsQuyen)): ?>
@@ -216,7 +216,7 @@
         </ul>
     </nav>
 
-    <!-- Menu mobile dạng overlay -->
+    <!-- Menu Mobile -->
     <div id="mobileMenu" class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform -translate-x-full transition-transform duration-300 z-50 md:hidden overflow-y-auto">
         <div class="flex justify-between items-center px-4 py-3 border-b">
             <span class="font-semibold text-gray-700">Menu</span>
@@ -224,92 +224,131 @@
                 <i class="fas fa-times"></i>
             </button>
         </div>
+        
         <ul class="flex flex-col text-sm text-gray-700">
-            <!-- Quản lý Khách hàng -->
-            <li class="border-b">
-                <button class="w-full flex justify-between items-center px-4 py-2 menu-mobile-btn">
-                    Quản lý Khách hàng <i class="fas fa-chevron-right"></i>
-                </button>
-                <ul class="hidden flex-col bg-gray-50">
-                    <li><a href="trangchu.php?page=khachhang" class="block px-6 py-2 hover:bg-blue-100">Danh sách khách hàng</a></li>
-                    <li><a href="#" class="block px-6 py-2 hover:bg-blue-100">Lịch sử đăng nhập/đăng xuất</a></li>
-                </ul>
-            </li>
 
-            <!-- Quản lý môi giới -->
-            <li class="border-b">
-                <button class="w-full flex justify-between items-center px-4 py-2 menu-mobile-btn">
-                    Quản lý môi giới <i class="fas fa-chevron-right"></i>
-                </button>
-                <ul class="hidden flex-col bg-gray-50">
-                    <li><a href="trangchu.php?page=moigioi" class="block px-6 py-2 hover:bg-blue-100">Danh sách môi giới</a></li>
-                    <li><a href="#" class="block px-6 py-2 hover:bg-blue-100">Quản lý biểu mẫu</a></li>
-                </ul>
-            </li>
+            <!-- Quản lý người dùng -->
+            <?php if (in_array('quantri', $dsQuyen) || in_array('moigioi', $dsQuyen)): ?>
+                <li class="border-b">
+                    <button class="w-full flex justify-between items-center px-4 py-2 menu-mobile-btn">
+                        Quản lý người dùng <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <ul class="hidden flex-col bg-gray-50">
+                        <?php if (in_array('quantri', $dsQuyen)): ?>
+                            <li><a href="trangchu.php?page=ds_nguoidung" class="block px-6 py-2 hover:bg-blue-100">Danh sách người dùng</a></li>
+                            <li><a href="trangchu.php?page=ls_xacthuc" class="block px-6 py-2 hover:bg-blue-100">Lịch sử xác thực</a></li>
+                        <?php endif; ?>
+                        <li><a href="trangchu.php?page=ls_xacthuc" class="block px-6 py-2 hover:bg-blue-100">Quản lý biểu mẫu</a></li>
+                    </ul>
+                </li>
+            <?php endif; ?>
+
+            <!-- Khách hàng tiềm năng -->
+            <?php if (in_array('moigioi', $dsQuyen)): ?>
+                <li class="border-b">
+                    <button class="w-full flex justify-between items-center px-4 py-2 menu-mobile-btn">
+                        Khách hàng tiềm năng <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <ul class="hidden flex-col bg-gray-50">
+                        <li><a href="trangchu.php?page=kh_quantam" class="block px-6 py-2 hover:bg-blue-100">Khách hàng quan tâm</a></li>
+                        <li><a href="trangchu.php?page=kh_damua" class="block px-6 py-2 hover:bg-blue-100">Khách hàng đã mua</a></li>
+                    </ul>
+                </li>
+            <?php endif; ?>
 
             <!-- Quản lý đơn hàng -->
-            <li class="border-b">
-                <button class="w-full flex justify-between items-center px-4 py-2 menu-mobile-btn">
-                    Quản lý đơn hàng <i class="fas fa-chevron-right"></i>
-                </button>
-                <ul class="hidden flex-col bg-gray-50">
-                    <li><a href="#" class="block px-6 py-2 hover:bg-blue-100">Theo dõi yêu cầu mua/bán/thuê</a></li>
-                    <li><a href="#" class="block px-6 py-2 hover:bg-blue-100">Quản lý thanh toán</a></li>
-                </ul>
-            </li>
+            <?php if (in_array('quantri', $dsQuyen) || in_array('moigioi', $dsQuyen)): ?>
+                <li class="border-b">
+                    <button class="w-full flex justify-between items-center px-4 py-2 menu-mobile-btn">
+                        Quản lý đơn hàng <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <ul class="hidden flex-col bg-gray-50">
+                        <?php if (in_array('quantri', $dsQuyen)): ?>
+                            <li><a href="trangchu.php?page=td_yeucau_mbt" class="block px-6 py-2 hover:bg-blue-100">Theo dõi các y.c mua/bán/thuê</a></li>
+                            <li><a href="trangchu.php?page=ql_thanhtoan" class="block px-6 py-2 hover:bg-blue-100">Quản lý thanh toán</a></li>
+                        <?php endif; ?> 
+                        <?php if (in_array('moigioi', $dsQuyen)): ?>
+                            <li><a href="trangchu.php?page=gd_canhan" class="block px-6 py-2 hover:bg-blue-100">Giao dịch cá nhân</a></li>
+                            <li><a href="trangchu.php?page=td_tiendo_gd" class="block px-6 py-2 hover:bg-blue-100">Theo dõi tiến độ giao dịch</a></li>
+                        <?php endif; ?>
+                    </ul>
+                </li>
+            <?php endif; ?>
 
             <!-- Quản lý sản phẩm bds -->
-            <li class="border-b">
-                <button class="w-full flex justify-between items-center px-4 py-2 menu-mobile-btn">
-                    Quản lý sản phẩm BĐS <i class="fas fa-chevron-right"></i>
-                </button>
-                <ul class="hidden flex-col bg-gray-50">
-                    <li><a href="trangchu.php?page=sanpham" class="block px-6 py-2 hover:bg-blue-100">Danh sách sản phẩm BĐS</a></li>
-                    <li><a href="#" class="block px-6 py-2 hover:bg-blue-100">Quản lý hình ảnh/videos</a></li>
-                    <li><a href="trangchu.php?page=danhgiasanpham" class="block px-6 py-2 hover:bg-blue-100">Quản lý đánh giá</a></li>
-                </ul>
-            </li>
+            <?php if (!in_array('khachhang', $dsQuyen)): ?>
+                <li class="border-b">
+                    <button class="w-full flex justify-between items-center px-4 py-2 menu-mobile-btn">
+                        Quản lý sản phẩm BĐS <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <ul class="hidden flex-col bg-gray-50">
+                        <?php if (in_array('quantri', $dsQuyen)): ?>
+                            <li><a href="trangchu.php?page=ds_sanpham_bds" class="block px-6 py-2 hover:bg-blue-100">Danh sách sản phẩm BĐS</a></li>
+                            <li><a href="trangchu.php?page=ql_anh_video_bds" class="block px-6 py-2 hover:bg-blue-100">Quản lý hình ảnh/videos</a></li>
+                            <li><a href="trangchu.php?page=ql_danhgia" class="block px-6 py-2 hover:bg-blue-100">Quản lý đánh giá</a></li>
+                        <?php endif; ?>
+                        <?php if (in_array('moigioi', $dsQuyen)): ?>
+                            <li><a href="trangchu.php?page=sp_canhan" class="block px-6 py-2 hover:bg-blue-100">Sản phẩm cá nhân</a></li>
+                        <?php endif; ?>
+                    </ul>
+                </li>
+            <?php endif; ?>
 
             <!-- Quản lý CMS -->
-            <li class="border-b">
-                <button class="w-full flex justify-between items-center px-4 py-2 menu-mobile-btn">
-                    Quản lý CMS <i class="fas fa-chevron-right"></i>
-                </button>
-                <ul class="hidden flex-col bg-gray-50">
-                    <li><a href="#" class="block px-6 py-2 hover:bg-blue-100">Quản lý tin tức</a></li>
-                    <li><a href="#" class="block px-6 py-2 hover:bg-blue-100">Quản lý bài đăng</a></li>
-                    <li><a href="#" class="block px-6 py-2 hover:bg-blue-100">Quản lý FAQ/hướng dẫn sử dụng web</a></li>
-                </ul>
-            </li>
+            <?php if (in_array('quantri', $dsQuyen)): ?>
+                <li class="border-b">
+                    <button class="w-full flex justify-between items-center px-4 py-2 menu-mobile-btn">
+                        Quản lý CMS <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <ul class="hidden flex-col bg-gray-50">
+                        <li><a href="trangchu.php?page=ql_tintuc" class="block px-6 py-2 hover:bg-blue-100">Quản lý tin tức</a></li>
+                        <li><a href="trangchu.php?page=ql_baidang" class="block px-6 py-2 hover:bg-blue-100">Quản lý bài đăng</a></li>
+                    </ul>
+                </li>
+            <?php endif; ?>
 
             <!-- Thông báo & chat -->
-            <li class="border-b">
-                <button class="w-full flex justify-between items-center px-4 py-2 menu-mobile-btn">
-                    Thông báo & chat <i class="fas fa-chevron-right"></i>
-                </button>
-                <ul class="hidden flex-col bg-gray-50">
-                    <li><a href="#" class="block px-6 py-2 hover:bg-blue-100">Gửi thông báo</a></li>
-                    <li><a href="trangchu.php?page=ql_hop_thoai_chat" class="block px-6 py-2 hover:bg-blue-100">Quản lý hộp thoại chat</a></li>
-                    <li><a href="#" class="block px-6 py-2 hover:bg-blue-100">Quản lý thông báo</a></li>
-                </ul>
-            </li>
+            <?php if (in_array('quantri', $dsQuyen) || in_array('moigioi', $dsQuyen)): ?>
+                <li class="border-b">
+                    <button class="w-full flex justify-between items-center px-4 py-2 menu-mobile-btn">
+                        Thông báo & chat <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <ul class="hidden flex-col bg-gray-50">
+                        <?php if (in_array('quantri', $dsQuyen)): ?>
+                            <li><a href="trangchu.php?page=g_thongbao" class="block px-6 py-2 hover:bg-blue-100">Gửi thông báo</a></li>
+                            <li><a href="trangchu.php?page=ql_hopthoai" class="block px-6 py-2 hover:bg-blue-100">Quản lý hộp thoại chat</a></li>
+                        <?php endif; ?>
+                        <li><a href="trangchu.php?page=ql_thongbao" class="block px-6 py-2 hover:bg-blue-100">Quản lý thông báo</a></li>
+                        <?php if (in_array('moigioi', $dsQuyen)): ?>
+                            <li><a href="trangchu.php?page=g_thongbao_kh" class="block px-6 py-2 hover:bg-blue-100">Gửi thông báo khách hàng</a></li>
+                        <?php endif; ?>
+                    </ul>
+                </li>
+            <?php endif; ?>
 
             <!-- Quản lý đặt lịch -->
-            <li class="border-b">
-                <button class="w-full flex justify-between items-center px-4 py-2 menu-mobile-btn">
-                    Quản lý đặt lịch <i class="fas fa-chevron-right"></i>
-                </button>
-                <ul class="hidden flex-col bg-gray-50">
-                    <li><a href="#" class="block px-6 py-2 hover:bg-blue-100">Danh sách lịch đặt</a></li>
-                    <li><a href="#" class="block px-6 py-2 hover:bg-blue-100">Xử lý xung đột</a></li>
-                    <li><a href="#" class="block px-6 py-2 hover:bg-blue-100">Nhắc nhở</a></li>
-                </ul>
-            </li>
+            <?php if (in_array('quantri', $dsQuyen) || in_array('moigioi', $dsQuyen)): ?>
+                <li class="border-b">
+                    <button class="w-full flex justify-between items-center px-4 py-2 menu-mobile-btn">
+                        Quản lý đặt lịch <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <ul class="hidden flex-col bg-gray-50">
+                        <?php if (in_array('quantri', $dsQuyen)): ?>
+                            <li><a href="trangchu.php?page=ds_datlich" class="block px-6 py-2 hover:bg-blue-100">Danh sách lịch đặt</a></li>
+                        <?php endif; ?>
+                        <?php if (in_array('moigioi', $dsQuyen)): ?>
+                            <li><a href="trangchu.php?page=lt_canhan" class="block px-6 py-2 hover:bg-blue-100">Lịch trình cá nhân</a></li>
+                        <?php endif; ?>
+                    </ul>
+                </li>
+            <?php endif; ?>
 
             <!-- Quản lý vi phạm (mục đơn, không có submenu) -->
-            <li class="border-b">
-                <a href="#" class="block px-4 py-2 hover:bg-blue-100">Quản lý vi phạm</a>
-            </li>
+            <?php if (in_array('quantri', $dsQuyen)): ?>
+                <li class="border-b">
+                    <a href="trangchu.php?page=ds_vipham" class="block px-4 py-2 hover:bg-blue-100">Quản lý vi phạm</a>
+                </li>
+            <?php endif; ?>
         </ul>
     </div>
 </header>
@@ -387,7 +426,6 @@
     document.getElementById("btnSearch").addEventListener("click", function() {
         const query = document.getElementById("searchInput").value.trim();
         if(query) {
-            // Lấy URL hiện tại
             const url = new URL(window.location.href);
             url.searchParams.set("search", query); 
             window.location.href = url.toString();
@@ -442,7 +480,6 @@
 
     </div>
 </div>
-
 
 <!-- Footer chi tiết cho sàn BĐS - nền trắng -->
 <footer class="bg-white text-gray-800 border-t border-gray-300">
@@ -525,10 +562,6 @@
         </p>
     </div>
 </footer>
-
-
-
-
 
 </body>
 </html>

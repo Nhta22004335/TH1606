@@ -309,6 +309,8 @@ CREATE TABLE IF NOT EXISTS thong_bao (
     CONSTRAINT chk_thong_bao_trang_thai CHECK (trang_thai IN ('chuaxem','daxem'))
 );
 
+SELECT * FROM thong_bao;
+
 -- 15. Bảng danh_gia_mg (đánh giá môi giới)
 CREATE TABLE IF NOT EXISTS danh_gia_mg (
     id SERIAL PRIMARY KEY,
