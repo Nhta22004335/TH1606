@@ -1,7 +1,8 @@
 <?php
     
     function ketnoicsdl() {
-        $host = "host.docker.internal"; 
+        // $host = "host.docker.internal";
+        $host = "localhost"; 
         $port = "5432";
         $dbname = "csdl_bds";
         $user = "postgres";
