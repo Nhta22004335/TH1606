@@ -5,7 +5,7 @@
 
 -- ===========================
 -- Extension cho UUID
--- ===========================
+-- =========================== tuấn anh
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE IF NOT EXISTS quyen (
