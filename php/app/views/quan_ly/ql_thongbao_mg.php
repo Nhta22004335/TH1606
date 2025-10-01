@@ -46,7 +46,7 @@ $thongbaos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <tr>
                         <td class="px-6 py-4 whitespace-nowrap"><?= $i+1 ?></td>
                         <td class="px-6 py-4 whitespace-normal"><?= htmlspecialchars($tb["noi_dung"]) ?></td>
-                        <td class="px-6 py-4 whitespace-nowrap"><?= $tb["ngay_tao"] ?></td>
+                        <td class="px-6 py-4 whitespace-nowrap"><?= $tb["thoi_gian_gui"] ?></td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <?php if ($tb["trang_thai"] === "chua_doc"): ?>
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Chưa đọc</span>
