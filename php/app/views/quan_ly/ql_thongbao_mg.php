@@ -17,7 +17,7 @@ if (!$id_mg) {
 }
 
 // Lấy danh sách thông báo cho môi giới này
-$sql = "SELECT * FROM thong_bao WHERE id_nguoi_dung = :id_mg ORDER BY ngay_tao DESC";
+$sql = "SELECT * FROM thong_bao WHERE id_nguoi_dung = :id_mg";
 $stmt = $pdo->prepare($sql);
 $stmt->execute(["id_mg" => $id_mg]);
 $thongbaos = $stmt->fetchAll(PDO::FETCH_ASSOC);
