@@ -120,7 +120,9 @@ $id = 'ea5c0d77-9ce2-4309-b0e7-cbe579f9209d';
                             <li><a href="trangchu.php?page=ls_xacthuc" class="block px-4 py-2 hover:bg-blue-100">Lịch sử xác thực</a></li>
                             <li><a href="trangchu.php?page=ql_bieumau" class="block px-4 py-2 hover:bg-blue-100">Quản lý biểu mẫu</a></li>
                         <?php endif; ?>
-                        <li><a href="trangchu.php?page=ql_hoso" class="block px-4 py-2 hover:bg-blue-100">Quản lý hồ sơ</a></li>
+                        <?php if (in_array('moigioi', $dsQuyen)): ?>
+                            <li><a href="trangchu.php?page=ql_hoso" class="block px-4 py-2 hover:bg-blue-100">Quản lý hồ sơ</a></li>
+                        <?php endif; ?>
                     </ul>
                 </li>
             <?php endif; ?>
@@ -241,7 +243,9 @@ $id = 'ea5c0d77-9ce2-4309-b0e7-cbe579f9209d';
                             <li><a href="trangchu.php?page=ds_nguoidung" class="block px-6 py-2 hover:bg-blue-100">Danh sách người dùng</a></li>
                             <li><a href="trangchu.php?page=ls_xacthuc" class="block px-6 py-2 hover:bg-blue-100">Lịch sử xác thực</a></li>
                         <?php endif; ?>
-                        <li><a href="trangchu.php?page=ls_xacthuc" class="block px-6 py-2 hover:bg-blue-100">Quản lý biểu mẫu</a></li>
+                        <?php if (in_array('moigioi', $dsQuyen)): ?>
+                            <li><a href="trangchu.php?page=ls_xacthuc" class="block px-6 py-2 hover:bg-blue-100">Quản lý biểu mẫu</a></li>
+                        <?php endif; ?>
                     </ul>
                 </li>
             <?php endif; ?>
