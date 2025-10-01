@@ -3,8 +3,8 @@
     require_once "../../../config/database.php";
     $pdo = ketnoicsdl();
 
-    $id = $_SESSION['id_nguoi_dung'];
-
+    // $id = $_SESSION['id_nguoi_dung'];
+$id = 'ea5c0d77-9ce2-4309-b0e7-cbe579f9209d';
     $sql = "
         SELECT q.vai_tro
         FROM phan_quyen pq
