@@ -55,12 +55,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <input type="text" name="tendangnhap" class="w-full p-2 border rounded mb-4" required>
 
         <label class="block mb-2 text-sm">Mật khẩu mới</label>
-        <input type="password" name="matkhau" class="w-full p-2 border rounded mb-4" required>
+        <div class="relative mb-4">
+            <input type="password" name="matkhau" id="matkhau" class="w-full p-2 border rounded pr-10" required>
+            <button type="button" onclick="togglePassword()" class="absolute right-2 top-2 text-gray-600 hover:text-gray-800">
+                <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+            </button>
+        </div>
 
         <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition">
             Đặt lại mật khẩu
         </button>
     </form>
 </div>
+
+<script>
+function togglePassword() {
+    const pwInput = document.getElementById('matkhau');
+    const eyeIcon = document.getElementById('eyeIcon');
+    if (pwInput.type === 'password') {
+        pwInput.type = 'text';
+        eyeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a10.05 10.05 0 012.083-3.333M15 12a3 3 0 11-6 0 3 3 0 016 0zM3 3l18 18" />`; // mắt tắt
+    } else {
+        pwInput.type = 'password';
+        eyeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />`; // mắt mở
+    }
+}
+</script>
 </body>
 </html>

@@ -121,7 +121,7 @@
                             <li><a href="trangchu.php?page=ql_bieumau" class="block px-4 py-2 hover:bg-blue-100">Quản lý biểu mẫu</a></li>
                         <?php endif; ?>
                         <?php if (in_array('moigioi', $dsQuyen)): ?>
-                            <li><a href="trangchu.php?page=ql_hoso" class="block px-4 py-2 hover:bg-blue-100">Quản lý hồ sơ</a></li>
+                            <li><a href="trangchu.php?page=../moi_gioi/ql_hoso" class="block px-4 py-2 hover:bg-blue-100">Quản lý hồ sơ</a></li>
                         <?php endif; ?>
                     </ul>
                 </li>
