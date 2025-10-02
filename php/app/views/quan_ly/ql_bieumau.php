@@ -47,58 +47,53 @@
 <body>
 
 <!-- Header -->
-<header class="flex items-center gap-4 bg-white shadow p-4  border-b-2">
+<header class="flex items-center gap-4 bg-white shadow p-4 border-b-1">
     <img src="../../../public/assets/anhht/0/customs-clearance.gif" alt="Chat" class="w-12 h-12">
     <h1 class="text-2xl font-bold text-gray-600">Giấy tờ đơn từ</h1>
 </header>
 
-<div class="w-full mx-auto p-6 bg-gray-50">
+<table class="w-full border-collapse my-6">
+    <thead>
+        <tr class="bg-gray-200 text-gray-700">
+            <th class="p-3 text-left">Tiêu đề</th>
+            <th class="p-3 text-left">Loại</th>
+            <th class="p-3 text-left">Người mua</th>
+            <th class="p-3 text-left">Người bán</th>
+            <th class="p-3 text-left">Trạng thái</th>
+            <th class="p-3 text-center">Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach($bieumau as $bm): ?>
+            <tr class="border-b hover:bg-gray-50">
+                <td class="p-3"><?= $bm["tieu_de"] ?></td>
+                <td class="p-3"><?= $bm["loai"] ?></td>
+                <td class="p-3"><?= $bm["ten_ben_mua"] ?></td>
+                <td class="p-3"><?= $bm["ten_ben_ban"] ?></td>
+                <td class="p-3">
+                    <?php if($bm["trang_thai"]=="choduyet"): ?>
+                        <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded">Chờ duyệt</span>
+                    <?php elseif($bm["trang_thai"]=="daduyet"): ?>
+                        <span class="px-2 py-1 bg-green-100 text-green-700 rounded">Đã duyệt</span>
+                    <?php elseif($bm["trang_thai"]=="daky"): ?>
+                        <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded">Đã ký</span>
+                    <?php elseif($bm["trang_thai"]=="huy"): ?>
+                        <span class="px-2 py-1 bg-red-100 text-red-700 rounded">Hủy</span>
+                    <?php endif; ?>
+                </td>
 
-    <div class="bg-white rounded-xl shadow p-6">
-        <table class="w-full border-collapse">
-            <thead>
-                <tr class="bg-gray-200 text-gray-700">
-                    <th class="p-3 text-left">Tiêu đề</th>
-                    <th class="p-3 text-left">Loại</th>
-                    <th class="p-3 text-left">Người mua</th>
-                    <th class="p-3 text-left">Người bán</th>
-                    <th class="p-3 text-left">Trạng thái</th>
-                    <th class="p-3 text-center">Hành động</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach($bieumau as $bm): ?>
-                    <tr class="border-b hover:bg-gray-50">
-                        <td class="p-3"><?= $bm["tieu_de"] ?></td>
-                        <td class="p-3"><?= $bm["loai"] ?></td>
-                        <td class="p-3"><?= $bm["ten_ben_mua"] ?></td>
-                        <td class="p-3"><?= $bm["ten_ben_ban"] ?></td>
-                        <td class="p-3">
-                            <?php if($bm["trang_thai"]=="choduyet"): ?>
-                                <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded">Chờ duyệt</span>
-                            <?php elseif($bm["trang_thai"]=="daduyet"): ?>
-                                <span class="px-2 py-1 bg-green-100 text-green-700 rounded">Đã duyệt</span>
-                            <?php elseif($bm["trang_thai"]=="daky"): ?>
-                                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded">Đã ký</span>
-                            <?php elseif($bm["trang_thai"]=="huy"): ?>
-                                <span class="px-2 py-1 bg-red-100 text-red-700 rounded">Hủy</span>
-                            <?php endif; ?>
-                        </td>
+                <td class="p-3 text-center">
+                    <button 
+                        onclick="document.getElementById('docModal<?= $bm['id'] ?>').classList.remove('hidden')" 
+                        class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg flex items-center justify-center gap-1 mx-auto shadow">
+                        <i class="fa-solid fa-eye"></i> Xem
+                    </button>
+                </td>
 
-                        <td class="p-3 text-center">
-                            <button 
-                                onclick="document.getElementById('docModal<?= $bm['id'] ?>').classList.remove('hidden')" 
-                                class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg flex items-center justify-center gap-1 mx-auto shadow">
-                                <i class="fa-solid fa-eye"></i> Xem
-                            </button>
-                        </td>
-
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-</div>
+            </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>
 
 <!-- Render modal chi tiết cho từng đơn -->
 <?php foreach($bieumau as $bm): ?>

@@ -79,6 +79,18 @@
         }
     }
 
+    if (isset($_POST['delete_id'])) {
+        $id = $_POST['delete_id'];
+        $stmt = $pdo->prepare("DELETE FROM lich_su_xac_thuc WHERE id = :id");
+        $stmt->execute([':id' => $id]);
+
+        if ($stmt->rowCount() > 0) {
+            $_SESSION['message'] = "🗑️ Đã xóa bản ghi #$id thành công.";
+        } else {
+            $_SESSION['message'] = "⚠️ Không tìm thấy bản ghi cần xóa.";
+        }
+    }
+
 ?>
 
 <!DOCTYPE html>
@@ -107,7 +119,7 @@
     <?php endif; ?>
     <!-- Search & Export CSV -->
     <div class="mb-4 flex justify-between items-center">
-        <a href="lichsuauth.php?export=csv" class="px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700">Xuất CSV</a>
+        <a href="ls_xacthuc.php?export=csv" class="px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700">Xuất CSV</a>
         <form method="POST" class="flex space-x-2 items-center">
             <input type="date" name="delete_from" class="border rounded-lg p-2 focus:outline-none" required>
             <span>đến</span>
@@ -127,6 +139,7 @@
                     <th class="px-4 py-2 border-b">Thời gian kết thúc</th>
                     <th class="px-4 py-2 border-b">Địa chỉ IP</th>
                     <th class="px-4 py-2 border-b">User Agent</th>
+                    <th class="px-4 py-2 border-b text-center">Hành động</th>
                 </tr>
             </thead>
             <tbody>
@@ -153,12 +166,19 @@
                             title="<?= htmlspecialchars($log['user_agent']) ?>">
                             <?= htmlspecialchars(substr($log['user_agent'], 0, 50)) ?>...
                         </td>
+                        <td class="px-4 py-2 border-b text-center">
+                            <form method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa bản ghi này?');">
+                                <input type="hidden" name="delete_id" value="<?= $log['id'] ?>">
+                                <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 text-sm">
+                                    Xóa
+                                </button>
+                            </form>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
     </div>
-
 
     <!-- Pagination -->
     <div class="mt-4 flex justify-center space-x-2">
@@ -167,7 +187,7 @@
         <?php endif; ?>
 
         <?php for ($i=1; $i <= $totalPages; $i++): ?>
-            <a href="?page=lichsuxacthuc&p=<?= $i ?>" class="px-3 py-1 border rounded-lg <?= $i == $page ? 'bg-blue-600 text-white' : 'hover:bg-gray-200' ?>"><?= $i ?></a>
+            <a href="?page=ls_xacthuc&p=<?= $i ?>" class="px-3 py-1 border rounded-lg <?= $i == $page ? 'bg-blue-600 text-white' : 'hover:bg-gray-200' ?>"><?= $i ?></a>
         <?php endfor; ?>
 
         <?php if ($page < $totalPages): ?>
@@ -182,7 +202,7 @@
         if (alertBox) {
             setTimeout(() => {
                 alertBox.style.display = "none";
-                window.location.href = "trangchu.php?page=lichsuxacthuc";
+                window.location.href = "trangchu.php?page=ls_xacthuc";
             }, 2000); 
         }
     });

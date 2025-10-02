@@ -47,7 +47,7 @@ $vipham = [
 <body x-data="viPhamApp()">
 
     <!-- Tiêu đề -->
-    <h1 class="flex items-center text-2xl font-bold mb-4 mt-4 text-gray-600">
+    <h1 class="flex items-center text-2xl font-bold mb-4 mt-4 text-gray-600 px-6">
         <img src="../../../public/assets/anhht/0/president.gif" 
              class="w-12 h-12 mr-3" alt="icon">
         Quản lý vi phạm
