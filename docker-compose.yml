@@ -11,7 +11,7 @@ services:
     environment:
       DB_HOST: pg-demo
       DB_USER: postgres
-      DB_PASS: 22004335
+      DB_PASS: 123456
       DB_NAME: csdl_bds
     volumes:
       - ./php:/var/www/html
@@ -22,7 +22,7 @@ services:
     environment:
       POSTGRES_DB: csdl_bds
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 22004335
+      POSTGRES_PASSWORD: 123456
     ports:
       - "5432:5432"
     volumes:
