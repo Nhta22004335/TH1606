@@ -347,3 +347,26 @@ INSERT INTO bieu_mau (tieu_de, loai, ben_mua, ben_ban, trang_thai, tep_dk) VALUE
 ('Hợp đồng mua bán nhà', 'Hợp đồng', '7a6fa374-5628-4870-be48-a4ea18aef621', 'ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'choduyet', 'hopdong1.pdf');
 
 SELECT * FROM bieu_mau;
+
+CREATE TABLE IF NOT EXISTS yeu_cau (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), 
+    
+    id_nguoi_dung UUID NOT NULL,
+    loai VARCHAR(100) NOT NULL,               
+    id_bds UUID,                             
+    trang_thai VARCHAR(50) DEFAULT 'choxuly',
+    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_yeucau_nguoidung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
+    CONSTRAINT fk_yeucau_bds FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE SET NULL,
+
+    CONSTRAINT chk_yeucau_trangthai CHECK (trang_thai IN ('choxuly', 'daduyet', 'dahuy')),
+	CONSTRAINT chk_yeucau_loai CHECK (loai IN ('mua', 'ban', 'thue'))
+);
+
+INSERT INTO yeu_cau (id_nguoi_dung, loai, id_bds, trang_thai)
+VALUES
+    ('7a6fa374-5628-4870-be48-a4ea18aef621', 'mua', '9b17fb30-8c6e-4494-920a-cbdd1621ee20', 'choxuly'),
+    ('7a6fa374-5628-4870-be48-a4ea18aef621', 'thue', '6c064758-3b9f-4ab0-af99-bcdbb8efa989', 'daduyet');
+	
+select * from bat_dong_san

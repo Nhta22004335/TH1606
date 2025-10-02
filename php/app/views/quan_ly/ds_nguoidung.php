@@ -175,7 +175,7 @@
     <?php function theNguoiDung($u, $roleColors, $labelvaitro, $labeltrangthai) { ?>
         <div class="bg-blue-50 border border-blue-200 rounded-xl overflow-hidden transition flex flex-col relative cursor-pointer">
             <div class="p-4 flex flex-col items-center">
-                <img src="../../../public/assets/anhht/0/<?= $u['avt'] ?>" class="w-20 h-20 rounded-full object-cover border-2 border-gray-200">
+                <img src="../../../storage/pictures/avt/<?= $u['avt'] ?>" class="w-20 h-20 rounded-full object-cover border-2 border-gray-200">
                 <h2 class="mt-2 font-semibold text-gray-800 text-center"><?= $u['ho_ten'] ?></h2>
                 <p class="text-gray-500 text-sm text-center"><?= $u['email'] ?></p>
                 <p class="text-gray-500 text-sm text-center"><?= $u['so_dt'] ?></p>
