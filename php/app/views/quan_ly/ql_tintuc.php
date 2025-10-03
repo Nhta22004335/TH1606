@@ -18,7 +18,7 @@ $tintuc = [
     "chuyenmuc"=>"Biệt thự","ngay"=>"28/09/2025","img"=>"https://picsum.photos/400/250?random=203",
     "moigioi"=>"Lê Văn C","sdt"=>"0988111222","avt"=>"https://i.pravatar.cc/100?img=3","view"=>1500
   ],
-  [
+  [                                                                                      
     "tieude"=>"Nhà phố thương mại Bình Dương bùng nổ",
     "mota"=>"Các dự án nhà phố thương mại tại Bình Dương ghi nhận lượng giao dịch cao.",
     "chuyenmuc"=>"Nhà phố","ngay"=>"27/09/2025","img"=>"https://picsum.photos/400/250?random=204",

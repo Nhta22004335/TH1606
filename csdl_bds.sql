@@ -151,6 +151,12 @@ CREATE TABLE IF NOT EXISTS bat_dong_san (
     CONSTRAINT fk_bds_nguoi_dung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE
 );
 
+ALTER TABLE bat_dong_san
+DROP COLUMN loai CASCADE;
+
+ALTER TABLE bat_dong_san
+ADD COLUMN hinh_thuc VARCHAR(100) DEFAULT 'chuacapnhat';
+
 INSERT INTO bat_dong_san (id_nguoi_dung, tieu_de, mo_ta, gia, dien_tich, dia_chi, loai, khu_vuc)
 VALUES (
     'ea5c0d77-9ce2-4309-b0e7-cbe579f9209d',
