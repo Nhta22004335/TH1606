@@ -123,6 +123,9 @@
                         <?php if (in_array('moigioi', $dsQuyen)): ?>
                             <li><a href="trangchu.php?page=../moi_gioi/ql_hoso" class="block px-4 py-2 hover:bg-blue-100">Quản lý hồ sơ</a></li>
                         <?php endif; ?>
+                         <?php if (in_array('moigioi', $dsQuyen)): ?>
+                            <li><a href="trangchu.php?page=../moi_gioi/cn_hoso" class="block px-4 py-2 hover:bg-blue-100">Cập nhật hồ sơ</a></li>
+                        <?php endif; ?>
                     </ul>
                 </li>
             <?php endif; ?>
@@ -131,8 +134,8 @@
                 <li class="relative">
                     <a class="hover:text-blue-600 menu-btn inline-flex items-center">Khách hàng tiềm năng<i class="fas fa-chevron-right ml-1 transition-transform duration-300"></i></a> 
                     <ul class="hidden absolute left-0 top-full bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
-                        <li><a href="trangchu.php?page=kh_quantam" class="block px-4 py-2 hover:bg-blue-100">Khách hàng quan tâm</a></li>
-                        <li><a href="trangchu.php?page=kh_damua" class="block px-4 py-2 hover:bg-blue-100">Khách hàng đã mua</a></li>
+                        <li><a href="trangchu.php?page=../moi_gioi/kh_quantam" class="block px-4 py-2 hover:bg-blue-100">Khách hàng quan tâm</a></li>
+                        <li><a href="trangchu.php?page=../moi_gioi/kh_damua" class="block px-4 py-2 hover:bg-blue-100">Khách hàng đã mua</a></li>
                     </ul>
                 </li>
             <?php endif; ?>
@@ -146,8 +149,8 @@
                             <li><a href="trangchu.php?page=ql_thanhtoan" class="block px-4 py-2 hover:bg-blue-100">Quản lý thanh toán</a></li>
                         <?php endif; ?>
                         <?php if (in_array('moigioi', $dsQuyen)): ?>
-                            <li><a href="trangchu.php?page=gd_canhan" class="block px-4 py-2 hover:bg-blue-100">Giao dịch cá nhân</a></li>
-                            <li><a href="trangchu.php?page=td_tiendo_gd" class="block px-4 py-2 hover:bg-blue-100">Theo dõi tiến độ giao dịch</a></li>
+                            <li><a href="trangchu.php?page=../moi_gioi/gd_canhan" class="block px-4 py-2 hover:bg-blue-100">Giao dịch cá nhân</a></li>
+                            <li><a href="trangchu.php?page=../moi_gioi/td_tiendo_gd" class="block px-4 py-2 hover:bg-blue-100">Theo dõi tiến độ giao dịch</a></li>
                         <?php endif; ?>
                     </ul>
                 </li>
@@ -162,18 +165,25 @@
                             <li><a href="trangchu.php?page=ql_danhgia" class="block px-4 py-2 hover:bg-blue-100">Quản lý đánh giá</a></li>
                         <?php endif; ?>
                         <?php if (in_array('moigioi', $dsQuyen)): ?>
-                            <li><a href="trangchu.php?page=sp_canhan" class="block px-4 py-2 hover:bg-blue-100">Sản phẩm cá nhân</a></li>
-                        <?php endif; ?>
+                            <li><a href="trangchu.php?page=../moi_gioi/sp_canhan" class="block px-4 py-2 hover:bg-blue-100">Sản phẩm cá nhân</a></li>
+                            <li><a href="trangchu.php?page=../moi_gioi/dang_sp" class="block px-4 py-2 hover:bg-blue-100">Đăng sản phẩm</a></li>
+
+                            <?php endif; ?>
                     </ul>
                 </li>
             <?php endif; ?>
 
-            <?php if (in_array('quantri', $dsQuyen)): ?>
+            <?php if (in_array('quantri', $dsQuyen)|| in_array('moigioi', $dsQuyen)): ?>
                 <li class="relative">
                     <a class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý CMS<i class="fas fa-chevron-right ml-2 transition-transform duration-300"></i></a>
                     <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
+                    <?php if (in_array('quantri', $dsQuyen)): ?>
                         <li><a href="trangchu.php?page=ql_tintuc" class="block px-4 py-2 hover:bg-blue-100">Quản lý tin tức</a></li>
                         <li><a href="trangchu.php?page=ql_baidang" class="block px-4 py-2 hover:bg-blue-100">Quản lý bài đăng</a></li>
+                         <?php endif; ?>
+                         <?php if (in_array('moigioi', $dsQuyen)): ?>
+                        <li><a href="trangchu.php?page=../moi_gioi/ql_tintuc_mg" class="block px-4 py-2 hover:bg-blue-100">Quản lý tin tức </a></li>
+                    <?php endif; ?>
                     </ul>
                 </li>
             <?php endif; ?>
@@ -185,12 +195,12 @@
                         <?php if (in_array('quantri', $dsQuyen)): ?>
                             <li><a href="trangchu.php?page=g_thongbao" class="block px-4 py-2 hover:bg-blue-100">Gửi thông báo</a></li>
                             <li><a href="trangchu.php?page=ql_hopthoai" class="block px-4 py-2 hover:bg-blue-100">Quản lý hộp thoại</a></li>
-                            <li><a href="trangchu.php?page=ql_thongbao" class="block px-4 py-2 hover:bg-blue-100">Quản lý thông báo</a></li>
+                            <li><a href="trangchu.php?page=../moi_gioi/ql_thongbao" class="block px-4 py-2 hover:bg-blue-100">Quản lý thông báo</a></li>
                         <?php endif; ?>
                         
                         <?php if (in_array('moigioi', $dsQuyen)): ?>
-                            <li><a href="trangchu.php?page=ql_thongbao_mg" class="block px-4 py-2 hover:bg-blue-100">Quản lý thông báo</a></li>
-                            <li><a href="trangchu.php?page=g_thongbao_kh" class="block px-4 py-2 hover:bg-blue-100">Gửi thông báo khách hàng</a></li>
+                            <li><a href="trangchu.php?page=../moi_gioi/ql_thongbao_mg" class="block px-4 py-2 hover:bg-blue-100">Quản lý thông báo</a></li>
+                            <li><a href="trangchu.php?page=../moi_gioi/g_thongbao_kh" class="block px-4 py-2 hover:bg-blue-100">Gửi thông báo khách hàng</a></li>
                         <?php endif; ?>
                     </ul>
                 </li>
@@ -204,7 +214,7 @@
                             <li><a href="trangchu.php?page=ds_datlich" class="block px-4 py-2 hover:bg-blue-100">Danh sách lịch đặt</a></li>
                         <?php endif; ?>
                         <?php if (in_array('moigioi', $dsQuyen)): ?>
-                            <li><a href="trangchu.php?page=lt_canhan" class="block px-4 py-2 hover:bg-blue-100">Lịch trình cá nhân</a></li>
+                            <li><a href="trangchu.php?page=../moi_gioi/lt_canhan" class="block px-4 py-2 hover:bg-blue-100">Lịch trình cá nhân</a></li>
                         <?php endif; ?>
                     </ul>
                 </li>
@@ -297,6 +307,7 @@
                         <?php endif; ?>
                         <?php if (in_array('moigioi', $dsQuyen)): ?>
                             <li><a href="trangchu.php?page=sp_canhan" class="block px-6 py-2 hover:bg-blue-100">Sản phẩm cá nhân</a></li>
+                           
                         <?php endif; ?>
                     </ul>
                 </li>
@@ -345,7 +356,7 @@
                             <li><a href="trangchu.php?page=ds_datlich" class="block px-6 py-2 hover:bg-blue-100">Danh sách lịch đặt</a></li>
                         <?php endif; ?>
                         <?php if (in_array('moigioi', $dsQuyen)): ?>
-                            <li><a href="trangchu.php?page=lt_canhan" class="block px-6 py-2 hover:bg-blue-100">Lịch trình cá nhân</a></li>
+                            <li><a href="trangchu.php?page=../moi_gioi/lt_canhan" class="block px-6 py-2 hover:bg-blue-100">Lịch trình cá nhân</a></li>
                         <?php endif; ?>
                     </ul>
                 </li>

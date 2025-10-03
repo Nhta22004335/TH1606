@@ -370,3 +370,37 @@ VALUES
     ('7a6fa374-5628-4870-be48-a4ea18aef621', 'thue', '6c064758-3b9f-4ab0-af99-bcdbb8efa989', 'daduyet');
 	
 select * from bat_dong_san
+-- 1. Bảng tin đăng
+CREATE TABLE tin_tuc (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),       
+    id_khach_hang UUID NOT NULL,                                                   
+    tieu_de VARCHAR(200) NOT NULL DEFAULT 'chuacapnhat',
+    mo_ta TEXT DEFAULT 'chuacapnhat',
+    chuyen_muc VARCHAR(100) DEFAULT 'chuacapnhat',                  
+    trang_thai VARCHAR(50) DEFAULT 'choduyet',           
+    ngay_dang TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_trang_thai_tin CHECK (trang_thai IN ('choduyet','dangban','daban','dathue')),
+    CONSTRAINT fk_tin_khachhang FOREIGN KEY (id_khach_hang) REFERENCES nguoi_dung(id) ON DELETE CASCADE
+);
+-- Dữ liệu mẫu cho bảng tin_tuc
+INSERT INTO tin_tuc (id_khach_hang, tieu_de, mo_ta, chuyen_muc, trang_thai)
+VALUES
+('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Mở bán căn hộ Vinhomes', 'Cập nhật thông tin dự án mới nhất tại Vinhomes.', 'Bất động sản', 'choduyet'),
+('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Những lưu ý khi mua nhà phố', 'Hướng dẫn khách hàng tránh rủi ro khi mua nhà phố.', 'Hướng dẫn', 'choduyet');
+
+select * from tin_tuc
+-- Ví dụ thêm 1 tin đăng
+INSERT INTO tin_dang (id_khach_hang, id_bds, tieu_de, mo_ta, gia, dien_tich, dia_chi, loai, trang_thai)
+VALUES
+('d7a1f6c2-xxxx-xxxx-xxxx-xxxxxxxxxxxx',  -- UUID khách hàng
+ 'b6e7dbf5-37a3-423d-a51e-59fc00467984',  -- UUID BĐS
+ 'Căn hộ cao cấp Vinhomes', 
+ 'Căn hộ 2PN full nội thất', 
+ 3500000000, 
+ 75.5, 
+ 'Quận 1, TP.HCM', 
+ 'ban', 
+ 'dangban'
+);
+ALTER TABLE tin_tuc
+ADD COLUMN anh_tin TEXT DEFAULT 'chuacapnhat.png';
