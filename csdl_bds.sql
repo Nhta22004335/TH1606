@@ -151,12 +151,6 @@ CREATE TABLE IF NOT EXISTS bat_dong_san (
     CONSTRAINT fk_bds_nguoi_dung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE
 );
 
-ALTER TABLE bat_dong_san
-DROP COLUMN loai CASCADE;
-
-ALTER TABLE bat_dong_san
-ADD COLUMN hinh_thuc VARCHAR(100) DEFAULT 'chuacapnhat';
-
 INSERT INTO bat_dong_san (id_nguoi_dung, tieu_de, mo_ta, gia, dien_tich, dia_chi, loai, khu_vuc)
 VALUES (
     'ea5c0d77-9ce2-4309-b0e7-cbe579f9209d',
@@ -410,3 +404,37 @@ VALUES
 );
 ALTER TABLE tin_tuc
 ADD COLUMN anh_tin TEXT DEFAULT 'chuacapnhat.png';
+
+CREATE TABLE hop_thoai (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),                 
+    nguoi_gui UUID NOT NULL,                 -- Người gửi
+    nguoi_nhan UUID NOT NULL,                   -- Người nhận
+    noi_dung TEXT NOT NULL CHECK (noi_dung <> ''), -- Không cho phép rỗng
+	anh_tn TEXT,
+	video_tn TEXT,
+    tg_gui TIMESTAMP NOT NULL DEFAULT NOW(),
+    -- Ràng buộc khóa ngoại
+    CONSTRAINT fk_gui FOREIGN KEY (nguoi_gui) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
+    CONSTRAINT fk_nhan  FOREIGN KEY (nguoi_nhan)   REFERENCES nguoi_dung(id) ON DELETE CASCADE,
+    -- Ràng buộc: người gửi và người nhận không được trùng
+    CONSTRAINT chk_gui_nhan CHECK (nguoi_gui <> nguoi_nhan)
+);
+
+select * from hop_thoai
+
+INSERT INTO hop_thoai (nguoi_gui, nguoi_nhan, noi_dung) VALUES 
+('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', '7a6fa374-5628-4870-be48-a4ea18aef621', 'Anh chị cần tư vấn về những thông tin j ạ ?'),
+('7a6fa374-5628-4870-be48-a4ea18aef621', 'ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Về căn hộ B đó có vấn đề về tranh chấp ko ?'),
+('ab76fa3c-893e-487d-983f-d8429ee95436', 'ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Bạn muốn phản hồi j về cho tôi? Hay muốn giải đáp!'),
+('7a6fa374-5628-4870-be48-a4ea18aef621', 'ab76fa3c-893e-487d-983f-d8429ee95436', 'Tôi cần nắm rỏ các quy định về chính sách');
+
+
+
+
+
+
+
+
+
+
+

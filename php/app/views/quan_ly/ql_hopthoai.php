@@ -1,24 +1,52 @@
 <?php
-$users = [
-    ['id'=>1, 'name'=>'Admin', 'role'=>'admin','avatar'=>'../../../public/assets/anhht/0/avt.png'],
-    ['id'=>2, 'name'=>'Môi giới 1', 'role'=>'broker','avatar'=>'../../../public/assets/anhht/0/avt.png'],
-    ['id'=>3, 'name'=>'Môi giới 2', 'role'=>'broker','avatar'=>'../../../public/assets/anhht/0/avt.png'],
-    ['id'=>4, 'name'=>'Khách hàng 1', 'role'=>'customer','avatar'=>'../../../public/assets/anhht/0/avt.png'],
-    ['id'=>5, 'name'=>'Khách hàng 2', 'role'=>'customer','avatar'=>'../../../public/assets/anhht/0/avt.png'],
-];
+    require_once "../../../config/database.php"; 
+    $pdo = ketnoicsdl();
 
-$tinnhan = [
-    ['id_chat'=>1,'from'=>2,'to'=>4,'content'=>'Chào bạn, bạn quan tâm dự án nào?','timestamp'=>'10:00 24/09/2025'],
-    ['id_chat'=>1,'from'=>4,'to'=>2,'content'=>'Tôi muốn xem VinHomes Central Park.','timestamp'=>'10:01 24/09/2025'],
-    ['id_chat'=>2,'from'=>3,'to'=>5,'content'=>'Xin chào, tôi có thể tư vấn cho bạn.','timestamp'=>'10:05 24/09/2025'],
-    ['id_chat'=>2,'from'=>5,'to'=>3,'content'=>'Vâng, tôi muốn tìm nhà quận 1.','timestamp'=>'10:06 24/09/2025'],
-    ['id_chat'=>100,'from'=>1,'to'=>2,'content'=>'Nhắc nhở cập nhật thông tin dự án.','timestamp'=>'09:00 24/09/2025'],
-    ['id_chat'=>101,'from'=>1,'to'=>4,'content'=>'Hướng dẫn thủ tục đặt cọc.','timestamp'=>'09:15 24/09/2025'],
-];
+    // Truy vấn danh sách người dùng
+    $sql = "
+        SELECT 
+            nd.id AS id_nguoi_dung,
+            info.ho_ten,
+            STRING_AGG(q.vai_tro, ', ') AS cac_vai_tro,
+            nd.avt
+        FROM nguoi_dung nd
+        JOIN info_nguoi_dung info ON nd.id = info.id_nguoi_dung
+        JOIN phan_quyen pq ON nd.id = pq.id_nguoi_dung
+        JOIN quyen q ON pq.id_quyen = q.id
+        GROUP BY nd.id, info.ho_ten, nd.avt;
+    ";
+    $stmt = $pdo->query($sql);
+    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$currentUser = $users[0];
-$currentChat = $_GET['chat'] ?? null;
+    // Truy vấn toàn bộ tin nhắn
+    $sql = "
+        SELECT 
+            ht.id AS id_hop_thoai,
+            ht.noi_dung,
+            ht.anh_tn,
+            ht.video_tn,
+            ht.tg_gui,
+            ng.id AS id_nguoi_gui,
+            info_g.ho_ten AS ten_nguoi_gui,
+            ng.avt AS avt_nguoi_gui,
+            nn.id AS id_nguoi_nhan,
+            info_n.ho_ten AS ten_nguoi_nhan,
+            nn.avt AS avt_nguoi_nhan
+        FROM hop_thoai ht
+        JOIN nguoi_dung ng ON ht.nguoi_gui = ng.id
+        JOIN info_nguoi_dung info_g ON ng.id = info_g.id_nguoi_dung
+        JOIN nguoi_dung nn ON ht.nguoi_nhan = nn.id
+        JOIN info_nguoi_dung info_n ON nn.id = info_n.id_nguoi_dung
+        ORDER BY ht.tg_gui ASC;
+    ";
+    $stmt = $pdo->query($sql);
+    $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+    $currentUser = $_SESSION['id_nguoi_dung'];
+    $currentChat = $_GET['chat'] ?? null;
 ?>
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -26,11 +54,11 @@ $currentChat = $_GET['chat'] ?? null;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý chat BĐS</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://unpkg.com/alpinejs" defer></script>
     <link rel="stylesheet" href="../../../public/assets/fontawesome/css/all.min.css">
     <style>[x-cloak]{display:none!important;}</style>
 </head>
-<body class="flex flex-col min-h-screen">
+<body>
 
 <!-- Header -->
 <header class="flex items-center gap-4 bg-white shadow p-4">
@@ -45,29 +73,33 @@ $currentChat = $_GET['chat'] ?? null;
             <h2 class="text-lg font-semibold mb-4 text-gray-700">Danh sách hội thoại</h2>
             <div class="space-y-2">
                 <?php
-                $chatIds = array_unique(array_column($tinnhan, 'id_chat'));
-                foreach ($chatIds as $id) {
-                    $participants = array_unique(array_map(function($t) use ($currentUser, $id) {
-                        if ($t['id_chat'] != $id) return null;
-                        return $t['from'] == $currentUser['id'] ? $t['to'] : $t['from'];
-                    }, $tinnhan));
-                    $participants = array_filter($participants);
+                $chatGroups = [];
+                foreach ($messages as $m) {
+                    $pair = [$m['ten_nguoi_gui'], $m['ten_nguoi_nhan']];
+                    sort($pair);
+                    $chatKey = implode("_", $pair);
+                    $chatGroups[$chatKey][] = $m;
+                }
 
-                    $names = implode(' & ', array_map(
-                        fn($pid) => $users[array_search($pid, array_column($users,'id'))]['name'],
-                        $participants
-                    ));
-                    $active = ($currentChat == $id) ? 'bg-blue-100' : 'hover:bg-blue-50';
-
+                foreach ($chatGroups as $chatKey => $msgs) {
+                    $participants = [$msgs[0]['id_nguoi_gui'], $msgs[0]['id_nguoi_nhan']];
+                    $names = [];
+                    $avatars = [];
+                    foreach ($participants as $pid) {
+                        $user = array_values(array_filter($users, fn($u) => $u['id_nguoi_dung'] == $pid))[0] ?? null;
+                        if ($user) {
+                            $names[] = $user['ho_ten'];
+                            $avatars[] = $user['avt'];
+                        }
+                    }
+                    $active = ($currentChat == $chatKey) ? 'bg-blue-100' : 'hover:bg-blue-50';
                     ?>
-                    <a href="trangchu.php?page=ql_hopthoai&chat=<?= urlencode($id) ?>"
+                    <a href="trangchu.php?page=ql_hopthoai&chat=<?= urlencode($chatKey) ?>"
                        class="flex items-center p-2 rounded-lg cursor-pointer transition <?= $active ?>">
-                        <?php foreach ($participants as $pid):
-                            $u = $users[array_search($pid, array_column($users,'id'))]; ?>
-                            <img src="<?= htmlspecialchars($u['avatar']) ?>" alt="<?= htmlspecialchars($u['name']) ?>"
-                                 class="w-8 h-8 rounded-full mr-2">
+                        <?php foreach ($avatars as $avt): ?>
+                            <img src="../../../storage/pictures/avt/<?= htmlspecialchars($avt) ?>" class="w-8 h-8 rounded-full mr-2">
                         <?php endforeach; ?>
-                        <span class="font-medium text-gray-700"><?= htmlspecialchars($names) ?> (Chat #<?= $id ?>)</span>
+                        <span class="font-medium text-gray-700"><?= htmlspecialchars(implode(' & ', $names)) ?></span>
                     </a>
                 <?php } ?>
             </div>
@@ -75,82 +107,76 @@ $currentChat = $_GET['chat'] ?? null;
     </aside>
 
     <!-- Chat area -->
-    <section class="flex-1 flex flex-col bg-white rounded-xl border shadow">
+    <section class="flex-1 flex flex-col bg-white rounded-xl border shadow relative">
+        <!-- Header -->
         <div class="bg-blue-500 text-white p-3 rounded-t-xl font-semibold text-lg flex justify-between items-center">
-            <div>
+            <span>
                 <?php
-                if($currentChat){
-                    $msgs = array_filter($tinnhan, fn($t)=>$t['id_chat']==$currentChat);
-                    $participants = array_unique(array_map(
-                        fn($m)=>$m['from']!=$currentUser['id']?$m['from']:$m['to'],
-                        $msgs
-                    ));
-                    echo implode(' & ', array_map(
-                        fn($pid)=>$users[array_search($pid, array_column($users,'id'))]['name'],
-                        $participants
-                    ));
-                } else {
-                    echo "Chọn hội thoại";
-                }
+                    if ($currentChat) {
+                        $msgs = $chatGroups[$currentChat] ?? [];
+                        if (!empty($msgs)) {
+                            echo htmlspecialchars($msgs[0]['ten_nguoi_gui']) . " & " . htmlspecialchars($msgs[0]['ten_nguoi_nhan']);
+                        }
+                    } else {
+                        echo "Chọn hội thoại";
+                    }
                 ?>
-            </div>
-
-            <?php if($currentChat): ?>
+            </span>
             <div x-data="{ open: false }" class="relative">
-                <button @click="open = !open" class="text-white hover:text-gray-200" title="Cài đặt hội thoại">
+                <!-- Button cài đặt -->
+                <button @click="open = !open" class="hover:bg-blue-600 px-2 py-1 rounded" title="Cài đặt hội thoại">
                     <i class="fas fa-cog"></i>
                 </button>
 
-                <!-- Dropdown -->
-                <div x-show="open" x-cloak @click.outside="open = false" x-transition
-                     class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-20">
-                    <div class="px-4 py-2 flex items-center space-x-2 border-b">
-                        <i class="fas fa-cog text-gray-600"></i>
-                        <div>
-                            <p class="text-sm font-medium text-gray-800">Thiết lập hội thoại</p>
-                            <p class="text-xs text-gray-500">Quản lý đoạn chat này</p>
+                <div class="flex items-center gap-3">
+                    <div x-show="open" x-cloak @click.outside="open = false" x-transition 
+                        class="absolute right-0 top-5 mt-3 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-10">
+                        <div class="px-4 py-2 flex items-center space-x-2 border-b">
+                            <i class="fas fa-cog text-gray-600"></i>
+                            <div>
+                                <p class="text-sm font-medium text-gray-800">Thiết lập hội thoại</p>
+                                <p class="text-xs text-gray-500">Quản lý đoạn chat này</p>
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Menu chức năng -->
-                    <a href="delete_chat.php?id=<?= urlencode($currentChat) ?>"
-                       onclick="return confirm('Bạn có chắc muốn xóa hội thoại này không?')"
-                       class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
-                       <i class="fas fa-trash-alt mr-2"></i> Xóa hội thoại
-                    </a>
-                    <a href="lock_chat.php?id=<?= urlencode($currentChat) ?>"
-                       onclick="return confirm('Khóa hội thoại này?')"
-                       class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                       <i class="fas fa-lock mr-2"></i> Khóa hội thoại
-                    </a>
-                    <a href="report_chat.php?id=<?= urlencode($currentChat) ?>"
-                       onclick="return confirm('Gửi cảnh báo về hội thoại này?')"
-                       class="block px-4 py-2 text-sm text-yellow-600 hover:bg-gray-100">
-                       <i class="fas fa-exclamation-triangle mr-2"></i> Cảnh báo
-                    </a>
+                        <!-- Menu chức năng -->
+                        <a href="delete_chat.php?id=<?= urlencode($currentChat) ?>"
+                        onclick="return confirm('Bạn có chắc muốn xóa hội thoại này không?')"
+                        class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+                            <i class="fas fa-trash-alt mr-2"></i> Xóa hội thoại
+                        </a>
+                        <a href="lock_chat.php?id=<?= urlencode($currentChat) ?>"
+                        onclick="return confirm('Khóa hội thoại này?')"
+                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-lock mr-2"></i> Khóa hội thoại
+                        </a>
+                        <a href="report_chat.php?id=<?= urlencode($currentChat) ?>"
+                        onclick="return confirm('Gửi cảnh báo về hội thoại này?')"
+                        class="block px-4 py-2 text-sm text-yellow-600 hover:bg-gray-100">
+                            <i class="fas fa-exclamation-triangle mr-2"></i> Cảnh báo
+                        </a>
+                    </div>
                 </div>
             </div>
-            <?php endif; ?>
         </div>
 
-        <div class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+        <!-- Nội dung tin nhắn -->
+        <div id="chatBox" class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 max-h-[450px]">
             <?php if ($currentChat && !empty($msgs)): ?>
                 <?php foreach ($msgs as $m):
-                    $key = array_search($m['from'], array_column($users,'id'));
-                    $sender = $key !== false ? $users[$key] : ['name'=>'Unknown','avatar'=>'/path/to/default.png'];
-
-                    $isAdmin = ($m['from'] == $currentUser['id']);
-                    $align = $isAdmin ? 'flex-row-reverse text-right' : 'flex-row text-left';
-                    $bg = $isAdmin ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-900';
-                    $timestampColor = $isAdmin ? 'text-blue-200' : 'text-gray-500';
+                    $isMe = ($m['id_nguoi_gui'] == $currentUser);
+                    $align = $isMe ? 'flex-row-reverse text-right' : 'flex-row text-left';
+                    $bg = $isMe ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-900';
+                    $timestampColor = $isMe ? 'text-blue-200' : 'text-gray-500';
                 ?>
                 <div class="flex items-start <?= $align ?> gap-3">
-                    <img src="<?= htmlspecialchars($sender['avatar']) ?>" alt="<?= htmlspecialchars($sender['name']) ?>"
-                         class="w-10 h-10 rounded-full shadow flex-shrink-0">
-                    <div class="px-4 py-3 <?= $bg ?> rounded-xl shadow max-w-[70%] break-words break-all">
-                        <p class="font-semibold mb-1"><?= htmlspecialchars($sender['name']) ?></p>
-                        <p class="mb-1"><?= nl2br(htmlspecialchars($m['content'])) ?></p>
-                        <p class="text-xs <?= $timestampColor ?>"><?= htmlspecialchars($m['timestamp']) ?></p>
+                    <img src="../../../storage/pictures/avt/<?= $m['avt_nguoi_gui'] ?>"
+                        alt="<?= htmlspecialchars($m['ten_nguoi_gui']) ?>" 
+                        class="w-10 h-10 rounded-full shadow flex-shrink-0">
+                    <div class="px-4 py-3 <?= $bg ?> rounded-xl shadow max-w-[70%] break-words">
+                        <p class="font-semibold mb-1"><?= htmlspecialchars($m['ten_nguoi_gui']) ?></p>
+                        <p class="mb-1"><?= nl2br(htmlspecialchars($m['noi_dung'])) ?></p>
+                        <p class="text-xs <?= $timestampColor ?>"><?= htmlspecialchars($m['tg_gui']) ?></p>
                     </div>
                 </div>
                 <?php endforeach; ?>
@@ -159,51 +185,57 @@ $currentChat = $_GET['chat'] ?? null;
             <?php endif; ?>
         </div>
 
-        <?php if($currentChat && $currentChat>=100): ?>
-        <form class="p-4 flex gap-2 bg-white rounded-b-xl border-t" method="POST" action="" enctype="multipart/form-data">
-            <!-- Ô nhập tin nhắn -->
-            <input name="message" type="text" placeholder="Nhập tin nhắn..."
-                   class="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
+        <?php
+            $showInput = false;
+            $id_nguoi_nhan = null;
+            if ($currentChat && !empty($msgs)) {
+                $ids = [$msgs[0]['id_nguoi_gui'], $msgs[0]['id_nguoi_nhan']];
+                if (in_array($currentUser, $ids)) {
+                    $showInput = true;
+                    // xác định người nhận (khác mình)
+                    $id_nguoi_nhan = ($msgs[0]['id_nguoi_gui'] == $currentUser) ? $msgs[0]['id_nguoi_nhan'] : $msgs[0]['id_nguoi_gui'];
+                }
+            }
+        ?>
 
-            <!-- Nút gửi ảnh -->
-            <label for="uploadImage"
-                   class="flex items-center justify-center bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 cursor-pointer">
-                <i class="fas fa-image"></i>
-            </label>
-            <input id="uploadImage" name="image" type="file" accept="image/*" class="hidden">
-
-            <!-- Nút chọn emoji -->
-            <div class="relative">
-                <button type="button" onclick="openEmojiPicker()" 
-                        class="bg-yellow-400 text-white px-4 py-4 rounded-lg hover:bg-yellow-500 transition flex items-center justify-center">
-                    <i class="fas fa-smile"></i>
+        <?php if ($showInput): ?>
+            <form id="chatForm" enctype="multipart/form-data" class="border-t p-3 flex items-center gap-2">
+                <!-- Emoji -->
+                <button type="button" onclick="openEmojiPicker()" class="p-2 text-gray-600 hover:bg-gray-100 rounded-full">
+                    <i class="far fa-smile"></i>
+                </button>
+                <!-- Gửi ảnh -->
+                <label class="p-2 text-gray-600 hover:bg-gray-100 rounded-full cursor-pointer">
+                    <i class="far fa-image"></i>
+                    <input type="file" name="image" accept="image/*" class="hidden" id="uploadImage">
+                </label>
+                <!-- Like -->
+                <button type="button" id="likeBtn" class="p-2 text-blue-500 hover:bg-blue-100 rounded-full" title="Thả Like">
+                    <i class="fas fa-thumbs-up"></i>
+                </button>
+                <!-- Nhập nội dung -->
+                <input type="text" name="message" id="messageInput" placeholder="Nhập tin nhắn..."
+                    class="flex-1 border rounded-full px-4 py-2 focus:outline-none focus:ring focus:ring-blue-200">
+                <!-- Gửi -->
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600">
+                    <i class="fas fa-paper-plane"></i>
                 </button>
 
-                <!-- Emoji Picker (ẩn mặc định) -->
-                <div id="emojiPickerWrapper" 
-                    class="hidden absolute bottom-14 right-0 bg-white border rounded-xl shadow-lg p-2 w-72 h-72 overflow-y-auto z-50">
-                    <emoji-picker id="emojiPicker"></emoji-picker>
-                </div>
-            </div>
-
-            <!-- Nút gửi icon trực tiếp -->
-            <button type="submit" name="message" value="👍"
-                    class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition flex items-center justify-center">
-                <i class="fas fa-thumbs-up"></i>
-            </button>
-
-            <!-- Nút gửi tin nhắn -->
-            <button type="submit"
-                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center justify-center">
-                <i class="fas fa-paper-plane"></i>
-            </button>
-        </form>
+                <input type="hidden" name="nguoi_nhan" value="<?= $id_nguoi_nhan ?>">
+            </form>
         <?php endif; ?>
+
+
+        <!-- Emoji Picker -->
+        <div id="emojiPickerWrapper" 
+            class="absolute bottom-20 left-10 bg-white shadow-lg rounded-lg p-2 hidden z-10 w-80 h-80 overflow-y-auto">
+            <emoji-picker id="emojiPicker" class="w-full h-full"></emoji-picker>
+        </div>
+
     </section>
 </main>
 
 <script>
-
     const emojiWrapper = document.getElementById("emojiPickerWrapper");
     const emojiPicker = document.getElementById("emojiPicker");
     const inputMessage = document.querySelector("input[name='message']");
@@ -212,19 +244,60 @@ $currentChat = $_GET['chat'] ?? null;
         emojiWrapper.classList.toggle("hidden");
     }
 
-    // Khi chọn emoji thì chèn vào ô input
+    // Khi chọn emoji thì chèn vào input
     emojiPicker.addEventListener("emoji-click", event => {
         inputMessage.value += event.detail.unicode;
-        // Ẩn picker sau khi chọn
         emojiWrapper.classList.add("hidden");
     });
 
-    // Ẩn khi click ra ngoài
+    // Ẩn emoji picker khi click ra ngoài
     document.addEventListener("click", (e) => {
         if (!emojiWrapper.contains(e.target) && !e.target.closest("button[onclick='openEmojiPicker()']")) {
             emojiWrapper.classList.add("hidden");
         }
     });
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const chatBox = document.getElementById("chatBox");
+        if (chatBox) {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    });
+
+    const chatForm = document.getElementById("chatForm");
+    const msgInput = document.getElementById("messageInput");
+    const likeBtn = document.getElementById("likeBtn");
+    const chatBox = document.querySelector(".flex-1.overflow-y-auto"); 
+
+    chatForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(chatForm);
+
+        let res = await fetch("../../models/xl_gui_tn_qt.php", {
+            method: "POST",
+            body: formData
+        });
+        let data = await res.json();
+
+        if (data.status === "ok") {
+            
+        }
+    });
+
+    likeBtn.addEventListener("click", async () => {
+        const formData = new FormData(chatForm);
+        formData.append("like", "1");
+
+        let res = await fetch("../../models/xl_gui_tn_qt.php", {
+            method: "POST",
+            body: formData
+        });
+        let data = await res.json();
+
+        if (data.status === "ok") {
+        }
+    });
+
 </script>
 
 <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
