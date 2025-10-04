@@ -12,19 +12,20 @@
     
     $anh = null;
 
-    // if (!empty($_FILES['image']['name'])) {
-    //     $targetDir = "../../../storage/messages/";
-    //     if (!is_dir($targetDir)) mkdir($targetDir, 0777, true);
-    //     $fileName = time() . "_" . basename($_FILES["image"]["name"]);
-    //     $targetFile = $targetDir . $fileName;
-    //     if (move_uploaded_file($_FILES["image"]["tmp_name"], $targetFile)) {
-    //         $anh = $fileName;
-    //     }
-    // }
+    if (!empty($_FILES['image']['name'])) {
+        $targetDir = "../../storage/pictures/messages/";
+        if (!is_dir($targetDir)) mkdir($targetDir, 0777, true);
+        $fileName = time() . "_" . basename($_FILES["image"]["name"]);
+        $targetFile = $targetDir . $fileName;
+        if (move_uploaded_file($_FILES["image"]["tmp_name"], $targetFile)) {
+            $anh = $fileName;   
+            
+        }
+    }
 
-    // if (isset($_POST['like']) && $_POST['like'] == "1") {
-    //     $noi_dung = "👍";
-    // }
+    if (isset($_POST['like']) && $_POST['like'] == "1") {
+        $noi_dung = "👍";
+    }
 
     if ($id_nhan && ($noi_dung || $anh)) {
         $sql = "INSERT INTO hop_thoai (noi_dung, anh_tn, tg_gui, nguoi_gui, nguoi_nhan) 

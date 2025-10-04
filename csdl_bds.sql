@@ -409,7 +409,7 @@ CREATE TABLE hop_thoai (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),                 
     nguoi_gui UUID NOT NULL,                 -- Người gửi
     nguoi_nhan UUID NOT NULL,                   -- Người nhận
-    noi_dung TEXT NOT NULL CHECK (noi_dung <> ''), -- Không cho phép rỗng
+    noi_dung TEXT, -- Không cho phép rỗng
 	anh_tn TEXT,
 	video_tn TEXT,
     tg_gui TIMESTAMP NOT NULL DEFAULT NOW(),
