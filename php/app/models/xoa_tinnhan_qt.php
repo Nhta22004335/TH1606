@@ -10,7 +10,7 @@
     $currentUser = $_SESSION['id_nguoi_dung'] ?? 0;
 
     if ($msgId && $currentUser) {
-        $stmt = $pdo->prepare("DELETE FROM hop_thoai WHERE id = ? AND nguoi_gui = ?");
+        $stmt = $pdo->prepare("DELETE FROM tin_nhan WHERE id = ? AND nguoi_gui = ?");
         if ($stmt->execute([$msgId, $currentUser])) {
             echo json_encode(['success'=>true]);
         } else {

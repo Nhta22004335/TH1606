@@ -5,23 +5,21 @@
     require_once "../../config/database.php";
     $pdo = ketnoicsdl();
 
-    $currentUser = $_SESSION['id_nguoi_dung'];
-    $idkey = $_POST['idkey'] ?? null;
-
+    // $currentUser = $_SESSION['id_nguoi_dung'];
+    // $idkey = $_POST['idkey'] ?? null;
+    $id_hop_thoai = $_POST['id_hop_thoai'] ?? null;
     // Cập nhật trạng thái khóa
     $stmt = $pdo->prepare("
-        UPDATE hop_thoai
+        UPDATE hop_thoai 
         SET da_khoa = 1
-        WHERE (nguoi_gui = :uid OR nguoi_nhan = :uid)
-        AND CONCAT(LEAST(nguoi_gui, nguoi_nhan),'_',GREATEST(nguoi_gui, nguoi_nhan)) = :idkey
+        WHERE (id = :id_hop_thoai)
     ");
 
     try {
         $stmt->execute([
-            ':uid' => $currentUser,
-            ':idkey' => $idkey
+            ':id_hop_thoai' => $id_hop_thoai
         ]);
-        echo json_encode(['status'=>'ok']);
+        echo json_encode(['status'=>'ok', 'msg'=>$id_hop_thoai]);
     } catch (Exception $e) {
         echo json_encode(['status'=>'fail','msg'=>$e->getMessage()]);
     }

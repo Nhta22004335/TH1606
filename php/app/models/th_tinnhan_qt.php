@@ -10,8 +10,8 @@
     $currentUser = $_SESSION['id_nguoi_dung'] ?? null;
 
     if ($msgId && $currentUser) {
-        $stmt = $pdo->prepare("UPDATE hop_thoai
-                            SET noi_dung='Tin nhắn đã được thu hồi'
+        $stmt = $pdo->prepare("UPDATE tin_nhan
+                            SET da_thu_hoi = 1
                             WHERE id = ? AND nguoi_gui = ?");
         if ($stmt->execute([$msgId, $currentUser])) {
             echo json_encode(['success'=>true]);

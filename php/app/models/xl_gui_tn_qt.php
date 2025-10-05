@@ -2,12 +2,13 @@
     date_default_timezone_set('Asia/Ho_Chi_Minh');
     header('Content-Type: application/json; charset=utf-8');
     session_start();
-
     require_once "../../config/database.php";
     $pdo = ketnoicsdl();
     
+    $id_hop_thoai = $_POST['id_hop_thoai'] ?? '';
     $id_gui = $_SESSION['id_nguoi_dung'];
     $id_nhan = $_POST['nguoi_nhan'] ?? null;
+
     $noi_dung = trim($_POST['message'] ?? '');
     
     $anh = null;
@@ -19,7 +20,6 @@
         $targetFile = $targetDir . $fileName;
         if (move_uploaded_file($_FILES["image"]["tmp_name"], $targetFile)) {
             $anh = $fileName;   
-            
         }
     }
 
@@ -27,15 +27,16 @@
         $noi_dung = "👍";
     }
 
-    if ($id_nhan && ($noi_dung || $anh)) {
-        $sql = "INSERT INTO hop_thoai (noi_dung, anh_tn, tg_gui, nguoi_gui, nguoi_nhan) 
-                VALUES (:noi_dung, :anh, NOW(), :nguoi_gui, :nguoi_nhan) RETURNING id";
+    // if ($id_nhan && ($noi_dung || $anh)) {
+        $sql = "INSERT INTO tin_nhan (id_hop_thoai, nguoi_gui, nguoi_nhan, noi_dung, anh_tn, tg_gui) 
+                VALUES (:id_hop_thoai, :nguoi_gui, :nguoi_nhan, :noi_dung, :anh, NOW()) RETURNING id";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([
-            ':noi_dung' => $noi_dung,
-            ':anh' => $anh,
+            ':id_hop_thoai' => $id_hop_thoai,
             ':nguoi_gui' => $id_gui,
             ':nguoi_nhan' => $id_nhan,
+            ':noi_dung' => $noi_dung,
+            ':anh' => $anh
         ]);
 
         $id = $stmt->fetchColumn(); 
@@ -51,7 +52,7 @@
             ]
         ]);
         
-    } else {
-        echo json_encode(["status" => "error", "msg" => "Thiếu dữ liệu"]);
-    }
+    // } else {
+    //     echo json_encode(["status" => "error", "msg" => "Thiếu dữ liệu"]);
+    // }
 ?>
