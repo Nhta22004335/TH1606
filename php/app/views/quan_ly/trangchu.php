@@ -64,7 +64,7 @@
                         <i class="fas fa-search"></i>
                     </button>
                 </div>
-            </div>
+            </div>    
 
             <!-- Bản đồ + avatar + đăng tin -->
             <div class="flex items-center justify-evenly space-x-3 w-full md:w-auto">
