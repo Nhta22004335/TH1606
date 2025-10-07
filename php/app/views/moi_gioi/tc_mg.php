@@ -90,7 +90,7 @@
           🗺️ <span>Bản đồ</span>
         </button>
         <div class="flex items-center space-x-2">
-          <img src="https://i.pravatar.cc/40" alt="avatar" class="w-9 h-9 rounded-full border">
+          <img src="../../../storage/pictures/avt/avt.png" alt="avatar" class="w-9 h-9 rounded-full border">
           <span class="text-sm font-medium text-gray-700">Nguyễn Tuấn Anh</span>
         </div>
       </div>
@@ -179,6 +179,42 @@
       </div>
     </div>
   </section>
+  
+<!-- Section App Landing -->
+<div class="bg-gray-50 text-gray-900 py-12 mt-4 border-t border-gray-300">
+    <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+        
+        <!-- Hình ảnh App -->
+        <div class="flex justify-center md:justify-start">
+            <img class="lazy w-72 h-auto rounded-lg shadow-lg" alt="app demo" src="https://static.homedy.com/src/images/social/app.png">
+        </div>
+
+        <!-- Nội dung Text -->
+        <div class="text-center md:text-left">
+            <p class="text-sm font-semibold text-blue-700 mb-2">TÌM KIẾM - LỰA CHỌN BẤT ĐỘNG SẢN</p>
+            <p class="text-lg font-bold text-blue-900 mb-4">MỌI LÚC MỌI NƠI</p>
+            <p class="text-sm text-gray-700 leading-relaxed">
+                Cài đặt ứng dụng Homedy trên điện thoại để tìm kiếm nhà đất bán - cho thuê nhanh chóng, xem thông tin đầy đủ tất cả các dự án mới, tin tức mới nhất về thị trường nhà đất được cập nhật liên tục.
+            </p>
+        </div>
+
+        <!-- QR Code + Link Store -->
+        <div class="flex flex-col items-center md:items-end space-y-4">
+            <div class="mb-4">
+                <img class="lazy w-32 h-auto" alt="qr" src="https://static.homedy.com/src/images/social/qr.png">
+            </div>
+            <div class="flex flex-col space-y-2 md:space-y-0 md:flex-row md:space-x-2">
+                <a href="https://apps.apple.com/vn/app/b%E1%BA%A5t-%C4%91%E1%BB%99ng-s%E1%BA%A3n-homedy/id1438315559/?l=vi" title="Homedy trên App Store">
+                    <img class="lazy w-36 h-auto" alt="app-store" src="https://static.homedy.com/src/images/social/app-store.png">
+                </a>
+                <a href="https://play.google.com/store/apps/details?id=com.homedyapp.android" title="Homedy trên Google Play">
+                    <img class="lazy w-36 h-auto" alt="google-play" src="https://static.homedy.com/src/images/social/google-play.png">
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
 
   <!-- ✅ Footer
   <footer class="bg-gray-900 text-gray-300 py-10 mt-16">
@@ -285,8 +321,6 @@
     </p>
   </div>
 </footer>
-
-
 
 </body>
 </html>
