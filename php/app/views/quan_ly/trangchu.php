@@ -18,6 +18,10 @@
     $stmt = $pdo->prepare($sql);
     $stmt->execute(['id' => $id]);
     $nd = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    echo "<pre>";
+print_r($nd);
+echo "</pre>";
 ?>
 <!DOCTYPE html>
 <html lang="vi" x-data="{ openFilter:false }">
