@@ -24,7 +24,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bất động sản</title>
+    <title>Đất Việt</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/alpinejs" defer></script>
     <link rel="stylesheet" href="../../../public/assets/fontawesome/css/all.min.css">
@@ -40,9 +40,9 @@
             <!-- Logo + slogan -->
             <div class="flex items-center justify-between w-full md:w-auto cursor-pointer">
                 <div class="flex items-center space-x-3">
-                <img src="../../../public/assets/anhht/0/logo-homedy.png" alt="Logo" class="h-10">
-                <span class="text-xs sm:text-sm text-gray-500 italic">
-                    Không gian sống lý tưởng cho bạn
+                <img src="../../../public/assets/anhht/0/dv.png" alt="Logo" class="h-24 md:h-28 lg:h-32">
+                <span class="text-xs sm:text-sm text-gray-800 font-bold">
+                    Đất Việt
                 </span>
                 </div>
             </div>
@@ -61,7 +61,7 @@
 
             <!-- Bản đồ + avatar (khách hàng không có đăng tin) -->
             <div class="flex items-center justify-evenly space-x-3 w-full md:w-auto">
-                <a href="#" class="px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-700 text-sm hover:bg-gray-100 flex items-center">
+                <a href="https://www.google.com/maps/place/Vĩnh+Long" target="_blank" rel="noopener" class="px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-700 text-sm hover:bg-gray-100 flex items-center">
                     <i class="fas fa-map-marked-alt mr-2 text-blue-600"></i> Bản đồ
                 </a>
                 <div x-data="{ open: false }" class="relative">
@@ -255,7 +255,8 @@
         
         <!-- Logo + mô tả + liên hệ nhanh -->
         <div>
-            <img src="../../../public/assets/anhht/0/logo-homedy.png" alt="Logo" class="h-12 mb-4">
+            <img src="../../../public/assets/anhht/0/dv.png" alt="Logo" class="h-28 mb-4">
+            <div class="text-lg font-bold text-gray-800 mb-2">Đất Việt</div>
             <p class="text-sm leading-relaxed text-gray-600 mb-4">
                 Sàn giao dịch bất động sản uy tín, cung cấp thông tin chính xác, dịch vụ tư vấn chuyên nghiệp 
                 và hỗ trợ khách hàng trong việc mua, bán, cho thuê bất động sản.
@@ -320,7 +321,7 @@
     <!-- Bản quyền, điều khoản & thông tin liên hệ nhanh -->
     <div class="bg-gray-100 text-center text-sm py-6 border-t border-gray-300 space-y-2">
         <p class="text-gray-700">
-            © 2025 Sàn BĐS 4335. Mọi quyền được bảo lưu. Trang web này cung cấp thông tin về các dự án bất động sản, dịch vụ mua bán, cho thuê nhà đất, và các tin tức liên quan đến thị trường bất động sản Việt Nam. 
+            © 2025 Đất Việt. Mọi quyền được bảo lưu. Trang web này cung cấp thông tin về các dự án bất động sản, dịch vụ mua bán, cho thuê nhà đất, và các tin tức liên quan đến thị trường bất động sản Việt Nam. 
             Vui lòng đọc <a href="trangchu.php?page=dieukhoan" class="hover:text-blue-500">Điều khoản & Điều kiện</a> trước khi sử dụng dịch vụ.
         </p>
         <p class="text-gray-700">
