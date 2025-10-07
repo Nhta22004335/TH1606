@@ -5,16 +5,9 @@
 
     $id = $_SESSION['id_nguoi_dung'];
 
-    $sql = "
-        SELECT q.vai_tro
-        FROM phan_quyen pq
-        JOIN quyen q ON pq.id_quyen = q.id
-        WHERE pq.id_nguoi_dung = :id_nguoi_dung
-    ";
-    $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':id_nguoi_dung', $id, PDO::PARAM_STR); 
-    $stmt->execute();
-    $dsQuyen = $stmt->fetchAll(PDO::FETCH_COLUMN); 
+
+    // Giao diện khách hàng: chỉ gán quyền là khách hàng
+    $dsQuyen = ['khachhang'];
 
     $sql = "SELECT * FROM info_nguoi_dung WHERE id_nguoi_dung = :id";
     $stmt = $pdo->prepare($sql);
@@ -66,19 +59,17 @@
                 </div>
             </div>    
 
-            <!-- Bản đồ + avatar + đăng tin -->
+            <!-- Bản đồ + avatar (khách hàng không có đăng tin) -->
             <div class="flex items-center justify-evenly space-x-3 w-full md:w-auto">
                 <a href="#" class="px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-700 text-sm hover:bg-gray-100 flex items-center">
                     <i class="fas fa-map-marked-alt mr-2 text-blue-600"></i> Bản đồ
                 </a>
-
                 <div x-data="{ open: false }" class="relative">
                     <!-- Nút avatar + tên -->
                     <div @click="open = !open" class="flex items-center space-x-2 cursor-pointer">
                         <img src="../../../public/assets/anhht/0/<?= $nd['avt'] ?>" alt="Avatar" class="w-9 h-9 rounded-full border border-gray-300">
                         <span class="text-sm text-gray-700"><?= $ind['ho_ten'] ?></span>
                     </div>
-
                     <!-- Dropdown -->
                     <div x-show="open" x-cloak @click.outside="open = false" x-transition class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2" style="z-index: 20;">
                         <div class="px-4 py-2 flex items-center space-x-2 border-b">
@@ -92,11 +83,13 @@
                         <a href="../../models/auth/xuly_dangxuat.php" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Đăng xuất</a>
                     </div>
                 </div>
+
                 <?php if (in_array('moigioi', $dsQuyen)): ?>
                     <a href="trangchu.php?page=../moi_gioi/dang_tin" class="px-3 py-1.5 border border-gray-400 text-gray-600 text-xs sm:text-sm rounded-md font-normal hover:bg-gray-200 transition">
                         Đăng tin
                     </a>
                 <?php endif; ?>
+
             </div>
         </div>
     </div>
@@ -108,9 +101,15 @@
         </button>
     </div>
 
-    <!-- Menu Desktop-->
+    <!-- Menu Desktop khách hàng: chỉ hiển thị các mục phù hợp -->
     <nav class="bg-gray-50 border-t hidden md:block cursor-pointer">
         <ul class="flex space-x-6 py-2 text-sm font-normal text-gray-700 whitespace-nowrap justify-evenly">
+<<<<<<< HEAD
+            <li><a href="trangchu.php?page=ds_sanpham_bds" class="hover:text-blue-600 menu-btn inline-flex items-center">Sản phẩm BĐS</a></li>
+            <li><a href="trangchu.php?page=gioithieuvesan" class="hover:text-blue-600 menu-btn inline-flex items-center">Giới thiệu sàn</a></li>
+            <li><a href="trangchu.php?page=lienhe" class="hover:text-blue-600 menu-btn inline-flex items-center">Liên hệ tư vấn</a></li>
+            <li><a href="trangchu.php?page=blog" class="hover:text-blue-600 menu-btn inline-flex items-center">Tin tức</a></li>
+=======
             <?php if (in_array('quantri', $dsQuyen) || in_array('moigioi', $dsQuyen)): ?>
                 <li class="relative">
                     <a class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý người dùng <i class="fas fa-chevron-right ml-1 transition-transform duration-300"></i></a> 
@@ -228,10 +227,11 @@
                     </ul>
                 </li>
             <?php endif; ?>
+>>>>>>> 9c360c5c46ee220fd3d36372decc93f663ae1258
         </ul>
     </nav>
 
-    <!-- Menu Mobile -->
+    <!-- Menu Mobile khách hàng: chỉ các mục phù hợp -->
     <div id="mobileMenu" class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform -translate-x-full transition-transform duration-300 z-50 md:hidden overflow-y-auto">
         <div class="flex justify-between items-center px-4 py-3 border-b">
             <span class="font-semibold text-gray-700">Menu</span>
@@ -239,8 +239,13 @@
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        
         <ul class="flex flex-col text-sm text-gray-700">
+<<<<<<< HEAD
+            <li class="border-b"><a href="trangchu.php?page=ds_sanpham_bds" class="block px-6 py-2 hover:bg-blue-100">Sản phẩm BĐS</a></li>
+            <li class="border-b"><a href="trangchu.php?page=gioithieuvesan" class="block px-6 py-2 hover:bg-blue-100">Giới thiệu sàn</a></li>
+            <li class="border-b"><a href="trangchu.php?page=lienhe" class="block px-6 py-2 hover:bg-blue-100">Liên hệ tư vấn</a></li>
+            <li class="border-b"><a href="trangchu.php?page=blog" class="block px-6 py-2 hover:bg-blue-100">Tin tức</a></li>
+=======
 
             <!-- Quản lý người dùng -->
             <?php if (in_array('quantri', $dsQuyen) || in_array('moigioi', $dsQuyen)): ?>
@@ -368,6 +373,7 @@
                     <a href="trangchu.php?page=ds_vipham" class="block px-4 py-2 hover:bg-blue-100">Quản lý vi phạm</a>
                 </li>
             <?php endif; ?>
+>>>>>>> 9c360c5c46ee220fd3d36372decc93f663ae1258
         </ul>
     </div>
 </header>
