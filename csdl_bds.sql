@@ -347,3 +347,109 @@ INSERT INTO bieu_mau (tieu_de, loai, ben_mua, ben_ban, trang_thai, tep_dk) VALUE
 ('Hợp đồng mua bán nhà', 'Hợp đồng', '7a6fa374-5628-4870-be48-a4ea18aef621', 'ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'choduyet', 'hopdong1.pdf');
 
 SELECT * FROM bieu_mau;
+
+CREATE TABLE IF NOT EXISTS yeu_cau (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), 
+    
+    id_nguoi_dung UUID NOT NULL,
+    loai VARCHAR(100) NOT NULL,               
+    id_bds UUID,                             
+    trang_thai VARCHAR(50) DEFAULT 'choxuly',
+    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_yeucau_nguoidung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
+    CONSTRAINT fk_yeucau_bds FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE SET NULL,
+
+    CONSTRAINT chk_yeucau_trangthai CHECK (trang_thai IN ('choxuly', 'daduyet', 'dahuy')),
+	CONSTRAINT chk_yeucau_loai CHECK (loai IN ('mua', 'ban', 'thue'))
+);
+
+INSERT INTO yeu_cau (id_nguoi_dung, loai, id_bds, trang_thai)
+VALUES
+    ('7a6fa374-5628-4870-be48-a4ea18aef621', 'mua', '9b17fb30-8c6e-4494-920a-cbdd1621ee20', 'choxuly'),
+    ('7a6fa374-5628-4870-be48-a4ea18aef621', 'thue', '6c064758-3b9f-4ab0-af99-bcdbb8efa989', 'daduyet');
+	
+select * from bat_dong_san
+-- 1. Bảng tin đăng
+CREATE TABLE tin_tuc (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),       
+    id_khach_hang UUID NOT NULL,                                                   
+    tieu_de VARCHAR(200) NOT NULL DEFAULT 'chuacapnhat',
+    mo_ta TEXT DEFAULT 'chuacapnhat',
+    chuyen_muc VARCHAR(100) DEFAULT 'chuacapnhat',                  
+    trang_thai VARCHAR(50) DEFAULT 'choduyet',           
+    ngay_dang TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_trang_thai_tin CHECK (trang_thai IN ('choduyet','dangban','daban','dathue')),
+    CONSTRAINT fk_tin_khachhang FOREIGN KEY (id_khach_hang) REFERENCES nguoi_dung(id) ON DELETE CASCADE
+);
+-- Dữ liệu mẫu cho bảng tin_tuc
+INSERT INTO tin_tuc (id_khach_hang, tieu_de, mo_ta, chuyen_muc, trang_thai)
+VALUES
+('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Mở bán căn hộ Vinhomes', 'Cập nhật thông tin dự án mới nhất tại Vinhomes.', 'Bất động sản', 'choduyet'),
+('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Những lưu ý khi mua nhà phố', 'Hướng dẫn khách hàng tránh rủi ro khi mua nhà phố.', 'Hướng dẫn', 'choduyet');
+
+select * from tin_tuc
+-- Ví dụ thêm 1 tin đăng
+INSERT INTO tin_dang (id_khach_hang, id_bds, tieu_de, mo_ta, gia, dien_tich, dia_chi, loai, trang_thai)
+VALUES
+('d7a1f6c2-xxxx-xxxx-xxxx-xxxxxxxxxxxx',  -- UUID khách hàng
+ 'b6e7dbf5-37a3-423d-a51e-59fc00467984',  -- UUID BĐS
+ 'Căn hộ cao cấp Vinhomes', 
+ 'Căn hộ 2PN full nội thất', 
+ 3500000000, 
+ 75.5, 
+ 'Quận 1, TP.HCM', 
+ 'ban', 
+ 'dangban'
+);
+ALTER TABLE tin_tuc
+ADD COLUMN anh_tin TEXT DEFAULT 'chuacapnhat.png';
+
+CREATE TABLE hop_thoai (
+	id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), 
+	da_khoa INT DEFAULT 0,
+	da_xoa INT DEFAULT 0
+)
+
+ALTER TABLE hop_thoai
+DROP COLUMN xoa_boi;
+
+CREATE TABLE tin_nhan (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), 
+	id_hop_thoai UUID,
+    nguoi_gui UUID NOT NULL,                 -- Người gửi
+    nguoi_nhan UUID NOT NULL,                   -- Người nhận
+    noi_dung TEXT, -- Không cho phép rỗng
+	anh_tn TEXT,
+	video_tn TEXT,
+    tg_gui TIMESTAMP NOT NULL DEFAULT NOW(),
+    -- Ràng buộc khóa ngoại
+    CONSTRAINT fk_gui FOREIGN KEY (nguoi_gui) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
+    CONSTRAINT fk_nhan  FOREIGN KEY (nguoi_nhan)   REFERENCES nguoi_dung(id) ON DELETE CASCADE,
+	CONSTRAINT fk_id_hop_thoai FOREIGN KEY (id_hop_thoai) REFERENCES hop_thoai(id) ON DELETE CASCADE,
+    -- Ràng buộc: người gửi và người nhận không được trùng
+    CONSTRAINT chk_gui_nhan CHECK (nguoi_gui <> nguoi_nhan)
+);
+
+ALTER TABLE tin_nhan
+ADD COLUMN da_xoa INT DEFAULT 0
+
+select * from hop_thoai
+select * from tin_nhan 
+
+INSERT INTO tin_nhan (nguoi_gui, nguoi_nhan, noi_dung) VALUES 
+('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', '7a6fa374-5628-4870-be48-a4ea18aef621', 'Anh chị cần tư vấn về những thông tin j ạ ?'),
+('7a6fa374-5628-4870-be48-a4ea18aef621', 'ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Về căn hộ B đó có vấn đề về tranh chấp ko ?'),
+('ab76fa3c-893e-487d-983f-d8429ee95436', 'ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Bạn muốn phản hồi j về cho tôi? Hay muốn giải đáp!'),
+('7a6fa374-5628-4870-be48-a4ea18aef621', 'ab76fa3c-893e-487d-983f-d8429ee95436', 'Tôi cần nắm rỏ các quy định về chính sách');
+
+
+
+
+
+
+
+
+
+
+

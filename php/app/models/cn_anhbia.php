@@ -27,7 +27,8 @@
                     ':id' => $id
                 ]);
 
-                echo "Cập nhật ảnh bìa thành công!";
+                header("Location: ../views/quan_ly/trangchu.php?page=ct_nguoidung&id=$id");
+                exit();
             } else {
                 echo "Lỗi khi lưu file.";
             }

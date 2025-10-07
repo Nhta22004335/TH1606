@@ -1,39 +1,44 @@
 <?php
-    require_once "../../../config/database.php";
-    $pdo = ketnoicsdl();
+require_once "../../../config/database.php";
+$pdo = ketnoicsdl();
 
-    $page   = $_GET['page']   ?? '';
-    $search = $_GET['search'] ?? '';
+$page   = $_GET['page']   ?? '';
+$search = $_GET['search'] ?? '';
+$id     = $_SESSION['id_nguoi_dung'] ?? '';
 
-    $sql = "
-        SELECT bm.id, bm.tieu_de, bm.loai, 
-            info1.ho_ten AS ten_ben_mua,
-            info2.ho_ten AS ten_ben_ban,
-            bm.trang_thai, bm.tep_dk, bm.ngay_tao, bm.ngay_cn
-        FROM bieu_mau bm
-        JOIN nguoi_dung nd1 ON bm.ben_mua = nd1.id
-        JOIN nguoi_dung nd2 ON bm.ben_ban = nd2.id
-        JOIN info_nguoi_dung info1 ON info1.id_nguoi_dung = nd1.id
-        JOIN info_nguoi_dung info2 ON info2.id_nguoi_dung = nd2.id
-    ";
+$sql = "
+    SELECT bm.id, bm.tieu_de, bm.loai, 
+           info1.ho_ten AS ten_ben_mua,
+           info2.ho_ten AS ten_ben_ban,
+           bm.trang_thai, bm.tep_dk, bm.ngay_tao, bm.ngay_cn
+    FROM bieu_mau bm
+    JOIN nguoi_dung nd1 ON bm.ben_mua = nd1.id
+    JOIN nguoi_dung nd2 ON bm.ben_ban = nd2.id
+    JOIN info_nguoi_dung info1 ON info1.id_nguoi_dung = nd1.id
+    JOIN info_nguoi_dung info2 ON info2.id_nguoi_dung = nd2.id
+    WHERE nd2.id = :id
+";
 
-    $params = [];
-    if (!empty($search)) {
-        $sql .= " WHERE bm.tieu_de ILIKE :search 
-                OR bm.loai ILIKE :search 
-                OR info1.ho_ten ILIKE :search 
-                OR info2.ho_ten ILIKE :search 
-                OR bm.trang_thai ILIKE :search";
-        $params[':search'] = "%$search%";
-    }
+$params = [':id' => $id];
 
-    // ORDER BY phải nằm cuối
-    $sql .= " ORDER BY bm.ngay_tao DESC";
+if (!empty($search)) {
+    $sql .= " AND (
+        bm.tieu_de ILIKE :search 
+        OR bm.loai ILIKE :search 
+        OR info1.ho_ten ILIKE :search 
+        OR info2.ho_ten ILIKE :search 
+        OR bm.trang_thai ILIKE :search
+    )";
+    $params[':search'] = "%$search%";
+}
 
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
-    $bieumau = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$sql .= " ORDER BY bm.ngay_tao DESC";
+
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
+$bieumau = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
+
 
 
 <!DOCTYPE html>
@@ -119,15 +124,11 @@
             </div>
 
             <!-- Nút duyệt/từ chối -->
-            <?php if($bm["trang_thai"]=="choduyet"): ?>
+            <?php if($bm["trang_thai"]!="daky"): ?>
                 <div class="mt-5 flex justify-between">
-                    <button onclick="capNhatTrangThai('<?php echo $bm['id']; ?>','daduyet')" 
+                    <button onclick="capNhatTrangThai('<?php echo $bm['id']; ?>','daky')" 
                         class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2">
-                        <i class="fa-solid fa-check"></i> Duyệt
-                    </button>
-                    <button onclick="capNhatTrangThai('<?php echo $bm['id']; ?>','huy')"
-                        class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex items-center gap-2">
-                        <i class="fa-solid fa-xmark"></i> Từ chối
+                        <i class="fa-solid fa-check"></i> Đã ký
                     </button>
                 </div>
             <?php endif; ?>

@@ -18,7 +18,7 @@ $tintuc = [
     "chuyenmuc"=>"Biệt thự","ngay"=>"28/09/2025","img"=>"https://picsum.photos/400/250?random=203",
     "moigioi"=>"Lê Văn C","sdt"=>"0988111222","avt"=>"https://i.pravatar.cc/100?img=3","view"=>1500
   ],
-  [
+  [                                                                                      
     "tieude"=>"Nhà phố thương mại Bình Dương bùng nổ",
     "mota"=>"Các dự án nhà phố thương mại tại Bình Dương ghi nhận lượng giao dịch cao.",
     "chuyenmuc"=>"Nhà phố","ngay"=>"27/09/2025","img"=>"https://picsum.photos/400/250?random=204",
@@ -141,11 +141,29 @@ $noibat = array_shift($tintuc);
 </main>
 </div>
 <div class="relative">
-    <!-- Nút điều hướng -->
-    <button onclick="slideLeft()" 
-        class="absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow p-2 rounded-full hover:bg-gray-100 z-10">←</button>
-    <button onclick="slideRight()" 
-        class="absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow p-2 rounded-full hover:bg-gray-100 z-10">→</button>
+<!-- Nút trái -->
+<button onclick="slideLeft()" 
+    class="absolute left-4 top-1/2 -translate-y-1/2
+           bg-blue-500/80 backdrop-blur-md shadow-lg
+           p-5 rounded-full text-white text-2xl
+           hover:bg-blue-600/90 hover:scale-110
+           transition transform duration-300 ease-in-out z-10">
+    <i class="fas fa-chevron-left"></i>
+</button>
+
+<!-- Nút phải -->
+<button onclick="slideRight()" 
+    class="absolute right-4 top-1/2 -translate-y-1/2
+           bg-blue-500/80 backdrop-blur-md shadow-lg
+           p-5 rounded-full text-white text-2xl
+           hover:bg-blue-600/90 hover:scale-110
+           transition transform duration-300 ease-in-out z-10">
+    <i class="fas fa-chevron-right"></i>
+</button>
+
+
+
+
 
     <!-- Danh sách tin tức dạng slider ngang -->
     <div id="newsSlider" class="flex flex-nowrap gap-6 overflow-x-auto scroll-smooth no-scrollbar py-2">
