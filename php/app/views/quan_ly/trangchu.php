@@ -83,14 +83,13 @@
                         <a href="../../models/auth/xuly_dangxuat.php" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Đăng xuất</a>
                     </div>
                 </div>
-<<<<<<< HEAD
-=======
+
                 <?php if (in_array('moigioi', $dsQuyen)): ?>
                     <a href="trangchu.php?page=../moi_gioi/dang_tin" class="px-3 py-1.5 border border-gray-400 text-gray-600 text-xs sm:text-sm rounded-md font-normal hover:bg-gray-200 transition">
                         Đăng tin
                     </a>
                 <?php endif; ?>
->>>>>>> 9c360c5c46ee220fd3d36372decc93f663ae1258
+
             </div>
         </div>
     </div>
