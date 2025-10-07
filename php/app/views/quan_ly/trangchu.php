@@ -47,13 +47,18 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between py-3 space-y-3 md:space-y-0">
             
-            <!-- Logo + slogan -->
-            <div class="flex items-center justify-between w-full md:w-auto cursor-pointer">
-                <div class="flex items-center space-x-3">
-                <img src="../../../public/assets/anhht/0/logo-homedy.png" alt="Logo" class="h-10">
-                <span class="text-xs sm:text-sm text-gray-500 italic">
+            <div class="flex items-center justify-center md:justify-between w-full md:w-auto cursor-pointer h-16">
+                <div class="flex flex-col md:flex-row items-center md:items-center space-y-1 md:space-y-0 md:space-x-3">
+                    <div class="relative h-16 w-16 flex items-center justify-center overflow-visible">
+                    <img 
+                        src="../../../public/assets/anhht/0/datviet.png" 
+                        alt="Logo" 
+                        class="h-12 transform scale-[2.8]"
+                    >
+                    </div>
+                    <span class="text-xs sm:text-sm text-gray-500 italic md:pl-4 text-center md:text-left">
                     Không gian sống lý tưởng cho bạn
-                </span>
+                    </span>
                 </div>
             </div>
 
@@ -511,12 +516,12 @@
 
 <!-- Footer chi tiết cho sàn BĐS - nền trắng -->
 <footer class="bg-white text-gray-800 border-t border-gray-300">
-    <div class="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-5 gap-8">
+    <div class="max-w-7xl mx-auto px-6 py-8 grid grid-cols-2 md:grid-cols-5 gap-8">
         
         <!-- Logo + mô tả + liên hệ nhanh -->
-        <div>
-            <img src="../../../public/assets/anhht/0/logo-homedy.png" alt="Logo" class="h-12 mb-4">
-            <p class="text-sm leading-relaxed text-gray-600 mb-4">
+        <div class="col-span-2 md:col-span-1">
+            <img src="../../../public/assets/anhht/0/datviet.png" alt="Logo" class="h-12 transform scale-[2.8] ml-4 mt-0">
+            <p class="text-sm leading-relaxed text-gray-600 mb-4 mt-8">
                 Sàn giao dịch bất động sản uy tín, cung cấp thông tin chính xác, dịch vụ tư vấn chuyên nghiệp 
                 và hỗ trợ khách hàng trong việc mua, bán, cho thuê bất động sản.
             </p>
@@ -528,7 +533,7 @@
             <ul class="space-y-2 text-sm">
                 <li><a href="trangchu.php?page=gioithieuvesan" class="hover:text-blue-500">Giới thiệu sàn</a></li>
                 <li><a href="trangchu.php?page=danhmucduan" class="hover:text-blue-500">Dự án nổi bật</a></li>
-                <li><a href="trangchu.php?page=kinhnghiemdau tu" class="hover:text-blue-500">Kinh nghiệm đầu tư</a></li>
+                <li><a href="trangchu.php?page=kinhnghiemdautu" class="hover:text-blue-500">Kinh nghiệm đầu tư</a></li>
                 <li><a href="trangchu.php?page=blog" class="hover:text-blue-500">Blog & Tin tức</a></li>
             </ul>
         </div>
@@ -544,7 +549,7 @@
             </ul>
         </div>
 
-        <!-- Dự án nổi bật / Liên kết nhanh -->
+        <!-- Dự án nổi bật -->
         <div>
             <h3 class="text-gray-900 font-semibold mb-4">Dự án nổi bật</h3>
             <ul class="space-y-2 text-sm">
@@ -565,8 +570,6 @@
                 <a href="#" class="hover:text-blue-300"><i class="fab fa-linkedin"></i></a>
                 <a href="#" class="hover:text-red-500"><i class="fab fa-youtube"></i></a>
             </div>
-
-            <!-- Giờ làm việc -->
             <p class="text-sm text-gray-600 leading-relaxed">
                 ⏰ Thời gian làm việc: <br>
                 <span class="text-gray-900">Thứ 2 - Thứ 6:</span> 8:00 - 18:00 <br>
@@ -574,22 +577,21 @@
                 <span class="text-gray-900">Chủ nhật:</span> Nghỉ
             </p>
         </div>
-
     </div>
 
-    <!-- Bản quyền, điều khoản & thông tin liên hệ nhanh -->
     <div class="bg-gray-100 text-center text-sm py-6 border-t border-gray-300 space-y-2">
         <p class="text-gray-700">
-            © 2025 Sàn BĐS 4335. Mọi quyền được bảo lưu. Trang web này cung cấp thông tin về các dự án bất động sản, dịch vụ mua bán, cho thuê nhà đất, và các tin tức liên quan đến thị trường bất động sản Việt Nam. 
-            Vui lòng đọc <a href="trangchu.php?page=dieukhoan" class="hover:text-blue-500">Điều khoản & Điều kiện</a> trước khi sử dụng dịch vụ.
+            © 2025 Sàn BĐS 4335. Mọi quyền được bảo lưu. Vui lòng đọc 
+            <a href="trangchu.php?page=dieukhoan" class="hover:text-blue-500">Điều khoản & Điều kiện</a>.
         </p>
         <p class="text-gray-700">
-            📞 Hotline: <a href="tel:19001234" class="hover:text-blue-500">1900 1234</a> &nbsp;|&nbsp; 
-            ✉ Email: <a href="mailto:support@homedy.com" class="hover:text-blue-500">hotro@bds.com</a> &nbsp;|&nbsp; 
-            📍 Địa chỉ: 72, phường Long Châu, Nguyễn Huệ, Vĩnh Long
+            📞 <a href="tel:19001234" class="hover:text-blue-500">1900 1234</a> &nbsp;|&nbsp; 
+            ✉ <a href="mailto:hotro@bds.com" class="hover:text-blue-500">hotro@bds.com</a> &nbsp;|&nbsp; 
+            📍 72 Nguyễn Huệ, Vĩnh Long
         </p>
     </div>
 </footer>
+
 
 </body>
 </html>
