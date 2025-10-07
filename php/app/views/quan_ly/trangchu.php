@@ -104,12 +104,6 @@
     <!-- Menu Desktop khách hàng: chỉ hiển thị các mục phù hợp -->
     <nav class="bg-gray-50 border-t hidden md:block cursor-pointer">
         <ul class="flex space-x-6 py-2 text-sm font-normal text-gray-700 whitespace-nowrap justify-evenly">
-<<<<<<< HEAD
-            <li><a href="trangchu.php?page=ds_sanpham_bds" class="hover:text-blue-600 menu-btn inline-flex items-center">Sản phẩm BĐS</a></li>
-            <li><a href="trangchu.php?page=gioithieuvesan" class="hover:text-blue-600 menu-btn inline-flex items-center">Giới thiệu sàn</a></li>
-            <li><a href="trangchu.php?page=lienhe" class="hover:text-blue-600 menu-btn inline-flex items-center">Liên hệ tư vấn</a></li>
-            <li><a href="trangchu.php?page=blog" class="hover:text-blue-600 menu-btn inline-flex items-center">Tin tức</a></li>
-=======
             <?php if (in_array('quantri', $dsQuyen) || in_array('moigioi', $dsQuyen)): ?>
                 <li class="relative">
                     <a class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý người dùng <i class="fas fa-chevron-right ml-1 transition-transform duration-300"></i></a> 
@@ -227,7 +221,6 @@
                     </ul>
                 </li>
             <?php endif; ?>
->>>>>>> 9c360c5c46ee220fd3d36372decc93f663ae1258
         </ul>
     </nav>
 
@@ -240,12 +233,6 @@
             </button>
         </div>
         <ul class="flex flex-col text-sm text-gray-700">
-<<<<<<< HEAD
-            <li class="border-b"><a href="trangchu.php?page=ds_sanpham_bds" class="block px-6 py-2 hover:bg-blue-100">Sản phẩm BĐS</a></li>
-            <li class="border-b"><a href="trangchu.php?page=gioithieuvesan" class="block px-6 py-2 hover:bg-blue-100">Giới thiệu sàn</a></li>
-            <li class="border-b"><a href="trangchu.php?page=lienhe" class="block px-6 py-2 hover:bg-blue-100">Liên hệ tư vấn</a></li>
-            <li class="border-b"><a href="trangchu.php?page=blog" class="block px-6 py-2 hover:bg-blue-100">Tin tức</a></li>
-=======
 
             <!-- Quản lý người dùng -->
             <?php if (in_array('quantri', $dsQuyen) || in_array('moigioi', $dsQuyen)): ?>
@@ -373,7 +360,6 @@
                     <a href="trangchu.php?page=ds_vipham" class="block px-4 py-2 hover:bg-blue-100">Quản lý vi phạm</a>
                 </li>
             <?php endif; ?>
->>>>>>> 9c360c5c46ee220fd3d36372decc93f663ae1258
         </ul>
     </div>
 </header>
