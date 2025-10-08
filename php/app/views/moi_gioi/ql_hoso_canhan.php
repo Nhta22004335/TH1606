@@ -61,29 +61,21 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<<<<<<< HEAD
+
 <title>Trang Cá Nhân</title>
-=======
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hồ sơ môi giới</title>
->>>>>>> add005de30c76e8ef4baff060f43e0415d3b4bca
+
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body class="bg-gray-50 min-h-screen">
 
-<<<<<<< HEAD
 <div class="max-w-4xl mx-auto mt-10 p-10 bg-white rounded-2xl shadow-2xl">
     <!-- Tiêu đề -->
     <h2 class="text-4xl font-extrabold text-center mb-8 
                bg-gradient-to-r from-blue-500 to-cyan-500 
                bg-clip-text text-transparent drop-shadow-lg">
         Trang Cá Nhân
-=======
-<div class="max-w-5xl mx-auto mt-12 p-8 md:p-10 bg-white rounded-2xl shadow-2xl border border-gray-100">
-    <h2 class="text-3xl md:text-4xl font-extrabold text-center mb-10 text-blue-800 tracking-tight">
-        <i class="fa-solid fa-user-circle text-blue-600 mr-3"></i> HỒ SƠ CÁ NHÂN
->>>>>>> add005de30c76e8ef4baff060f43e0415d3b4bca
+
     </h2>
 
     <?php if ($success): ?>
