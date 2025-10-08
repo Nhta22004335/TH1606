@@ -59,7 +59,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Hồ sơ môi giới</title>
+<title>Trang Cá Nhân</title>
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
@@ -69,7 +69,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
     <h2 class="text-4xl font-extrabold text-center mb-8 
                bg-gradient-to-r from-blue-500 to-cyan-500 
                bg-clip-text text-transparent drop-shadow-lg">
-        Hồ sơ môi giới
+        Trang Cá Nhân
     </h2>
 
     <!-- Avatar + Info -->
