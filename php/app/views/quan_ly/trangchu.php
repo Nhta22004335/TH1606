@@ -137,8 +137,8 @@
                             <li><a href="trangchu.php?page=ql_bieumau" class="block px-4 py-2 hover:bg-blue-100">Quản lý biểu mẫu</a></li>
                         <?php endif; ?>
                         <?php if (in_array('moigioi', $dsQuyen)): ?>
-                            <li><a href="trangchu.php?page=../moi_gioi/ql_hoso" class="block px-4 py-2 hover:bg-blue-100">Quản lý hồ sơ</a></li>
-                            <li><a href="trangchu.php?page=../moi_gioi/cn_hoso" class="block px-4 py-2 hover:bg-blue-100">Cập nhật hồ sơ</a></li>
+                            <li><a href="trangchu.php?page=../moi_gioi/ql_hoso" class="block px-4 py-2 hover:bg-blue-100">Quản lý đơn từ</a></li>
+                            <li><a href="trangchu.php?page=../moi_gioi/cn_hoso" class="block px-4 py-2 hover:bg-blue-100">tạo hồ sơ mới</a></li>
                         <?php endif; ?>
                     </ul>
                 </li>
@@ -268,8 +268,8 @@
                             <li><a href="trangchu.php?page=ql_bieumau" class="block px-6 py-2 hover:bg-blue-100">Quản lý biểu mẫu</a></li>
                         <?php endif; ?>
                         <?php if (in_array('moigioi', $dsQuyen)): ?>
-                            <li><a href="trangchu.php?page=../moi_gioi/ql_hoso" class="block px-6 py-2 hover:bg-blue-100">Quản lý hồ sơ</a></li>
-                            <li><a href="trangchu.php?page=../moi_gioi/cn_hoso" class="block px-6 py-2 hover:bg-blue-100">Cập nhậthồ sơ</a></li>
+                            <li><a href="trangchu.php?page=../moi_gioi/ql_hoso" class="block px-6 py-2 hover:bg-blue-100">Quản lý đơn từ</a></li>
+                            <li><a href="trangchu.php?page=../moi_gioi/cn_hoso" class="block px-6 py-2 hover:bg-blue-100">Tạo hồ sơ mới</a></li>
                         <?php endif; ?>
                     </ul>
                 </li>

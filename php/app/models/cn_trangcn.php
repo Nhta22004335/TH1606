@@ -30,11 +30,13 @@ function sendResponse($status, $message, $httpCode = 200) {
     // WARNING: Lỗi này xảy ra do output đã được tạo (thông báo lỗi/deprecated)
     // Nếu bạn không thể tắt hiển thị lỗi từ cấu hình server, 
     // bạn cần đảm bảo không có output nào trước sendResponse.
-    if (!headers_sent()) {
-        http_response_code($httpCode);
-    }
-    echo json_encode(["status" => $status, "message" => $message]);
-    exit;
+    // if (!headers_sent()) {
+    //     http_response_code($httpCode);
+    // }
+    // echo json_encode(["status" => $status, "message" => $message]);
+    // exit;
+    header("location: ../views/quan_ly/trangchu.php?page=../moi_gioi/ql_hoso_canhan");
+    exit();
 }
 
 // 2. Kết nối CSDL
