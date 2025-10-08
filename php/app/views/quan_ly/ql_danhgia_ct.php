@@ -140,44 +140,66 @@
         </div>
     </div>
 
-    <!-- Danh sách đánh giá -->
-<div class="space-y-4">
+   <div class="space-y-4">
     <div class="flex items-center mb-4">
         <img src="../../../public/assets/anhht/0/danhgia01.gif" alt="Đánh giá" class="w-10 h-10 mr-2">
         <h3 class="text-lg font-semibold">Đánh giá của khách hàng</h3>
     </div>
 
-    <!-- Container đánh giá có thể cuộn dọc -->
     <div class="bg-white shadow rounded-lg p-4 max-h-[400px] overflow-y-auto space-y-4 scrollbar-hide">
-        <?php foreach($danhgia as $dg): ?>
-            <div class="flex space-x-4 items-start">
+        <?php foreach($danhgia as $dg): 
+            // Xác định màu sắc và hành động
+            $is_hidden = $dg['trang_thai'] !== 'hien';
+            $status_class = $is_hidden ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700';
+            $action_text = $is_hidden ? 'Hiện' : 'Ẩn';
+            $action_type = $is_hidden ? 'show' : 'hide';
+        ?>
+            <div id="review-<?= $dg['id_danh_gia'] ?>" class="flex space-x-4 items-start border-b pb-4 last:border-b-0">
                 <div class="flex-shrink-0">
                     <img src="https://i.pravatar.cc/50?u=<?= urlencode($dg['id_nguoi_dung']) ?>" class="w-12 h-12 rounded-full object-cover">
                 </div>
                 <div class="flex-1">
                     <div class="flex justify-between items-center mb-1">
-                        <span class="font-medium text-gray-800"><?= $dg['ho_ten'] ?></span>
+                        <span class="font-medium text-gray-800"><?= htmlspecialchars($dg['ho_ten']) ?></span>
                         <span class="text-yellow-500 text-sm">
-                            <?= str_repeat('★', $dg['diem']) . str_repeat('☆', 5 - $dg['diem']) ?>
+                            <?php 
+                                // Hiển thị sao
+                                $stars = (int)$dg['diem'];
+                                echo str_repeat('<i class="fa-solid fa-star"></i>', $stars);
+                                echo str_repeat('<i class="fa-regular fa-star text-gray-300"></i>', 5 - $stars);
+                            ?>
                         </span>
                     </div>
-                    <p class="text-gray-700 text-sm mb-1"><?= $dg['binh_luan'] ?></p>
+                    <p class="text-gray-700 text-sm mb-1 break-words"><?= htmlspecialchars($dg['binh_luan']) ?></p>
                     <div class="flex justify-between items-center">
-                        <p class="text-gray-400 text-xs"><?= htmlspecialchars($dg['ngay_tao']) ?></p>
-                        <span class="px-2 py-0.5 rounded text-xs 
-                            <?= $dg['trang_thai'] === 'hiện' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' ?>">
-                            <?= ucfirst($dg['trang_thai']) ?>
+                        <p class="text-gray-400 text-xs"><?= date("d/m/Y H:i", strtotime($dg['ngay_tao'])) ?></p>
+                        <span id="status-<?= $dg['id_danh_gia'] ?>" class="px-2 py-0.5 rounded text-xs font-semibold <?= $status_class ?>">
+                            <?= $is_hidden ? 'ẨN' : 'HIỆN' ?>
                         </span>
                     </div>
-                </div>
-                <!-- Nút hành động -->
-                <div class="flex space-x-2 mt-2 md:mt-0">
-                    <button class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm">Xóa</button>
-                    <?php if ($dg['trang_thai'] === 'hiện'): ?>
-                        <a class="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600 text-sm">Ẩn</a>
-                    <?php else: ?>
-                        <a class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 text-sm">Hiện</a>
+                    
+                    <?php if (!empty($dg['ds_hinh_anh']) || !empty($dg['ds_video'])): ?>
+                        <div class="mt-2 text-xs text-gray-500">
+                            <i class="fa-solid fa-paperclip"></i> Kèm theo: 
+                            <?php if (!empty($dg['ds_hinh_anh'])): ?>
+                                <span class="text-blue-500"><?= count($dg['ds_hinh_anh']) ?> ảnh</span>
+                            <?php endif; ?>
+                            <?php if (!empty($dg['ds_video'])): ?>
+                                <span class="text-indigo-500"><?= count($dg['ds_video']) ?> video</span>
+                            <?php endif; ?>
+                        </div>
                     <?php endif; ?>
+                </div>
+                
+                <div class="flex flex-col space-y-2 w-[100px] flex-shrink-0">
+                    <button onclick="handleAction('<?= $dg['id_danh_gia'] ?>', '<?= $action_type ?>')" 
+                            class="action-btn-<?= $action_type ?> bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600 text-sm transition">
+                        <?= $action_text ?>
+                    </button>
+                    <button onclick="handleAction('<?= $dg['id_danh_gia'] ?>', 'delete')"
+                            class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm transition">
+                        Xóa
+                    </button>
                 </div>
             </div>
         <?php endforeach; ?>
@@ -185,6 +207,90 @@
 </div>
 
 </main>
+
+<script>
+    // ... (Javascript cho carousel giữ nguyên) ...
+
+    /**
+     * Hàm gửi yêu cầu AJAX để cập nhật trạng thái hoặc xóa đánh giá.
+     */
+    function handleAction(id, action) {
+        let confirmMsg;
+        if (action === 'delete') {
+            confirmMsg = 'Bạn có chắc chắn muốn XÓA vĩnh viễn đánh giá này không?';
+        } else if (action === 'hide') {
+            confirmMsg = 'Bạn có chắc chắn muốn ẨN đánh giá này không?';
+        } else {
+            confirmMsg = 'Bạn có chắc chắn muốn HIỆN đánh giá này không?';
+        }
+
+        if (!confirm(confirmMsg)) {
+            return;
+        }
+
+        // Tạo đối tượng FormData
+        const formData = new FormData();
+        formData.append('id', id);
+        formData.append('action', action);
+
+        fetch('../../models/cn_danhgia.php', { // Đảm bảo đường dẫn này chính xác
+            method: 'POST',
+            body: formData,
+        })
+        .then(res => {
+            if (!res.ok) {
+                return res.json().then(err => { throw new Error(err.message || 'Lỗi HTTP'); });
+            }
+            return res.json();
+        })
+        .then(data => {
+            alert(data.message);
+            if (data.status === 'success') {
+                updateDOM(id, action);
+            }
+        })
+        .catch(err => {
+            console.error('Lỗi xử lý đánh giá:', err);
+            alert('Lỗi: ' + err.message);
+        });
+    }
+
+    /**
+     * Cập nhật DOM sau khi AJAX thành công.
+     */
+    function updateDOM(id, action) {
+        const reviewElement = document.getElementById(`review-${id}`);
+        const statusElement = document.getElementById(`status-${id}`);
+        const actionButton = reviewElement.querySelector(`.action-btn-${action}`);
+
+        if (action === 'delete') {
+            reviewElement.remove();
+            return;
+        }
+
+        // Logic ẩn/hiện
+        if (action === 'hide') {
+            statusElement.textContent = 'ẨN';
+            statusElement.className = 'px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-700';
+            
+            // Đổi nút Ẩn thành Hiện
+            actionButton.textContent = 'Hiện';
+            actionButton.setAttribute('onclick', `handleAction('${id}', 'show')`);
+            actionButton.classList.remove('bg-gray-500', 'hover:bg-gray-600', 'action-btn-hide');
+            actionButton.classList.add('bg-green-500', 'hover:bg-green-600', 'action-btn-show');
+
+        } else if (action === 'show') {
+            statusElement.textContent = 'HIỆN';
+            statusElement.className = 'px-2 py-0.5 rounded text-xs font-semibold bg-green-100 text-green-700';
+
+            // Đổi nút Hiện thành Ẩn
+            actionButton.textContent = 'Ẩn';
+            actionButton.setAttribute('onclick', `handleAction('${id}', 'hide')`);
+            actionButton.classList.remove('bg-green-500', 'hover:bg-green-600', 'action-btn-show');
+            actionButton.classList.add('bg-gray-500', 'hover:bg-gray-600', 'action-btn-hide');
+        }
+    }
+</script>
 
 <script>
     // JavaScript đơn giản cho carousel

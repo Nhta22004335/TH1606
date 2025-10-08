@@ -138,7 +138,7 @@
                         <?php endif; ?>
                         <?php if (in_array('moigioi', $dsQuyen)): ?>
                             <li><a href="trangchu.php?page=../moi_gioi/ql_hoso" class="block px-4 py-2 hover:bg-blue-100">Quản lý đơn từ</a></li>
-                            <li><a href="trangchu.php?page=../moi_gioi/cn_hoso" class="block px-4 py-2 hover:bg-blue-100">tạo hồ sơ mới</a></li>
+                            <li><a href="trangchu.php?page=../moi_gioi/cn_hoso" class="block px-4 py-2 hover:bg-blue-100">Tạo hồ sơ mới</a></li>
                         <?php endif; ?>
                     </ul>
                 </li>
@@ -164,7 +164,6 @@
                         <?php endif; ?>
                         <?php if (in_array('moigioi', $dsQuyen)): ?>
                             <li><a href="trangchu.php?page=../moi_gioi/gd_canhan" class="block px-4 py-2 hover:bg-blue-100">Giao dịch cá nhân</a></li>
-                            <li><a href="trangchu.php?page=../moi_gioi/td_tiendo_gd" class="block px-4 py-2 hover:bg-blue-100">Theo dõi tiến độ giao dịch</a></li>
                         <?php endif; ?>
                     </ul>
                 </li>
@@ -172,7 +171,7 @@
 
             <?php if (!in_array('khachhang', $dsQuyen)): ?>
                 <li class="relative"><a class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý sản phẩm bds<i class="fas fa-chevron-right ml-2 transition-transform duration-300"></i></a>
-                    <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
+                    <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 9999;">
                         <?php if (in_array('quantri', $dsQuyen)): ?>
                             <li><a href="trangchu.php?page=ds_sanpham_bds" class="block px-4 py-2 hover:bg-blue-100">Danh sách sản phẩm bds</a></li>
                             <li><a href="trangchu.php?page=ql_anh_video_bds" class="block px-4 py-2 hover:bg-blue-100">Quản lý hình ảnh/videos</a></li>
@@ -301,7 +300,6 @@
                         <?php endif; ?> 
                         <?php if (in_array('moigioi', $dsQuyen)): ?>
                             <li><a href="trangchu.php?page=../moi_gioi/gd_canhan" class="block px-6 py-2 hover:bg-blue-100">Giao dịch cá nhân</a></li>
-                            <li><a href="trangchu.php?page=../moi_gioi/td_tiendo_gd" class="block px-6 py-2 hover:bg-blue-100">Theo dõi tiến độ giao dịch</a></li>
                         <?php endif; ?>
                     </ul>
                 </li>

@@ -121,9 +121,17 @@ $bieumau = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     $status_classes = "bg-gray-100 text-gray-600 border-gray-300";
                             }
                         ?>
+                        <?php
+                            $loaiText = [
+                                'hosomuaban' => 'Hồ sơ mua bán',
+                                'hosothue'   => 'Hồ sơ thuê',
+                                'bienban'    => 'Biên bản'
+                            ];
+                        ?>
                             <tr class="hover:bg-blue-50 transition duration-150">
                                 <td class="p-4 text-gray-700 truncate"><?= htmlspecialchars($bm["tieu_de"]) ?></td>
-                                <td class="p-4 text-gray-600"><?= htmlspecialchars($bm["loai"]) ?></td>
+
+                                <td class="p-4 text-gray-600"><?= htmlspecialchars($loaiText[$bm["loai"]]) ?></td>
                                 <td class="p-4 text-gray-600"><?= htmlspecialchars($bm["ten_ben_mua"]) ?></td>
                                 <td class="p-4 text-gray-600"><?= htmlspecialchars($bm["ten_ben_ban"]) ?></td>
                                 <td class="p-4">
@@ -194,7 +202,7 @@ $bieumau = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <div class="grid grid-cols-2 gap-4 text-sm">
                     <div class="p-3 border rounded-xl bg-white shadow-sm">
                         <p class="text-xs uppercase text-gray-500 mb-1">Loại</p>
-                        <p class="font-semibold text-gray-900 flex items-center gap-1"><i class="fa-solid fa-tags text-blue-400"></i> <?= htmlspecialchars($bm["loai"]) ?></p>
+                        <p class="font-semibold text-gray-900 flex items-center gap-1"><i class="fa-solid fa-tags text-blue-400"></i> <?= $loaiText[$bm["loai"]] ?></p>
                     </div>
                     <div class="p-3 border rounded-xl bg-white shadow-sm">
                         <p class="text-xs uppercase text-gray-500 mb-2">Trạng thái</p>

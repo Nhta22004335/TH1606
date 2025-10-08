@@ -72,7 +72,14 @@ $bieumau = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php foreach($bieumau as $bm): ?>
             <tr class="border-b hover:bg-gray-50">
                 <td class="p-3"><?= $bm["tieu_de"] ?></td>
-                <td class="p-3"><?= $bm["loai"] ?></td>
+                <?php
+                    $loaiText = [
+                        'hosomuaban' => 'Hồ sơ mua bán',
+                        'hosothue'   => 'Hồ sơ thuê',
+                        'bienban'    => 'Biên bản'
+                    ];
+                ?>
+                <td class="p-3"><?= $loaiText[$bm['loai']] ?? 'Không xác định' ?></td>
                 <td class="p-3"><?= $bm["ten_ben_mua"] ?></td>
                 <td class="p-3"><?= $bm["ten_ben_ban"] ?></td>
                 <td class="p-3">
@@ -124,7 +131,7 @@ $bieumau = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
 
             <!-- Nút duyệt/từ chối -->
-            <?php if($bm["trang_thai"]!="daky"): ?>
+            <?php if($bm["trang_thai"]!="daky" && $bm['trang_thai']!="choduyet"): ?>
                 <div class="mt-5 flex justify-between">
                     <button onclick="capNhatTrangThai('<?php echo $bm['id']; ?>','daky')" 
                         class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2">
@@ -137,24 +144,42 @@ $bieumau = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <?php endforeach; ?>
 
 <script>
-    function capNhatTrangThai(id, trangThai) {
-        fetch("../../models/cn_trangthai_bm.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: JSON.stringify({
-                id: id,
-                trang_thai: trangThai
-            })
-        })
-        .then(res => res.json())
-        .then(data => {
-            alert(data.message);
-            if (data.status === "success") {
-                location.reload(); 
-            }
-        })
-        .catch(err => console.error(err));
+    // Thay thế hàm capNhatTrangThai hiện tại bằng hàm sau
+function capNhatTrangThai(id, trangThai) {
+    if (!confirm(`Bạn có chắc chắn muốn chuyển trạng thái biểu mẫu ID ${id} sang ${trangThai.toUpperCase()} không?`)) {
+        return;
     }
+
+    // KHẮC PHỤC: Sử dụng URLSearchParams để gửi dữ liệu dạng form-encoded
+    const formData = new URLSearchParams();
+    formData.append('id', id);
+    formData.append('trang_thai', trangThai); 
+
+    fetch("../../models/cn_trangthai_bm.php", {
+        method: "POST",
+        headers: { 
+            "Content-Type": "application/x-www-form-urlencoded" // <-- Đồng bộ Header
+        },
+        body: formData.toString() // <-- Gửi dữ liệu dưới dạng form
+    })
+    .then(res => {
+        if (!res.ok) {
+            // Xử lý lỗi HTTP (ví dụ: 404, 500)
+            return res.json().then(errorData => { throw new Error(errorData.message || `Lỗi HTTP! Status: ${res.status}`); });
+        }
+        return res.json();
+    })
+    .then(data => {
+        alert(data.message);
+        if (data.status === "success") {
+            location.reload(); 
+        }
+    })
+    .catch(err => {
+        console.error("Lỗi cập nhật:", err);
+        alert("Lỗi: " + err.message);
+    });
+}
 </script>
 </body>
 </html>

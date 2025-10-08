@@ -16,9 +16,9 @@ CREATE TABLE IF NOT EXISTS quyen (
 INSERT INTO quyen (vai_tro) VALUES ('quantri'), ('moigioi'), ('khachhang');
 
 SELECT * FROM quyen;
-ab14ef80-6033-4789-95de-c15f897402c2 qt
-2a26f68a-fda7-4740-b14b-1e7e63d919c4 mg
-32cb8e98-4de2-4164-b1f0-86e3a2dc8866 kh
+bd8fc7f4-7941-4bae-80c4-ede4e907a904 qt
+21ea2b50-e9d2-4894-bc4a-a9818ef226b1 mg
+6bc0b436-c0ab-4970-82b0-b0907136c9f0 kh
 
 -- 0. Bảng nguoi_dung
 CREATE TABLE IF NOT EXISTS nguoi_dung (
@@ -43,9 +43,9 @@ INSERT INTO nguoi_dung (ten_dang_nhap, mat_khau, email, so_dt, trang_thai, hoat_
 ('dangtq', '$argon2id$v=19$m=65536,t=3,p=4$l4ptltIvcKNyDeuOZ2dfDg$XBg6sR18fXH+1Uj7DcfbXg08dz6tb61tko1U+JyIzIE', '22004069@st.vlute.edu.vn', '0897654321', 'danghoatdong', 'online');
 
 SELECT * FROM nguoi_dung;
-424a8689-5224-4142-8f1f-59177ca48c30 anhnt
-864fd80c-d28c-4881-816f-01c36af447a5 quynhln
-40ff6a89-9d88-40a7-84d2-f919771d831b dangtq
+ab76fa3c-893e-487d-983f-d8429ee95436 anhnt
+ea5c0d77-9ce2-4309-b0e7-cbe579f9209d quynhln
+7a6fa374-5628-4870-be48-a4ea18aef621 dangtq
 
 CREATE TABLE IF NOT EXISTS phan_quyen (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -57,9 +57,9 @@ CREATE TABLE IF NOT EXISTS phan_quyen (
 );
 
 INSERT INTO  phan_quyen (id_nguoi_dung, id_quyen) VALUES 
-('424a8689-5224-4142-8f1f-59177ca48c30', 'ab14ef80-6033-4789-95de-c15f897402c2'),
-('864fd80c-d28c-4881-816f-01c36af447a5', '2a26f68a-fda7-4740-b14b-1e7e63d919c4'),
-('40ff6a89-9d88-40a7-84d2-f919771d831b', '32cb8e98-4de2-4164-b1f0-86e3a2dc8866');
+('ab76fa3c-893e-487d-983f-d8429ee95436', '21ea2b50-e9d2-4894-bc4a-a9818ef226b1'),
+('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', '21ea2b50-e9d2-4894-bc4a-a9818ef226b1'),
+('7a6fa374-5628-4870-be48-a4ea18aef621', '6bc0b436-c0ab-4970-82b0-b0907136c9f0');
 
 SELECT * FROM phan_quyen;
 
@@ -80,9 +80,9 @@ ALTER TABLE info_nguoi_dung
 ADD COLUMN mo_ta TEXT DEFAULT 'chuacapnhat';
 
 INSERT INTO info_nguoi_dung (id_nguoi_dung, ho_ten, gioi_tinh, dia_chi, ngay_sinh) VALUES
-('424a8689-5224-4142-8f1f-59177ca48c30', 'Nguyễn Tuấn Anh', 'nam', 'Cà Mau', '2004-09-21'),
-('864fd80c-d28c-4881-816f-01c36af447a5', 'Lê Ngọc Quỳnh', 'nu', 'Vĩnh Long', '2003-1-1'),
-('40ff6a89-9d88-40a7-84d2-f919771d831b', 'Trương Quốc Đặng', 'nam', 'Cần Thơ', '2004-1-1');
+('ab76fa3c-893e-487d-983f-d8429ee95436', 'Nguyễn Tuấn Anh', 'nam', 'Cà Mau', '2004-09-21'),
+('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Lê Ngọc Quỳnh', 'nu', 'Vĩnh Long', '2003-1-1'),
+('7a6fa374-5628-4870-be48-a4ea18aef621', 'Trương Quốc Đặng', 'nam', 'Cần Thơ', '2004-1-1');
 
 SELECT * FROM info_nguoi_dung;
 
@@ -142,20 +142,27 @@ CREATE TABLE IF NOT EXISTS bat_dong_san (
     id_nguoi_dung UUID, 
     tieu_de VARCHAR(200) DEFAULT 'chuacapnhat',
     mo_ta TEXT DEFAULT 'chuacapnhat',
-    gia NUMERIC(18,2) CHECK (gia >= 0) DEFAULT 0,
+    gia NUMERI	C(18,2) CHECK (gia >= 0) DEFAULT 0,
     dien_tich NUMERIC(10,2) CHECK (dien_tich > 0) DEFAULT 0,
     dia_chi TEXT DEFAULT 'chuacapnhat',
     loai VARCHAR(100) DEFAULT 'chuacapnhat',
     khu_vuc VARCHAR(100) DEFAULT 'chuacapnhat',
 	trang_thai VARCHAR(50) DEFAULT 'chuaduyet',
+	hinh_thuc VARCHAR(50),
     ngay_dang TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT chk_bat_dong_san_loai CHECK (loai IN ('ban','thue','duan','chuacapnhat')),
     CONSTRAINT fk_bds_nguoi_dung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE
 );
-select * from nguoi_dung
+
+ALTER TABLE bat_dong_san
+ADD COLUMN loai VARCHAR(100) DEFAULT 'chuacapnhat'
+
+ALTER TABLE bat_dong_san
+DROP COLUMN loai VARCHAR(100) DEFAULT 'chuacapnhat'
+
+
 INSERT INTO bat_dong_san (id_nguoi_dung, tieu_de, mo_ta, gia, dien_tich, dia_chi, loai, khu_vuc)
 VALUES (
-    '864fd80c-d28c-4881-816f-01c36af447a5',
+    'ea5c0d77-9ce2-4309-b0e7-cbe579f9209d',
     'Bán nhà vườn tại Vĩnh Long',
     'Căn nhà vườn rộng rãi nằm ngay trung tâm Vĩnh Long, cách chợ khoảng 5 phút đi xe. 
      Không gian thoáng mát, có sân trước và vườn sau trồng nhiều loại cây ăn trái. 
@@ -171,7 +178,7 @@ VALUES (
 
 INSERT INTO bat_dong_san (id_nguoi_dung, tieu_de, mo_ta, gia, dien_tich, dia_chi, loai, khu_vuc)
 VALUES (
-    '864fd80c-d28c-4881-816f-01c36af447a5',
+    'ea5c0d77-9ce2-4309-b0e7-cbe579f9209d',
     'Dự án đất nền ven sông Vĩnh Long',
     'Khu đất nền ven sông Vĩnh Long với vị trí đắc địa, gần trung tâm hành chính 
      và trường học. Pháp lý minh bạch, sổ hồng riêng từng nền. Đường nội bộ 
@@ -186,7 +193,7 @@ VALUES (
 
 INSERT INTO bat_dong_san (id_nguoi_dung, tieu_de, mo_ta, gia, dien_tich, dia_chi, loai, khu_vuc)
 VALUES (
-    '864fd80c-d28c-4881-816f-01c36af447a5',
+    'ea5c0d77-9ce2-4309-b0e7-cbe579f9209d',
     'Cho thuê nhà phố Vĩnh Long',
     'Nhà phố 1 trệt 2 lầu ngay mặt tiền đường chính, gần siêu thị Coopmart 
      và bến xe Vĩnh Long. Diện tích sử dụng rộng rãi, gồm 4 phòng ngủ, 1 phòng 
@@ -198,7 +205,24 @@ VALUES (
     'thue',
     'Vĩnh Long'
 );
+CREATE TABLE IF NOT EXISTS hinh_anh_bds (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id_bds UUID NOT NULL,
+    url VARCHAR(300),
+    mo_ta VARCHAR(200),
+    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_hinh_anh_bds_bds FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE CASCADE
+);
 
+-- 9. Bảng video (video sản phẩm bất động sản)
+CREATE TABLE IF NOT EXISTS video_bds (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id_bds UUID NOT NULL,
+    url VARCHAR(300),
+    mo_ta VARCHAR(200),
+    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_video_bds_bds FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE CASCADE
+);
 SELECT * FROM bat_dong_san;
 9b17fb30-8c6e-4494-920a-cbdd1621ee20
 ba11e8d1-b68b-42e9-b35d-40eaea043fc3
@@ -243,6 +267,7 @@ CREATE TABLE IF NOT EXISTS video_danh_gia_bds (
 CREATE TABLE IF NOT EXISTS giao_dich (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     id_nguoi_dung UUID,
+	id_nguoi_ban UUID,
     id_bds UUID,
     loai VARCHAR(50) NOT NULL, 
     ngay_giao_dich TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -253,11 +278,97 @@ CREATE TABLE IF NOT EXISTS giao_dich (
     CONSTRAINT fk_giao_dich_bds FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE SET NULL
 );
 
+ALTER TABLE giao_dich
+ADD COLUMN id_nguoi_ban UUID
+
+
 INSERT INTO giao_dich (id_nguoi_dung, id_bds, loai) VALUES
 ('7a6fa374-5628-4870-be48-a4ea18aef621', '9b17fb30-8c6e-4494-920a-cbdd1621ee20', 'ban');
 
+-- Giao dịch MUA BÁN
+INSERT INTO giao_dich (id, id_nguoi_dung, id_nguoi_ban, id_bds, loai, trang_thai)
+VALUES (
+    '87654321-abcd-abcd-abcd-123456789012', -- ID Giao dịch Mẫu
+    '7a6fa374-5628-4870-be48-a4ea18aef621', -- id_nguoi_dung (Người mua/thuê)
+    'ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', -- id_nguoi_ban (Người bán)
+    '9b17fb30-8c6e-4494-920a-cbdd1621ee20', -- id_bds
+    'mua',
+    'dangxuly' -- Đang trong quá trình xử lý
+);
+
+-- Kế hoạch Thanh toán (Tổng giá trị)
+INSERT INTO ke_hoach_thanh_toan (id_giao_dich, tong_gia_tri, so_tien_da_tt, trang_thai_tt)
+VALUES (
+    '87654321-abcd-abcd-abcd-123456789012', 
+    2500000000.00,  -- Tổng giá trị hợp đồng
+    1000000000.00,  -- Số tiền đã TT (Đợt 1 + Đợt 2)
+    'dangthanhtoan' -- Đang trong quá trình thanh toán
+);
+
+-- Đợt Thanh toán 1: Đặt cọc
+INSERT INTO dot_thanh_toan (id, id_giao_dich, lan_tt, so_tien_tt, ngay_tt, phuong_thuc)
+VALUES (
+    'a1b2c3d4-0000-0000-0001-000000000001', 
+    '87654321-abcd-abcd-abcd-123456789012', 
+    1, 
+    500000000.00, 
+    '2025-09-01 10:00:00',
+    'Chuyen khoan'
+);
+
+-- Đợt Thanh toán 2: Ký hợp đồng
+INSERT INTO dot_thanh_toan (id, id_giao_dich, lan_tt, so_tien_tt, ngay_tt, phuong_thuc)
+VALUES (
+    'a1b2c3d4-0000-0000-0002-000000000002', 
+    '87654321-abcd-abcd-abcd-123456789012', 
+    2, 
+    500000000.00, 
+    '2025-10-01 15:30:00',
+    'Tien mat'
+);
+
+-- Đợt Thanh toán 3: Bàn giao (Giả định đợt này CHƯA có bản ghi trong bảng dot_thanh_toan 
+-- vì nó chưa được thực hiện, nhưng nó là một phần của kế hoạch)
+-- Bảng dot_thanh_toan chỉ lưu các đợt ĐÃ hoàn thành.
+-- Nếu bạn có một bảng Kế hoạch Đợt, bạn sẽ thêm nó vào đó.
 SELECT * FROM giao_dich;
+SELECT * FROM nguoi_dung
 d4b0ccdd-4554-4456-b0d8-c1fc783b0cc1
+
+CREATE TABLE IF NOT EXISTS ke_hoach_thanh_toan (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id_giao_dich UUID NOT NULL UNIQUE,
+    tong_gia_tri NUMERIC(18,2) NOT NULL CHECK (tong_gia_tri >= 0), -- Tổng giá trị Hợp đồng/GD
+    so_tien_da_tt NUMERIC(18,2) DEFAULT 0 CHECK (so_tien_da_tt >= 0), -- Tổng số tiền đã thanh toán (Tính toán)
+    trang_thai_tt VARCHAR(50) DEFAULT 'chuathanhtoan', -- Trạng thái tổng quát của TT
+    
+    CONSTRAINT chk_khtt_trang_thai CHECK (trang_thai_tt IN ('chuathanhtoan', 'dangthanhtoan', 'hoantat')),
+    CONSTRAINT fk_khtt_gd FOREIGN KEY (id_giao_dich) REFERENCES giao_dich(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS dot_thanh_toan (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id_giao_dich UUID NOT NULL,
+    lan_tt INT NOT NULL,                                     -- Lần thanh toán thứ mấy (1, 2, 3...)
+    so_tien_tt NUMERIC(18,2) NOT NULL CHECK (so_tien_tt > 0), -- Số tiền của đợt thanh toán này
+    ngay_tt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    phuong_thuc VARCHAR(100),
+    ghichu TEXT,
+    
+    CONSTRAINT fk_dtt_gd FOREIGN KEY (id_giao_dich) REFERENCES giao_dich(id) ON DELETE CASCADE,
+    UNIQUE (id_giao_dich, lan_tt) -- Đảm bảo không có 2 đợt cùng số lần trong 1 giao dịch
+);
+
+CREATE TABLE IF NOT EXISTS dot_thanh_toan_ct (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id_dot_thanh_toan UUID NOT NULL,
+    id_bds UUID,                                            -- Mặc dù giao dịch đã có id_bds, nhưng để linh hoạt cho dự án lớn hơn.
+    so_luong INT DEFAULT 1,
+    so_tien NUMERIC(18,2) CHECK (so_tien >= 0),
+    
+    CONSTRAINT fk_dttct_dtt FOREIGN KEY (id_dot_thanh_toan) REFERENCES dot_thanh_toan(id) ON DELETE CASCADE,
+    CONSTRAINT fk_dttct_bds FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE SET NULL
+);
 
 -- 12. Bảng thanh_toan (tổng thanh toán liên quan giao dịch)
 CREATE TABLE IF NOT EXISTS thanh_toan (
@@ -348,8 +459,8 @@ CREATE TABLE bieu_mau (
 INSERT INTO bieu_mau (tieu_de, loai, ben_mua, ben_ban, trang_thai, tep_dk) VALUES 
 ('Hợp đồng mua bán nhà', 'Hợp đồng', '7a6fa374-5628-4870-be48-a4ea18aef621', 'ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'choduyet', 'hopdong1.pdf');
 
-SELECT * FROM bieu_mau;
-
+SELECT * FROM bieu_mau
+SELECT * FROM nguoi_dung
 CREATE TABLE IF NOT EXISTS yeu_cau (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), 
     
