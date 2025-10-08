@@ -134,6 +134,8 @@ CREATE TABLE IF NOT EXISTS lich_su_xac_thuc (
     CONSTRAINT chk_lich_su_xac_thuc_time_range CHECK (thoi_gian_ket_thuc IS NULL OR thoi_gian_ket_thuc >= thoi_gian_bat_dau)
 );
 
+select * from lich_su_xac_thuc
+
 -- 7. Bảng bat_dong_san (lưu thống tin các sản phẩm bất động sản)
 CREATE TABLE IF NOT EXISTS bat_dong_san (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -364,6 +366,11 @@ CREATE TABLE IF NOT EXISTS yeu_cau (
 	CONSTRAINT chk_yeucau_loai CHECK (loai IN ('mua', 'ban', 'thue'))
 );
 
+ALTER TABLE yeu_cau
+ADD COLUMN mo_ta_chi_tiet TEXT DEFAULT 'chuacapnhat'
+
+select * from yeu_cau
+
 INSERT INTO yeu_cau (id_nguoi_dung, loai, id_bds, trang_thai)
 VALUES
     ('7a6fa374-5628-4870-be48-a4ea18aef621', 'mua', '9b17fb30-8c6e-4494-920a-cbdd1621ee20', 'choxuly'),
@@ -377,7 +384,8 @@ CREATE TABLE tin_tuc (
     tieu_de VARCHAR(200) NOT NULL DEFAULT 'chuacapnhat',
     mo_ta TEXT DEFAULT 'chuacapnhat',
     chuyen_muc VARCHAR(100) DEFAULT 'chuacapnhat',                  
-    trang_thai VARCHAR(50) DEFAULT 'choduyet',           
+    trang_thai VARCHAR(50) DEFAULT 'choduyet',  
+	anh_tin TEXT DEFAULT 'chuacapnhat.png',
     ngay_dang TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT chk_trang_thai_tin CHECK (trang_thai IN ('choduyet','dangban','daban','dathue')),
     CONSTRAINT fk_tin_khachhang FOREIGN KEY (id_khach_hang) REFERENCES nguoi_dung(id) ON DELETE CASCADE

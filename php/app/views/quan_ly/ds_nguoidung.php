@@ -248,15 +248,25 @@
                             <label class="block mb-2 text-gray-700">Trạng thái</label>
                             <div id="trangthai" 
                                 class="w-full border rounded-lg overflow-hidden divide-y divide-gray-200">
-                                <div data-value="danghoatdong" class="option px-4 py-2 cursor-pointer hover:bg-blue-50">
-                                    Kích hoạt
-                                </div>
-                                <div data-value="chuakichhoat" class="option px-4 py-2 cursor-pointer hover:bg-blue-50">
-                                    Tạm ngừng
-                                </div>
-                                <div data-value="khoa" class="option px-4 py-2 cursor-pointer hover:bg-blue-50">
-                                    Khóa
-                                </div>
+                                <?php
+                                    if ($u['trang_thai'] != 'danghoatdong'):
+                                ?>
+                                    <div data-value="danghoatdong" class="option px-4 py-2 cursor-pointer hover:bg-blue-50">
+                                        Kích hoạt
+                                    </div>
+                                <?php endif; ?>
+                                
+                                <?php if ($u['trang_thai'] != 'chuakichhoat'): ?>
+                                    <div data-value="chuakichhoat" class="option px-4 py-2 cursor-pointer hover:bg-blue-50">
+                                        Tạm ngừng
+                                    </div>
+                                <?php endif; ?>
+                                
+                                <?php if ($u['trang_thai'] != 'khoa'): ?>  
+                                    <div data-value="khoa" class="option px-4 py-2 cursor-pointer hover:bg-blue-50">
+                                        Khóa
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         </div>
 

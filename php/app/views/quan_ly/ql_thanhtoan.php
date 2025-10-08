@@ -104,10 +104,10 @@
                             </button>
 
                             <!-- Nút Đánh dấu -->
-                            <button onclick="danhDau('<?= $gd['id'] ?>')" 
+                            <!-- <button onclick="danhDau('<?= $gd['id'] ?>')" 
                                 class="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg">
                                 <i class="fa-solid fa-bookmark"></i> Đánh dấu
-                            </button>
+                            </button> -->
 
                             <!-- Nút Xóa -->
                             <button onclick="xoaGiaoDich('<?= $gd['id'] ?>')" 

@@ -21,6 +21,7 @@
             $_SESSION['id_phien']    = $row['id'];
             $_SESSION['id_nguoi_dung'] = $row['id_nguoi_dung'];
             $_SESSION['token_phien'] = $row['token_phien'];
+            $_SESSION['id_lich_su'] = $_COOKIE['id_lich_su'] ?? null;
         } else {
             // Token hết hạn hoặc sai → xóa cookie
             setcookie("token_phien", "", time() - 3600, "/");
@@ -67,8 +68,8 @@
                 header("Location: app/views/quan_ly/trangchu.php");
                 exit;
             } 
-            else {
-                header("Location: app/views/khachhang/trangchu.php");
+            else if (in_array('khachhang', $dsQuyen)) {
+                header("Location: app/views/khach_hang/trangchu_kh.php");
                 exit;
             }
         } else {

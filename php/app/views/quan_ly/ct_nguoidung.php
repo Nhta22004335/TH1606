@@ -207,7 +207,14 @@
                         <label class="block mb-1 font-semibold">Chọn quyền:</label>
                         <select name="vai_tro[]" multiple class="border rounded px-2 py-1 w-48">
                             <?php foreach ($dsTatCaQuyen as $q): ?>
-                                <option value="<?= $q['id'] ?>" <?= in_array($q['id'],$dsQuyenArray)?'selected':'' ?>><?= $labelvaitro[$q['vai_tro']] ?></option>
+                                <!-- <option value="<?= $q['id'] ?>" <?= in_array($q['id'],$dsQuyenArray)?'selected':'' ?>><?= $labelvaitro[$q['vai_tro']] ?></option> -->
+                                <?php
+                                    // Nếu người dùng đã là "khách hàng" thì ẩn tùy chọn "Khách hàng"
+                                    if (in_array($q['vai_tro'], $dsQuyenArray)) continue;
+                                ?>
+                                <option value="<?= $q['id'] ?>" <?= in_array($q['id'],$dsQuyenArray)?'selected':'' ?>>
+                                    <?= $labelvaitro[$q['vai_tro']] ?>
+                                </option>
                             <?php endforeach; ?>
                         </select>
 

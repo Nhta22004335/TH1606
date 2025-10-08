@@ -67,6 +67,7 @@ function luuLichSuNguoiDung($pdo, $id_nguoi_dung, $loai_su_kien = 'dangnhap') {
     ]);
     $idlichsu = $stmt->fetchColumn();
     $_SESSION['id_lich_su'] = $idlichsu;
+    setcookie("id_lich_su", $id_nguoi_dung, time() + (86400 * 7), "/", "", true, true);
 }
 
 if ($user) {

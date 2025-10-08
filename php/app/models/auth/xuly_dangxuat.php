@@ -16,6 +16,14 @@
         }
     }
 
+    $stmt = $pdo->prepare("
+        UPDATE lich_su_xac_thuc
+        SET thoi_gian_ket_thuc = CURRENT_TIMESTAMP
+        WHERE id = :id
+    ");
+    $stmt->execute([':id' => $_SESSION['id_lich_su']]);
+    unset($_SESSION['id_lich_su']);
+
     $_SESSION = [];
     if (ini_get("session.use_cookies")) {
         $params = session_get_cookie_params();
@@ -28,24 +36,9 @@
 
     if (isset($_COOKIE['remember_token'])) {
         setcookie('remember_token', '', time() - 3600, '/');
-    }
-
-    function luuLichSuNguoiDung($pdo) {
-        if (!empty($_SESSION['id_lich_su'])) {
-            $stmt = $pdo->prepare("
-                UPDATE lich_su_dn_dx
-                SET thoi_gian_dang_xuat = CURRENT_TIMESTAMP
-                WHERE id = :id
-            ");
-            $stmt->execute([':id' => $_SESSION['id_lich_su']]);
-            unset($_SESSION['id_lich_su']);
-        }
-    }
-
-    luuLichSuNguoiDung($pdo);
+    }    
 
     header("Location: ../../views/auth/dangnhap.html");
     exit;
-
-    
+   
 ?>

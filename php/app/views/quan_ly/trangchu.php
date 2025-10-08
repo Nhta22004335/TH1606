@@ -5,7 +5,6 @@
 
     $id = $_SESSION['id_nguoi_dung'];
 
-    // Giao diện khách hàng: chỉ gán quyền là khách hàng
     $sql = "
         SELECT q.vai_tro
         FROM phan_quyen pq
@@ -26,8 +25,6 @@
     $stmt = $pdo->prepare($sql);
     $stmt->execute(['id' => $id]);
     $nd = $stmt->fetch(PDO::FETCH_ASSOC);
-
-
 ?>
 <!DOCTYPE html>
 <html lang="vi" x-data="{ openFilter:false }">
@@ -53,12 +50,19 @@
                     <img 
                         src="../../../public/assets/anhht/0/datviet.png" 
                         alt="Logo" 
-                        class="h-12 transform scale-[2.8]"
-                    >
+                        class="h-14 transform scale-[2.6] object-contain pr-2">
                     </div>
-                    <span class="text-xs sm:text-sm text-gray-500 italic md:pl-4 text-center md:text-left">
-                    Không gian sống lý tưởng cho bạn
-                    </span>
+                    <div class="flex flex-col justify-center leading-tight">
+                        <span class="text-3xl pl-6 font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-sky-500 to-cyan-300 drop-shadow-[0_2px_6px_rgba(56,189,248,0.4)] font-[Poppins]">
+                            Đất Việt
+                        </span>
+                        
+                        <span class="text-xs sm:text-sm text-gray-500 italic md:pl-0 text-center md:text-left pl-0">
+                            Không gian sống lý tưởng cho bạn
+                        </span>
+
+                    </div>
+                    
                 </div>
             </div>
 
@@ -76,19 +80,23 @@
 
             <!-- Bản đồ + avatar (khách hàng không có đăng tin) -->
             <div class="flex items-center justify-evenly space-x-3 w-full md:w-auto">
+                <!-- 🏠 Nút Home -->
+                <a href="trangchu.php" class="px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-700 text-sm hover:bg-gray-100 flex items-center">
+                    <i class="fas fa-home mr-2 text-blue-600"></i> Trang chủ
+                </a>
                 <a href="#" class="px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-700 text-sm hover:bg-gray-100 flex items-center">
                     <i class="fas fa-map-marked-alt mr-2 text-blue-600"></i> Bản đồ
                 </a>
                 <div x-data="{ open: false }" class="relative">
                     <!-- Nút avatar + tên -->
                     <div @click="open = !open" class="flex items-center space-x-2 cursor-pointer">
-                        <img src="../../../public/assets/anhht/0/<?= $nd['avt'] ?>" alt="Avatar" class="w-9 h-9 rounded-full border border-gray-300">
+                        <img src="../../../storage/pictures/avt/<?= $nd['avt'] ?>" alt="Avatar" class="w-9 h-9 rounded-full border border-gray-300">
                         <span class="text-sm text-gray-700"><?= $ind['ho_ten'] ?></span>
                     </div>
                     <!-- Dropdown -->
                     <div x-show="open" x-cloak @click.outside="open = false" x-transition class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2" style="z-index: 20;">
                         <div class="px-4 py-2 flex items-center space-x-2 border-b">
-                            <img src="../../../public/assets/anhht/0/<?= $nd['avt'] ?>" alt="Avatar" class="w-10 h-10 rounded-full border">
+                            <img src="../../../storage/pictures/avt/<?= $nd['avt'] ?>" alt="Avatar" class="w-10 h-10 rounded-full border">
                             <div>
                                 <p class="text-sm font-medium text-gray-800"><?= $ind['ho_ten'] ?></p>
                                 <p class="text-xs text-gray-500">Tài khoản cá nhân</p>
@@ -477,6 +485,92 @@
     ?>
 </div>
 
+<script>
+    window.addEventListener("DOMContentLoaded", () => {
+        const hero = document.getElementById("heroCarousel");
+        const params = new URLSearchParams(window.location.search);
+
+        // Nếu URL có ?page=... thì ẩn banner
+        if (params.has("page") && hero) {
+            hero.style.display = "none";
+        } 
+        // Nếu không có ?page=... thì hiện banner (trang chủ)
+        else if (!params.has("page") && hero) {
+            hero.style.display = "block";
+        }
+    });
+</script>
+
+<!-- ✅ Banner Hero Carousel -->
+<section id="heroCarousel" class="relative h-[480px] overflow-hidden">
+
+    <!-- Slide 1 -->
+    <div class="slide absolute inset-0 bg-cover bg-center transition-opacity duration-1000 opacity-100"
+        style="background-image: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.3)), 
+        url('https://images.unsplash.com/photo-1501183638710-841dd1904471');">
+        <div class="absolute inset-0 flex flex-col items-center justify-center text-white text-center px-4">
+            <h2 class="text-4xl md:text-5xl font-bold mb-4 drop-shadow-lg">Tìm ngôi nhà mơ ước của bạn</h2>
+            <p class="mb-6 text-lg opacity-90">Khám phá hàng ngàn bất động sản uy tín, chất lượng cao trên toàn quốc.</p>
+        </div>
+    </div>
+
+    <!-- Slide 2 -->
+    <div class="slide absolute inset-0 bg-cover bg-center transition-opacity duration-1000 opacity-0"
+        style="background-image: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.3)), 
+        url('https://images.unsplash.com/photo-1570129477492-45c003edd2be');">
+        <div class="absolute inset-0 flex flex-col items-center justify-center text-white text-center px-4">
+            <h2 class="text-4xl md:text-5xl font-bold mb-4 drop-shadow-lg">Không gian sống xanh & hiện đại</h2>
+            <p class="mb-6 text-lg opacity-90">Trải nghiệm cuộc sống tiện nghi trong các khu đô thị xanh.</p>
+        </div>
+    </div>
+
+    <!-- Slide 3 -->
+    <div class="slide absolute inset-0 bg-cover bg-center transition-opacity duration-1000 opacity-0"
+        style="background-image: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.3)), 
+        url('https://images.unsplash.com/photo-1494526585095-c41746248156');">
+        <div class="absolute inset-0 flex flex-col items-center justify-center text-white text-center px-4">
+            <h2 class="text-4xl md:text-5xl font-bold mb-4 drop-shadow-lg">Đầu tư thông minh, sinh lời bền vững</h2>
+            <p class="mb-6 text-lg opacity-90">Chọn lựa bất động sản tiềm năng để gia tăng giá trị tương lai.</p>
+        </div>
+    </div>
+
+    <!-- 🔘 Dots điều hướng -->
+    <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-3">
+        <button class="dot w-3 h-3 rounded-full bg-white opacity-70"></button>
+        <button class="dot w-3 h-3 rounded-full bg-white opacity-40"></button>
+        <button class="dot w-3 h-3 rounded-full bg-white opacity-40"></button>
+    </div>
+</section>
+
+<script>
+    const slides = document.querySelectorAll("#heroCarousel .slide");
+    const dots = document.querySelectorAll("#heroCarousel .dot");
+    let current = 0;
+
+    function showSlide(index) {
+        slides.forEach((slide, i) => {
+            slide.style.opacity = i === index ? "1" : "0";
+            dots[i].classList.toggle("opacity-70", i === index);
+            dots[i].classList.toggle("opacity-40", i !== index);
+        });
+    }
+
+    function nextSlide() {
+        current = (current + 1) % slides.length;
+        showSlide(current);
+    }
+
+    // Tự động chuyển slide
+    setInterval(nextSlide, 5000);
+
+    // Cho phép click chọn slide
+    dots.forEach((dot, index) => {
+        dot.addEventListener("click", () => {
+            current = index;
+            showSlide(index);
+        });
+    });
+</script>
 
 <!-- Section App Landing -->
 <div class="bg-gray-50 text-gray-900 py-12 mt-4 border-t border-gray-300">
