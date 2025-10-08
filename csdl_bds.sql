@@ -16,9 +16,9 @@ CREATE TABLE IF NOT EXISTS quyen (
 INSERT INTO quyen (vai_tro) VALUES ('quantri'), ('moigioi'), ('khachhang');
 
 SELECT * FROM quyen;
-bd8fc7f4-7941-4bae-80c4-ede4e907a904 qt
-21ea2b50-e9d2-4894-bc4a-a9818ef226b1 mg
-6bc0b436-c0ab-4970-82b0-b0907136c9f0 kh
+ab14ef80-6033-4789-95de-c15f897402c2 qt
+2a26f68a-fda7-4740-b14b-1e7e63d919c4 mg
+32cb8e98-4de2-4164-b1f0-86e3a2dc8866 kh
 
 -- 0. Bảng nguoi_dung
 CREATE TABLE IF NOT EXISTS nguoi_dung (
@@ -43,9 +43,9 @@ INSERT INTO nguoi_dung (ten_dang_nhap, mat_khau, email, so_dt, trang_thai, hoat_
 ('dangtq', '$argon2id$v=19$m=65536,t=3,p=4$l4ptltIvcKNyDeuOZ2dfDg$XBg6sR18fXH+1Uj7DcfbXg08dz6tb61tko1U+JyIzIE', '22004069@st.vlute.edu.vn', '0897654321', 'danghoatdong', 'online');
 
 SELECT * FROM nguoi_dung;
-ab76fa3c-893e-487d-983f-d8429ee95436 anhnt
-ea5c0d77-9ce2-4309-b0e7-cbe579f9209d quynhln
-7a6fa374-5628-4870-be48-a4ea18aef621 dangtq
+424a8689-5224-4142-8f1f-59177ca48c30 anhnt
+864fd80c-d28c-4881-816f-01c36af447a5 quynhln
+40ff6a89-9d88-40a7-84d2-f919771d831b dangtq
 
 CREATE TABLE IF NOT EXISTS phan_quyen (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -57,9 +57,9 @@ CREATE TABLE IF NOT EXISTS phan_quyen (
 );
 
 INSERT INTO  phan_quyen (id_nguoi_dung, id_quyen) VALUES 
-('ab76fa3c-893e-487d-983f-d8429ee95436', '21ea2b50-e9d2-4894-bc4a-a9818ef226b1'),
-('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', '21ea2b50-e9d2-4894-bc4a-a9818ef226b1'),
-('7a6fa374-5628-4870-be48-a4ea18aef621', '6bc0b436-c0ab-4970-82b0-b0907136c9f0');
+('424a8689-5224-4142-8f1f-59177ca48c30', 'ab14ef80-6033-4789-95de-c15f897402c2'),
+('864fd80c-d28c-4881-816f-01c36af447a5', '2a26f68a-fda7-4740-b14b-1e7e63d919c4'),
+('40ff6a89-9d88-40a7-84d2-f919771d831b', '32cb8e98-4de2-4164-b1f0-86e3a2dc8866');
 
 SELECT * FROM phan_quyen;
 
@@ -80,9 +80,9 @@ ALTER TABLE info_nguoi_dung
 ADD COLUMN mo_ta TEXT DEFAULT 'chuacapnhat';
 
 INSERT INTO info_nguoi_dung (id_nguoi_dung, ho_ten, gioi_tinh, dia_chi, ngay_sinh) VALUES
-('ab76fa3c-893e-487d-983f-d8429ee95436', 'Nguyễn Tuấn Anh', 'nam', 'Cà Mau', '2004-09-21'),
-('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Lê Ngọc Quỳnh', 'nu', 'Vĩnh Long', '2003-1-1'),
-('7a6fa374-5628-4870-be48-a4ea18aef621', 'Trương Quốc Đặng', 'nam', 'Cần Thơ', '2004-1-1');
+('424a8689-5224-4142-8f1f-59177ca48c30', 'Nguyễn Tuấn Anh', 'nam', 'Cà Mau', '2004-09-21'),
+('864fd80c-d28c-4881-816f-01c36af447a5', 'Lê Ngọc Quỳnh', 'nu', 'Vĩnh Long', '2003-1-1'),
+('40ff6a89-9d88-40a7-84d2-f919771d831b', 'Trương Quốc Đặng', 'nam', 'Cần Thơ', '2004-1-1');
 
 SELECT * FROM info_nguoi_dung;
 
@@ -150,10 +150,10 @@ CREATE TABLE IF NOT EXISTS bat_dong_san (
     CONSTRAINT chk_bat_dong_san_loai CHECK (loai IN ('ban','thue','duan','chuacapnhat')),
     CONSTRAINT fk_bds_nguoi_dung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE
 );
-
+select * from nguoi_dung
 INSERT INTO bat_dong_san (id_nguoi_dung, tieu_de, mo_ta, gia, dien_tich, dia_chi, loai, khu_vuc)
 VALUES (
-    'ea5c0d77-9ce2-4309-b0e7-cbe579f9209d',
+    '864fd80c-d28c-4881-816f-01c36af447a5',
     'Bán nhà vườn tại Vĩnh Long',
     'Căn nhà vườn rộng rãi nằm ngay trung tâm Vĩnh Long, cách chợ khoảng 5 phút đi xe. 
      Không gian thoáng mát, có sân trước và vườn sau trồng nhiều loại cây ăn trái. 
@@ -169,7 +169,7 @@ VALUES (
 
 INSERT INTO bat_dong_san (id_nguoi_dung, tieu_de, mo_ta, gia, dien_tich, dia_chi, loai, khu_vuc)
 VALUES (
-    'ea5c0d77-9ce2-4309-b0e7-cbe579f9209d',
+    '864fd80c-d28c-4881-816f-01c36af447a5',
     'Dự án đất nền ven sông Vĩnh Long',
     'Khu đất nền ven sông Vĩnh Long với vị trí đắc địa, gần trung tâm hành chính 
      và trường học. Pháp lý minh bạch, sổ hồng riêng từng nền. Đường nội bộ 
@@ -184,7 +184,7 @@ VALUES (
 
 INSERT INTO bat_dong_san (id_nguoi_dung, tieu_de, mo_ta, gia, dien_tich, dia_chi, loai, khu_vuc)
 VALUES (
-    'ea5c0d77-9ce2-4309-b0e7-cbe579f9209d',
+    '864fd80c-d28c-4881-816f-01c36af447a5',
     'Cho thuê nhà phố Vĩnh Long',
     'Nhà phố 1 trệt 2 lầu ngay mặt tiền đường chính, gần siêu thị Coopmart 
      và bến xe Vĩnh Long. Diện tích sử dụng rộng rãi, gồm 4 phòng ngủ, 1 phòng 
