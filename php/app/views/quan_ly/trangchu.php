@@ -72,7 +72,7 @@
                     <!-- Ô nhập -->
                     <input id="searchInput" type="text" placeholder="Tìm kiếm" class="flex-1 h-10 border border-gray-300 px-3 text-sm rounded-l-md focus:ring-1 focus:ring-blue-400 focus:border-blue-400 outline-none">
                     <!-- Nút search -->
-                    <button id="btnSearch" class="h-10 px-4 bg-red-500 text-white rounded-r-md border border-red-500 flex items-center justify-center hover:bg-red-600 transition">
+                    <button id="btnSearch" class="h-10 px-4 bg-blue-500 text-white rounded-r-md border border-blue-500 flex items-center justify-center hover:bg-blue-700 transition">
                         <i class="fas fa-search"></i>
                     </button>
                 </div>
@@ -130,7 +130,7 @@
             <?php if (in_array('quantri', $dsQuyen) || in_array('moigioi', $dsQuyen)): ?>
                 <li class="relative">
                     <a class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý người dùng <i class="fas fa-chevron-right ml-1 transition-transform duration-300"></i></a> 
-                    <ul class="hidden absolute left-0 top-full bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
+                    <ul class="hidden absolute left-0 top-full bg-white border shadow-md mt-4 sub-menu" style="z-index: 99999;">
                         <?php if (in_array('quantri', $dsQuyen)): ?>
                             <li><a href="trangchu.php?page=ds_nguoidung" class="block px-4 py-2 hover:bg-blue-100">Danh sách người dùng</a></li>
                             <li><a href="trangchu.php?page=ls_xacthuc" class="block px-4 py-2 hover:bg-blue-100">Lịch sử xác thực</a></li>
@@ -147,7 +147,7 @@
             <?php if (in_array('moigioi', $dsQuyen)): ?>
                 <li class="relative">
                     <a class="hover:text-blue-600 menu-btn inline-flex items-center">Khách hàng tiềm năng<i class="fas fa-chevron-right ml-1 transition-transform duration-300"></i></a> 
-                    <ul class="hidden absolute left-0 top-full bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
+                    <ul class="hidden absolute left-0 top-full bg-white border shadow-md mt-4 sub-menu" style="z-index: 99999;">
                         <li><a href="trangchu.php?page=../moi_gioi/kh_quantam" class="block px-4 py-2 hover:bg-blue-100">Khách hàng quan tâm</a></li>
                         <li><a href="trangchu.php?page=../moi_gioi/kh_damua" class="block px-4 py-2 hover:bg-blue-100">Khách hàng đã mua</a></li>
                     </ul>
@@ -157,7 +157,7 @@
             <?php if (in_array('quantri', $dsQuyen) || in_array('moigioi', $dsQuyen)): ?>
                 <li class="relative">
                     <a class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý đơn hàng<i class="fas fa-chevron-right ml-2 transition-transform duration-300"></i></a>
-                    <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
+                    <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 99999;">
                         <?php if (in_array('quantri', $dsQuyen)): ?>
                             <li><a href="trangchu.php?page=td_yeucau_mbt" class="block px-4 py-2 hover:bg-blue-100">Theo dõi các y.c mua/bán/thuê</a>
                             <li><a href="trangchu.php?page=ql_thanhtoan" class="block px-4 py-2 hover:bg-blue-100">Quản lý thanh toán</a></li>
@@ -171,7 +171,7 @@
 
             <?php if (!in_array('khachhang', $dsQuyen)): ?>
                 <li class="relative"><a class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý sản phẩm bds<i class="fas fa-chevron-right ml-2 transition-transform duration-300"></i></a>
-                    <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 9999;">
+                    <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 99999;">
                         <?php if (in_array('quantri', $dsQuyen)): ?>
                             <li><a href="trangchu.php?page=ds_sanpham_bds" class="block px-4 py-2 hover:bg-blue-100">Danh sách sản phẩm bds</a></li>
                             <li><a href="trangchu.php?page=ql_anh_video_bds" class="block px-4 py-2 hover:bg-blue-100">Quản lý hình ảnh/videos</a></li>
@@ -188,7 +188,7 @@
             <?php if (in_array('quantri', $dsQuyen)|| in_array('moigioi', $dsQuyen)): ?>
                 <li class="relative">
                     <a class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý CMS<i class="fas fa-chevron-right ml-2 transition-transform duration-300"></i></a>
-                    <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
+                    <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 99999;">
                         <?php if (in_array('quantri', $dsQuyen)): ?>
                             <li><a href="trangchu.php?page=ql_tintuc" class="block px-4 py-2 hover:bg-blue-100">Quản lý tin tức</a></li>
                             <li><a href="trangchu.php?page=ql_baidang" class="block px-4 py-2 hover:bg-blue-100">Quản lý bài đăng</a></li>
@@ -203,7 +203,7 @@
             <?php if (in_array('quantri', $dsQuyen) || in_array('moigioi', $dsQuyen)): ?>
                 <li class="relative">
                     <a class="hover:text-blue-600 menu-btn inline-flex items-center">Thông báo & chat<i class="fas fa-chevron-right ml-2 transition-transform duration-300"></i></a>
-                    <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
+                    <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 99999;">
                         <?php if (in_array('quantri', $dsQuyen)): ?>
                             <li><a href="trangchu.php?page=g_thongbao" class="block px-4 py-2 hover:bg-blue-100">Gửi thông báo</a></li>
                             <li><a href="trangchu.php?page=ql_hopthoai" class="block px-4 py-2 hover:bg-blue-100">Quản lý hộp thoại</a></li>
@@ -221,7 +221,7 @@
             <?php if (in_array('quantri', $dsQuyen) || in_array('moigioi', $dsQuyen)): ?>
                 <li class="relative">
                     <a class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý đặt lịch<i class="fas fa-chevron-right ml-2 transition-transform duration-300"></i></a>
-                    <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
+                    <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 99999;">
                         <?php if (in_array('quantri', $dsQuyen)): ?>
                             <li><a href="trangchu.php?page=ds_datlich" class="block px-4 py-2 hover:bg-blue-100">Danh sách lịch đặt</a></li>
                         <?php endif; ?>
@@ -235,7 +235,7 @@
             <?php if (in_array('quantri', $dsQuyen)): ?>
                 <li class="relative">
                     <a href="#" class="hover:text-blue-600 menu-btn inline-flex items-center">Quản lý vi phạm<i class="fas fa-chevron-right ml-2 transition-transform duration-300"></i></a>
-                    <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 10;">
+                    <ul class="hidden absolute bg-white border shadow-md mt-4 sub-menu" style="z-index: 99999;">
                         <li><a href="trangchu.php?page=ds_vipham" class="block px-4 py-2 hover:bg-blue-100">Danh sách vi phạm</a></li>
                     </ul>
                 </li>
