@@ -154,6 +154,9 @@ CREATE TABLE IF NOT EXISTS bat_dong_san (
 );
 
 ALTER TABLE bat_dong_san
+ADD COLUMN hinh_thuc VARCHAR(100) DEFAULT 'chuacapnhat'
+
+ALTER TABLE bat_dong_san
 ADD COLUMN loai VARCHAR(100) DEFAULT 'chuacapnhat'
 
 ALTER TABLE bat_dong_san
