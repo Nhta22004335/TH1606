@@ -1,418 +1,176 @@
 <?php
-    require_once "../../../config/database.php";
-    $pdo = ketnoicsdl();
+// ===== PHẦN LOGIC PHP - ĐƯỢC TỐI ƯU HÓA =====
+require_once "../../../config/database.php";
 
-    $sql = "
-        SELECT 
-            b.id,
-            b.tieu_de,
-            b.mo_ta,
-            b.gia,
-            b.dien_tich,
-            b.dia_chi,
-            b.loai,
-            b.khu_vuc,
-            b.ngay_dang,
-            b.trang_thai,
-            d.diem as rating
-        FROM public.bat_dong_san b
-        LEFT JOIN danh_gia_bds d ON d.id_bds = b.id
-        ORDER BY b.ngay_dang DESC
-        ";
-    $stmt = $pdo->query($sql);
-    $products = $stmt->fetchAll();
-
-    $filters = [];
-    if (isset($_GET['boloc'])) {
-        $filters = json_decode($_GET['boloc'], true);
+// Các hàm helper để code sạch sẽ
+function formatPrice($price) {
+    if ($price >= 1000000000) {
+        return round($price / 1000000000, 2) . ' tỷ';
+    } elseif ($price >= 1000000) {
+        return round($price / 1000000, 2) . ' triệu';
     }
+    return number_format($price) . ' đ';
+}
 
-    $search = $_GET['search'] ?? '';
-    $page = $_GET['page'] ?? '';
+function getStatusInfo($status) {
+    $map = [
+        'chuaduyet' => ['text' => 'Chờ duyệt', 'classes' => 'bg-yellow-100 text-yellow-800'],
+        'daduyet'   => ['text' => 'Đã duyệt', 'classes' => 'bg-green-100 text-green-800'],
+    ];
+    return $map[$status] ?? ['text' => 'Không rõ', 'classes' => 'bg-gray-100 text-gray-800'];
+}
 
-    $sql = "
-        SELECT 
-            b.id,
-            b.tieu_de,
-            b.mo_ta,
-            b.gia,
-            b.dien_tich,
-            b.dia_chi,
-            b.loai,
-            b.khu_vuc,
-            b.ngay_dang,
-            b.trang_thai,
-            d.diem as rating,
-            ts_rank_cd(
-                to_tsvector('simple', b.tieu_de || :search || b.mo_ta), 
-                plainto_tsquery('simple', :search)
-            ) AS rank
-        FROM public.bat_dong_san b
-        LEFT JOIN danh_gia_bds d ON d.id_bds = b.id
-        WHERE to_tsvector('simple', b.tieu_de || :search || b.mo_ta) @@ plainto_tsquery('simple', :search)
-        ORDER BY rank DESC, b.ngay_dang DESC
-    ";
+$pdo = ketnoicsdl();
+$search = $_GET['search'] ?? '';
 
-    $stmt = $pdo->prepare($sql);
-    $stmt->bindValue(':search', $search, PDO::PARAM_STR);
-    $stmt->execute();
-    $mangtksanpham = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// TỐI ƯU: Chỉ dùng MỘT câu lệnh SQL duy nhất
+$sql = "
+    SELECT 
+        b.id, b.tieu_de, b.mo_ta, b.gia, b.dien_tich, b.dia_chi, b.loai, 
+        b.khu_vuc, b.ngay_dang, b.trang_thai, d.diem as rating
+    FROM public.bat_dong_san b
+    LEFT JOIN danh_gia_bds d ON d.id_bds = b.id
+";
+$params = [];
+
+// Thêm điều kiện tìm kiếm nếu có
+if (!empty($search)) {
+    // Sử dụng Full-Text Search của PostgreSQL cho hiệu quả
+    $sql .= " WHERE to_tsvector('simple', b.tieu_de || ' ' || b.mo_ta || ' ' || b.dia_chi) @@ plainto_tsquery('simple', :search)";
+    $params[':search'] = $search;
+    $sql .= " ORDER BY ts_rank_cd(to_tsvector('simple', b.tieu_de || ' ' || b.mo_ta || ' ' || b.dia_chi), plainto_tsquery('simple', :search)) DESC";
+} else {
+    $sql .= " ORDER BY b.ngay_dang DESC";
+}
+
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
+$products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
-<html lang="vi" x-data="{ openFilter: false }">
+<html lang="vi" class="bg-slate-50">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý sản phẩm BDS</title>
+    <title>Quản lý Bất động sản</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/alpinejs" defer></script>
-    <link rel="stylesheet" href="../../../public/assets/fontawesome/css/all.min.css">
-    <style>
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
-
-        .scrollbar-hide {
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
 </head>
-<body>
+<body class="font-sans text-gray-800">
 
-<div class="max-w-7xl mx-auto p-6 flex gap-6">
+<div class="container mx-auto p-4 md:p-6">
 
-    <!-- Bộ lọc (Desktop) -->
-    <div class="hidden md:block w-64 bg-white shadow rounded-xl p-4 h-fit">
-        <h2 class="flex items-center text-lg font-semibold">
-            <img src="../../../public/assets/anhht/0/filter.gif" alt="Quản lý sản phẩm" style="width: 40px; height: 40px; margin-right: 10px;">
-            Bộ lọc
-        </h2>
-
-        <label class="block mb-2 text-sm">Loại BĐS</label>
-        <select id="loai-desktop" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
-            <option value="" <?= (($filters['loai'] ?? '') == 'tatca') ? 'selected' : ''?>>Tất cả</option>
-            <option value="canho" <?= (($filters['loai'] ?? '') == 'canho') ? 'selected' : ''?>>Căn hộ</option>
-            <option value="nhapho" <?= (($filters['loai'] ?? '') == 'nhapho') ? 'selected' : ''?>>Nhà phố</option>
-            <option value="datnen" <?= (($filters['loai'] ?? '') == 'datnen') ? 'selected' : ''?>>Đất nền</option>
-            <option value="bietthu" <?= (($filters['loai'] ?? '') == 'bietthu') ? 'selected' : ''?>>Biệt thự</option>
-        </select>
-
-        <label class="block mb-2 text-sm">Khu vực</label>
-        <select id="khuvuc-desktop" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
-            <option value="" <?= (($filters['khuvuc'] ?? '') == 'tatca') ? 'selected' : ''?>>Tất cả</option>
-            <?php
-            $lines = file("../../../storage/documents/tinhthanh.txt", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-            foreach ($lines as $line):
-                $selected = (($filters['khuvuc'] ?? '') == $line) ? 'selected' : '';
-                echo "<option value=\"$line\" $selected>$line</option>";
-            endforeach;
-            ?>
-        </select>
-
-        <label class="block mb-2 text-sm">Tình trạng</label>
-        <select id="trangthai-desktop" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
-            <option value="" <?= (($filters['trangthai'] ?? '') == 'tatca') ? 'selected' : ''?>>Tất cả</option>
-            <option value="chuaduyet" <?= (($filters['trangthai'] ?? '') == 'chuaduyet') ? 'selected' : ''?>>Chưa duyệt</option>
-            <option value="daduyet" <?= (($filters['trangthai'] ?? '') == 'daduyet') ? 'selected' : ''?>>Đã duyệt</option>
-        </select>
-
-        <label class="block mb-2 text-sm">Giá (VNĐ)</label>
-        <div class="flex gap-2 mb-4">
-            <input id="giatu-desktop" value="<?= ($filters['giatu'] ?? '') ?>" type="number" placeholder="Từ" class="w-1/2 border rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-400">
-            <input id="giaden-desktop" value="<?= ($filters['giaden'] ?? '') ?>" type="number" placeholder="Đến" class="w-1/2 border rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-400">
-        </div>
-
-        <label class="block mb-2 text-sm">Diện tích (m²)</label>
-        <div class="flex gap-2 mb-4">
-            <input id="dientu-desktop" value="<?= ($filters['dientu'] ?? '') ?>" type="number" placeholder="Từ" class="w-1/2 border rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-400">
-            <input id="dienden-desktop" value="<?= ($filters['dienden'] ?? '') ?>" type="number" placeholder="Đến" class="w-1/2 border rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-400">
-        </div>
-
-        <label class="block mb-2 text-sm">Đánh giá</label>
-        <select id="rating-desktop" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
-            <option value="">Tất cả</option>
-            <option value="5" <?= (($filters['rating'] ?? '') == '5') ? 'selected' : '' ?>>⭐⭐⭐⭐⭐</option>
-            <option value="4" <?= (($filters['rating'] ?? '') == '4') ? 'selected' : '' ?>>⭐⭐⭐⭐</option>
-            <option value="3" <?= (($filters['rating'] ?? '') == '3') ? 'selected' : '' ?>>⭐⭐⭐</option>
-            <option value="2" <?= (($filters['rating'] ?? '') == '2') ? 'selected' : '' ?>>⭐⭐</option>
-            <option value="1" <?= (($filters['rating'] ?? '') == '1') ? 'selected' : '' ?>>⭐</option>
-        </select>
-
-        <div class="flex gap-3 mt-4">
-            <!-- Nút áp dụng -->
-            <button id="btnloc-desktop" class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">Áp dụng</button>
-            <!-- Nút hủy -->
-            <button id="btnhuy-desktop" class="flex-1 bg-gray-300 text-gray-800 py-2 rounded-lg hover:bg-gray-400 transition">Hủy</button>
-        </div>
-    </div>
-
-    <!-- Bộ lọc (Mobile) -->
-    <div x-show="openFilter" class="fixed inset-0 bg-black bg-opacity-50 flex justify-start z-50 md:hidden">
-        <div class="bg-white w-64 h-full p-4 shadow-lg overflow-y-auto" @click.away="openFilter = false">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="flex items-center text-lg font-semibold">
-                    <img src="../../../public/assets/anhht/0/filter.gif" alt="Quản lý sản phẩm" style="width: 40px; height: 40px; margin-right: 10px;">
-                    Bộ lọc
-                </h2>
-                <button @click="openFilter=false" class="text-gray-600 hover:text-gray-800"><i class="fas fa-times"></i></button>
-            </div>
-        
-            <label class="block mb-2 text-sm">Loại BĐS</label>
-            <select id="loai-mobile" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
-                <option value="" <?= (($filters['loai'] ?? '') == 'tatca') ? 'selected' : ''?>>Tất cả</option>
-                <option value="canho" <?= (($filters['loai'] ?? '') == 'canho') ? 'selected' : ''?>>Căn hộ</option>
-                <option value="nhapho" <?= (($filters['loai'] ?? '') == 'nhapho') ? 'selected' : ''?>>Nhà phố</option>
-                <option value="datnen" <?= (($filters['loai'] ?? '') == 'datnen') ? 'selected' : ''?>>Đất nền</option>
-                <option value="bietthu" <?= (($filters['loai'] ?? '') == 'bietthu') ? 'selected' : ''?>>Biệt thự</option>
-            </select>
-
-            <label class="block mb-2 text-sm">Khu vực</label>
-            <select id="khuvuc-mobile" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
-                <option value="" <?= (($filters['khuvuc'] ?? '') == 'Tất cả') ? 'selected' : ''?>>Tất cả</option>
-                <?php
-                $lines = file("../../../storage/documents/tinhthanh.txt", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-                foreach ($lines as $line):
-                    $selected = (($filters['khuvuc'] ?? '') == $line) ? 'selected' : '';
-                    echo "<option value=\"$line\" $selected>$line</option>";
-                endforeach;
-                ?>
-            </select>
-
-            <label class="block mb-2 text-sm">Tình trạng</label>
-            <select id="trangthai-mobile" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
-                <option value="" <?= (($filters['trangthai'] ?? '') == 'Tất cả') ? 'selected' : ''?>>Tất cả</option>
-                <option value="chuaduyet" <?= (($filters['trangthai'] ?? '') == 'chuaduyet') ? 'selected' : ''?>>Chưa duyệt</option>
-                <option value="daduyet" <?= (($filters['trangthai'] ?? '') == 'daduyet') ? 'selected' : ''?>>Đã duyệt</option>
-            </select>
-
-            <label class="block mb-2 text-sm">Giá (VNĐ)</label>
-            <div class="flex gap-2 mb-4">
-                <input id="giatu-mobile" value="<?= ($filters['giatu'] ?? '') ?>" type="number" placeholder="Từ" class="w-1/2 border rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-400">
-                <input id="giaden-mobile" value="<?= ($filters['giaden'] ?? '') ?>" type="number" placeholder="Đến" class="w-1/2 border rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-400">
-            </div>
-
-            <label class="block mb-2 text-sm">Diện tích (m²)</label>
-            <div class="flex gap-2 mb-4">
-                <input id="dientu-mobile" value="<?= ($filters['dientu'] ?? '') ?>" type="number" placeholder="Từ" class="w-1/2 border rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-400">
-                <input id="dienden-mobile" value="<?= ($filters['dienden'] ?? '') ?>" type="number" placeholder="Đến" class="w-1/2 border rounded-lg p-2 focus:outline-none focus:ring focus:border-blue-400">
-            </div>
-
-            <label class="block mb-2 text-sm">Đánh giá</label>
-            <select id="rating-mobile" class="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring focus:border-blue-400">
-                <option value="">Tất cả</option>
-                <option value="5" <?= (($filters['rating'] ?? '') == '5') ? 'selected' : '' ?>>⭐⭐⭐⭐⭐</option>
-                <option value="4" <?= (($filters['rating'] ?? '') == '4') ? 'selected' : '' ?>>⭐⭐⭐⭐</option>
-                <option value="3" <?= (($filters['rating'] ?? '') == '3') ? 'selected' : '' ?>>⭐⭐⭐</option>
-                <option value="2" <?= (($filters['rating'] ?? '') == '2') ? 'selected' : '' ?>>⭐⭐</option>
-                <option value="1" <?= (($filters['rating'] ?? '') == '1') ? 'selected' : '' ?>>⭐</option>
-            </select>
-
-            <div class="flex gap-3 mt-4">
-                <!-- Nút áp dụng -->
-                <button id="btnloc-mobile" class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">Áp dụng</button>
-                <!-- Nút hủy -->
-                <button id="btnhuy-mobile" class="flex-1 bg-gray-300 text-gray-800 py-2 rounded-lg hover:bg-gray-400 transition">Hủy</button>
+    <header class="mb-6">
+        <div class="flex items-center gap-3">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">Quản lý Bất động sản</h1>
+                <p class="text-gray-500">Xem, tìm kiếm và quản lý các tin đăng bất động sản.</p>
             </div>
         </div>
-    </div>
+    </header>
 
-    <!-- Nội dung sản phẩm -->
-    <div class="flex-1">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="flex items-center text-2xl font-bold text-gray-600">
-                <i class="fas fa-building mr-2 text-red-500"></i> Quản lý Bất động sản
-            </h1>
-            <div class="flex gap-2">
-                <button @click="openFilter = true" class="md:hidden bg-gray-200 px-3 py-2 rounded-lg shadow hover:bg-gray-300">
-                    <i class="fas fa-filter"></i>
-                </button>
-            </div>
+    
+    <form id="search-form" method="GET" class="flex items-center mb-6">
+        <div class="relative w-72">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"><i class="fas fa-search text-gray-400"></i></div>
+            <input type="search" id="search-input" name="search" class="bg-white outline-none border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 p-2" 
+                placeholder="Tìm theo tiêu đề, mô tả, địa chỉ..." value="<?= htmlspecialchars($search) ?>">
         </div>
+        <button type="submit" id="search-button" class="ml-2 px-4 py-2 text-sm font-medium text-white bg-gray-400 rounded-lg hover:bg-gray-500">Tìm</button>
+    </form>
 
-        <!-- Grid -->
-        <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[500px] overflow-y-auto scrollbar-hide p-2">
-            <?php if (empty($filters) && empty($mangtksanpham)): ?>
-                <?php foreach($products as $p): ?>
-                    <div class="bg-white shadow rounded-xl overflow-hidden hover:shadow-lg transition flex flex-col">
-                        <img src="https://picsum.photos/300?random=<?= $p['id'] ?>" class="w-full h-40 object-cover">
-                        <div class="p-4 flex-1 flex flex-col">
-                            <h2 class="text-sm font-semibold text-gray-800 line-clamp-2 min-h-[40px]"><?= $p['tieu_de'] ?></h2>
-                            <p class="text-red-600 font-bold mt-2"><?= number_format($p['gia'], 0, ',', '.') ?> đ</p>
-                            <p class="mt-1 text-xs text-gray-600">Diện tích: <?= $p['dien_tich'] ?> m²</p>
-                            <p class="mt-1 text-xs text-gray-600"><?= $p['dia_chi'] ?></p>
-                            <p class="mt-1 text-xs text-gray-600">
-                                <?php
-                                    $loai = [
-                                        'ban' => 'Bán',
-                                        'thue' => 'Thuê',
-                                        'duan' => 'Dự án'
-                                    ];
-                                    echo $loai[$p['loai']] ?? 'Chưa cập nhật';
-                                ?> - <?= $p['khu_vuc'] ?>
-                            </p>
-                            <?php
-                                $trangThai = [
-                                    'chuaduyet' => 'Chờ duyệt',
-                                    'daduyet'  => 'Đã duyệt'
-                                ];
-                            ?>
-                            <p class="mt-1 text-xs text-gray-600 font-semibold">Trạng thái: <?= $trangThai[$p['trang_thai']]?></p>
-                            <p class="mt-1 text-[10px] text-gray-400">Ngày đăng: <?= date("d/m/Y", strtotime($p['ngay_dang'])) ?></p>
-                            <div class="flex items-center gap-1 text-yellow-400 mt-1">
-                                <?php for ($i = 1; $i <= 5; $i++): ?>
-                                    <?php if ($i <= $p['rating']): ?>
-                                        <i class="fas fa-star"></i>
-                                    <?php else: ?>
-                                        <i class="far fa-star"></i>
-                                    <?php endif; ?>
-                                <?php endfor; ?>
-                                <span class="text-gray-500 text-xs ml-1">(<?= $p['rating'] ?? 0 ?>/5)</span>
-                            </div>
-                            <div class="flex justify-between items-center mt-auto pt-4">
-                                <a href="#" class="text-blue-600 hover:text-blue-800 text-sm"><i class="fas fa-edit"></i> Chi tiết</a>
-                                <a href="#" class="text-red-600 hover:text-red-800 text-sm"><i class="fas fa-trash-alt"></i> Xóa </a>
-                            </div>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            <?php elseif (!empty($filters)): ?>
-                <?php foreach ($products as $p): ?>
-                    <?php
-                        $match = true;
+    <script>
+        // 1. Lấy các phần tử HTML cần thiết qua ID
+        const searchForm = document.getElementById('search-form');
+        const searchInput = document.getElementById('search-input');
+        const searchButton = document.getElementById('search-button');
 
-                        if (isset($filters['loai']) && $filters['loai'] !== $p['loai']) $match = false;
-                        if (isset($filters['khuvuc']) && $filters['khuvuc'] !== $p['khu_vuc']) $match = false;
-                        if (isset($filters['trangthai']) && $filters['trangthai'] !== $p['trang_thai']) $match = false;
-                        if (isset($filters['giatu']) && $p['gia'] < $filters['giatu']) $match = false;
-                        if (isset($filters['giaden']) && $p['gia'] > $filters['giaden']) $match = false;
-                        if (isset($filters['dttu']) && $p['dien_tich'] < $filters['dttu']) $match = false;
-                        if (isset($filters['dtden']) && $p['dien_tich'] > $filters['dtden']) $match = false;
-                        if (isset($filters['rating']) && $p['rating'] < $filters['rating']) $match = false;
-                    ?>
-                    <?php if ($match): ?>
-                        <div class="bg-white shadow rounded-xl overflow-hidden hover:shadow-lg transition flex flex-col">
-                            <img src="https://picsum.photos/300?random=<?= $p['id'] ?>" class="w-full h-40 object-cover">
-                            <div class="p-4 flex-1 flex flex-col">
-                                <h2 class="text-sm font-semibold text-gray-800 line-clamp-2 min-h-[40px]"><?= $p['tieu_de'] ?></h2>
-                                <p class="text-red-600 font-bold mt-2"><?= number_format($p['gia'], 0, ',', '.') ?> đ</p>
-                                <p class="mt-1 text-xs text-gray-600">Diện tích: <?= $p['dien_tich'] ?> m²</p>
-                                <p class="mt-1 text-xs text-gray-600"><?= $p['dia_chi'] ?></p>
-                                <p class="mt-1 text-xs text-gray-600">
-                                    <?php
-                                        $loai = [
-                                            'ban' => 'Bán',
-                                            'thue' => 'Thuê',
-                                            'duan' => 'Dự án'
-                                        ];
-                                        echo $loai[$p['loai']] ?? 'Chưa cập nhật';
-                                    ?> - <?= $p['khu_vuc'] ?>
-                                </p>
-                                <?php
-                                    $trangThai = [
-                                        'choduyet' => 'Chờ duyệt',
-                                        'dangban'  => 'Đang bán',
-                                        'daban'    => 'Đã bán',
-                                        'dathue'   => 'Đã thuê'
-                                    ];
-                                ?>
-                                <p class="mt-1 text-xs text-gray-600 font-semibold">Trạng thái: <?= $trangThai[$p['trang_thai']]?></p>
-                                <p class="mt-1 text-[10px] text-gray-400">Ngày đăng: <?= date("d/m/Y", strtotime($p['ngay_dang'])) ?></p>
-                                <div class="flex items-center gap-1 text-yellow-400 mt-1">
-                                    <?php for ($i = 1; $i <= 5; $i++): ?>
-                                        <?php if ($i <= $p['rating']): ?>
-                                            <i class="fas fa-star"></i>
-                                        <?php else: ?>
-                                            <i class="far fa-star"></i>
-                                        <?php endif; ?>
-                                    <?php endfor; ?>
-                                    <span class="text-gray-500 text-xs ml-1">(<?= $p['rating'] ?? 0 ?>/5)</span>
-                                </div>
-                                <div class="flex justify-between items-center mt-auto pt-4">
-                                    <a href="#" class="text-blue-600 hover:text-blue-800 text-sm"><i class="fas fa-edit"></i> Chi tiết</a>
-                                    <a href="#" class="text-red-600 hover:text-red-800 text-sm"><i class="fas fa-trash-alt"></i> Xóa </a>
-                                </div>
-                            </div>
-                        </div>  
-                    <?php endif; ?>
-                <?php endforeach; ?>
-            <?php elseif (!empty($mangtksanpham)): ?> 
-                <?php foreach ($mangtksanpham as $m): ?>
-                    <div class="bg-white shadow rounded-xl overflow-hidden hover:shadow-lg transition flex flex-col">
-                        <img src="https://picsum.photos/300?random=<?= $m['id'] ?>" class="w-full h-40 object-cover">
-                        <div class="p-4 flex-1 flex flex-col">
-                            <h2 class="text-sm font-semibold text-gray-800 line-clamp-2 min-h-[40px]"><?= $m['tieu_de'] ?></h2>
-                            <p class="text-red-600 font-bold mt-2"><?= number_format($m['gia'], 0, ',', '.') ?> đ</p>
-                            <p class="mt-1 text-xs text-gray-600">Diện tích: <?= $m['dien_tich'] ?> m²</p>
-                            <p class="mt-1 text-xs text-gray-600"><?= $m['dia_chi'] ?></p>
-                            <p class="mt-1 text-xs text-gray-600">
-                                <?php
-                                    $loai = [
-                                        'ban' => 'Bán',
-                                        'thue' => 'Thuê',
-                                        'duan' => 'Dự án'
-                                    ];
-                                    echo $loai[$m['loai']] ?? 'Chưa cập nhật';
-                                ?> - <?= $m['khu_vuc'] ?>
-                            </p>
-                            <?php
-                                $trangThai = [
-                                    'choduyet' => 'Chờ duyệt',
-                                    'dangban'  => 'Đang bán',
-                                    'daban'    => 'Đã bán',
-                                    'dathue'   => 'Đã thuê'
-                                ];
-                            ?>
-                            <p class="mt-1 text-xs text-gray-600 font-semibold">Trạng thái: <?= $trangThai[$p['trang_thai']]?></p>
-                            <p class="mt-1 text-[10px] text-gray-400">Ngày đăng: <?= date("d/m/Y", strtotime($m['ngay_dang'])) ?></p>
-                            <div class="flex items-center gap-1 text-yellow-400 mt-1">
-                                <?php for ($i = 1; $i <= 5; $i++): ?>
-                                    <?php if ($i <= $m['rating']): ?>
-                                        <i class="fas fa-star"></i>
-                                    <?php else: ?>
-                                        <i class="far fa-star"></i>
-                                    <?php endif; ?>
-                                <?php endfor; ?>
-                                <span class="text-gray-500 text-xs ml-1">(<?= $m['rating'] ?? 0 ?>/5)</span>
-                            </div>
-                            <div class="flex justify-between items-center mt-auto pt-4">
-                                <a href="#" class="text-blue-600 hover:text-blue-800 text-sm"><i class="fas fa-edit"></i> Chi tiết</a>
-                                <a href="#" class="text-red-600 hover:text-red-800 text-sm"><i class="fas fa-trash-alt"></i> Xóa </a>
-                            </div>
-                        </div>
-                    </div> 
-                <?php endforeach; ?>
-            <?php endif; ?>
-        </div>
-    </div>
-</div>
+        // 2. Hàm để thực hiện submit
+        function submitSearch() {
+            console.log('Đang chuẩn bị chuyển hướng bằng window.location...');
 
-<script>
-    function apdungloc(prefix) {
-        const keys = ["loai", "khuvuc", "trangthai", "giatu", "giaden", "dientu", "dienden", "rating"];
-        let filters = {};
+            // 1. Lấy giá trị từ ô input
+            const searchValue = searchInput.value;
 
-        keys.forEach(key => {
-            const el = document.getElementById(key + "-" + prefix);
-            if (el && el.value.trim() !== "") {
-                filters[key] = el.value.trim();
-            }
+            // 2. (Quan trọng) Mã hóa giá trị để đảm bảo URL hợp lệ
+            //    Ví dụ: "áo thun" -> "ao%20thun"
+            const encodedSearchValue = encodeURIComponent(searchValue.trim());
+
+            // 3. Xây dựng URL mới một cách thủ công
+            //    Hãy chắc chắn rằng đường dẫn cơ sở '/app/trangchu.php' là đúng với cấu trúc dự án của bạn
+            const newUrl = `trangchu.php?page=ql_bieumau&search=${encodedSearchValue}`;
+
+            // 4. Dùng window.location.href để chuyển hướng trình duyệt đến URL mới
+            window.location.href = newUrl;
+        }
+
+        // 3. Gán sự kiện cho nút bấm
+        searchButton.addEventListener('click', function(event) {
+            event.preventDefault(); // Ngăn hành vi mặc định của nút
+            submitSearch();
         });
 
-        const boloc = encodeURIComponent(JSON.stringify(filters));
-        window.location.href = "trangchu.php?page=sanpham&boloc=" + boloc;
-    }
+        // 4. Gán sự kiện cho ô input (submit khi nhấn Enter)
+        searchInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Ngăn form bị gửi đi 2 lần
+                submitSearch();
+            }
+        });
+    </script>
 
-    document.getElementById("btnloc-desktop").addEventListener("click", () => apdungloc("desktop"));
-    document.getElementById("btnloc-mobile").addEventListener("click", () => apdungloc("mobile"));
-
-    function huyloc(prefix) {
-        window.location.href = "trangchu.php?page=sanpham";
-    }
-    document.getElementById("btnhuy-desktop").addEventListener("click", () => huyloc("desktop"));
-    document.getElementById("btnhuy-mobile").addEventListener("click", () => huyloc("mobile"));
-
-</script>
-
+    <main class="bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200">
+        <div class="overflow-x-auto">
+            <table class="min-w-full">
+                <thead class="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                        <th class="py-3 px-4 text-left text-xs font-bold text-gray-500 uppercase">Tên Bất động sản</th>
+                        <th class="py-3 px-4 text-left text-xs font-bold text-gray-500 uppercase">Giá</th>
+                        <th class="py-3 px-4 text-left text-xs font-bold text-gray-500 uppercase">Diện tích</th>
+                        <th class="py-3 px-4 text-left text-xs font-bold text-gray-500 uppercase">Trạng thái</th>
+                        <th class="py-3 px-4 text-left text-xs font-bold text-gray-500 uppercase">Ngày đăng</th>
+                        <th class="py-3 px-4 text-center text-xs font-bold text-gray-500 uppercase">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    <?php if (empty($products)): ?>
+                        <tr><td colspan="6" class="p-8 text-center text-gray-500 text-lg">Không tìm thấy bất động sản nào.</td></tr>
+                    <?php else: ?>
+                        <?php foreach($products as $p): 
+                            $status_info = getStatusInfo($p["trang_thai"]);
+                        ?>
+                            <tr class="hover:bg-slate-50 transition duration-150">
+                                <td class="p-4">
+                                    <div class="flex items-center gap-3">
+                                        <img src="https://picsum.photos/40?random=<?= $p['id'] ?>" class="w-10 h-10 rounded-md object-cover">
+                                        <div>
+                                            <p class="font-medium text-sm text-gray-900 line-clamp-1" title="<?= htmlspecialchars($p['tieu_de']) ?>"><?= htmlspecialchars($p['tieu_de']) ?></p>
+                                            <p class="text-xs text-gray-500 line-clamp-1" title="<?= htmlspecialchars($p['dia_chi']) ?>"><?= htmlspecialchars($p['dia_chi']) ?></p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="p-4 font-semibold text-red-600 text-sm"><?= formatPrice($p['gia']) ?></td>
+                                <td class="p-4 text-gray-700 text-sm"><?= htmlspecialchars($p['dien_tich']) ?> m²</td>
+                                <td class="p-4">
+                                    <span class="px-2.5 py-1 text-xs font-semibold rounded-full <?= $status_info['classes'] ?>">
+                                        <?= $status_info['text'] ?>
+                                    </span>
+                                </td>
+                                <td class="p-4 text-gray-500 text-sm"><?= date("d/m/Y", strtotime($p['ngay_dang'])) ?></td>
+                                <td class="p-4">
+                                    <div class="flex justify-center items-center gap-3">
+                                        <button class="text-blue-600 hover:text-blue-800" title="Sửa"><i class="fa-solid fa-pencil"></i></button>
+                                        <button class="text-red-600 hover:text-red-800" title="Xóa"><i class="fa-solid fa-trash-can"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
 </body>
 </html>

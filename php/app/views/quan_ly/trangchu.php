@@ -338,24 +338,5 @@
     </div>
 </div>
 
-<script>
-    // Logic Sidebar (sử dụng Alpine.js: sidebarOpen)
-    document.addEventListener('DOMContentLoaded', () => {
-        // Khởi tạo Alpine
-        if (typeof Alpine !== 'undefined') {
-            Alpine.start();
-        }
-    });
-
-    // Logic Search (Giữ nguyên)
-    document.getElementById("btnSearch").addEventListener("click", function() {
-        const query = document.getElementById("searchInput").value.trim();
-        if(query) {
-            // Thay đổi URL để load trang mới
-            window.location.href = `trangchu.php?page=search_results&q=${encodeURIComponent(query)}`; 
-        }
-    });
-</script>
-
 </body>
 </html>
