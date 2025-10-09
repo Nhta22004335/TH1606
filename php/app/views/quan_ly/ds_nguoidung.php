@@ -1,416 +1,221 @@
 <?php
-    require_once "../../../config/database.php";
-    $pdo = ketnoicsdl();
+// ===== PHẦN LOGIC PHP - ĐƯỢC TỐI ƯU HÓA VÀ ĐẶT LÊN ĐẦU =====
 
-    $page = $_GET['page'] ?? '';
-    $search = $_GET['search'] ?? '';
-    $filters = [];
+require_once "../../../config/database.php";
 
-    if (isset($_GET['boloc'])) {
-        $filters = json_decode($_GET['boloc'], true);
-    }
+// 1. Lấy dữ liệu đầu vào (Input)
+$search = $_GET['search'] ?? '';
 
-    $sql = "
-        SELECT 
-            i.ho_ten,
-            i.gioi_tinh,
-            i.dia_chi,
-            nd.avt,
-            i.ngay_sinh,
-            nd.id,
-            nd.ten_dang_nhap,
-            nd.email,
-            nd.so_dt,
-            nd.trang_thai,
-            nd.hoat_dong,
-            nd.ngay_tao,
-            COUNT(gd.id) AS so_don,
-            ARRAY_AGG(q.vai_tro) AS danh_sach_quyen
-        FROM info_nguoi_dung i
-        JOIN nguoi_dung nd ON i.id_nguoi_dung = nd.id
-        LEFT JOIN giao_dich gd ON nd.id = gd.id_nguoi_dung AND gd.trang_thai = 'hoanthanh'
-        LEFT JOIN phan_quyen pq ON nd.id = pq.id_nguoi_dung
-        LEFT JOIN quyen q ON pq.id_quyen = q.id
-    ";
+// 2. Xây dựng câu lệnh SQL một cách linh hoạt
+$pdo = ketnoicsdl();
+$baseSql = "
+    SELECT 
+        i.ho_ten, i.gioi_tinh, i.dia_chi, nd.avt, i.ngay_sinh, nd.id,
+        nd.ten_dang_nhap, nd.email, nd.so_dt, nd.trang_thai, nd.hoat_dong, nd.ngay_tao,
+        COUNT(gd.id) AS so_don, ARRAY_AGG(DISTINCT q.vai_tro) AS danh_sach_quyen
+    FROM info_nguoi_dung i
+    JOIN nguoi_dung nd ON i.id_nguoi_dung = nd.id
+    LEFT JOIN giao_dich gd ON nd.id = gd.id_nguoi_dung AND gd.trang_thai = 'hoanthanh'
+    LEFT JOIN phan_quyen pq ON nd.id = pq.id_nguoi_dung
+    LEFT JOIN quyen q ON pq.id_quyen = q.id
+";
 
-    $params = [];
-    if (!empty($search)) {
-        $sql .= " WHERE (i.ho_ten ILIKE :search OR i.dia_chi ILIKE :search)";
-        $params[':search'] = "%" . $search . "%";
-    }
+$whereConditions = [];
+$params = [];
 
-    $sql .= "
-        GROUP BY 
-            i.ho_ten, i.gioi_tinh, i.dia_chi, nd.avt, i.ngay_sinh,
-            nd.id, nd.ten_dang_nhap, nd.email, nd.so_dt, nd.trang_thai, nd.hoat_dong, nd.ngay_tao
-        ORDER BY so_don DESC
-    ";
+// Thêm điều kiện tìm kiếm nếu có
+if (!empty($search)) {
+    // Tìm kiếm trên nhiều cột: họ tên, email, sđt, địa chỉ
+    $whereConditions[] = "(i.ho_ten ILIKE :search OR nd.email ILIKE :search OR nd.so_dt ILIKE :search OR i.dia_chi ILIKE :search)";
+    $params[':search'] = "%" . $search . "%";
+}
 
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
-    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Ghép các điều kiện WHERE lại (nếu có)
+if (!empty($whereConditions)) {
+    $baseSql .= " WHERE " . implode(' AND ', $whereConditions);
+}
 
-    $roleColors = [
-        'quantri' => 'bg-red-100 text-red-700',
-        'moigioi' => 'bg-blue-100 text-blue-700',
-        'khachhang' => 'bg-yellow-100 text-yellow-700'
-    ];
+// Thêm GROUP BY và ORDER BY
+$baseSql .= "
+    GROUP BY 
+        nd.id, i.ho_ten, i.gioi_tinh, i.dia_chi, i.ngay_sinh
+    ORDER BY so_don DESC
+";
 
-    $labelvaitro = [
-        'quantri' => 'Quản trị',
-        'moigioi' => 'Môi giới',
-        'khachhang' => 'Khách hàng'
-    ];
-    $labeltrangthai = [
-        'danghoatdong' => 'Đang hoạt động',
-        'chuakichhoat' => 'Chưa kích hoạt',
-        'khoa'         => 'Đã khóa'
-    ];
+// 3. Thực thi câu lệnh
+$stmt = $pdo->prepare($baseSql);
+$stmt->execute($params);
+$users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// 4. Mảng định nghĩa màu và nhãn (GIỮ NGUYÊN)
+$roleColors = [
+    'quantri' => 'bg-red-100 text-red-700', 'moigioi' => 'bg-indigo-100 text-indigo-700', 'khachhang' => 'bg-teal-100 text-teal-700'
+];
+$labelvaitro = [
+    'quantri' => 'Quản trị', 'moigioi' => 'Môi giới', 'khachhang' => 'Khách hàng'
+];
+$labeltrangthai = [
+    'danghoatdong' => 'Hoạt động', 'chuakichhoat' => 'Chờ kích hoạt', 'khoa' => 'Đã khóa'
+];
+$statusColors = [
+    'danghoatdong' => 'bg-green-100 text-green-700 border-green-300', 'chuakichhoat' => 'bg-yellow-100 text-yellow-700 border-yellow-300', 'khoa' => 'bg-red-100 text-red-700 border-red-300'
+];
+
 ?>
-
 <!DOCTYPE html>
-<html lang="vi" x-data="{ openFilter:false }">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý khách hàng</title>
+    <title>Quản lý người dùng</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/alpinejs" defer></script>
     <link rel="stylesheet" href="../../../public/assets/fontawesome/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
-
-        .scrollbar-hide {
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-        [x-cloak] { display: none !important; }
-        .option.active {
-            background-color: #2563eb;
-            color: white;
-            border-color: #2563eb;
-        }
+        body { font-family: 'Inter', sans-serif; }
+        @media (max-width: 768px) { .hide-on-mobile { display: none; } }
     </style>
 </head>
 <body>
 
-<div class="max-w-7xl mx-auto mt-4 flex gap-6">
-
-    <!-- Bộ lọc Desktop -->
-    <div class="hidden md:block w-64 bg-white shadow rounded-xl p-4 h-fit">
-        <h2 class="flex items-center text-lg font-semibold mb-4"> 
-            <img src="../../../public/assets/anhht/0/filter.gif" class="w-10 h-10 mr-2"> Bộ lọc
-        </h2>
-
-        <label class="block mb-2 text-sm">Hoạt động</label>
-        <select id="hoatdong-desktop" class="w-full border rounded-lg p-2 mb-4 outline-none focus:ring focus:border-blue-400 cursor-pointer">
-            <option value="" <?= (($filters['hoatdong'] ?? '') == 'tatca') ? 'selected' : ''?>>Tất cả</option>
-            <option value="online" <?= (($filters['hoatdong'] ?? '') == 'online') ? 'selected' : ''?>>Online</option>
-            <option value="offline" <?= (($filters['hoatdong'] ?? '') == 'offline') ? 'selected' : ''?>>Offline</option>
-        </select>
-
-        <label class="block mb-2 text-sm">Trạng thái</label>
-        <select id="trangthai-desktop" class="w-full border rounded-lg p-2 mb-4 outline-none focus:ring focus:border-blue-400 cursor-pointer">
-            <option value="" <?= (($filters['trangthai'] ?? '') == 'tatca') ? 'selected' : ''?>>Tất cả</option>
-            <option value="danghoatdong" <?= (($filters['trangthai'] ?? '') == 'danghoatdong') ? 'selected' : ''?>>Đang hoạt động</option>
-            <option value="chuakichhoat" <?= (($filters['trangthai'] ?? '') == 'chuakichhoat') ? 'selected' : ''?>>Chưa kích hoạt</option>
-            <option value="khoa" <?= (($filters['trangthai'] ?? '') == 'khoa') ? 'selected' : ''?>>Khóa</option>
-        </select>
-
-        <label class="block mb-2 text-sm">Ngày tạo tài khoản trước</label>
-        <input id="ngaytruoc-desktop" value="<?= ($filters['ngaytruoc'] ?? '') ?>" type="date" class="w-full border rounded-lg p-2 mb-4 outline-none focus:ring focus:border-blue-400 cursor-pointer">
-
-        <label class="block mb-2 text-sm">Số đơn lớn hơn</label>
-        <input id="sodon-desktop" value="<?= ($filters['sodon'] ?? '') ?>" type="number" placeholder="Số đơn tối thiểu" class="w-full border rounded-lg p-2 mb-4 outline-none focus:ring focus:border-blue-400 cursor-pointer">
-
-        <div class="flex gap-3 mt-4 cursor-pointer">
-            <button id="btnloc-desktop" class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">Áp dụng</button>
-            <button id="btnhuy-desktop" class="flex-1 bg-gray-300 text-gray-800 py-2 rounded-lg hover:bg-gray-400 transition">Hủy</button>
-        </div>
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">Danh sách Người dùng</h1>
+        <p class="text-gray-500">Quản lý, tìm kiếm và thực hiện các thao tác trên tài khoản người dùng.</p>
     </div>
 
-    <!-- Bộ lọc Mobile -->
-    <div x-show="openFilter" class="fixed inset-0 bg-black bg-opacity-50 flex justify-start z-50 md:hidden">
-        <div class="bg-white w-64 h-full p-4 shadow-lg overflow-y-auto" @click.away="openFilter=false">
-
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="flex items-center text-lg font-semibold">
-                    <img src="../../../public/assets/anhht/0/filter.gif" style="width: 40px; height: 40px; margin-right: 10px;"> Bộ lọc
-                </h2>
-                <button @click="openFilter=false" class="text-gray-600 hover:text-gray-800"><i class="fas fa-times"></i></button>
+    <form id="search-form" method="GET" class="flex items-center mb-4">
+        <div class="relative w-72"> 
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <i class="fas fa-search text-gray-400"></i>
             </div>
-
-            <label class="block mb-2 text-sm">Hoạt động</label>
-            <select id="hoatdong-mobile" class="w-full border rounded-lg p-2 mb-4 outline-none focus:ring focus:border-blue-400">
-                <option value="" <?= (($filters['hoatdong'] ?? '') == 'tatca') ? 'selected' : ''?>>Tất cả</option>
-                <option value="online" <?= (($filters['hoatdong'] ?? '') == 'online') ? 'selected' : ''?>>Online</option>
-                <option value="offline" <?= (($filters['hoatdong'] ?? '') == 'offline') ? 'selected' : ''?>>Offline</option>
-            </select>
-
-            <label class="block mb-2 text-sm">Trạng thái</label>
-            <select id="trangthai-mobile" class="w-full border rounded-lg p-2 mb-4 outline-none focus:ring focus:border-blue-400">
-                <option value="" <?= (($filters['trangthai'] ?? '') == 'tatca') ? 'selected' : ''?>>Tất cả</option>
-                <option value="danghoatdong" <?= (($filters['trangthai'] ?? '') == 'danghoatdong') ? 'selected' : ''?>>Đang hoạt động</option>
-                <option value="chuakichhoat" <?= (($filters['trangthai'] ?? '') == 'chuakichhoat') ? 'selected' : ''?>>Chưa kích hoạt</option>
-                <option value="khoa" <?= (($filters['trangthai'] ?? '') == 'khoa') ? 'selected' : ''?>>Khóa</option>
-            </select>
-
-            <label class="block mb-2 text-sm">Ngày tạo tài khoản trước</label>
-            <input id="ngaytruoc-mobile" value="<?= ($filters['ngaytruoc'] ?? '') ?>" type="date" class="w-full border rounded-lg p-2 mb-4 outline-none focus:ring focus:border-blue-400">
-
-            <label class="block mb-2 text-sm">Số đơn lớn hơn</label>
-            <input id="sodon-mobile" value="<?= ($filters['sodon'] ?? '') ?>" type="number" placeholder="Số đơn tối thiểu" class="w-full border rounded-lg p-2 mb-4 outline-none focus:ring focus:border-blue-400">
-
-            <div class="flex gap-3 mt-4">
-                <button id="btnloc-mobile" class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">Áp dụng</button>
-                <button id="btnhuy-mobile" class="flex-1 bg-gray-300 text-gray-800 py-2 rounded-lg hover:bg-gray-400 transition">Hủy</button>
-            </div>
-
+            <input type="search" name="search" id="search-input" 
+                class="bg-white outline-none border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 p-2" 
+                placeholder="Tìm kiếm..." 
+                value="<?= htmlspecialchars($search) ?>">
         </div>
-    </div>
+        <button id="search-button" type="submit" class="ml-2 px-4 py-2 text-sm font-medium text-white bg-gray-400 rounded-lg hover:bg-gray-500">
+            Tìm
+        </button>
+    </form>
     
-    <!-- Hàm hiển thị thẻ người dùng -->
-    <?php function theNguoiDung($u, $roleColors, $labelvaitro, $labeltrangthai) { ?>
-        <div class="bg-blue-50 border border-blue-200 rounded-xl overflow-hidden transition flex flex-col relative cursor-pointer">
-            <div class="p-4 flex flex-col items-center">
-                <img src="../../../storage/pictures/avt/<?= $u['avt'] ?>" class="w-20 h-20 rounded-full object-cover border-2 border-gray-200">
-                <h2 class="mt-2 font-semibold text-gray-800 text-center"><?= $u['ho_ten'] ?></h2>
-                <p class="text-gray-500 text-sm text-center"><?= $u['email'] ?></p>
-                <p class="text-gray-500 text-sm text-center"><?= $u['so_dt'] ?></p>
-                <span class="mt-2 px-2 py-1 rounded-full text-xs font-semibold <?= $u['hoat_dong']=='online'?'bg-green-100 text-green-700':'bg-gray-200 text-gray-700' ?>"><?= ucfirst($u['hoat_dong']) ?></span>
-                <?php
-                    $chuoiQuyen = $u['danh_sach_quyen']; 
-                    $dsQuyenArray = explode(',', trim($chuoiQuyen, '{}'));  
-                ?>
-                <div class="flex flex-wrap gap-1">
-                    <?php foreach ($dsQuyenArray as $vai_tro): ?>
-                        <span class="mt-1 px-2 py-1 rounded-full text-xs font-semibold <?= $roleColors[$vai_tro] ?? 'bg-gray-100 text-gray-700' ?>">
-                            <?= $labelvaitro[$vai_tro] ?? $vai_tro ?>
-                        </span>
-                    <?php endforeach; ?>
-                </div>
-                <span class="mt-1 px-2 py-1 rounded-full text-xs font-semibold 
-                    <?= $u['trang_thai']=='danghoatdong' ? 'bg-green-50 text-green-600' : ($u['trang_thai']=='chuakichhoat' ? 'bg-yellow-50 text-yellow-600' : 'bg-red-50 text-red-600') ?>">
-                    <?= $labeltrangthai[$u['trang_thai']] ?>
-                </span>
-                <p class="mt-2 text-sm text-gray-600">Đã đặt: <?= $u['so_don'] ?> đơn</p>
-                <p class="mt-1 text-xs text-gray-400">Ngày tạo: <?= date("d/m/Y",strtotime($u['ngay_tao'])) ?></p>
-            </div>
-            <div x-data="{ openForm: false, openOption: false}" class="relative">
+    <script>
+        // 1. Lấy các phần tử HTML cần thiết qua ID
+        const searchForm = document.getElementById('search-form');
+        const searchInput = document.getElementById('search-input');
+        const searchButton = document.getElementById('search-button');
 
-                <!-- Nút hành động -->
-                <div class="flex justify-around border-t p-2 mt-auto">
-                    <a href="javascript:void(0)" @click="openForm = true" class="text-blue-600 hover:text-blue-800"><i class="fas fa-edit"></i></a> 
-                    <a href="javascript:void(0)" @click="openOption = true" class="text-red-600 hover:text-red-800"><i class="fas fa-key"></i></a>
-                    <a href="trangchu.php?page=ct_nguoidung&id=<?= $u['id'] ?>" class="text-green-600 hover:text-green-800"><i class="fas fa-eye"></i></a>
-                </div>
+        // 2. Hàm để thực hiện submit
+        function submitSearch() {
+            console.log('Đang chuẩn bị chuyển hướng bằng window.location...');
 
-                <!-- Popup form -->
-                <div x-show="openForm" x-cloak class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
-                    <div class="bg-white rounded-xl shadow-lg p-6 w-96">
-                        <h2 class="text-lg font-semibold mb-4">Thông báo</h2>
-                        <input type="hidden" id="idnguoidung" value="<?= htmlspecialchars($u['id']) ?>">
+            // 1. Lấy giá trị từ ô input
+            const searchValue = searchInput.value;
 
-                        <label class="block text-sm font-medium mb-1">Loại thông báo</label>
-                        <select id="loaithongbao" class="w-full border rounded-lg p-2 mb-3 outline-none focus:ring focus:border-blue-400">
-                            <option value="capnhatthongtin">Yêu cầu cập nhật thông tin cá nhân</option>
-                            <option value="doimatkhau">Yêu cầu đổi mật khẩu</option>
-                            <option value="khoataikhoan">Yêu cầu khóa tài khoản</option>
-                            <option value="xoataikhoan">Yêu cầu xóa tài khoản</option>
-                        </select>
+            // 2. (Quan trọng) Mã hóa giá trị để đảm bảo URL hợp lệ
+            //    Ví dụ: "áo thun" -> "ao%20thun"
+            const encodedSearchValue = encodeURIComponent(searchValue.trim());
 
-                        <label class="block text-sm font-medium mb-1">Tiêu đề</label>
-                        <input type="text" id="tieude"
-                            class="w-full outline-none border rounded-lg p-2 mb-3 focus:ring focus:border-blue-400" 
-                            placeholder="Nhập tiêu đề...">
+            // 3. Xây dựng URL mới một cách thủ công
+            //    Hãy chắc chắn rằng đường dẫn cơ sở '/app/trangchu.php' là đúng với cấu trúc dự án của bạn
+            const newUrl = `trangchu.php?page=ds_nguoidung&search=${encodedSearchValue}`;
 
-                        <label class="block text-sm font-medium mb-1">Nội dung</label>
-                        <textarea id="noidung"
-                                class="w-full border rounded-lg p-2 mb-3 outline-none focus:ring focus:border-blue-400" 
-                                rows="3" placeholder="Nhập nội dung..."></textarea>
-
-                        <div class="flex justify-end space-x-2">
-                            <button @click="openForm = false" class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">Hủy</button>
-                            <button id="btnguithongbao" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Gửi</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Popup Lựa chọn -->
-                <div x-show="openOption" x-cloak class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
-                    <div class="bg-white rounded-xl shadow-lg p-6 w-80">
-                        <h2 class="text-lg font-semibold mb-4 text-blue-600">Lựa chọn</h2>
-                        <input type="hidden" id="trangthai-value" name="trangthai" value="danghoatdong">
-
-                        <div class="w-full">
-                            <label class="block mb-2 text-gray-700">Trạng thái</label>
-                            <div id="trangthai" 
-                                class="w-full border rounded-lg overflow-hidden divide-y divide-gray-200">
-                                <?php
-                                    if ($u['trang_thai'] != 'danghoatdong'):
-                                ?>
-                                    <div data-value="danghoatdong" class="option px-4 py-2 cursor-pointer hover:bg-blue-50">
-                                        Kích hoạt
-                                    </div>
-                                <?php endif; ?>
-                                
-                                <?php if ($u['trang_thai'] != 'chuakichhoat'): ?>
-                                    <div data-value="chuakichhoat" class="option px-4 py-2 cursor-pointer hover:bg-blue-50">
-                                        Tạm ngừng
-                                    </div>
-                                <?php endif; ?>
-                                
-                                <?php if ($u['trang_thai'] != 'khoa'): ?>  
-                                    <div data-value="khoa" class="option px-4 py-2 cursor-pointer hover:bg-blue-50">
-                                        Khóa
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-
-                        <div class="flex justify-end space-x-2 mt-2">
-                            <button @click="openOption = false" class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100">Hủy</button>
-                            <button onclick="capnhattrangthai('<?= $u['id'] ?>')" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Lưu</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    <?php } ?>
-
-    <!-- Nội dung -->
-    <div class="flex-1">
-
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="flex items-center text-2xl font-bold text-gray-600">
-                <img src="../../../public/assets/anhht/0/user.gif" style="width: 50px; height: 50px; margin-right: 10px;"> Quản lý Khách hàng
-            </h1>
-            <div class="flex gap-2">
-                <button @click="openFilter=true" class="md:hidden mr-4 bg-gray-200 px-3 py-2 rounded-lg shadow hover:bg-gray-300">
-                    <i class="fas fa-filter"></i>
-                </button>
-            </div>
-        </div>
-        
-        <!-- Thẻ người dùng -->
-        <div class="h-[500px] overflow-y-scroll p-2 scrollbar-hide">
-            <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                <?php if (empty($filters) && empty($mangtkkhachhang)): ?>
-                    <?php foreach($users as $u): ?>
-                        <?php theNguoiDung($u, $roleColors, $labelvaitro, $labeltrangthai); ?>
-                    <?php endforeach; ?>
-                <?php elseif (!empty($filters)): ?> 
-                    <?php foreach($users as $u): ?>
-                        <?php
-                            $match = true;
-                            if (isset($filters['hoatdong']) && $filters['hoatdong'] !== $u['hoat_dong']) $match = false;
-                            if (isset($filters['trangthai']) && $filters['trangthai'] !== $u['trang_thai']) $match = false;
-                            if (isset($filters['ngaytruoc']) && $u['ngay_tao'] > $filters['ngaytruoc']) $match = false;
-                            if (isset($filters['sodon']) && $u['so_don'] > $filters['sodon']) $match = false;
-                        ?>
-                        <?php if ($match): ?>
-                            <?php theNguoiDung($u, $roleColors, $labelvaitro, $labeltrangthai); ?>
-                        <?php endif; ?>
-                    <?php endforeach; ?>
-                <?php elseif (!empty($search)): ?>
-                    <?php foreach ($users as $u): ?>
-                         <?php theNguoiDung($u, $roleColors, $labelvaitro, $labeltrangthai); ?>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    function apdungloc(prefix) {
-        const keys = ["hoatdong", "trangthai", "ngaytruoc", "sodon"];
-        let filters = {};
-
-        keys.forEach(key => {
-            const el = document.getElementById(key + "-" + prefix);
-            if (el && el.value.trim() !== "") {
-                filters[key] = el.value.trim();
-            }
-        });
-
-        const boloc = encodeURIComponent(JSON.stringify(filters));
-        window.location.href = "trangchu.php?page=ds_nguoidung&boloc=" + boloc;
-    }
-
-    document.getElementById("btnloc-desktop").addEventListener("click", () => apdungloc("desktop"));
-    document.getElementById("btnloc-mobile").addEventListener("click", () => apdungloc("mobile"));
-
-    function huyloc(prefix) {
-        window.location.href = "trangchu.php?page=ds_nguoidung";
-    }
-
-    document.getElementById("btnhuy-desktop").addEventListener("click", () => huyloc("desktop"));
-    document.getElementById("btnhuy-mobile").addEventListener("click", () => huyloc("mobile"));
-
-    document.querySelectorAll('#trangthai .option').forEach(opt => {
-        opt.addEventListener('click', function() {
-            document.querySelectorAll('#trangthai .option').forEach(o => o.classList.remove('active'));
-            this.classList.add('active');
-            document.getElementById('trangthai-value').value = this.dataset.value;
-        });
-    });
-
-    async function capnhattrangthai(id) {
-        let trangthai = document.getElementById("trangthai-value").value;
-        fetch('../../models/capnhat_tt_kh.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id, trangthai })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert(data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Đã xảy ra lỗi khi đăng nhập.');
-        });
-    }
-
-    document.getElementById("btnguithongbao").addEventListener("click", function () {
-        const idnguoidung = document.getElementById("idnguoidung").value;
-        const loaithongbao = document.getElementById("loaithongbao").value;
-        const tieude       = document.getElementById("tieude").value.trim();
-        const noidung      = document.getElementById("noidung").value.trim();
-
-        if (!tieude || !noidung) {
-            alert("Vui lòng nhập đầy đủ tiêu đề và nội dung!");
-            return;
+            // 4. Dùng window.location.href để chuyển hướng trình duyệt đến URL mới
+            window.location.href = newUrl;
         }
 
-        fetch("../../models/gui_tb_nd.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                loai: loaithongbao,
-                tieude: tieude,
-                noidung: noidung,
-                id: idnguoidung
-            })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
-                window.location.reload();
-            } else {
-                alert("Có lỗi xảy ra: " + data.message);
+        // 3. Gán sự kiện cho nút bấm
+        searchButton.addEventListener('click', function(event) {
+            event.preventDefault(); // Ngăn hành vi mặc định của nút
+            submitSearch();
+        });
+
+        // 4. Gán sự kiện cho ô input (submit khi nhấn Enter)
+        searchInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Ngăn form bị gửi đi 2 lần
+                submitSearch();
             }
-        })
-        .catch(err => console.error(err));
-    });
-</script>
+        });
+    </script>
+
+    <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Người dùng</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hide-on-mobile">Vai trò</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Trạng thái</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hide-on-mobile">Liên hệ</th>
+                    <th class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider hide-on-mobile">Đơn HT</th>
+                    <th class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Hành động</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                <?php if (empty($users)): ?>
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                            Không tìm thấy người dùng nào phù hợp.
+                        </td>
+                    </tr>
+                <?php else: ?>
+                    <?php foreach($users as $u): ?>
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10">
+                                        <img class="h-10 w-10 rounded-full object-cover border border-gray-200" src="../../../storage/pictures/avt/<?= htmlspecialchars($u['avt']) ?>" alt="<?= htmlspecialchars($u['ho_ten']) ?>">
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900"><?= htmlspecialchars($u['ho_ten']) ?></div>
+                                        <div class="text-sm text-gray-500"><?= htmlspecialchars($u['email']) ?></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap hide-on-mobile">
+                                <?php
+                                    $chuoiQuyen = $u['danh_sach_quyen'] ?? '{}';
+                                    $dsQuyenArray = ($chuoiQuyen === '{NULL}') ? [] : explode(',', trim($chuoiQuyen, '{}'));
+                                ?>
+                                <div class="flex flex-wrap gap-1">
+                                    <?php foreach ($dsQuyenArray as $vai_tro): if(empty($vai_tro)) continue; ?>
+                                        <span class="px-2 py-1 rounded-full text-xs font-semibold <?= $roleColors[$vai_tro] ?? 'bg-gray-100 text-gray-700' ?>">
+                                            <?= htmlspecialchars($labelvaitro[$vai_tro] ?? $vai_tro) ?>
+                                        </span>
+                                    <?php endforeach; ?>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border <?= $statusColors[$u['trang_thai']] ?>">
+                                    <?= htmlspecialchars($labeltrangthai[$u['trang_thai']]) ?>
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hide-on-mobile">
+                                <span class="block"><?= htmlspecialchars($u['so_dt']) ?></span>
+                                <span class="block text-xs text-gray-400">Tạo: <?= date("d/m/Y", strtotime($u['ngay_tao'])) ?></span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 hide-on-mobile">
+                                <?= $u['so_don'] ?>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                                <a href="trangchu.php?page=ct_nguoidung&id=<?= $u['id'] ?>" class="text-indigo-600 hover:text-indigo-900" title="Xem chi tiết">
+                                    <i class="fas fa-eye text-lg"></i>
+                                </a>
+
+                                <?php if ($u['trang_thai'] === 'danghoatdong'): ?>
+                                    <a href="trangchu.php?page=cn_trangthai_nd&id=<?= $u['id'] ?>&new_status=khoa" class="text-red-600 hover:text-red-900 ml-4" title="Khóa tài khoản">
+                                        <i class="fas fa-lock text-lg"></i>
+                                    </a>
+                                <?php else: ?>
+                                    <a href="trangchu.php?page=cn_trangthai_nd&id=<?= $u['id'] ?>&new_status=danghoatdong" class="text-green-600 hover:text-green-900 ml-4" title="Kích hoạt tài khoản">
+                                        <i class="fas fa-check-circle text-lg"></i>
+                                    </a>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>

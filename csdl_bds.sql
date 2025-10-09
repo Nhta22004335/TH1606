@@ -504,6 +504,10 @@ CREATE TABLE tin_tuc (
     CONSTRAINT chk_trang_thai_tin CHECK (trang_thai IN ('choduyet','dangban','daban','dathue')),
     CONSTRAINT fk_tin_khachhang FOREIGN KEY (id_khach_hang) REFERENCES nguoi_dung(id) ON DELETE CASCADE
 );
+
+ALTER TABLE tin_tuc
+ADD COLUMN luot_xem INT 
+
 -- Dữ liệu mẫu cho bảng tin_tuc
 INSERT INTO tin_tuc (id_khach_hang, tieu_de, mo_ta, chuyen_muc, trang_thai)
 VALUES

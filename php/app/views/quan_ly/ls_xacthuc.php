@@ -108,12 +108,6 @@
 </head>
 <body>
 
-<!-- Header -->
-<header class="flex bg-white border-b border-gray-200 p-4">
-    <img src="../../../public/assets/anhht/0/lichsu.gif" alt="Quản lý sản phẩm" style="width: 40px; height: 40px; margin-right: 10px;">
-    <h1 class="text-2xl font-bold text-gray-600">Quản lý lịch sử xác thực</h1>
-</header>
-
 <!-- Main -->
 <main class="flex-1 p-6">
     <?php if (!empty($_SESSION['message'])): ?>
@@ -156,19 +150,18 @@
         </div>
     </div>
 
-
     <!-- Table -->
     <div class="bg-white rounded-xl shadow overflow-x-auto">
         <table class="w-full text-sm text-left border-collapse">
-            <thead class="bg-gray-50">
+            <thead class="bg-gray-50 border-b">
                 <tr>
-                    <th class="px-4 py-2 border-b">Người dùng</th>
-                    <th class="px-4 py-2 border-b">Loại sự kiện</th>
-                    <th class="px-4 py-2 border-b">Thời gian bắt đầu</th>
-                    <th class="px-4 py-2 border-b">Thời gian kết thúc</th>
-                    <th class="px-4 py-2 border-b">Địa chỉ IP</th>
-                    <th class="px-4 py-2 border-b">User Agent</th>
-                    <th class="px-4 py-2 border-b text-center">Hành động</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Người dùng</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Loại sự kiện</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Thời gian bắt đầu</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Thời gian kết thúc</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Địa chỉ IP</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">User Agent</th>
+                    <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Hành động</th>
                 </tr>
             </thead>
             <tbody>
