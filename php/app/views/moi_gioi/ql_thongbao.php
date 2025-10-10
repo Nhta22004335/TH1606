@@ -109,7 +109,7 @@ if (!$not_logged_in) {
         <div id="notificationList" class="space-y-4">
             <?php if (!empty($thongbaos)): ?>
                 <?php foreach ($thongbaos as $tb):
-                    $is_unread = $tb["trang_thai"] === "chua_doc";
+                    $is_unread = $tb["trang_thai"] === "chuaxem";
                     $row_class = $is_unread 
                         ? 'bg-white border-l-4 border-indigo-500 shadow-lg' 
                         : 'bg-white border-l-4 border-gray-200 shadow-md';
