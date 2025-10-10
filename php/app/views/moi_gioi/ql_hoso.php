@@ -98,7 +98,7 @@ $bieumau_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             // 3. Xây dựng URL mới một cách thủ công
             //    Hãy chắc chắn rằng đường dẫn cơ sở '/app/trangchu.php' là đúng với cấu trúc dự án của bạn
-            const newUrl = `trangchu.php?page=ql_hoso&search=${encodedSearchValue}`;
+            const newUrl = `trangchu.php?page=../moi_gioi/ql_hoso&search=${encodedSearchValue}`;
 
             // 4. Dùng window.location.href để chuyển hướng trình duyệt đến URL mới
             window.location.href = newUrl;
