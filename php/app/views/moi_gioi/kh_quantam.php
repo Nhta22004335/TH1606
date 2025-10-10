@@ -79,7 +79,8 @@ if (!is_valid_uuid($id_bds)) {
         $khachhang_quantam = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
         $error_msg = "Lỗi truy vấn CSDL: " . $e->getMessage();
-    }
+        
+}
 }
 ?>
 
@@ -155,4 +156,3 @@ if (!is_valid_uuid($id_bds)) {
 
 </body>
 </html>
-
