@@ -33,8 +33,8 @@
     $ngaydang = $_GET['ngaydang'] ?? '';
 
     echo '<pre>'; print_r([$chuyenmuc, $moigioi, $ngaydang]); echo '</pre>';
+    
     if ($chuyenmuc || $moigioi || $ngaydang) {
-        echo "helo";
         $filtered_tintuc = [];
         foreach ($tintuc as $tin) {
             $match = true;
