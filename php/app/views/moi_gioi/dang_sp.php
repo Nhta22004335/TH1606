@@ -1,157 +1,183 @@
 <?php
-if(!isset($_SESSION['id_nguoi_dung'])) {
-    // Giả sử session đã được khởi tạo ở nơi khác
-    header("Location: ../auth/dangnhap.html");
-    exit;
-}
+// Giả sử session đã được khởi tạo
+// if(!isset($_SESSION['id_nguoi_dung'])) {
+//     header("Location: ../auth/dangnhap.html");
+//     exit;
+// }
 ?>
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" class="h-full bg-slate-50">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <title>Đăng tin bất động sản</title>
+    <title>Đăng tin Bất động sản Mới</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        /* Tùy chỉnh mũi tên cho select box */
+        select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+    </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="h-full">
 
-<div class="max-w-5xl mx-auto py-12 px-4 md:px-6">
+<div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
     
-    <div class="text-center mb-10">
-        <h1 class="text-4xl font-extrabold text-blue-700 flex items-center justify-center gap-3">
-            <i class="fa-solid fa-house-circle-check text-blue-500"></i>
-            ĐĂNG BẤT ĐỘNG SẢN MỚI
-        </h1>
-        <p class="text-gray-600 mt-3">Hãy cung cấp thông tin chính xác và đầy đủ để tin đăng được duyệt nhanh hơn.</p>
-    </div>
+    <header class="mb-10">
+        <h1 class="text-3xl font-bold tracking-tight text-slate-900">Tạo tin đăng mới</h1>
+        <p class="mt-2 text-base text-slate-600">Cung cấp thông tin chi tiết để thu hút khách hàng tiềm năng.</p>
+    </header>
 
-    <form method="POST" action="trangchu.php?page=../../models/xl_dang_sp" enctype="multipart/form-data" 
-          class="bg-white p-8 shadow-2xl rounded-2xl border border-gray-100 space-y-8">
-      
-        <div class="space-y-6 border-b pb-6">
-            <h2 class="text-2xl font-bold text-gray-700 flex items-center gap-2">
-                <i class="fa-solid fa-file-lines text-blue-500"></i> Thông tin Cơ bản
-            </h2>
-            
-            <div>
-                <label class="block text-sm text-gray-700 font-semibold mb-1">Tiêu đề tin <span class="text-red-500">*</span></label>
-                <input type="text" name="tieu_de" required
-                  placeholder="VD: Bán căn hộ chung cư 2 phòng ngủ, Quận 7, view sông"
-                  class="w-full p-3 rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none shadow-sm transition"/>
-            </div>
+    <form method="POST" action="trangchu.php?page=../../models/xl_dang_sp" enctype="multipart/form-data">
+        <div class="lg:grid lg:grid-cols-3 lg:gap-12">
 
-            <div>
-                <label class="block text-sm text-gray-700 font-semibold mb-1">Mô tả chi tiết <span class="text-red-500">*</span></label>
-                <textarea name="mo_ta" rows="6" required
-                  placeholder="Nhập mô tả chi tiết: tiện ích, nội thất, pháp lý..."
-                  class="w-full p-3 rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none shadow-sm transition"></textarea>
-            </div>
-        </div>
+            <aside class="lg:col-span-1 lg:sticky lg:top-8 self-start hidden lg:block">
+                <nav class="space-y-4">
+                    <a href="#section-basic-info" class="flex items-center gap-3 px-4 py-2 text-base font-semibold text-indigo-600 bg-indigo-50 rounded-lg">
+                        <i class="fa-solid fa-file-lines w-5 text-center"></i>
+                        <span>Thông tin cơ bản</span>
+                    </a>
+                    <a href="#section-details" class="flex items-center gap-3 px-4 py-2 text-base font-medium text-slate-700 hover:bg-slate-100 rounded-lg">
+                        <i class="fa-solid fa-map-location-dot w-5 text-center"></i>
+                        <span>Thông số & Vị trí</span>
+                    </a>
+                    <a href="#section-media" class="flex items-center gap-3 px-4 py-2 text-base font-medium text-slate-700 hover:bg-slate-100 rounded-lg">
+                        <i class="fa-solid fa-photo-film w-5 text-center"></i>
+                        <span>Hình ảnh & Video</span>
+                    </a>
+                </nav>
+            </aside>
 
-        <div class="space-y-6 border-b pb-6">
-            <h2 class="text-2xl font-bold text-gray-700 flex items-center gap-2">
-                <i class="fa-solid fa-map-location-dot text-green-500"></i> Thông số & Vị trí
-            </h2>
-            
-            <div class="grid md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm text-gray-700 font-semibold mb-1">Loại bất động sản <span class="text-red-500">*</span></label>
-                    <select name="loai" required
-                      class="w-full p-3 rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none shadow-sm transition appearance-none">
-                        <option value="">-- Chọn loại --</option>
-                        <option value="canho">Căn hộ</option>
-                        <option value="nhapho">Nhà phố</option>
-                        <option value="datnen">Đất nền</option>
-                        <option value="bietthu">Biệt thự</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm text-gray-700 font-semibold mb-1">Hình thức <span class="text-red-500">*</span></label>
-                    <select name="hinh_thuc" required
-                      class="w-full p-3 rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none shadow-sm transition appearance-none">
-                        <option value="">-- Chọn hình thức --</option>
-                        <option value="ban">Bán</option>
-                        <option value="thue">Cho thuê</option>
-                        </select>
-                </div>
-            </div>
+            <div class="lg:col-span-2 space-y-10">
 
-            <div class="grid md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm text-gray-700 font-semibold mb-1">Giá (VNĐ) <span class="text-red-500">*</span></label>
-                    <div class="relative">
-                        <i class="fa-solid fa-dong-sign absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        <input type="number" name="gia" required
-                          placeholder="Ví dụ: 2,500,000,000"
-                          class="w-full p-3 pl-8 rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none shadow-sm transition"/>
+                <section id="section-basic-info" class="bg-white p-6 shadow-lg rounded-lg">
+                    <h2 class="text-xl font-bold text-slate-800 border-b pb-4 mb-6">Thông tin cơ bản</h2>
+                    <div class="space-y-6">
+                        <div>
+                            <label for="tieu_de" class="block text-sm font-medium text-slate-900">Tiêu đề tin <span class="text-red-500">*</span></label>
+                            <p class="text-sm text-slate-500 mt-1">Tên gọi hấp dẫn, ngắn gọn, nêu bật điểm chính của BĐS.</p>
+                            <input type="text" id="tieu_de" name="tieu_de" required
+                                placeholder="VD: Bán căn hộ 2PN, 80m², full nội thất, view sông Sài Gòn"
+                                class="mt-2 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"/>
+                        </div>
+                        <div>
+                            <label for="mo_ta" class="block text-sm font-medium text-slate-900">Mô tả chi tiết <span class="text-red-500">*</span></label>
+                            <p class="text-sm text-slate-500 mt-1">Mô tả về tiện ích, nội thất, tình trạng pháp lý, và các điểm nổi bật khác.</p>
+                            <textarea id="mo_ta" name="mo_ta" rows="6" required
+                                placeholder="Nội dung mô tả..."
+                                class="mt-2 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"></textarea>
+                        </div>
                     </div>
-                </div>
-                <div>
-                    <label class="block text-sm text-gray-700 font-semibold mb-1">Diện tích (m²) <span class="text-red-500">*</span></label>
-                    <div class="relative">
-                        <i class="fa-solid fa-ruler-combined absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        <input type="number" name="dien_tich" required
-                          placeholder="Ví dụ: 80"
-                          class="w-full p-3 pl-8 rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none shadow-sm transition"/>
+                </section>
+
+                <section id="section-details" class="bg-white p-6 shadow-lg rounded-lg">
+                    <h2 class="text-xl font-bold text-slate-800 border-b pb-4 mb-6">Thông số & Vị trí</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label for="loai" class="block text-sm font-medium text-slate-900">Loại bất động sản <span class="text-red-500">*</span></label>
+                            <select id="loai" name="loai" required class="mt-2 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                                <option value="" disabled selected>-- Chọn loại --</option>
+                                <option value="canho">Căn hộ</option>
+                                <option value="nhapho">Nhà phố</option>
+                                <option value="datnen">Đất nền</option>
+                                <option value="bietthu">Biệt thự</option>
+                            </select>
+                        </div>
+                        <div>
+                             <label for="hinh_thuc" class="block text-sm font-medium text-slate-900">Hình thức <span class="text-red-500">*</span></label>
+                            <select id="hinh_thuc" name="hinh_thuc" required class="mt-2 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                                <option value="" disabled selected>-- Chọn hình thức --</option>
+                                <option value="ban">Bán</option>
+                                <option value="thue">Cho thuê</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="gia" class="block text-sm font-medium text-slate-900">Giá (VNĐ) <span class="text-red-500">*</span></label>
+                            <input type="number" id="gia" name="gia" required placeholder="VD: 2500000000" class="mt-2 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"/>
+                        </div>
+                         <div>
+                            <label for="dien_tich" class="block text-sm font-medium text-slate-900">Diện tích (m²) <span class="text-red-500">*</span></label>
+                            <input type="number" id="dien_tich" name="dien_tich" step="0.1" required placeholder="VD: 80" class="mt-2 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"/>
+                        </div>
+                        <div>
+                            <label for="khu_vuc" class="block text-sm font-medium text-slate-900">Khu vực (Tỉnh/Thành) <span class="text-red-500">*</span></label>
+                            <input type="text" id="khu_vuc" name="khu_vuc" required placeholder="VD: TP. Hồ Chí Minh" class="mt-2 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"/>
+                        </div>
+                        <div>
+                            <label for="dia_chi" class="block text-sm font-medium text-slate-900">Địa chỉ chi tiết <span class="text-red-500">*</span></label>
+                            <input type="text" id="dia_chi" name="dia_chi" required placeholder="Số nhà, đường, phường/xã, quận/huyện" class="mt-2 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"/>
+                        </div>
                     </div>
+                </section>
+
+                <section id="section-media" class="bg-white p-6 shadow-lg rounded-lg" x-data="imagePreview()">
+                    <h2 class="text-xl font-bold text-slate-800 border-b pb-4 mb-6">Hình ảnh & Video</h2>
+                    <div class="space-y-6">
+                        <div>
+                            <label for="hinh_anh" class="block text-sm font-medium text-slate-900">Hình ảnh (tối đa 5 ảnh) <span class="text-red-500">*</span></label>
+                             <p class="text-sm text-slate-500 mt-1">Ảnh đầu tiên sẽ là ảnh đại diện. Kéo thả để sắp xếp lại.</p>
+                            <input @change="updatePreview" type="file" id="hinh_anh" name="hinh_anh[]" multiple required accept="image/*" class="mt-2 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition"/>
+                            <div x-show="previews.length > 0" class="mt-4 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
+                                <template x-for="preview in previews" :key="preview.id">
+                                    <div class="relative aspect-square">
+                                        <img :src="preview.url" class="w-full h-full object-cover rounded-md shadow">
+                                        <button @click="removePreview(preview.id)" type="button" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">&times;</button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="video" class="block text-sm font-medium text-slate-900">Video (tùy chọn)</label>
+                            <p class="text-sm text-slate-500 mt-1">Tải lên một video ngắn giới thiệu về bất động sản.</p>
+                            <input type="file" id="video" name="video" accept="video/*" class="mt-2 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-slate-50 file:text-slate-700 hover:file:bg-slate-100 transition"/>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="flex justify-end pt-4">
+                    <button type="submit" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-semibold rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform transform hover:scale-105">
+                        <i class="fa-solid fa-upload mr-2"></i>
+                        Đăng tin
+                    </button>
                 </div>
-            </div>
 
-            <div class="grid md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm text-gray-700 font-semibold mb-1">Khu vực (Tỉnh/Thành) <span class="text-red-500">*</span></label>
-                    <input type="text" name="khu_vuc" required
-                      placeholder="VD: TP. Hồ Chí Minh"
-                      class="w-full p-3 rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none shadow-sm transition"/>
-                </div>
-                <div>
-                    <label class="block text-sm text-gray-700 font-semibold mb-1">Địa chỉ chi tiết <span class="text-red-500">*</span></label>
-                    <input type="text" name="dia_chi" required
-                      placeholder="Số nhà, đường, quận/huyện"
-                      class="w-full p-3 rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none shadow-sm transition"/>
-                </div>
             </div>
-        </div>
-
-        <div class="space-y-6">
-            <h2 class="text-2xl font-bold text-gray-700 flex items-center gap-2">
-                <i class="fa-solid fa-photo-film text-purple-500"></i> Hình ảnh & Video
-            </h2>
-            
-            <div>
-                <label class="block text-sm text-gray-700 font-semibold mb-1">Hình ảnh (Nhiều ảnh) <span class="text-red-500">*</span></label>
-                <input type="file" name="hinh_anh[]" multiple required accept="image/*"
-                  class="w-full p-3 file:mr-4 file:py-2 file:px-4
-                         file:rounded-full file:border-0
-                         file:text-sm file:font-semibold
-                         file:bg-blue-50 file:text-blue-700
-                         hover:file:bg-blue-100 transition duration-300
-                         rounded-xl border border-gray-300 bg-white shadow-sm"/>
-            </div>
-            
-            <div>
-                <label class="block text-sm text-gray-700 font-semibold mb-1">Video (Tùy chọn)</label>
-                <input type="file" name="video" accept="video/*"
-                  class="w-full p-3 file:mr-4 file:py-2 file:px-4
-                         file:rounded-full file:border-0
-                         file:text-sm file:font-semibold
-                         file:bg-purple-50 file:text-purple-700
-                         hover:file:bg-purple-100 transition duration-300
-                         rounded-xl border border-gray-300 bg-white shadow-sm"/>
-            </div>
-        </div>
-
-
-        <div class="text-center pt-4">
-            <button type="submit" 
-              class="px-12 py-3 rounded-xl font-bold text-lg text-white shadow-xl 
-                     bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-indigo-700 hover:to-blue-600 
-                     transition-all duration-300 transform hover:scale-[1.02]">
-                <i class="fa-solid fa-upload mr-2"></i> HOÀN TẤT VÀ ĐĂNG SẢN PHẨM
-            </button>
         </div>
     </form>
 </div>
+
+<script>
+    // JavaScript cho Image Preview
+    function imagePreview() {
+        return {
+            previews: [],
+            updatePreview(event) {
+                this.previews = [];
+                const files = event.target.files;
+                for (let i = 0; i < files.length; i++) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.previews.push({ id: i, url: e.target.result });
+                    };
+                    reader.readAsDataURL(files[i]);
+                }
+            },
+            removePreview(id) {
+                this.previews = this.previews.filter(p => p.id !== id);
+                // Cần thêm logic để xóa file khỏi input nếu cần
+            }
+        }
+    }
+</script>
+
 </body>
 </html>
