@@ -346,9 +346,9 @@ CREATE TABLE IF NOT EXISTS ke_hoach_thanh_toan (
     trang_thai_tt VARCHAR(50) DEFAULT 'chuathanhtoan', -- Trạng thái tổng quát của TT
     
     CONSTRAINT chk_khtt_trang_thai CHECK (trang_thai_tt IN ('chuathanhtoan', 'dangthanhtoan', 'hoantat')),
-    CONSTRAINT fk_khtt_gd FOREIGN KEY (id_giao_dich) REFERENCES giao_dich(id) ON DELETE CASCADE
+    CONSTRAINT fk_khtt_gd FOREIGN KEY ( id_giao_dich) REFERENCES giao_dich(id) ON DELETE CASCADE
 );
-
+select * from ke_hoach_thanh_toan 
 CREATE TABLE IF NOT EXISTS dot_thanh_toan (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     id_giao_dich UUID NOT NULL,
@@ -372,7 +372,8 @@ CREATE TABLE IF NOT EXISTS dot_thanh_toan_ct (
     CONSTRAINT fk_dttct_dtt FOREIGN KEY (id_dot_thanh_toan) REFERENCES dot_thanh_toan(id) ON DELETE CASCADE,
     CONSTRAINT fk_dttct_bds FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE SET NULL
 );
-
+select * from giao_dich
+select * from dot_thanh_toan
 -- 12. Bảng thanh_toan (tổng thanh toán liên quan giao dịch)
 CREATE TABLE IF NOT EXISTS thanh_toan (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -405,7 +406,7 @@ INSERT INTO thanh_toan_ct (id_thanh_toan, id_bds, so_luong, so_tien) VALUES
 ('437a2754-0c15-4225-be14-cd319b06dacb', '9b17fb30-8c6e-4494-920a-cbdd1621ee20', '1', '2800000000');
 
 SELECT * FROM thanh_toan_ct;
-
+SELECT * FROM thong_bao;
 -- 14. Bảng thong_bao
 CREATE TABLE IF NOT EXISTS thong_bao (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -514,19 +515,6 @@ VALUES
 ('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Mở bán căn hộ Vinhomes', 'Cập nhật thông tin dự án mới nhất tại Vinhomes.', 'Bất động sản', 'choduyet'),
 ('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Những lưu ý khi mua nhà phố', 'Hướng dẫn khách hàng tránh rủi ro khi mua nhà phố.', 'Hướng dẫn', 'choduyet');
 
-INSERT INTO tin_tuc (id_khach_hang, tieu_de, mo_ta, chuyen_muc, trang_thai)
-VALUES
-('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Mở bán căn hộ Vinhomes', 'Cập nhật thông tin dự án mới nhất tại Vinhomes.', 'Dự án', 'choduyet'),
-('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Những lưu ý khi mua nhà phố', 'Hướng dẫn khách hàng tránh rủi ro khi mua nhà phố.', 'Hướng dẫn', 'choduyet'),
-('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Thị trường BĐS cuối năm: Xu hướng nào dẫn đầu?', 'Phân tích các yếu tố vĩ mô ảnh hưởng đến thị trường nhà đất vào quý 4.', 'Phân tích thị trường', 'choduyet'),
-('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', '5 sai lầm pháp lý cần tránh khi đặt cọc mua đất', 'Tổng hợp các rủi ro pháp lý thường gặp và cách phòng tránh để đảm bảo an toàn.', 'Pháp lý', 'choduyet'),
-('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Ra mắt phân khu mới The Ocean tại Aqua City', 'Thông tin chi tiết về chính sách bán hàng và ưu đãi cho phân khu The Ocean.', 'Dự án', 'choduyet'),
-('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Đầu tư căn hộ cho thuê: Lợi nhuận và thách thức', 'Kinh nghiệm lựa chọn vị trí, loại hình căn hộ và quản lý để tối ưu hóa dòng tiền.', 'Đầu tư', 'choduyet'),
-('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Cách chọn hướng nhà hợp tuổi gia chủ', 'Các chuyên gia phong thủy chia sẻ bí quyết chọn hướng nhà đất để thu hút tài lộc.', 'Phong thủy', 'choduyet'),
-('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Xu hướng thiết kế nội thất căn hộ nhỏ gọn', 'Gợi ý các giải pháp nội thất đa năng giúp tối ưu không gian sống.', 'Nội thất', 'choduyet'),
-('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Thủ tục vay vốn ngân hàng mua nhà trả góp', 'Cập nhật lãi suất và quy trình vay vốn từ các ngân hàng lớn.', 'Tài chính', 'choduyet'),
-('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Tiềm năng phát triển của khu đô thị Thủ Thiêm', 'Đánh giá tiềm năng tăng giá và cơ sở hạ tầng của khu vực Thủ Thiêm trong 5 năm tới.', 'Phân tích thị trường', 'choduyet');
-
 select * from tin_tuc
 -- Ví dụ thêm 1 tin đăng
 INSERT INTO tin_dang (id_khach_hang, id_bds, tieu_de, mo_ta, gia, dien_tich, dia_chi, loai, trang_thai)
@@ -584,10 +572,31 @@ INSERT INTO tin_nhan (nguoi_gui, nguoi_nhan, noi_dung) VALUES
 
 
 
+CREATE TABLE IF NOT EXISTS khach_quan_tam_bds (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id_khach_hang UUID NOT NULL,
+    id_bat_dong_san UUID NOT NULL,
+    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    trang_thai VARCHAR(20) DEFAULT 'active' CHECK (trang_thai IN ('active', 'huy')),
+    ghi_chu TEXT,
+
+    CONSTRAINT fk_kqt_kh FOREIGN KEY (id_khach_hang)
+        REFERENCES nguoi_dung(id) ON DELETE CASCADE,
+    CONSTRAINT fk_kqt_bds FOREIGN KEY (id_bat_dong_san)
+        REFERENCES bat_dong_san(id) ON DELETE CASCADE,
+
+    CONSTRAINT uq_kqt UNIQUE (id_khach_hang, id_bat_dong_san)
+);
 
 
-
-
+CREATE TABLE lich_su (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- mã lịch sử tự sinh
+    id_bat_dong_san UUID NOT NULL,                 -- ID bất động sản
+    id_nguoi_dung UUID,                            -- người thực hiện hành động (khách hoặc admin)
+    hanh_dong VARCHAR(50) NOT NULL,               -- ví dụ: 'quan_tam', 'duyet', 'mua', 'thanh_toan'
+    ghi_chu TEXT,                                  -- thông tin chi tiết nếu cần
+    ngay_tao TIMESTAMP NOT NULL DEFAULT now()     -- thời gian thực hiện
+);
 
 
 

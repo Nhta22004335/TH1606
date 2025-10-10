@@ -72,7 +72,7 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <div class="container mx-auto p-6">
     <h1 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-        <i class="fas fa-building text-red-500"></i> Quản lý Bất động sản
+        <i class="fas fa-building text-red-500"></i> Sản phẩm cá nhân
     </h1>
 
 <!-- Thanh tìm kiếm sản phẩm -->
