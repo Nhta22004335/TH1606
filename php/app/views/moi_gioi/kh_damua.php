@@ -71,7 +71,7 @@ try {
     <div class="space-y-4">
         <?php if (!empty($giao_dich_hoan_tat)): ?>
             <?php foreach($giao_dich_hoan_tat as $gd): ?>
-                <a href="/hoa-don.php?id=<?= htmlspecialchars($gd['id_giao_dich']) ?>" 
+                <a href="trangchu.php?page=../moi_gioi/hoa_don&id=<?= htmlspecialchars($gd['id_giao_dich']) ?>" 
                    class="block bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden transition hover:shadow-lg hover:border-blue-400 group">
                     
                     <div class="p-5">
