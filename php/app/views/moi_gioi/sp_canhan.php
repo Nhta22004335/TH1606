@@ -1,37 +1,44 @@
 <?php
-// Bắt đầu phiên
+// ===================================================================
+// PHẦN 1: XỬ LÝ LOGIC & DỮ LIỆU (BACKEND)
+// ===================================================================
+
+// Bắt đầu phiên làm việc an toàn
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Kết nối CSDL (Giả định hàm ketnoicsdl() đã xử lý lỗi kết nối)
 require_once "../../../config/database.php";
 $pdo = ketnoicsdl();
 
-// Lấy ID môi giới đang đăng nhập
+// --- BẢO MẬT: Xác thực người dùng ---
 $id_moigioi = $_SESSION['id_nguoi_dung'] ?? null;
-
 if (!$id_moigioi) {
-    echo "<p class='p-4 text-red-500 font-bold text-center'>⚠️ Vui lòng đăng nhập để xem sản phẩm cá nhân.</p>";
-    exit;
+    // Thoát sớm nếu không đăng nhập, tránh xử lý thừa
+    http_response_code(403); // Lỗi Forbidden, tốt hơn là chỉ echo
+    exit("<p class='p-4 text-red-500 font-bold text-center'>⚠️ Vui lòng đăng nhập để xem sản phẩm cá nhân.</p>");
 }
 
-// Nhận từ khóa tìm kiếm
-$keyword = isset($_GET['keyword']) ? trim($_GET['keyword']) : '';
+// --- LÀM SẠCH ĐẦU VÀO: Lấy và chuẩn hóa các tham số filter ---
+$search_term = trim($_GET['search'] ?? '');
+$filter_status = trim($_GET['trang_thai'] ?? 'tat_ca');
 
-// Câu truy vấn
+// Whitelist: Chỉ cho phép các giá trị trạng thái hợp lệ
+$valid_statuses = ['chuaduyet', 'daduyet', 'daban', 'dathue'];
+if (!in_array($filter_status, $valid_statuses) && $filter_status !== 'tat_ca') {
+    $filter_status = 'tat_ca'; // Mặc định nếu giá trị không hợp lệ
+}
+
+
+// --- TỐI ƯU TRUY VẤN: Xây dựng câu lệnh SQL linh hoạt ---
+// Sử dụng mảng $params để quản lý các tham số binding, giúp code sạch hơn
+$params = [':id_moigioi' => $id_moigioi];
+
 $sql = "
     SELECT 
-        b.id,
-        b.tieu_de,
-        b.mo_ta,
-        b.gia,
-        b.dien_tich,
-        b.dia_chi,
-        b.loai,
-        b.khu_vuc,
-        b.ngay_dang,
-        b.trang_thai,
-        b.hinh_thuc,
+        b.id, b.tieu_de, b.gia, b.dien_tich, b.khu_vuc, b.loai, 
+        b.ngay_dang, b.trang_thai,
         COALESCE(d.diem, 0) AS rating,
         COALESCE(ha.url, 'chuacapnhat.jpg') AS anh_dai_dien
     FROM public.bat_dong_san b
@@ -42,23 +49,69 @@ $sql = "
     WHERE b.id_nguoi_dung = :id_moigioi
 ";
 
-if ($keyword !== '') {
-    $sql .= " AND (b.tieu_de ILIKE :kw OR b.khu_vuc ILIKE :kw OR b.dia_chi ILIKE :kw)";
+// Thêm điều kiện tìm kiếm nếu có
+if ($search_term !== '') {
+    $sql .= " AND (b.tieu_de ILIKE :search OR b.khu_vuc ILIKE :search OR b.dia_chi ILIKE :search)";
+    $params[':search'] = "%$search_term%";
+}
+
+// Thêm điều kiện lọc trạng thái nếu có
+if ($filter_status !== 'tat_ca') {
+    $sql .= " AND b.trang_thai = :trang_thai";
+    $params[':trang_thai'] = $filter_status;
 }
 
 $sql .= " ORDER BY b.ngay_dang DESC";
 
+// Thực thi câu lệnh
 $stmt = $pdo->prepare($sql);
-$stmt->bindValue(':id_moigioi', $id_moigioi, PDO::PARAM_STR);
+$stmt->execute($params);
+$products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-if ($keyword !== '') {
-    $stmt->bindValue(':kw', "%$keyword%", PDO::PARAM_STR);
+
+// --- LOGIC HỖ TRỢ HIỂN THỊ ---
+// Định nghĩa các thông tin về trạng thái ở một nơi để dễ quản lý
+$status_map = [
+    'chuaduyet' => ['label' => 'Chờ duyệt', 'class' => 'bg-yellow-100 text-yellow-800'],
+    'daduyet'   => ['label' => 'Đã duyệt',  'class' => 'bg-green-100 text-green-800'],
+    'daban'     => ['label' => 'Đã bán',    'class' => 'bg-red-100 text-red-800'],
+    'dathue'    => ['label' => 'Đã thuê',   'class' => 'bg-blue-100 text-blue-800'],
+    'default'   => ['label' => 'Không rõ',  'class' => 'bg-gray-100 text-gray-700']
+];
+
+// Helper function để làm sạch output, tránh lặp lại htmlspecialchars
+function e(string $string): string {
+    return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
 }
 
-$stmt->execute();
-$products = $stmt->fetchAll(PDO::FETCH_ASSOC);
-?>
+/**
+ * Hàm định dạng giá tiền sang định dạng tỷ/triệu cho thân thiện.
+ * @param float $price Số tiền cần định dạng.
+ * @return string Chuỗi giá đã được định dạng.
+ */
+function format_price_vietnamese(float $price): string {
+    if ($price >= 1000000000) {
+        // Nếu lớn hơn hoặc bằng 1 tỷ
+        $result = $price / 1000000000;
+        // Làm tròn đến 2 chữ số thập phân và loại bỏ số 0 thừa
+        return rtrim(rtrim(number_format($result, 2, ',', ''), '0'), ',') . ' tỷ';
+    } elseif ($price >= 1000000) {
+        // Nếu lớn hơn hoặc bằng 1 triệu
+        $result = $price / 1000000;
+        return number_format($result, 0, ',', '.') . ' triệu';
+    } elseif ($price > 0) {
+        // Nếu nhỏ hơn 1 triệu
+        return number_format($price, 0, ',', '.') . ' VNĐ';
+    } else {
+        // Nếu giá bằng 0 hoặc không xác định
+        return 'Thỏa thuận';
+    }
+}
 
+// ===================================================================
+// PHẦN 2: HIỂN THỊ GIAO DIỆN (FRONTEND)
+// ===================================================================
+?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -75,120 +128,92 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <i class="fas fa-building text-red-500"></i> Sản phẩm cá nhân
     </h1>
 
-<!-- Thanh tìm kiếm sản phẩm -->
-<div class="bg-white shadow-md rounded-xl p-4 mb-6 flex flex-col md:flex-row items-center justify-between gap-3">
+    <div class="bg-white shadow-md rounded-xl p-4 mb-6 flex flex-col md:flex-row items-center justify-between gap-3">
+        <form method="GET" class="flex flex-wrap items-center gap-4">
+            <input type="hidden" name="page" value="<?= e($_GET['page'] ?? 'sanpham_canhan') ?>">
+            
+            <div class="relative">
+                <input type="text" name="search" placeholder="Tìm kiếm theo tiêu đề, khu vực..." value="<?= e($search_term) ?>"
+                       class="w-64 pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+            
+            <select name="trang_thai" class="w-48 text-sm border border-gray-300 rounded-full px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="tat_ca" <?= $filter_status == 'tat_ca' ? 'selected' : '' ?>>-- Tất cả trạng thái --</option>
+                <?php foreach ($valid_statuses as $status): ?>
+                    <option value="<?= e($status) ?>" <?= $filter_status == $status ? 'selected' : '' ?>><?= e($status_map[$status]['label']) ?></option>
+                <?php endforeach; ?>
+            </select>
 
-    <!-- Ô tìm kiếm -->
-    <form method="GET" class="w-full md:w-auto flex items-center space-x-2">
-        <input type="hidden" name="page" value="<?= htmlspecialchars($_GET['page'] ?? 'sanpham_canhan') ?>"> 
-        <div class="relative">
-            <input type="text" name="search" placeholder="Nhập từ khóa tìm kiếm..." value="<?= htmlspecialchars($search ?? '') ?>"
-                   class="w-64 pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-full 
-                          focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
-                   onchange="this.form.submit()">
-            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
-        </div>
-    </form>
-
-    <!-- Bộ lọc trạng thái -->
-    <form method="GET" class="w-full md:w-auto">
-        <input type="hidden" name="page" value="<?= htmlspecialchars($_GET['page'] ?? 'sanpham_canhan') ?>">
-        <input type="hidden" name="search" value="<?= htmlspecialchars($search ?? '') ?>">
-        <select name="trang_thai"
-                class="w-48 text-sm border border-gray-300 rounded-full px-3 py-2 bg-white
-                       focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
-                onchange="this.form.submit()">
-            <option value="tat_ca" <?= ($filter_status ?? '') == 'tat_ca' ? 'selected' : '' ?>>-- Tất cả trạng thái --</option>
-            <option value="chuaduyet" <?= ($filter_status ?? '') == 'chuaduyet' ? 'selected' : '' ?>>Chờ duyệt</option>
-            <option value="daduyet" <?= ($filter_status ?? '') == 'daduyet' ? 'selected' : '' ?>>Đã duyệt</option>
-            <option value="daban" <?= ($filter_status ?? '') == 'daban' ? 'selected' : '' ?>>Đã bán</option>
-            <option value="dathue" <?= ($filter_status ?? '') == 'dathue' ? 'selected' : '' ?>>Đã thuê</option>
-        </select>
-    </form>
-
-</div>
-
+            <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-full text-sm font-semibold hover:bg-red-600">
+                <i class="fas fa-filter"></i> Lọc
+            </button>
+        </form>
+    </div>
 
     <div class="bg-white shadow-lg rounded-xl overflow-hidden">
-        <table class="min-w-full table-auto border-collapse">
-            <thead class="bg-gray-100 text-gray-700 uppercase text-sm font-semibold">
+        <table class="min-w-full table-auto">
+            <thead class="bg-gray-100 text-gray-700 text-sm font-semibold">
                 <tr>
-                    <th class="px-4 py-3 text-left">Ảnh</th>
-                    <th class="px-4 py-3 text-left">Tiêu đề</th>
-                    <th class="px-4 py-3 text-left">Giá (VNĐ)</th>
-                    <th class="px-4 py-3 text-left">Diện tích (m²)</th>
-                    <th class="px-4 py-3 text-left">Khu vực</th>
-                    <th class="px-4 py-3 text-left">Loại</th>
-                    <th class="px-4 py-3 text-left">Trạng thái</th>
-                    <th class="px-4 py-3 text-left">Đánh giá</th>
-                    <th class="px-4 py-3 text-center">Hành động</th>
+                    <th class="py-3 px-4 text-left text-sm font-semibold text-slate-500 uppercase">Ảnh</th>
+                    <th class="py-3 px-4 text-left text-sm font-semibold text-slate-500 uppercase">Tiêu đề</th>
+                    <th class="py-3 px-4 text-left text-sm font-semibold text-slate-500 uppercase">Giá (VNĐ)</th>
+                    <th class="py-3 px-4 text-left text-sm font-semibold text-slate-500 uppercase">Khu vực</th>
+                    <th class="py-3 px-4 text-left text-sm font-semibold text-slate-500 uppercase">Trạng thái</th>
+                    <th class="py-3 px-4 text-left text-sm font-semibold text-slate-500 uppercase">Đánh giá</th>
+                    <th class="px-4 py-3 text-center text-sm font-semibold text-slate-500 uppercase">Hành động</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
                 <?php if (empty($products)): ?>
                     <tr>
-                        <td colspan="9" class="text-center text-gray-500 py-6">
-                            Không có bất động sản nào <?= $keyword ? "phù hợp với từ khóa “" . htmlspecialchars($keyword) . "”" : "để hiển thị" ?>.
+                        <td colspan="7" class="text-center text-gray-500 py-6">
+                            Không có sản phẩm nào phù hợp.
                         </td>
                     </tr>
                 <?php else: ?>
-                    <?php foreach ($products as $p): ?>
+                    <?php foreach ($products as $product): ?>
                         <tr class="hover:bg-gray-50 transition">
                             <td class="px-4 py-3">
-                                <img src="../../../storage/bds/<?= htmlspecialchars($p['anh_dai_dien']) ?>" 
-                                     alt="Ảnh" class="w-16 h-16 object-cover rounded-lg border">
+                                <img src="../../../storage/bds/<?= e($product['anh_dai_dien']) ?>" alt="Ảnh <?= e($product['tieu_de']) ?>" class="w-16 h-16 object-cover rounded-lg border">
                             </td>
                             <td class="px-4 py-3 text-sm font-semibold text-gray-800">
-                                <?= htmlspecialchars($p['tieu_de']) ?>
-                                <p class="text-xs text-gray-500 mt-1">
-                                    <?= date("d/m/Y", strtotime($p['ngay_dang'])) ?>
+                                <?= e($product['tieu_de']) ?>
+                                <p class="text-xs text-gray-500 mt-1 font-normal">
+                                    <i class="fas fa-calendar-alt fa-fw"></i> <?= date("d/m/Y", strtotime($product['ngay_dang'])) ?>
+                                </p>
+                                <p class="text-xs text-gray-500 mt-1 font-normal">
+                                    <i class="fas fa-ruler-combined fa-fw"></i> <?= e($product['dien_tich']) ?> m²
                                 </p>
                             </td>
                             <td class="px-4 py-3 text-sm text-red-600 font-bold">
-                                <?= number_format($p['gia'], 0, ',', '.') ?> đ
+                                <?= format_price_vietnamese($product['gia']) ?>
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-700"><?= $p['dien_tich'] ?> m²</td>
-                            <td class="px-4 py-3 text-sm text-gray-700"><?= htmlspecialchars($p['khu_vuc']) ?></td>
-                            <td class="px-4 py-3 text-sm text-gray-700 capitalize"><?= htmlspecialchars($p['loai']) ?></td>
+                            <td class="px-4 py-3 text-sm text-gray-700"><?= e($product['khu_vuc']) ?></td>
                             <td class="px-4 py-3 text-sm">
                                 <?php
-                                    $statusColors = [
-                                        'chuaduyet' => 'bg-yellow-100 text-yellow-800',
-                                        'daduyet'   => 'bg-green-100 text-green-800',
-                                        'daban'     => 'bg-red-100 text-red-800',
-                                        'dathue'    => 'bg-blue-100 text-blue-800'
-                                    ];
-                                    $statusText = [
-                                        'chuaduyet' => 'Chờ duyệt',
-                                        'daduyet'   => 'Đã duyệt',
-                                        'daban'     => 'Đã bán',
-                                        'dathue'    => 'Đã thuê'
-                                    ];
-                                    $class = $statusColors[$p['trang_thai']] ?? 'bg-gray-100 text-gray-700';
-                                    $label = $statusText[$p['trang_thai']] ?? 'Không rõ';
+                                    $status_info = $status_map[$product['trang_thai']] ?? $status_map['default'];
                                 ?>
-                                <span class="px-2 py-1 rounded-full text-xs font-semibold <?= $class ?>">
-                                    <?= $label ?>
+                                <span class="px-2 py-1 rounded-full text-xs font-semibold <?= $status_info['class'] ?>">
+                                    <?= e($status_info['label']) ?>
                                 </span>
                             </td>
                             <td class="px-4 py-3 text-yellow-500">
-                                <?php $rating = (int)round($p['rating']); ?>
                                 <?php for ($i = 1; $i <= 5; $i++): ?>
-                                    <?php if ($i <= $rating): ?>
-                                        <i class="fas fa-star"></i>
-                                    <?php else: ?>
-                                        <i class="far fa-star"></i>
-                                    <?php endif; ?>
+                                    <i class="<?= $i <= round($product['rating']) ? 'fas' : 'far' ?> fa-star"></i>
                                 <?php endfor; ?>
-                                <span class="text-gray-500 text-xs ml-1">(<?= number_format($p['rating'], 1) ?>/5)</span>
+                                <span class="text-gray-500 text-xs ml-1">(<?= number_format($product['rating'], 1) ?>)</span>
                             </td>
                             <td class="px-4 py-3 text-center">
-                                <a href="#" class="text-blue-600 hover:text-blue-800 mr-3 text-sm" title="Chỉnh sửa">
+                                <a href="trangchu.php?page=../moi_gioi/sua_san_pham&id=<?= e($product['id']) ?>" class="text-blue-600 hover:text-blue-800 mr-3 text-sm" title="Chỉnh sửa">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <a href="#" class="text-red-600 hover:text-red-800 text-sm" title="Xóa">
-                                    <i class="fas fa-trash-alt"></i>
-                                </a>
+                                <form action="../../models/xoa_san_pham.php" method="POST" class="inline-block" onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?');">
+                                    <input type="hidden" name="id_bds" value="<?= e($product['id']) ?>">
+                                    <button type="submit" class="text-red-600 hover:text-red-800 text-sm" title="Xóa">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                     <?php endforeach; ?>

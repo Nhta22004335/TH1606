@@ -1,46 +1,11 @@
 <?php
 // Giả lập môi trường và kết nối CSDL để có thể xem trước
 // Trong môi trường thực tế, bạn sẽ sử dụng file kết nối thật
-// require_once "../../../config/database.php";
-// $pdo = ketnoicsdl();
+require_once "../../../config/database.php";
+$pdo = ketnoicsdl();
 
-if (!isset($pdo)) {
-    class MockPDO {
-        public function prepare($sql) { return $this; }
-        public function execute($params = []) {}
-        public function fetchAll($fetch_style = 0) {
-            // Dữ liệu giả lập đã được nhóm lại theo yêu cầu
-            return [
-                [
-                    'id' => '7a6fa374-5628-4870-be48-a4ea18aef621',
-                    'ho_ten' => 'Trương Quốc Đặng',
-                    'email' => 'dang.tq@example.com',
-                    'so_lan_quan_tam' => 5,
-                    'ngay_quan_tam_moi_nhat' => '2025-10-09 11:00:00'
-                ],
-                [
-                    'id' => 'ea5c0d77-9ce2-4309-b0e7-cbe579f9209d',
-                    'ho_ten' => 'Lê Ngọc Quỳnh',
-                    'email' => 'quynh.ln@example.com',
-                    'so_lan_quan_tam' => 3,
-                    'ngay_quan_tam_moi_nhat' => '2025-10-09 10:30:00'
-
-                ],
-                [
-                    'id' => 'ab76fa3c-893e-487d-983f-d8429ee95436',
-                    'ho_ten' => 'Nguyễn Tuấn Anh',
-                    'email' => 'anh.nt@example.com',
-                    'so_lan_quan_tam' => 1,
-                    'ngay_quan_tam_moi_nhat' => '2025-10-08 15:00:00'
-                ],
-            ];
-        }
-    }
-    $pdo = new MockPDO();
-}
 
 // Lấy id BĐS từ GET
-$id_bds = $_GET['id_bds'] ?? '9b17fb30-8c6e-4494-920a-cbdd1621ee20'; // UUID BĐS mẫu để xem trước
 $khachhang_quantam = [];
 $error_msg = null;
 
@@ -49,10 +14,7 @@ function is_valid_uuid($uuid) {
     return preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $uuid);
 }
 
-if (!is_valid_uuid($id_bds)) {
-    $error_msg = "Mã bất động sản không hợp lệ. Vui lòng kiểm tra lại URL.";
-} else {
-    try {
+try {
         // Câu truy vấn được cập nhật để nhóm theo khách hàng và đếm số lần quan tâm
         $sql = "
             SELECT
@@ -67,20 +29,18 @@ if (!is_valid_uuid($id_bds)) {
                 nguoi_dung nd ON yc.id_nguoi_dung = nd.id
             LEFT JOIN
                 info_nguoi_dung info ON nd.id = info.id_nguoi_dung
-            WHERE
-                yc.id_bds = :id_bds
             GROUP BY
                 nd.id, info.ho_ten, nd.email
             ORDER BY
                 ngay_quan_tam_moi_nhat DESC
         ";
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([':id_bds' => $id_bds]);
+        $stmt->execute();
         $khachhang_quantam = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    } catch (PDOException $e) {
-        $error_msg = "Lỗi truy vấn CSDL: " . $e->getMessage();
-        
 }
+catch (PDOException $e) {
+    $error_msg = "Lỗi truy vấn cơ sở dữ liệu: " . $e->getMessage();
+    $khachhang_quantam = [];
 }
 ?>
 
