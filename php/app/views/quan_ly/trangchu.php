@@ -265,7 +265,7 @@
     
     <div class="flex items-center space-x-4">
         <?php if ($is_moigioi): ?>
-            <a href="trangchu.php?page=../moi_gioi/dang_sp" 
+            <a href="trangchu.php?page=../moi_gioi/dang_tin" 
                 class="flex items-center px-4 py-2 border border-gray-200 bg-transparent text-gray-700 text-sm rounded-lg 
                     hover:bg-gray-100 transition duration-300 hidden sm:block">
                 Đăng tin
@@ -303,8 +303,8 @@
                     <a href="trangchu.php?page=../moi_gioi/ql_hoso_canhan" class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition">
                         <i class="fas fa-user-circle w-5 mr-2"></i> Trang cá nhân
                     </a>
-                    <a href="../../models/auth/xuly_dangxuat.php" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition">
-                        <i class="fas fa-sign-out-alt w-5 mr-2"></i> Đăng xuất
+                    <a href="../../models/auth/xuly_quen_matkhau.php?email=<?= $nd['email'] ?>" class="block px-4 py-2 text-sm text-yellow-600 hover:bg-yellow-50 transition">
+                        <i class="fas fa-key w-5 mr-2"></i> Quên mật khẩu
                     </a>
                 </div>
             </div>
@@ -320,12 +320,12 @@
                     if ($page_to_include !== 'trangchu' && file_exists($page_to_include . '.php')) {
                         include $page_to_include . '.php';
                     } else if ($current_page === 'trangchu') {
-                        // Nội dung trang chủ/Dashboard
-                        echo '<div class="p-6 border border-indigo-200 bg-indigo-50 rounded-lg space-y-3">';
-                        echo '<p class="text-xl font-semibold text-indigo-700">Chào mừng, ' . $ind['ho_ten'] . '!</p>';
-                        echo '<p class="text-gray-700">Bạn đang ở Dashboard của hệ thống quản trị Bất Động Sản Đất Việt. Vui lòng sử dụng thanh Menu bên trái để truy cập các chức năng quản lý chi tiết.</p>';
-                        // Thêm các widget Dashboard mẫu ở đây
-                        echo '</div>';
+                        include 'dashboard.php';
+                        // echo '<div class="p-6 border border-indigo-200 bg-indigo-50 rounded-lg space-y-3">';
+                        // echo '<p class="text-xl font-semibold text-indigo-700">Chào mừng, ' . $ind['ho_ten'] . '!</p>';
+                        // echo '<p class="text-gray-700">Bạn đang ở Dashboard của hệ thống quản trị Bất Động Sản Đất Việt. Vui lòng sử dụng thanh Menu bên trái để truy cập các chức năng quản lý chi tiết.</p>';
+                        
+                        // echo '</div>';
                     } else {
                         echo '<div class="p-6 bg-red-50 border border-red-300 text-red-700 rounded-lg">Không tìm thấy nội dung trang. Vui lòng kiểm tra lại đường dẫn: ' . htmlspecialchars($page_to_include) . '.php</div>';
                     }

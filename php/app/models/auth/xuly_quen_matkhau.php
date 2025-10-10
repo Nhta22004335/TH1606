@@ -1,4 +1,5 @@
 <?php
+session_start();
 date_default_timezone_set('Asia/Ho_Chi_Minh');
 require_once "../../../config/database.php";
 $pdo = ketnoicsdl();
@@ -6,13 +7,13 @@ $pdo = ketnoicsdl();
 require_once '../../../config/email.php';
 $mailer = createmailer();
 
-$ten_dang_nhap = trim($_GET['tendangnhap'] ?? '');
+$id = trim($_SESSION['id_nguoi_dung'] ?? '');
 $email = trim($_GET['email'] ?? '');
 
 try {
     // Kiểm tra tài khoản tồn tại
-    $stmt = $pdo->prepare("SELECT * FROM nguoi_dung WHERE ten_dang_nhap = :ten_dang_nhap");
-    $stmt->execute(['ten_dang_nhap' => $ten_dang_nhap]);
+    $stmt = $pdo->prepare("SELECT * FROM nguoi_dung WHERE id = :id");
+    $stmt->execute(['id' => $id]);
     $tk = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$tk) {
@@ -97,6 +98,6 @@ try {
         echo "<script>alert('Lỗi gửi email!');</script>";
     }
 } catch (PDOException $e) {
-    
+    echo "<script>alert('Lỗi gửi email!');</script>";
 }
 ?>

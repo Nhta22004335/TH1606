@@ -119,6 +119,8 @@ CREATE TABLE IF NOT EXISTS yeu_cau_otp (
     CONSTRAINT chk_yeu_cau_otp_time_range CHECK (het_han > bat_dau)
 );
 
+SELECT * FROM yeu_cau_otp
+
 -- 6. Bảng lich_su_xac_thuc (lưu lại vết đăng nhập, đăng ký hay đổi mật khẩu từ người dùng)
 CREATE TABLE IF NOT EXISTS lich_su_xac_thuc (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -427,7 +429,7 @@ CREATE TABLE IF NOT EXISTS thong_bao (
 );
 
 SELECT * FROM thong_bao;
-
+SELECT * FROM nguoi_dung;
 -- 15. Bảng danh_gia_mg (đánh giá môi giới)
 CREATE TABLE IF NOT EXISTS danh_gia_mg (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
