@@ -145,7 +145,7 @@ if (empty($id_giao_dich_url)) {
                     </thead>
                     <tbody>
                         <tr class="border-b border-gray-100">
-                            <td class="p-3">Giá trị hợp đồng / Giá trị bất động sản</td>
+                            <td class="p-3">Giá trị Bất động sản</td>
                             <td class="p-3 text-right">
                                 <?= number_format($tong_gia_tri, 0, ',', '.') ?> VNĐ
                             </td>
