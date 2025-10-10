@@ -1,4 +1,5 @@
 <?php
+// PHP data array for users (as provided in the original code)
     $nd = [
         ["id"=>1, "name"=>"Nguyễn Văn A", "email"=>"a@gmail.com"],
         ["id"=>2, "name"=>"Trần Thị B", "email"=>"b@gmail.com"],
@@ -13,74 +14,77 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gửi thông báo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
 </head>
-<body>
+<body class="bg-gray-100 min-h-screen">
 
-<!-- Header -->
-<header class="flex items-center gap-4 bg-white shadow p-4  border-b-2">
-    <img src="../../../public/assets/anhht/0/notification.gif" alt="Chat" class="w-12 h-12">
-    <h1 class="text-2xl font-bold text-gray-600">Gửi thông báo</h1>
-</header>
+<div class="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
 
-<div class="w-full bg-white p-6">
-    <!-- Khung chọn user -->
-    <div class="mb-4" id="userSelectArea">
-        <label class="block text-gray-600 font-medium mb-2">Tài khoản được chọn</label>
-        <div id="selectedUsers" class="min-h-[80px] border border-gray-300 rounded-lg p-3 bg-gray-50 text-sm text-gray-600">
-            <p class="text-gray-400">Chưa có tài khoản nào được chọn</p>
+    <header class="flex items-center gap-4 bg-white shadow p-4 border-b-2 border-gray-100">
+        <img src="../../../public/assets/anhht/0/notification.gif" alt="Notification" class="w-12 h-12 rounded-full border p-1">
+        <h1 class="text-2xl font-bold text-blue-600">Gửi thông báo</h1>
+    </header>
+
+    <div class="w-full p-6">
+        <div class="mb-6" id="userSelectArea">
+            <label class="block text-gray-700 font-bold mb-2">Tài khoản được chọn</label>
+            <div id="selectedUsers" class="min-h-[80px] border border-gray-300 rounded-lg p-3 bg-gray-50 text-sm text-gray-600 shadow-inner transition duration-150">
+                <p class="text-gray-400">Chưa có tài khoản nào được chọn</p>
+            </div>
+
+            <div class="mt-3 relative">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
+                </div>
+                <input type="text" id="searchUser" placeholder="Tìm kiếm tài khoản theo tên hoặc email..."
+                    class="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150">
+                
+                <div id="searchResults" class="absolute w-full bg-white border border-gray-200 rounded-lg shadow-xl mt-1 hidden max-h-40 overflow-y-auto z-10"></div>
+            </div>
+        </div>
+        
+        <div class="mb-8 border-t pt-4 border-gray-100">
+            <div class="flex items-center gap-3 bg-blue-50 p-3 rounded-lg border border-blue-200">
+                <input type="checkbox" id="selectAll" class="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                <label for="selectAll" class="text-blue-700 font-semibold cursor-pointer select-none">Chọn tất cả tài khoản</label>
+            </div>
+        </div>
+        
+        <div class="mb-6">
+            <label class="block text-gray-700 font-bold mb-3">Hình thức gửi</label>
+            <div class="flex gap-8">
+                <label class="flex items-center gap-2 bg-white p-3 border border-gray-300 rounded-lg shadow-sm hover:border-blue-500 transition duration-150 cursor-pointer">
+                    <input type="radio" name="sendMethod" value="email" class="w-4 h-4 text-blue-500 border-gray-300 focus:ring-blue-500" required>
+                    <i class="fa-solid fa-envelope text-lg text-blue-500"></i><span class="font-medium text-gray-700">Email</span>
+                </label>
+                <label class="flex items-center gap-2 bg-white p-3 border border-gray-300 rounded-lg shadow-sm hover:border-blue-500 transition duration-150 cursor-pointer">
+                    <input type="radio" name="sendMethod" value="chat" class="w-4 h-4 text-blue-500 border-gray-300 focus:ring-blue-500" required>
+                    <i class="fa-regular fa-comments text-lg text-blue-500"></i><span class="font-medium text-gray-700">Hộp thoại chat</span>
+                </label>
+            </div>
         </div>
 
-        <!-- Ô tìm kiếm -->
-        <div class="mt-3 relative">
-            <input type="text" id="searchUser" placeholder="Tìm kiếm tài khoản..."
-                class="w-full border border-gray-300 rounded-lg p-2 outline-none focus:ring focus:ring-blue-200 focus:border-blue-400">
-            <!-- Gợi ý kết quả -->
-            <div id="searchResults" class="absolute w-full bg-white border border-gray-200 rounded-lg shadow mt-1 hidden max-h-40 overflow-y-auto z-10"></div>
+        <div class="mb-4">
+            <label for="title" class="block text-gray-700 font-bold mb-2">Tiêu đề</label>
+            <input type="text" id="title" class="w-full rounded-lg shadow-sm outline-none focus:ring-2 focus:ring-blue-500 p-3 border border-gray-300" placeholder="Nhập tiêu đề thông báo..." required>
         </div>
-    </div>
 
-    <!-- Checkbox chọn tất cả -->
-    <div class="mb-6 flex items-center gap-2">
-        <input type="checkbox" id="selectAll" class="w-4 h-4 text-blue-500 border-gray-300 rounded">
-        <label for="selectAll" class="text-gray-700">Chọn tất cả tài khoản</label>
-    </div>
-
-    <!-- Hình thức gửi -->
-    <div class="mb-6">
-        <label class="block text-gray-600 font-medium mb-2">Hình thức gửi</label>
-        <div class="flex gap-6">
-            <label class="flex items-center gap-2">
-                <input type="radio" name="sendMethod" value="email" class="w-4 h-4 text-blue-500 border-gray-300">
-                <i class="fa-solid fa-envelope text-blue-400"></i><span>Email</span>
-            </label>
-            <label class="flex items-center gap-2">
-                <input type="radio" name="sendMethod" value="chat" class="w-4 h-4 text-blue-500 border-gray-300">
-                <i class="fa-regular fa-comments text-blue-400"></i><span>Hộp thoại chat</span>
-            </label>
+        <div class="mb-8">
+            <label for="content" class="block text-gray-700 font-bold mb-2">Nội dung</label>
+            <textarea id="content" rows="5" class="w-full rounded-lg shadow-sm outline-none focus:ring-2 focus:ring-blue-500 p-3 border border-gray-300 resize-y" placeholder="Nhập nội dung thông báo..." required></textarea>
         </div>
-    </div>
 
-    <!-- Tiêu đề -->
-    <div class="mb-4">
-        <label class="block text-gray-600 font-medium mb-2">Tiêu đề</label>
-        <input type="text" id="title" class="w-full rounded-lg shadow-sm outline-none focus:ring focus:ring-blue-200 p-2 border border-gray-300" placeholder="Nhập tiêu đề thông báo...">
-    </div>
-
-    <!-- Nội dung -->
-    <div class="mb-6">
-        <label class="block text-gray-600 font-medium mb-2">Nội dung</label>
-        <textarea id="content" rows="4" class="w-full rounded-lg shadow-sm outline-none focus:ring focus:ring-blue-200 p-2 border border-gray-300" placeholder="Nhập nội dung thông báo..."></textarea>
-    </div>
-
-    <!-- Nút gửi -->
-    <div class="flex justify-end">
-        <button id="sendBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-5 rounded-lg shadow flex items-center gap-2 transition">
-            <i class="fa-solid fa-paper-plane"></i> Gửi thông báo
-        </button>
+        <div class="flex justify-end">
+            <button id="sendBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg flex items-center gap-2 transition duration-300 transform hover:scale-[1.02]">
+                <i class="fa-solid fa-paper-plane"></i> Gửi thông báo
+            </button>
+        </div>
     </div>
 </div>
 
 <script>
+    // PHP data is converted to a JavaScript array
     const users = <?php echo json_encode($nd); ?>;
 
     const searchInput = document.getElementById("searchUser");
@@ -97,10 +101,23 @@
             selectedUsers.innerHTML = `<p class="text-gray-400">Chưa có tài khoản nào được chọn</p>`;
             return;
         }
+        // Added a clickable 'X' for removing users
         selectedUsers.innerHTML = chosenUsers.map(u =>
-            `<span class="inline-block bg-green-100 text-green-700 px-2 py-1 rounded-lg mr-2 mb-2"><i class="fa-solid fa-user mr-1"></i>${u.name}</span>`
+            `<span data-id="${u.id}" class="inline-flex items-center bg-green-100 text-green-800 px-3 py-1 rounded-full mr-2 mb-2 text-sm font-medium">
+                <i class="fa-solid fa-user mr-2"></i>${u.name}
+                <button type="button" class="ml-2 text-green-600 hover:text-green-900 remove-user-btn leading-none" data-id="${u.id}">&times;</button>
+            </span>`
         ).join("");
     }
+    
+    // Xóa user đã chọn
+    selectedUsers.addEventListener("click", (e) => {
+        if (e.target.classList.contains("remove-user-btn")) {
+            const idToRemove = e.target.getAttribute("data-id");
+            chosenUsers = chosenUsers.filter(u => u.id != idToRemove);
+            renderSelectedUsers();
+        }
+    });
 
     // Tìm kiếm user
     searchInput.addEventListener("input", () => {
@@ -110,16 +127,19 @@
             return;
         }
 
+        // Filter out users already in chosenUsers
         const filtered = users.filter(u =>
-            u.name.toLowerCase().includes(keyword) || u.email.toLowerCase().includes(keyword)
+            (u.name.toLowerCase().includes(keyword) || u.email.toLowerCase().includes(keyword)) && 
+            !chosenUsers.some(cu => cu.id === u.id)
         );
 
         if (filtered.length === 0) {
-            searchResults.innerHTML = `<p class="p-2 text-gray-500">Không tìm thấy</p>`;
+            searchResults.innerHTML = `<p class="p-3 text-gray-500 italic">Không tìm thấy hoặc đã chọn tất cả kết quả</p>`;
         } else {
             searchResults.innerHTML = filtered.map(u =>
-            `<div class="p-2 hover:bg-blue-50 cursor-pointer" data-id="${u.id}">
-                <i class="fa-solid fa-user text-gray-500 mr-1"></i>${u.name} - ${u.email}
+            `<div class="p-3 hover:bg-blue-50 cursor-pointer transition duration-100 border-b border-gray-100 last:border-b-0" data-id="${u.id}">
+                <div class="font-medium text-gray-800">${u.name}</div>
+                <div class="text-sm text-gray-500">${u.email}</div>
             </div>`
             ).join("");
         }
@@ -128,14 +148,17 @@
 
     // Chọn user từ danh sách gợi ý
     searchResults.addEventListener("click", (e) => {
-        const id = e.target.closest("div")?.getAttribute("data-id");
-        if (!id) return;
-
+        const item = e.target.closest("div[data-id]");
+        if (!item) return;
+        
+        const id = item.getAttribute("data-id");
         const user = users.find(u => u.id == id);
+        
         if (user && !chosenUsers.some(u => u.id == id)) {
             chosenUsers.push(user);
             renderSelectedUsers();
         }
+        // Clear search input and hide results after selection
         searchInput.value = "";
         searchResults.classList.add("hidden");
     });
@@ -145,17 +168,19 @@
         if (this.checked) {
             userSelectArea.style.display = "none"; 
             selectedUsers.innerHTML = `
-            <span class="inline-block bg-blue-100 text-blue-600 px-2 py-1 rounded-lg mr-2 mb-2">
+            <span class="inline-block bg-blue-100 text-blue-700 px-3 py-1 rounded-full mr-2 mb-2 font-medium">
                 <i class="fa-solid fa-users mr-1"></i>Tất cả người dùng
             </span>
             `;
+            // Clear chosenUsers so it's not confused with "All"
+            chosenUsers = [];
         } else {
             userSelectArea.style.display = "block"; 
-            chosenUsers = [];
-            renderSelectedUsers();
+            renderSelectedUsers(); // Re-render if there were previous selections
         }
     });
-
+    
+    // Gửi thông báo
     document.getElementById("sendBtn").addEventListener("click", () => {
         const title = document.getElementById("title").value.trim();
         const content = document.getElementById("content").value.trim();
@@ -170,14 +195,19 @@
             return;
         }
         if (!selectAll.checked && chosenUsers.length === 0) {
-            alert("⚠️ Vui lòng chọn ít nhất một tài khoản!");
+            alert("⚠️ Vui lòng chọn ít nhất một tài khoản hoặc chọn 'Tất cả tài khoản'!");
             return;
         }
 
         const recipients = selectAll.checked ? "Tất cả người dùng" : chosenUsers.map(u => u.name).join(", ");
+        const methodDisplay = method.value === 'email' ? 'Email' : 'Hộp thoại chat';
 
-        alert(`✅ Gửi thành công!\n\n👥 Người nhận: ${recipients}\n📢 Tiêu đề: ${title}\n📧 Qua: ${method.value}`);
+        // Prepare the final alert message
+        alert(`✅ Gửi thành công!\n\n👥 Người nhận: ${recipients}\n📢 Tiêu đề: ${title}\n📧 Hình thức: ${methodDisplay}\n\nNội dung đã gửi: "${content.substring(0, 50)}..."`);
     });
+    
+    // Initial render
+    renderSelectedUsers();
 </script>
 </body>
 </html>

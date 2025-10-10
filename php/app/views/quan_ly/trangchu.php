@@ -333,7 +333,7 @@
         </main>
         
         <footer class="h-12 bg-white border-t border-gray-200 flex items-center justify-center text-xs text-gray-500 shadow-inner">
-            © 2025 Đất Việt BDS. Thiết kế giao diện Quản trị đơn giản và trực quan.
+            © 2025 Đất Việt BDS. Quản trị BĐS: Minh bạch, Hiệu quả, Tăng trưởng.
         </footer>
     </div>
 </div>

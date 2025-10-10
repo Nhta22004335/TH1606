@@ -68,12 +68,6 @@
 </head>
 <body>
 
-<!-- Header -->
-<header class="flex items-center gap-4 bg-white shadow p-4">
-    <img src="../../../public/assets/anhht/0/discussion.gif" alt="Chat" class="w-12 h-12">
-    <h1 class="text-2xl font-bold text-gray-600">Quản lý hộp thoại chat</h1>
-</header>
-
 <main class="flex flex-1 p-4 gap-4 bg-gray-50">
     <!-- Danh sách chat -->
     <aside class="w-1/3 bg-white rounded-xl shadow overflow-y-auto h-[600px]">

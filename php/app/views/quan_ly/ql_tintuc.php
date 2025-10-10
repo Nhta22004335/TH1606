@@ -32,8 +32,6 @@
     $moigioi = $_GET['moigioi'] ?? '';
     $ngaydang = $_GET['ngaydang'] ?? '';
 
-    echo '<pre>'; print_r([$chuyenmuc, $moigioi, $ngaydang]); echo '</pre>';
-    
     if ($chuyenmuc || $moigioi || $ngaydang) {
         $filtered_tintuc = [];
         foreach ($tintuc as $tin) {
@@ -56,8 +54,6 @@
         }
         $tintuc = $filtered_tintuc;
     }
-
-    echo '<pre>'; print_r($tintuc); echo '</pre>'; 
 ?>
 
 <!DOCTYPE html>
@@ -98,9 +94,10 @@
                         <label for="chuyenmuc-filter" class="block text-sm font-medium text-slate-700">Chuyên mục</label>
                         <select id="chuyenmuc-filter" name="chuyenmuc" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
                             <option value="">Tất cả</option>
-                            <option value="Căn hộ">Căn hộ</option>
-                            <option value="Đất nền">Đất nền</option>
-                            <option value="Biệt thự">Biệt thự</option>
+                            <option value="canho">Căn hộ</option>
+                            <option value="datnen">Đất nền</option>
+                            <option value="bietthu">Biệt thự</option>
+                            <option value="nhapho">Nhà phố</option>
                         </select>
                     </div>
                     <div>
