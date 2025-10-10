@@ -1,265 +1,212 @@
 <?php
-
-// ====================================================================
-// PHẦN 1: CẤU HÌNH KẾT NỐI CSDL (Sử dụng PDO cho PostgreSQL)
-// ====================================================================
-
-// THAY THẾ CÁC THÔNG SỐ KẾT NỐI CỦA BẠN TẠI ĐÂY!
-    
     require_once "../../../config/database.php";
     $pdo = ketnoicsdl();
 
-    $id = $_SESSION['id_nguoi_dung'];
+    $sql = "SELECT t.id, t.tieu_de, t.mo_ta, t.chuyen_muc, t.anh_tin, t.ngay_dang, COALESCE(t.luot_xem, 0) AS luot_xem, u.so_dt AS sdt, u.avt, COALESCE(i.ho_ten, u.ten_dang_nhap) AS ten_moi_gioi 
+        FROM tin_tuc t JOIN nguoi_dung u ON t.id_khach_hang = u.id 
+        LEFT JOIN info_nguoi_dung i ON u.id = i.id_nguoi_dung 
+        WHERE t.trang_thai IN ('choduyet', 'dangban', 'daban', 'dathue') 
+        ORDER BY t.ngay_dang DESC, luot_xem DESC";
+    $stmt = $pdo->query($sql);
+    $data = $stmt->fetchAll();
 
 
-// Truy vấn JOIN để lấy thông tin Tin tức, Người dùng và Thông tin chi tiết Người dùng.
-// Giả định thêm cột 'luot_xem' (lượt xem) vào bảng tin_tuc cho mục đích sắp xếp/hiển thị.
-$sql = "
-    SELECT 
-        t.id, t.tieu_de, t.mo_ta, t.chuyen_muc, t.anh_tin, t.ngay_dang,
-        -- Giả định cột luot_xem, mặc định là 0 nếu không tồn tại hoặc NULL
-        COALESCE(t.luot_xem, 0) AS luot_xem, 
-        
-        -- Thông tin Môi giới (Người đăng)
-        u.so_dt AS sdt, u.avt, 
-        
-        -- Thông tin cá nhân chi tiết của người đăng
-        COALESCE(i.ho_ten, u.ten_dang_nhap) AS ten_moi_gioi
-        
-    FROM 
-        tin_tuc t
-    JOIN 
-        nguoi_dung u ON t.id_khach_hang = u.id
-    LEFT JOIN 
-        info_nguoi_dung i ON u.id = i.id_nguoi_dung
-    WHERE
-        t.trang_thai IN ('dangban', 'daban', 'dathue') -- Chỉ lấy tin đã được duyệt
-    ORDER BY 
-        t.ngay_dang DESC, luot_xem DESC
-";
-
-$stmt = $pdo->query($sql);
-$data = $stmt->fetchAll();
-
-// ====================================================================
-// PHẦN 3: XỬ LÝ VÀ PHÂN LOẠI DỮ LIỆU CHO GIAO DIỆN
-// ====================================================================
-
-$noibat = []; 
-$tintuc = [];
-
-if (count($data) > 0) {
-    // A. Tin nổi bật (Tin mới nhất/lượt xem cao nhất)
-    $first_tin = array_shift($data); // Lấy tin đầu tiên ra khỏi mảng $data
-
-    $noibat = [
-        'img'       => htmlspecialchars($first_tin['anh_tin']),
-        'chuyenmuc' => htmlspecialchars($first_tin['chuyen_muc']),
-        'tieude'    => htmlspecialchars($first_tin['tieu_de']),
-        // Giới hạn mô tả để hiển thị gọn gàng
-        'mota'      => htmlspecialchars(substr($first_tin['mo_ta'], 0, 300)) . (strlen($first_tin['mo_ta']) > 300 ? '...' : ''), 
-        'moigioi'   => htmlspecialchars($first_tin['ten_moi_gioi']),
-        'avt'       => htmlspecialchars($first_tin['avt']),
-        'sdt'       => htmlspecialchars($first_tin['sdt']),
-        'ngay'      => date('d/m/Y', strtotime($first_tin['ngay_dang'])), // Định dạng ngày tháng
-        'view'      => $first_tin['luot_xem'],
-    ];
-
-    // B. Danh sách tin tức còn lại cho slider
-    foreach ($data as $tin) {
-        $tintuc[] = [
-            'img'       => htmlspecialchars($tin['anh_tin']),
-            'tieude'    => htmlspecialchars($tin['tieu_de']),
-            // Giới hạn mô tả cho slider
-            'mota'      => htmlspecialchars(substr($tin['mo_ta'], 0, 100)) . (strlen($tin['mo_ta']) > 100 ? '...' : ''),
-            'moigioi'   => htmlspecialchars($tin['ten_moi_gioi']),
-            'avt'       => htmlspecialchars($tin['avt']),
-            'sdt'       => htmlspecialchars($tin['sdt']),
-            'ngay'      => date('d/m/Y', strtotime($tin['ngay_dang'])),
-            'view'      => $tin['luot_xem'],
+    $noibat = [];
+    $tintuc = [];
+    if (count($data) > 0) {
+        $first_tin = array_shift($data);
+        $noibat = [
+            'img' => htmlspecialchars($first_tin['anh_tin']), 'chuyenmuc' => htmlspecialchars($first_tin['chuyen_muc']), 'tieude' => htmlspecialchars($first_tin['tieu_de']), 'mota' => htmlspecialchars(substr($first_tin['mo_ta'], 0, 200)) . (strlen($first_tin['mo_ta']) > 200 ? '...' : ''), 'moigioi' => htmlspecialchars($first_tin['ten_moi_gioi']), 'avt' => htmlspecialchars($first_tin['avt']), 'sdt' => htmlspecialchars($first_tin['sdt']), 'ngay' => date('d/m/Y', strtotime($first_tin['ngay_dang'])), 'view' => $first_tin['luot_xem'],
         ];
+        foreach ($data as $tin) {
+            $tintuc[] = [
+                'img' => htmlspecialchars($tin['anh_tin']), 'tieude' => htmlspecialchars($tin['tieu_de']), 'mota' => htmlspecialchars(substr($tin['mo_ta'], 0, 100)) . (strlen($tin['mo_ta']) > 100 ? '...' : ''), 'moigioi' => htmlspecialchars($tin['ten_moi_gioi']), 'avt' => htmlspecialchars($tin['avt']), 'sdt' => htmlspecialchars($tin['sdt']), 'ngay' => date('d/m/Y', strtotime($tin['ngay_dang'])), 'view' => $tin['luot_xem'], 'chuyenmuc' => htmlspecialchars($tin['chuyen_muc']),
+            ];
+        }
+    } else {
+        $noibat = ['img' => 'chuacapnhat.png', 'chuyenmuc' => 'Chưa cập nhật', 'tieude' => 'Hiện chưa có tin tức nào.', 'mota' => 'Vui lòng kiểm tra lại hoặc thêm dữ liệu mới.', 'moigioi' => 'Hệ thống', 'avt' => 'avt.png', 'sdt' => 'N/A', 'ngay' => date('d/m/Y'), 'view' => 0];
     }
-} else {
-    // Dữ liệu mặc định nếu không có tin nào
-    $noibat = [
-        'img' => 'chuacapnhat.png', 'chuyenmuc' => 'Chưa cập nhật', 'tieude' => 'Hiện chưa có tin tức bất động sản nào.', 
-        'mota' => 'Vui lòng kiểm tra lại trạng thái tin tức hoặc thêm dữ liệu mới vào hệ thống.', 'moigioi' => 'Hệ thống', 
-        'avt' => 'avt.png', 'sdt' => '000000000', 'ngay' => date('d/m/Y'), 'view' => 0
-    ];
-}
 
-// ====================================================================
-// PHẦN 4: ĐÓNG PHP VÀ TIẾP TỤC VỚI HTML
-// ====================================================================
+    // Xử lý bộ lọc từ URL
+    $chuyenmuc = $_GET['chuyenmuc'] ?? '';
+    $moigioi = $_GET['moigioi'] ?? '';
+    $ngaydang = $_GET['ngaydang'] ?? '';
 
+    echo '<pre>'; print_r([$chuyenmuc, $moigioi, $ngaydang]); echo '</pre>';
+    if ($chuyenmuc || $moigioi || $ngaydang) {
+        echo "helo";
+        $filtered_tintuc = [];
+        foreach ($tintuc as $tin) {
+            $match = true;
+            if ($chuyenmuc && strcasecmp($tin['chuyenmuc'], $chuyenmuc) !== 0) {
+                $match = false;
+            }
+            if ($moigioi && stripos($tin['moigioi'], $moigioi) === false) {
+                $match = false;
+            }
+            if ($ngaydang) {
+                $tin_ngay = date('Y-m-d', strtotime($tin['ngay']));
+                if ($tin_ngay !== $ngaydang) {
+                    $match = false;
+                }
+            }
+            if ($match) {
+                $filtered_tintuc[] = $tin;
+            }
+        }
+        $tintuc = $filtered_tintuc;
+    }
+
+    echo '<pre>'; print_r($tintuc); echo '</pre>'; 
 ?>
 
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" class="h-full bg-slate-50">
 <head>
     <meta charset="UTF-8">
     <title>Tin tức Bất động sản</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>[x-cloak] { display: none !important; }</style>
 </head>
-<body>
+<body class="h-full">
 
-<div class="max-w-7xl mx-auto px-4">
-    
-    <div class="flex justify-between items-center mb-6 mt-4 px-4 py-2 rounded-lg ">
-        <h1 class="flex items-center text-2xl font-bold text-gray-600">
-            <img src="../../../storage/pictures/avt/avt.png" 
-                 class="w-12 h-12 mr-3 ml-4 rounded-full border border-gray-300">
-            Quản lý tin tức
-        </h1>
-
-        <button onclick="document.getElementById('filterPanel').classList.remove('hidden')" 
-            class="md:hidden bg-blue-600 text-white px-3 py-2 rounded-lg shadow hover:bg-blue-700 transition">
-            <i class="fas fa-filter"></i>
-        </button>
-    </div>
-
-
-    <div class="flex gap-6">
-
-    <aside id="filterPanel" 
-        class="hidden md:block fixed md:static top-0 right-0 w-72 h-full md:h-fit bg-white shadow rounded-xl p-4 z-50 transition-transform">
-        <div class="flex items-center justify-between md:block mb-4">
-            <h2 class="text-lg font-semibold flex items-center gap-2">
-                <span>🔍</span> Bộ lọc
-            </h2>
-            <button onclick="document.getElementById('filterPanel').classList.add('hidden')" 
-                class="md:hidden text-gray-500 text-2xl">&times;</button>
-        </div>
-
-        <label class="block text-sm mb-2">Loại tin</label>
-        <select class="w-full border rounded-lg p-2 mb-4 outline-none focus:ring-0 focus:border-blue-500">
-            <option>Tất cả</option>
-            <option>Đất nền</option>
-            <option>Căn hộ</option>
-            <option>Biệt thự</option>
-            <option>Nhà phố</option>
-        </select>
-
-        <label class="block text-sm mb-2">Môi giới</label>
-        <input type="text" placeholder="Tên môi giới"
-            class="w-full border rounded-lg p-2 mb-4 outline-none focus:ring-0 focus:border-blue-500">
-
-        <label class="block text-sm mb-2">Ngày đăng</label>
-        <input type="date"
-            class="w-full border rounded-lg p-2 mb-4 outline-none focus:ring-0 focus:border-blue-500">
-
-        <label class="block text-sm mb-2">Sắp xếp theo</label>
-        <select class="w-full border rounded-lg p-2 outline-none focus:ring-0 focus:border-blue-500">
-            <option>Mới nhất</option>
-            <option>Lượt xem cao</option>
-        </select>
-
-        <button class="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">Áp dụng</button>
-    </aside>
-
-    <main class="flex-1 min-w-0">
-        <div class="bg-white rounded-xl shadow overflow-hidden mb-6">
-            <img src="../../../storage/pictures/chuacapnhat.jpg" class="w-full h-80 object-cover">
-            <div class="p-6">
-            <span class="text-sm text-blue-600 uppercase font-medium"><?= $noibat['chuyenmuc'] ?></span>
-            <h2 class="text-2xl font-bold mt-2 mb-2"><?= $noibat['tieude'] ?></h2>
-            <p class="text-gray-600 mb-3"><?= $noibat['mota'] ?></p>
-
-            <div class="flex items-center gap-3 mb-3">
-                <img src="../../../storage/pictures/avt/<?= $noibat['avt'] ?>" class="w-10 h-10 rounded-full border">
-                <div>
-                <p class="font-semibold"><?= $noibat['moigioi'] ?></p>
-                <p class="text-xs text-gray-500"><?= $noibat['sdt'] ?></p>
-                </div>
+<div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <header class="mb-8">
+        <div class="sm:flex sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight text-slate-900">Bảng tin Bất động sản</h1>
+                <p class="mt-2 text-base text-slate-600">Khám phá các tin tức, xu hướng và cơ hội đầu tư mới nhất.</p>
             </div>
-
-            <div class="flex gap-2 mt-3 mb-3"> 
-                <a href="#" class="flex-1 text-center px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700">Chi tiết</a> 
-                <button class="flex-1 px-2 py-1 bg-yellow-500 text-white text-xs rounded hover:bg-yellow-600">Đánh dấu</button> 
-                <button class="flex-1 px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700">Xóa</button> 
-            </div>
-
-            <div class="flex justify-between text-sm text-gray-500">
-                <span>📅 <?= $noibat['ngay'] ?></span>
-                <span>👁 <?= number_format($noibat['view']) ?> lượt xem</span>
-            </div>
+            <div class="mt-4 sm:mt-0">
+                <a href="#" class="inline-flex items-center gap-2 px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <i class="fa-solid fa-plus"></i> Thêm tin mới
+                </a>
             </div>
         </div>
-    </main>
-    </div>
+    </header>
 
-    <div class="relative mt-10 mb-8">
-        <h2 class="text-xl font-bold text-gray-700 mb-4">Tin tức khác</h2>
+    <div class="grid grid-cols-1 lg:grid-cols-4 lg:gap-8">
 
-        <?php if (!empty($tintuc)): // Chỉ hiển thị slider nếu có tin tức ?>
-            <button onclick="slideLeft()" 
-                class="absolute left-0 -translate-x-full top-1/2 -translate-y-1/2
-                        bg-blue-500/80 backdrop-blur-md shadow-lg
-                        p-3 rounded-full text-white text-xl
-                        hover:bg-blue-600/90 hover:scale-110
-                        transition transform duration-300 ease-in-out z-10 hidden md:block">
-                <i class="fas fa-chevron-left"></i>
-            </button>
+        <aside class="lg:col-span-1 lg:sticky lg:top-8 self-start">
+            <div class="bg-white p-5 shadow-lg rounded-lg">
+                <h2 class="text-lg font-bold text-slate-800 border-b pb-3 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-filter text-indigo-600"></i> Bộ lọc
+                </h2>
+               <form id="filterForm" class="space-y-4">
+                    <div>
+                        <label for="chuyenmuc-filter" class="block text-sm font-medium text-slate-700">Chuyên mục</label>
+                        <select id="chuyenmuc-filter" name="chuyenmuc" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                            <option value="">Tất cả</option>
+                            <option value="Căn hộ">Căn hộ</option>
+                            <option value="Đất nền">Đất nền</option>
+                            <option value="Biệt thự">Biệt thự</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="moigioi-filter" class="block text-sm font-medium text-slate-700">Tên môi giới</label>
+                        <input type="text" id="moigioi-filter" name="moigioi" placeholder="Nhập tên..." class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label for="ngaydang-filter" class="block text-sm font-medium text-slate-700">Ngày đăng</label>
+                        <input type="date" id="ngaydang-filter" name="ngaydang" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                    </div>
+                    <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">Áp dụng</button>
+                </form>
+            </div>
+        </aside>
 
-            <button onclick="slideRight()" 
-                class="absolute right-0 translate-x-full top-1/2 -translate-y-1/2
-                        bg-blue-500/80 backdrop-blur-md shadow-lg
-                        p-3 rounded-full text-white text-xl
-                        hover:bg-blue-600/90 hover:scale-110
-                        transition transform duration-300 ease-in-out z-10 hidden md:block">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-        <?php endif; ?>
+        <script>
+            // 1. Tìm đến form bằng ID
+            const filterForm = document.getElementById('filterForm');
 
+            // 2. Lắng nghe sự kiện "submit" của form
+            filterForm.addEventListener('submit', function(event) {
+                // 3. Ngăn chặn hành vi submit mặc định (tải lại trang)
+                event.preventDefault();
 
-        <div id="newsSlider" class="flex flex-nowrap gap-6 overflow-x-auto scroll-smooth no-scrollbar py-2">
-            <?php if (empty($tintuc)): ?>
-                <p class="text-gray-500 text-center w-full">Không có tin tức nào khác để hiển thị.</p>
-            <?php endif; ?>
-            <?php foreach ($tintuc as $tin): ?>
-                <div class="bg-white rounded-xl shadow hover:shadow-lg transition w-72 flex-shrink-0 border">
-                    <img src="<?= $tin['img'] ?>" class="w-full h-40 object-cover rounded-t-xl">
-                    <div class="p-4">
-                        <h3 class="font-semibold mt-1 mb-2 hover:text-blue-600 cursor-pointer"><?= $tin['tieude'] ?></h3>
-                        <p class="text-sm text-gray-600 line-clamp-2"><?= $tin['mota'] ?></p>
-                        
-                        <div class="flex items-center gap-2 mt-3">
-                            <img src="<?= $tin['avt'] ?>" class="w-8 h-8 rounded-full border">
+                // 4. Lấy giá trị từ các ô input
+                const chuyenmuc = document.getElementById('chuyenmuc-filter').value;
+                const moigioi = document.getElementById('moigioi-filter').value;
+                const ngaydang = document.getElementById('ngaydang-filter').value;
+
+                // 5. Xây dựng chuỗi truy vấn (query string) bằng URLSearchParams
+                const params = new URLSearchParams();
+
+                // Chỉ thêm tham số vào URL nếu nó có giá trị
+                if (chuyenmuc) {
+                    params.append('chuyenmuc', chuyenmuc);
+                }
+                if (moigioi) {
+                    params.append('moigioi', moigioi);
+                }
+                if (ngaydang) {
+                    params.append('ngaydang', ngaydang);
+                }
+                
+                // Lấy đường dẫn trang hiện tại (không bao gồm query string cũ)
+                const currentPath = window.location.pathname;
+
+                // 6. Điều hướng trang đến URL mới với các tham số đã lọc
+                window.location.href = currentPath + '?page=ql_tintuc&' + params.toString();
+            });
+        </script>
+
+        <main class="lg:col-span-3 mt-8 lg:mt-0">
+            <article class="bg-white rounded-lg shadow-lg overflow-hidden mb-10">
+                <img src="../../../storage/pictures/anhtin/<?= $noibat['img'] ?>" alt="<?= $noibat['tieude'] ?>" class="w-full h-80 object-cover">
+                <div class="p-6">
+                    <span class="text-sm font-semibold text-indigo-600 uppercase"><?= $noibat['chuyenmuc'] ?></span>
+                    <h2 class="text-3xl font-bold mt-2 mb-3 text-slate-900 leading-tight">
+                        <a href="#" class="hover:text-indigo-700 transition-colors"><?= $noibat['tieude'] ?></a>
+                    </h2>
+                    <p class="text-slate-600 mb-5 text-base leading-relaxed"><?= $noibat['mota'] ?></p>
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-t pt-4">
+                        <div class="flex items-center gap-3 mb-4 sm:mb-0">
+                            <img src="../../../storage/pictures/avt/<?= $noibat['avt'] ?>" class="w-11 h-11 rounded-full border-2 border-white shadow">
                             <div>
-                                <p class="text-xs font-semibold"><?= $tin['moigioi'] ?></p>
-                                <p class="text-[11px] text-gray-500"><?= $tin['sdt'] ?></p>
+                                <p class="font-semibold text-slate-800"><?= $noibat['moigioi'] ?></p>
+                                <p class="text-xs text-slate-500"><?= $noibat['ngay'] ?> &bull; <?= number_format($noibat['view']) ?> lượt xem</p>
                             </div>
                         </div>
-
-                        <div class="flex gap-2 mt-3 mb-3"> 
-                            <a href="#" class="flex-1 text-center px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700">Chi tiết</a> 
-                            <button class="flex-1 px-2 py-1 bg-yellow-500 text-white text-xs rounded hover:bg-yellow-600">Đánh dấu</button> 
-                            <button class="flex-1 px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700">Xóa</button> 
-                        </div>
-
-                        <div class="flex justify-between mt-3 text-xs text-gray-500">
-                            <span>📅 <?= $tin['ngay'] ?></span>
-                            <span>👁 <?= number_format($tin['view']) ?></span>
-                        </div>
+                        <a href="#" class="inline-flex items-center gap-2 px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
+                            Đọc tiếp <i class="fa-solid fa-arrow-right"></i>
+                        </a>
                     </div>
                 </div>
-            <?php endforeach; ?>
-        </div>
+            </article>
+
+            <div>
+                <h3 class="text-2xl font-bold text-slate-900 mb-6 border-b pb-3">Tin tức khác</h3>
+                <?php if (empty($tintuc)): ?>
+                    <p class="text-slate-500 text-center py-8">Không có tin tức nào khác để hiển thị.</p>
+                <?php else: ?>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <?php foreach ($tintuc as $tin): ?>
+                            
+                            <article class="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col group">
+                                <img src="../../../storage/pictures/anhtin/<?= $tin['img'] ?>" alt="<?= $tin['tieude'] ?>" class="w-full h-48 object-cover">
+                                <div class="p-5 flex flex-col flex-1">
+                                    <span class="text-xs font-semibold text-indigo-600 uppercase"><?= $tin['chuyenmuc'] ?></span>
+                                    <h4 class="text-lg font-bold mt-2 mb-2 text-slate-900 flex-1">
+                                        <a href="#" class="group-hover:text-indigo-700 transition-colors"><?= $tin['tieude'] ?></a>
+                                    </h4>
+                                    <div class="flex items-center gap-3 mt-4 border-t pt-4">
+                                        <img src="../../../storage/pictures/avt/<?= $tin['avt'] ?>" class="w-9 h-9 rounded-full border-2 border-white shadow">
+                                        <div>
+                                            <p class="text-sm font-semibold text-slate-800"><?= $tin['moigioi'] ?></p>
+                                            <p class="text-xs text-slate-500"><?= $tin['ngay'] ?> &bull; <?= number_format($tin['view']) ?> lượt xem</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </article>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </main>
     </div>
 </div>
-
-<script>
-    const slider = document.getElementById('newsSlider');
-    function slideLeft() { slider.scrollBy({ left: -300, behavior: 'smooth' }); }
-    function slideRight() { slider.scrollBy({ left: 300, behavior: 'smooth' }); }
-</script>
-
-<style>
-    /* Ẩn thanh cuộn mặc định */
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-</style>
 
 </body>
 </html>

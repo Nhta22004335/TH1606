@@ -514,6 +514,19 @@ VALUES
 ('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Mở bán căn hộ Vinhomes', 'Cập nhật thông tin dự án mới nhất tại Vinhomes.', 'Bất động sản', 'choduyet'),
 ('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Những lưu ý khi mua nhà phố', 'Hướng dẫn khách hàng tránh rủi ro khi mua nhà phố.', 'Hướng dẫn', 'choduyet');
 
+INSERT INTO tin_tuc (id_khach_hang, tieu_de, mo_ta, chuyen_muc, trang_thai)
+VALUES
+('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Mở bán căn hộ Vinhomes', 'Cập nhật thông tin dự án mới nhất tại Vinhomes.', 'Dự án', 'choduyet'),
+('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Những lưu ý khi mua nhà phố', 'Hướng dẫn khách hàng tránh rủi ro khi mua nhà phố.', 'Hướng dẫn', 'choduyet'),
+('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Thị trường BĐS cuối năm: Xu hướng nào dẫn đầu?', 'Phân tích các yếu tố vĩ mô ảnh hưởng đến thị trường nhà đất vào quý 4.', 'Phân tích thị trường', 'choduyet'),
+('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', '5 sai lầm pháp lý cần tránh khi đặt cọc mua đất', 'Tổng hợp các rủi ro pháp lý thường gặp và cách phòng tránh để đảm bảo an toàn.', 'Pháp lý', 'choduyet'),
+('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Ra mắt phân khu mới The Ocean tại Aqua City', 'Thông tin chi tiết về chính sách bán hàng và ưu đãi cho phân khu The Ocean.', 'Dự án', 'choduyet'),
+('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Đầu tư căn hộ cho thuê: Lợi nhuận và thách thức', 'Kinh nghiệm lựa chọn vị trí, loại hình căn hộ và quản lý để tối ưu hóa dòng tiền.', 'Đầu tư', 'choduyet'),
+('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Cách chọn hướng nhà hợp tuổi gia chủ', 'Các chuyên gia phong thủy chia sẻ bí quyết chọn hướng nhà đất để thu hút tài lộc.', 'Phong thủy', 'choduyet'),
+('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Xu hướng thiết kế nội thất căn hộ nhỏ gọn', 'Gợi ý các giải pháp nội thất đa năng giúp tối ưu không gian sống.', 'Nội thất', 'choduyet'),
+('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Thủ tục vay vốn ngân hàng mua nhà trả góp', 'Cập nhật lãi suất và quy trình vay vốn từ các ngân hàng lớn.', 'Tài chính', 'choduyet'),
+('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Tiềm năng phát triển của khu đô thị Thủ Thiêm', 'Đánh giá tiềm năng tăng giá và cơ sở hạ tầng của khu vực Thủ Thiêm trong 5 năm tới.', 'Phân tích thị trường', 'choduyet');
+
 select * from tin_tuc
 -- Ví dụ thêm 1 tin đăng
 INSERT INTO tin_dang (id_khach_hang, id_bds, tieu_de, mo_ta, gia, dien_tich, dia_chi, loai, trang_thai)
