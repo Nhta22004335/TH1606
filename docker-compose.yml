@@ -1,32 +1,38 @@
 version: "3.9"
 
 services:
-  php-web:
+  # Service cho ứng dụng web, đổi tên từ 'php-web'
+  bds_web:                                 # <-- THAY ĐỔI 1
     build: .
-    container_name: php-demo
+    container_name: bds_datviet_web        # <-- THAY ĐỔI 2
     ports:
-      - "8080:80"
+      - "8080:80"    # Cổng cho Apache
+      - "3000:3000"  # <-- THÊM CỔNG NÀY cho WebSocket
     depends_on:
-      - pg-demo           # <-- phải trùng với tên service PostgreSQL
+      - bds_db                             # <-- THAY ĐỔI 3 (phải khớp với tên service DB)
     environment:
-      DB_HOST: pg-demo
+      DB_HOST: bds_db                      # <-- THAY ĐỔI 4 (phải khớp với tên service DB)
       DB_USER: postgres
-      DB_PASS: 123456
+      DB_PASS: 22004335
       DB_NAME: csdl_bds
     volumes:
-      - ./php:/var/www/html
+      - ./bds_datviet_1606:/var/www/html
+      # THÊM DÒNG NÀY:
+      # Khai báo một anonymous volume để bảo vệ thư mục node_modules
+      - /var/www/html/socket-server/node_modules
 
-  pg-demo:                 # <-- tên service trùng với DB_HOST và depends_on
+  # Service cho database, đổi tên từ 'pg-demo'
+  bds_db:                                  # <-- THAY ĐỔI 5
     image: postgres:15
-    container_name: pg-demo
+    container_name: bds_datviet_db         # <-- THAY ĐỔI 6
     environment:
       POSTGRES_DB: csdl_bds
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 123456
+      POSTGRES_PASSWORD: 22004335
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - bds_datviet_pgdata:/var/lib/postgresql/data # <-- THAY ĐỔI 7
 
 volumes:
-  pgdata:
+  bds_datviet_pgdata:                      # <-- THAY ĐỔI 8
