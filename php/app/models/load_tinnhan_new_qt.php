@@ -1,4 +1,7 @@
 <?php
+    // =================================================================
+    // PHẦN 1: XỬ LÝ DỮ LIỆU PHP (GIỮ NGUYÊN THEO YÊU CẦU)
+    // =================================================================
     require_once "../../config/database.php";
     $pdo = ketnoicsdl();
     session_start();
@@ -8,7 +11,7 @@
 
     if (!$currentChat) exit;
 
-    // Lấy tin nhắn
+    // Lấy tin nhắn (Logic gốc được giữ nguyên)
     $sql = "
         SELECT 
             ht.id AS id_hop_thoai,
@@ -36,11 +39,11 @@
         GROUP BY ht.id, info_g.ho_ten, info_n.ho_ten, ng.avt, nn.avt, ng.id, nn.id, tn.tg_gui, tn.noi_dung, tn.anh_tn, tn.id, tn.da_thu_hoi, tn.da_xoa
         ORDER BY tg_moi_nhat ASC
     ";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute();
-        $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+    $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Nhóm chat
+    // Nhóm chat (Logic gốc được giữ nguyên)
     $chatGroups = [];
     foreach ($messages as $m) {
         $pair = [$m['ten_nguoi_gui'], $m['ten_nguoi_nhan']];
@@ -51,53 +54,45 @@
 
     $msgs = $chatGroups[$currentChat] ?? [];
 
+    // =================================================================
+    // PHẦN 2: TẠO GIAO DIỆN HTML (ĐÃ CẬP NHẬT ĐỂ ĐỒNG BỘ)
+    // =================================================================
     ob_start();
     foreach ($msgs as $m):
         $isMe = ($m['id_nguoi_gui'] == $currentUser);
-        $align = $isMe ? 'flex-row-reverse text-right' : 'flex-row text-left';
-        $bg = $isMe ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-900';
-        $timestampColor = $isMe ? 'text-blue-200' : 'text-gray-500';
-        // Tính thời gian
-        $sentTime = strtotime($m['tg_gui']);
-        $now = time();
-        $hoursPassed = ($now - $sentTime) / 3600; // số giờ đã trôi qua
+        $align = $isMe ? 'justify-end' : 'justify-start';
+        $bubbleClasses = $isMe ? 'bg-indigo-500 text-white chat-bubble-me' : 'bg-white text-slate-800 chat-bubble-other';
+        $hoursPassed = (time() - strtotime($m['tg_gui'])) / 3600;
     ?>
-    <div class="flex items-start <?= $align ?> gap-3">
-        <img src="../../../storage/pictures/avt/<?= $m['avt_nguoi_gui'] ?>" 
-            alt="<?= htmlspecialchars($m['ten_nguoi_gui']) ?>" 
-            class="w-10 h-10 rounded-full shadow flex-shrink-0">
-        <div class="px-4 py-3 <?= $bg ?> rounded-xl shadow max-w-[70%] break-words relative">
-            <?php if ($m['da_thu_hoi'] === 1): ?>
-                <p class="italic text-white"><i class="fas fa-info-circle"></i> Tin nhắn đã được thu hồi</p>
-            <?php elseif ($m['da_xoa'] === 1): ?>
-                <p class="italic text-white"><i class="fas fa-info-circle"></i> Tin nhắn đã được xóa</p>
-            <?php elseif (!empty($m['anh_tn'])): ?>
-                <p class="font-semibold mb-1"><?= htmlspecialchars($m['ten_nguoi_gui']) ?></p>
-                <!-- Nếu là ảnh -->
-                <img src="../../../storage/pictures/messages/<?= htmlspecialchars($m['anh_tn']) ?>" 
-                    alt="Image" class="max-w-xs rounded-md shadow mb-1">
-            <?php else: ?>
-                <p class="font-semibold mb-1"><?= htmlspecialchars($m['ten_nguoi_gui']) ?></p>
-                <p class="mb-1"><?= nl2br(htmlspecialchars($m['noi_dung'])) ?></p>
-                <p class="text-xs <?= $timestampColor ?>"><?= date('H:i j/n/Y', strtotime($m['tg_gui'])) ?></p>
-                <?php if ($isMe): ?>
-                    <?php if ($hoursPassed <= 24): ?>
-                        <!-- Nút thu hồi, hiển thị khi hover vào tin nhắn -->
-                        <button onclick="revokeMessage('<?= $m['id_hop_thoai'] ?>')" 
-                            class="absolute -left-8 top-16 text-gray-500 hover:text-gray-600 text-sm">
-                            <i class="fas fa-undo"></i>
-                        </button>
-                    <?php else: ?>
-                        <!-- Nút thu hồi, hiển thị khi hover vào tin nhắn -->
-                        <button onclick="deleteMessage('<?= $m['id_hop_thoai'] ?>')" 
-                            class="absolute -left-8 top-16 text-gray-500 hover:text-gray-600 text-sm">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    <?php endif; ?>
+        <div class="flex items-end gap-2.5 <?= $align ?> group">
+            <?php if (!$isMe): ?>
+                <img src="../../../storage/pictures/avt/<?= htmlspecialchars($m['avt_nguoi_gui']) ?>" class="w-8 h-8 rounded-full shadow flex-shrink-0 object-cover">
+            <?php endif; ?>
+
+            <div class="px-4 py-3 shadow-sm max-w-[70%] break-words relative <?= $bubbleClasses ?>">
+                <?php if ($m['da_thu_hoi'] == 1): ?>
+                    <p class="italic text-sm opacity-75"><i class="fas fa-ban"></i> Tin nhắn đã được thu hồi</p>
+                <?php elseif ($m['da_xoa'] == 1): ?>
+                    <p class="italic text-sm opacity-75"><i class="fas fa-ban"></i> Tin nhắn đã được xóa</p>
+                <?php elseif (!empty($m['anh_tn'])): ?>
+                    <img src="../../../storage/pictures/messages/<?= htmlspecialchars($m['anh_tn']) ?>" alt="Image" class="max-w-xs rounded-md shadow mb-1">
+                <?php else: ?>
+                    <p><?= nl2br(htmlspecialchars($m['noi_dung'])) ?></p>
                 <?php endif; ?>
+                <p class="text-xs opacity-60 text-right mt-1"><?= date('H:i', strtotime($m['tg_gui'])) ?></p>
+            </div>
+            
+            <?php if ($isMe && !$m['da_thu_hoi'] && !$m['da_xoa']): ?>
+            <div class="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                <?php if ($hoursPassed <= 24): ?>
+                    <button onclick="revokeMessage('<?= $m['id_tin_nhan'] ?>')" title="Thu hồi" class="text-slate-400 hover:text-indigo-600"><i class="fas fa-undo"></i></button>
+                <?php else: ?>
+                    <button onclick="deleteMessage('<?= $m['id_tin_nhan'] ?>')" title="Xóa" class="text-slate-400 hover:text-red-500"><i class="fas fa-trash"></i></button>
+                <?php endif; ?>
+            </div>
             <?php endif; ?>
         </div>
-    </div>
-    <?php endforeach;
+    <?php 
+    endforeach;
     echo ob_get_clean();
 ?>

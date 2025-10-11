@@ -58,11 +58,9 @@ function format_day_of_week($date_string) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lịch Trình Cá Nhân</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <style>[x-cloak] { display: none !important; }</style>
 </head>
-<body class="h-full" x-data="{ openModal: false, selectedSchedule: null }">
+<body class="h-full">
 
     <header class="mb-6 pb-4 border-b">
         <div class="sm:flex sm:items-center sm:justify-between">
@@ -140,7 +138,10 @@ function format_day_of_week($date_string) {
                                     <div class="flex items-center gap-4 mt-3 sm:mt-0 flex-shrink-0">
                                         <?= get_status_badge($schedule['trang_thai']) ?>
                                         <div class="flex items-center gap-2 text-slate-400">
-                                            <button @click="selectedSchedule = <?= htmlspecialchars(json_encode($schedule)) ?>; openModal = true" class="hover:text-blue-600" title="Xem chi tiết"><i class="fa-solid fa-eye"></i></button>
+                                            <button class="view-details-btn hover:text-blue-600" title="Xem chi tiết" 
+                                                    data-schedule='<?= htmlspecialchars(json_encode($schedule)) ?>'>
+                                                <i class="fa-solid fa-eye"></i>
+                                            </button>
                                             <a href="sua_lichtrinh.php?id=<?= $schedule['id'] ?>" class="hover:text-indigo-600" title="Chỉnh sửa"><i class="fa-solid fa-pen-to-square"></i></a>
                                             <button class="hover:text-red-600" title="Xóa"><i class="fa-solid fa-trash-can"></i></button>
                                         </div>
@@ -154,34 +155,49 @@ function format_day_of_week($date_string) {
         <?php endif; ?>
     </div>
 
-<div x-show="openModal" x-transition.opacity x-cloak class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-    <div @click.away="openModal = false" class="bg-white rounded-xl shadow-2xl w-full max-w-lg transform transition-all"
-         x-show="openModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
-        <div class="p-6" x-if="selectedSchedule">
+<div id="details-modal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 transition-opacity duration-300 opacity-0">
+    <div id="modal-content" class="bg-white rounded-xl shadow-2xl w-full max-w-lg transform transition-all scale-95">
+        <div class="p-6">
             <div class="flex items-start justify-between">
                 <div>
-                    <h2 class="text-xl font-bold text-slate-900" x-text="selectedSchedule.tieu_de"></h2>
-                    <div class="mt-2" x-html="get_status_badge(selectedSchedule.trang_thai)"></div>
+                    <h2 id="modal-tieu_de" class="text-xl font-bold text-slate-900"></h2>
+                    <div id="modal-status" class="mt-2"></div>
                 </div>
-                <button @click="openModal = false" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
+                <button class="close-modal-btn text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
             </div>
             <dl class="mt-5 space-y-4 text-sm">
-                <div><dt class="font-medium text-slate-500">Thời gian</dt><dd class="mt-1 text-slate-800 font-semibold text-base" x-text="new Date(selectedSchedule.thoi_gian).toLocaleString('vi-VN', { dateStyle: 'full', timeStyle: 'short' })"></dd></div>
-                <div><dt class="font-medium text-slate-500">Loại lịch trình</dt><dd class="mt-1 text-slate-800" x-text="selectedSchedule.loai"></dd></div>
-                <div><dt class="font-medium text-slate-500">Địa điểm</dt><dd class="mt-1 text-slate-800" x-text="selectedSchedule.dia_diem"></dd></div>
-                <div><dt class="font-medium text-slate-500">Ghi chú</dt><dd class="mt-1 text-slate-600 italic p-3 bg-slate-50 rounded-md" x-text="selectedSchedule.ghi_chu || 'Không có ghi chú.'"></dd></div>
+                <div><dt class="font-medium text-slate-500">Thời gian</dt><dd id="modal-thoi_gian" class="mt-1 text-slate-800 font-semibold text-base"></dd></div>
+                <div><dt class="font-medium text-slate-500">Loại lịch trình</dt><dd id="modal-loai" class="mt-1 text-slate-800"></dd></div>
+                <div><dt class="font-medium text-slate-500">Địa điểm</dt><dd id="modal-dia_diem" class="mt-1 text-slate-800"></dd></div>
+                <div><dt class="font-medium text-slate-500">Ghi chú</dt><dd id="modal-ghi_chu" class="mt-1 text-slate-600 italic p-3 bg-slate-50 rounded-md"></dd></div>
             </dl>
         </div>
         <div class="bg-slate-50 px-6 py-4 rounded-b-xl flex justify-end gap-3">
-            <button type="button" @click="openModal = false" class="px-4 py-2 border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50">Đóng</button>
-            <a :href="'sua_lichtrinh.php?id=' + selectedSchedule.id" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">Chỉnh sửa</a>
+            <button type="button" class="close-modal-btn px-4 py-2 border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50">Đóng</button>
+            <a id="modal-edit-link" href="#" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">Chỉnh sửa</a>
         </div>
     </div>
 </div>
 
 <script>
-    // Các hàm helper này cần được định nghĩa lại trong Javascript để AlpineJS có thể sử dụng.
-    function get_status_badge(status) {
+document.addEventListener('DOMContentLoaded', function () {
+    // --- Lấy các phần tử DOM ---
+    const modal = document.getElementById('details-modal');
+    const modalContent = document.getElementById('modal-content');
+    const viewButtons = document.querySelectorAll('.view-details-btn');
+    const closeButtons = document.querySelectorAll('.close-modal-btn');
+    
+    // --- Các phần tử để hiển thị dữ liệu trong modal ---
+    const modalTitle = document.getElementById('modal-tieu_de');
+    const modalStatus = document.getElementById('modal-status');
+    const modalTime = document.getElementById('modal-thoi_gian');
+    const modalType = document.getElementById('modal-loai');
+    const modalLocation = document.getElementById('modal-dia_diem');
+    const modalNotes = document.getElementById('modal-ghi_chu');
+    const modalEditLink = document.getElementById('modal-edit-link');
+
+    // Hàm helper để tạo status badge, giống hàm PHP
+    function getStatusBadgeHTML(status) {
         const map = {
             'sap_toi': { class: 'bg-blue-100 text-blue-800', label: 'Sắp tới' },
             'hoan_thanh': { class: 'bg-green-100 text-green-800', label: 'Hoàn thành' },
@@ -190,6 +206,64 @@ function format_day_of_week($date_string) {
         const details = map[status] || { class: 'bg-gray-100 text-gray-800', label: 'Không rõ' };
         return `<span class='inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full ${details.class}'>${details.label}</span>`;
     }
+
+    // --- Hàm mở và điền dữ liệu vào modal ---
+    function openModal(schedule) {
+        // Điền dữ liệu
+        modalTitle.textContent = schedule.tieu_de;
+        modalStatus.innerHTML = getStatusBadgeHTML(schedule.trang_thai);
+        modalTime.textContent = new Date(schedule.thoi_gian).toLocaleString('vi-VN', { dateStyle: 'full', timeStyle: 'short' });
+        modalType.textContent = schedule.loai;
+        modalLocation.textContent = schedule.dia_diem;
+        modalNotes.textContent = schedule.ghi_chu || 'Không có ghi chú.';
+        modalEditLink.href = `sua_lichtrinh.php?id=${schedule.id}`;
+
+        // Hiển thị modal với hiệu ứng
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            modalContent.classList.remove('scale-95');
+        }, 10); // Một khoảng trễ nhỏ để transition hoạt động
+    }
+
+    // --- Hàm đóng modal ---
+    function closeModal() {
+        modal.classList.add('opacity-0');
+        modalContent.classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300); // Đợi transition hoàn thành rồi mới ẩn hẳn
+    }
+
+    // --- Gán sự kiện cho các nút ---
+
+    // Gán sự kiện click cho tất cả các nút "Xem chi tiết"
+    viewButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const scheduleData = JSON.parse(button.dataset.schedule);
+            openModal(scheduleData);
+        });
+    });
+
+    // Gán sự kiện click cho tất cả các nút đóng modal
+    closeButtons.forEach(button => {
+        button.addEventListener('click', closeModal);
+    });
+
+    // Gán sự kiện click vào nền mờ để đóng modal
+    modal.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            closeModal();
+        }
+    });
+
+    // Gán sự kiện nhấn phím Esc để đóng modal
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !modal.classList.contains('hidden')) {
+            closeModal();
+        }
+    });
+});
 </script>
 
 </body>

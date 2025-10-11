@@ -169,7 +169,7 @@ function format_price_vietnamese(float $price): string {
     </form>
 </div>
 
-    <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+    <div class="bg-white shadow-lg rounded-xl overflow-hidden overflow-x-auto overflow-y-auto">
         <table class="min-w-full table-auto">
             <thead class="bg-gray-100 text-gray-700 text-sm font-semibold">
                 <tr>
