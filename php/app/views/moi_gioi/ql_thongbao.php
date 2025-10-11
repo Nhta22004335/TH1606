@@ -58,14 +58,13 @@ if (!$not_logged_in) {
 </head>
 <body class="bg-gray-50 min-h-screen">
 
-<div class="max-w-6xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
-    
+
     <!-- Header và Tiêu đề -->
-    <header class="mb-8 border-b border-gray-200 pb-4">
-        <h1 class="flex items-center text-3xl font-extrabold text-gray-800">
-            <i class="fas fa-bell mr-4 text-3xl text-yellow-400 animate-pulse"></i> Hộp Thư Thông Báo
+    <header class="mb-6 border-b border-gray-200 pb-4">
+        <h1 class="flex items-center text-2xl font-bold text-gray-800">
+            <i class="fas fa-bell mr-4 text-2xl text-yellow-400 animate-pulse"></i> Hộp Thư Thông Báo
         </h1>
-        <p class="text-gray-500 mt-1">Quản lý các thông báo từ hệ thống và quản trị viên.</p>
+        <p class="text-sm text-gray-500 mt-1">Quản lý các thông báo từ hệ thống và quản trị viên.</p>
     </header>
 
     <?php if ($not_logged_in): ?>
@@ -182,7 +181,7 @@ if (!$not_logged_in) {
             <?php endif; ?>
         </div>
     <?php endif; ?>
-</div>
+
 
 <script>
     // Hàm giả lập đánh dấu đã đọc

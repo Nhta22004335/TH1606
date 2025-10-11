@@ -53,7 +53,6 @@ $vipham = [
     <script src="https://unpkg.com/alpinejs" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLMDJ8S+anWHD9+lWlI/Bw4g8q6uL+yqT2S8cRAB6XQp9r/9C7M/dFm3J8mN/K2uYmQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
-        
         .table-responsive { overflow-x: auto; }
         .badge-loai { font-weight: 600; padding: 0.25rem 0.65rem; border-radius: 9999px; font-size: 0.75rem; }
     </style>
@@ -61,9 +60,9 @@ $vipham = [
 <body x-data="viPhamApp()">
 
     <!-- Header -->
-    <header class="mb-8 border-b-2 border-gray-400 pb-4">
+    <header class="mb-6 border-b border-gray-400 pb-4">
         <h1 class="flex items-center text-2xl font-bold text-gray-800">
-            <i class="fas fa-gavel text-indigo-500 mr-4"></i> Quản Lý Vi Phạm
+            Quản Lý Vi Phạm
         </h1>
         <p class="text-gray-500 text-sm mt-2">Theo dõi và xử lý các hành vi vi phạm quy tắc nền tảng của người dùng.</p>
     </header>

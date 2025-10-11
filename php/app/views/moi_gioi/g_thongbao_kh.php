@@ -64,11 +64,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['khach_hang_ids'], $_P
 </head>
 <body class="h-full">
 
-<div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8" x-data="notificationApp()">
+<div class="" x-data="notificationApp()">
 
-    <header class="mb-8">
-        <h1 class="text-3xl font-bold tracking-tight text-slate-900">Gửi thông báo</h1>
-        <p class="mt-2 text-base text-slate-600">Chọn khách hàng từ danh sách và soạn thảo nội dung để gửi đi.</p>
+    <header class="mb-6 border-b pb-4">
+        <h1 class="text-2xl font-bold text-slate-800">Gửi thông báo</h1>
+        <p class="mt-2 text-sm text-slate-600">Chọn khách hàng từ danh sách và soạn thảo nội dung để gửi đi.</p>
     </header>
 
     <?php if ($success_msg): ?>

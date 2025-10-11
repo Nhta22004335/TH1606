@@ -57,17 +57,13 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     
 </head>
-<body class="font-sans text-gray-800">
+<body>
 
-<div class="container mx-auto p-4 md:p-6">
+<div class="container">
 
-    <header class="mb-6">
-        <div class="flex items-center gap-3">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-800">Quản lý Bất động sản</h1>
-                <p class="text-gray-500">Xem, tìm kiếm và quản lý các tin đăng bất động sản.</p>
-            </div>
-        </div>
+    <header class="mb-6 border-b pb-4">
+        <h1 class="text-2xl font-bold text-gray-800">Quản lý Bất động sản</h1>
+        <p class="text-sm mt-2 text-gray-500">Xem, tìm kiếm và quản lý các tin đăng bất động sản.</p>
     </header>
 
     

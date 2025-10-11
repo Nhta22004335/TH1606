@@ -79,15 +79,11 @@ $bieumau_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </head>
 <body class="font-sans text-gray-800">
 
-<div class="container mx-auto p-4 md:p-6">
+<div class="container">
 
-    <header class="mb-6">
-        <div class="flex items-center gap-3">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-800">Quản lý Biểu mẫu</h1>
-                <p class="text-gray-500">Duyệt, xem và quản lý tất cả các hồ sơ, hợp đồng.</p>
-            </div>
-        </div>
+    <header class="mb-6 border-b pb-4">
+        <h1 class="text-2xl font-bold text-gray-800">Quản lý Biểu mẫu</h1>
+        <p class="text-sm mt-2 text-gray-500">Duyệt, xem và quản lý tất cả các hồ sơ, hợp đồng.</p>
     </header>
 
     <form id="search-form" method="GET" class="flex items-center mb-6">

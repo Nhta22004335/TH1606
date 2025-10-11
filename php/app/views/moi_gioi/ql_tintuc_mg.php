@@ -61,13 +61,11 @@ $stats = [
 </head>
 <body class="h-full">
 
-<div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-    
     <header>
-        <div class="sm:flex sm:items-center sm:justify-between mb-6">
+        <div class="sm:flex sm:items-center sm:justify-between mb-6 pb-4 border-b">
             <div>
-                <h1 class="text-3xl font-bold tracking-tight text-slate-900">Bài đăng của tôi</h1>
-                <p class="mt-2 text-base text-slate-600">Quản lý, chỉnh sửa và theo dõi hiệu suất các tin bạn đã đăng.</p>
+                <h1 class="text-2xl font-bold text-slate-800">Bài đăng của tôi</h1>
+                <p class="mt-2 text-sm text-slate-600">Quản lý, chỉnh sửa và theo dõi hiệu suất các tin bạn đã đăng.</p>
             </div>
             <div class="mt-4 sm:mt-0">
                 <a href="trangchu.php?page=dang_sp" class="inline-flex items-center gap-2 px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
@@ -154,7 +152,6 @@ $stats = [
             </div>
         </div>
     </main>
-</div>
 
 </body>
 </html>

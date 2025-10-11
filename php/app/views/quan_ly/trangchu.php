@@ -138,63 +138,58 @@
     }
 ?>
 <!DOCTYPE html>
-<html lang="vi" x-data="{ sidebarOpen: window.innerWidth >= 768 }">
+<html lang="vi" x-data="{ sidebarOpen: window.innerWidth >= 768 }" :class="{'overflow-hidden': sidebarOpen}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | Đất Việt Bất Động Sản</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/alpinejs" defer></script>
+    <script defer src="https://unpkg.com/alpinejs"></script>
     <link rel="stylesheet" href="../../../public/assets/fontawesome/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     
     <style>
         [x-cloak] { display: none !important; }
-         
+        
         .sidebar { 
             transition: transform 0.3s ease-in-out, width 0.3s ease-in-out; 
-            background-color: #ffffff; /* Nền Sidebar màu trắng */
-            border-right: 1px solid #e2e8f0; /* Đường viền mỏng tinh tế */
+            background-color: #ffffff;
+            border-right: 1px solid #e2e8f0;
         }
-        .content { transition: margin-left 0.3s ease-in-out; }
-        /* Màu chủ đạo (Primary Color): Indigo/Teal 600 */
-        .primary-color { color: #3b82f6; } 
-        .primary-bg-hover:hover { background-color: #e0f2fe; }
-        .primary-active-bg { background-color: #bfdbfe; color: #1e40af; }
 
-        /* Dành cho Chrome, Safari và Opera */
-        .scrollbar-hidden::-webkit-scrollbar {
-            display: none;
-        }
-        /* Dành cho IE, Edge, và Firefox */
-        .scrollbar-hidden {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
-        }
+        /* Ẩn thanh cuộn trên các trình duyệt */
+        .scrollbar-hidden::-webkit-scrollbar { display: none; }
+        .scrollbar-hidden { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body>
+<body class="bg-gray-50">
 
-<div class="flex h-screen bg-gray-50">
+<div class="relative min-h-screen md:flex" @keydown.escape.window="sidebarOpen = false">
 
-    <div x-cloak :class="{'translate-x-0 ease-out w-64': sidebarOpen, '-translate-x-full ease-in w-0': !sidebarOpen}" 
-         class="sidebar fixed inset-y-0 left-0 text-gray-700 z-40 overflow-y-auto md:relative md:translate-x-0 scrollbar-hidden">
-        
-        <div class="flex items-center justify-center h-16 bg-white border-b shadow-sm">
+    <div x-show="sidebarOpen" 
+         @click="sidebarOpen = false" 
+         x-transition:enter="transition-opacity ease-in-out duration-300" 
+         x-transition:enter-start="opacity-0" 
+         x-transition:enter-end="opacity-100" 
+         x-transition:leave="transition-opacity ease-in-out duration-300" 
+         x-transition:leave-start="opacity-100" 
+         x-transition:leave-end="opacity-0" 
+         class="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden" 
+         x-cloak>
+    </div>
+
+    <div x-cloak :class="{'translate-x-0 ease-out': sidebarOpen, '-translate-x-full ease-in': !sidebarOpen}" 
+        class="sidebar fixed inset-y-0 left-0 text-gray-700 w-64 z-40 h-screen flex flex-col bg-white">
+       
+        <div class="flex-shrink-0 flex items-center justify-center h-16 bg-white border-b shadow-sm">
             <a href="trangchu.php" class="flex items-center space-x-2 cursor-pointer p-2">
                 <div class="relative h-14 w-14 flex items-center justify-center">
-                    <img 
-                        src="../../../public/assets/anhht/0/datviet.png" 
-                        alt="Logo" 
-                        class=" transform scale-150"
-                    >
+                    <img src="../../../public/assets/anhht/0/datviet.png" alt="Logo" class="transform scale-150">
                 </div>
-                
                 <div class="flex flex-col justify-center leading-none">
                     <span class="text-2xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-teal-500 drop-shadow-sm">
                         Đất Việt
                     </span>
-                    
                     <span class="text-xs text-gray-500 italic mt-0.5">
                         Quản trị BĐS
                     </span>
@@ -202,7 +197,7 @@
             </a>
         </div>
 
-        <nav class="flex-1 py-4 space-y-1 px-3 ">
+        <nav class="flex-1 min-h-0 py-4 space-y-1 px-3 overflow-y-auto scrollbar-hidden">
             <?php foreach ($menu_items as $item): ?>
                 <?php if (check_role($item['roles'], $dsQuyen)): ?>
                     <?php 
@@ -219,19 +214,20 @@
                     <?php if (isset($item['submenu'])): ?>
                         <div x-data="{ open: <?= $is_active ? 'true' : 'false' ?> }" class="relative">
                             <button @click="open = !open" 
-                                class="w-full flex items-center justify-between px-3 py-2 text-left text-sm font-semibold rounded-lg transition duration-150 <?= $is_active ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-100' ?>">
+                                    class="w-full flex items-center justify-between px-3 py-2 text-left text-sm font-semibold rounded-lg transition duration-150 <?= $is_active ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-100' ?>">
                                 <div class="flex items-center">
-                                    <i class="<?= $item['icon'] ?> w-5 mr-3 <?= $is_active ? 'text-indigo-600' : 'text-gray-500' ?>"></i> <?= $item['title'] ?>
+                                    <i class="<?= $item['icon'] ?> w-5 mr-3 <?= $is_active ? 'text-indigo-600' : 'text-gray-500' ?>"></i> 
+                                    <span><?= $item['title'] ?></span>
                                 </div>
                                 <i :class="{'rotate-90': open, 'rotate-0': !open}" class="fas fa-chevron-right text-xs transition-transform duration-200"></i>
                             </button>
-                            <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 transform scale-y-0" x-transition:enter-end="opacity-100 transform scale-y-100" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 transform scale-y-100" x-transition:leave-end="opacity-0 transform scale-y-0"
-                                class="bg-gray-50 py-1 space-y-1 origin-top border-l-2 border-indigo-400 ml-3 mt-1">
+                            <div x-show="open" x-cloak x-transition
+                                 class="bg-gray-50 py-1 space-y-1 origin-top border-l-2 border-indigo-400 ml-3 mt-1">
                                 <?php foreach ($item['submenu'] as $sub_title => $sub_item): ?>
                                     <?php if (check_role($sub_item['roles'], $dsQuyen)): ?>
                                         <?php $sub_active = str_replace('trangchu.php?page=', '', $sub_item['link']) === $current_page; ?>
                                         <a href="trangchu.php?page=<?= $sub_item['link'] ?>" 
-                                            class="block pl-8 pr-3 py-1.5 text-sm font-medium transition duration-150 <?= $sub_active ? 'bg-indigo-100 text-indigo-700 font-bold' : 'text-gray-600 hover:bg-indigo-50' ?>">
+                                           class="block pl-8 pr-3 py-1.5 text-sm font-medium transition duration-150 <?= $sub_active ? 'bg-indigo-100 text-indigo-700 font-bold' : 'text-gray-600 hover:bg-indigo-50' ?>">
                                             <?= $sub_title ?>
                                         </a>
                                     <?php endif; ?>
@@ -240,100 +236,112 @@
                         </div>
                     <?php else: ?>
                         <a href="<?= $item['link'] ?>" 
-                            class="flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition duration-150 <?= $is_active ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-100' ?>">
-                            <i class="<?= $item['icon'] ?> w-5 mr-3 <?= $is_active ? 'text-indigo-600' : 'text-gray-500' ?>"></i> <?= $item['title'] ?>
+                           class="flex items-center px-3 py-2 text-sm font-semibold rounded-lg transition duration-150 <?= $is_active ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-100' ?>">
+                            <i class="<?= $item['icon'] ?> w-5 mr-3 <?= $is_active ? 'text-indigo-600' : 'text-gray-500' ?>"></i> 
+                            <span><?= $item['title'] ?></span>
                         </a>
                     <?php endif; ?>
                 <?php endif; ?>
             <?php endforeach; ?>
         </nav>
 
-        <div class="p-4 border-t mt-4 border-gray-200">
-            <a href="../../models/auth/xuly_dangxuat.php" class="flex items-center px-4 py-2 text-sm font-semibold bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition duration-150">
-                <i class="fas fa-sign-out-alt w-5 mr-3"></i> Đăng xuất
+        <footer class="flex-shrink-0 p-3 border-t flex flex-col space-y-2">
+            <?php if ($is_moigioi): ?>
+                <a href="trangchu.php?page=../moi_gioi/dang_tin" class="flex items-center justify-center p-2 text-sm font-semibold bg-transparent text-gray-700 rounded-lg hover:bg-gray-100 transition-colors md:hidden border border-gray-200"">
+                    <span>Đăng tin</span>
+                </a>
+            <?php endif; ?>
+
+            <a href="../../models/auth/xuly_dangxuat.php" class="flex items-center justify-center p-2 text-sm font-semibold bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors">
+                <i class="fas fa-sign-out-alt w-5 mr-3" aria-hidden="true"></i>
+                <span>Đăng xuất</span>
             </a>
-        </div>
+        </footer>
+        
     </div>
 
-    <div class="flex-1 flex flex-col overflow-hidden">
-        
-       <header class="flex items-center justify-end h-16 bg-white border-b shadow-sm px-4 md:px-6 z-30">
+    <div class="flex-1 flex flex-col md:ml-64 h-screen">
+
+        <header class="flex items-center justify-between h-16 bg-white border-b shadow-sm px-4 md:px-6 z-20">
+            <button @click="sidebarOpen = !sidebarOpen" class="text-gray-500 hover:text-gray-700 md:hidden p-2 rounded-full hover:bg-gray-100 transition">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
             
-    <button @click="sidebarOpen = !sidebarOpen" class="text-gray-500 hover:text-gray-700 md:hidden p-2 rounded-full hover:bg-gray-100 transition absolute left-4">
-        <i class="fas fa-bars text-xl"></i>
-    </button>
-    
-    <div class="flex items-center space-x-4">
-        <?php if ($is_moigioi): ?>
-            <a href="trangchu.php?page=../moi_gioi/dang_tin" 
-                class="flex items-center px-4 py-2 border border-gray-200 bg-transparent text-gray-700 text-sm rounded-lg 
-                    hover:bg-gray-100 transition duration-300 hidden sm:block">
-                Đăng tin
-            </a>
-        <?php endif; ?>
+            <div class="hidden md:block"></div>
 
-        <?php if ($is_logged_in): ?>
-            <div x-data="{ open: false }" class="relative">
-                <div @click="open = !open"
-                    class="flex items-center space-x-3 cursor-pointer pr-4 rounded-lg border border-gray-200
-                            hover:bg-gray-100 transition-colors duration-200 ease-in-out">
+            <div x-show="!sidebarOpen" class="md:hidden">
+                <a href="trangchu.php" class="flex items-center space-x-2 cursor-pointer p-2">
+                    <div class="relative h-14 w-14 flex items-center justify-center">
+                        <img src="../../../public/assets/anhht/0/datviet.png" alt="Logo" class="transform scale-150">
+                    </div>
+                    <div class="flex flex-col justify-center leading-none">
+                        <span class="text-2xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-teal-500 drop-shadow-sm">
+                            Đất Việt
+                        </span>
+                        <span class="text-xs text-gray-500 italic mt-0.5">
+                            Quản trị BĐS
+                        </span>
+                    </div>
+                </a>
+            </div>
 
-                    <img src="../../../storage/pictures/avt/<?= $nd['avt'] ?>" 
-                        alt="Avatar" 
-                        class="w-10 h-10 rounded-full object-cover border-2 border-transparent 
-                                group-hover:border-blue-500 transition-all duration-200">
-                    
-                    <span class="text-sm font-medium text-gray-700 hidden lg:block">
-                        <?= $ind['ho_ten'] ?>
-                    </span>
+            <div class="flex items-center space-x-4">
+                <?php if ($is_moigioi): ?>
+                    <a href="trangchu.php?page=../moi_gioi/dang_tin" 
+                       class="hidden sm:flex items-center px-4 py-2 border border-gray-200 bg-transparent text-gray-700 text-sm rounded-lg hover:bg-gray-100 transition duration-300">
+                        Đăng tin
+                    </a>
+                <?php endif; ?>
 
-                    <i class="fas fa-chevron-down text-gray-500 text-xs hidden lg:block 
-                            transition-transform duration-300"
-                    :class="{ 'rotate-180': open }"></i>
-                </div>
-                
-                <div x-show="open" x-cloak @click.outside="open = false" x-transition 
-                     class="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 origin-top-right" style="z-index: 100;">
-                    <div class="px-4 py-3 flex items-center space-x-3 border-b border-gray-100">
-                        <div>
-                            <p class="text-base font-semibold text-gray-800 truncate"><?= $ind['ho_ten'] ?></p>
-                            <p class="text-xs text-indigo-600 font-medium"><?= $is_quantri ? 'Quản Trị Viên' : ($is_moigioi ? 'Môi Giới' : 'Khách Hàng') ?></p>
+                <?php if ($is_logged_in): ?>
+                    <div x-data="{ open: false }" class="relative">
+                        <div @click="open = !open" class="flex items-center space-x-3 cursor-pointer p-1 rounded-lg hover:bg-gray-100 transition-colors duration-200 ease-in-out">
+                            <img src="../../../storage/pictures/avt/<?= htmlspecialchars($nd['avt']) ?>" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-gray-200">
+                            <div class="hidden lg:block">
+                                <span class="text-sm font-medium text-gray-700"><?= htmlspecialchars($ind['ho_ten']) ?></span>
+                            </div>
+                            <i class="fas fa-chevron-down text-gray-500 text-xs hidden lg:block transition-transform duration-300" :class="{ 'rotate-180': open }"></i>
+                        </div>
+                        
+                        <div x-show="open" x-cloak @click.outside="open = false" x-transition 
+                             class="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 origin-top-right z-50">
+                            <div class="px-4 py-3 flex items-center space-x-3 border-b border-gray-100">
+                                <div>
+                                    <p class="text-base font-semibold text-gray-800 truncate"><?= htmlspecialchars($ind['ho_ten']) ?></p>
+                                    <p class="text-xs text-indigo-600 font-medium"><?= $is_quantri ? 'Quản Trị Viên' : ($is_moigioi ? 'Môi Giới' : 'Khách Hàng') ?></p>
+                                </div>
+                            </div>
+                            <a href="trangchu.php?page=../moi_gioi/ql_hoso_canhan" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition">
+                                <i class="fas fa-user-circle w-5 mr-2"></i> Trang cá nhân
+                            </a>
+                            <a href="../../models/auth/xuly_quen_matkhau.php?email=<?= urlencode($nd['email']) ?>" class="block w-full text-left px-4 py-2 text-sm text-yellow-600 hover:bg-yellow-50 transition">
+                                <i class="fas fa-key w-5 mr-2"></i> Quên mật khẩu
+                            </a>
                         </div>
                     </div>
-                    <a href="trangchu.php?page=../moi_gioi/ql_hoso_canhan" class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition">
-                        <i class="fas fa-user-circle w-5 mr-2"></i> Trang cá nhân
-                    </a>
-                    <a href="../../models/auth/xuly_quen_matkhau.php?email=<?= $nd['email'] ?>" class="block px-4 py-2 text-sm text-yellow-600 hover:bg-yellow-50 transition">
-                        <i class="fas fa-key w-5 mr-2"></i> Quên mật khẩu
-                    </a>
-                </div>
+                <?php endif; ?>
             </div>
-        <?php endif; ?>
-    </div>
-</header>
+        </header>
 
-        <main class="flex-1 overflow-x-hidden overflow-y-auto p-4 md:p-6">
-                <?php
-                    // Lấy giá trị sau `page=` để kiểm tra sự tồn tại của file
-                    $page_to_include = str_replace('trangchu.php?page=', '', $current_page);
-                    
-                    if ($page_to_include !== 'trangchu' && file_exists($page_to_include . '.php')) {
-                        include $page_to_include . '.php';
-                    } else if ($current_page === 'trangchu') {
-                        include 'dashboard.php';
-                        // echo '<div class="p-6 border border-indigo-200 bg-indigo-50 rounded-lg space-y-3">';
-                        // echo '<p class="text-xl font-semibold text-indigo-700">Chào mừng, ' . $ind['ho_ten'] . '!</p>';
-                        // echo '<p class="text-gray-700">Bạn đang ở Dashboard của hệ thống quản trị Bất Động Sản Đất Việt. Vui lòng sử dụng thanh Menu bên trái để truy cập các chức năng quản lý chi tiết.</p>';
-                        
-                        // echo '</div>';
-                    } else {
-                        echo '<div class="p-6 bg-red-50 border border-red-300 text-red-700 rounded-lg">Không tìm thấy nội dung trang. Vui lòng kiểm tra lại đường dẫn: ' . htmlspecialchars($page_to_include) . '.php</div>';
-                    }
-                ?>
+        <main class="flex-1 overflow-x-hidden overflow-y-auto p-4 md:p-6 min-h-0">
+            <?php
+                $page_to_include = str_replace('trangchu.php?page=', '', $current_page);
+                
+                if ($page_to_include !== 'trangchu' && file_exists($page_to_include . '.php')) {
+                    include $page_to_include . '.php';
+                } else if ($current_page === 'trangchu') {
+                    echo '<div class="p-6 border border-indigo-200 bg-indigo-50 rounded-lg space-y-3">';
+                    echo '<p class="text-xl font-semibold text-indigo-700">Chào mừng, ' . htmlspecialchars($ind['ho_ten']) . '!</p>';
+                    echo '<p class="text-gray-700">Bạn đang ở Dashboard của hệ thống quản trị Bất Động Sản Đất Việt. Vui lòng sử dụng thanh Menu bên trái để truy cập các chức năng quản lý chi tiết.</p>';
+                    echo '</div>';
+                } else {
+                    echo '<div class="p-6 bg-red-50 border border-red-300 text-red-700 rounded-lg">Không tìm thấy nội dung trang. Vui lòng kiểm tra lại đường dẫn: ' . htmlspecialchars($page_to_include) . '.php</div>';
+                }
+            ?>
         </main>
         
-        <footer class="h-12 bg-white border-t border-gray-200 flex items-center justify-center text-xs text-gray-500 shadow-inner">
-            © 2025 Đất Việt BDS. Quản trị BĐS: Minh bạch, Hiệu quả, Tăng trưởng.
+        <footer class="flex-shrink-0 h-12 bg-white border-t border-gray-200 flex items-center justify-center text-xs text-gray-500 shadow-inner">
+            <span>© 2025 Đất Việt BDS. Quản trị BĐS: Minh bạch, Hiệu quả, Tăng trưởng.</span>
         </footer>
     </div>
 </div>

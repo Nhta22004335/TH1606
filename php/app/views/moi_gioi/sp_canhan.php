@@ -123,33 +123,51 @@ function format_price_vietnamese(float $price): string {
 </head>
 <body class="bg-gray-50">
 
-<div class="container mx-auto p-6">
-    <h1 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-        <i class="fas fa-building text-red-500"></i> Sản phẩm cá nhân
-    </h1>
+<div class="container">
 
-    <div class="bg-white shadow-md rounded-xl p-4 mb-6 flex flex-col md:flex-row items-center justify-between gap-3">
-        <form method="GET" class="flex flex-wrap items-center gap-4">
-            <input type="hidden" name="page" value="<?= e($_GET['page'] ?? 'sanpham_canhan') ?>">
-            
-            <div class="relative">
-                <input type="text" name="search" placeholder="Tìm kiếm theo tiêu đề, khu vực..." value="<?= e($search_term) ?>"
-                       class="w-64 pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-            </div>
-            
-            <select name="trang_thai" class="w-48 text-sm border border-gray-300 rounded-full px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="tat_ca" <?= $filter_status == 'tat_ca' ? 'selected' : '' ?>>-- Tất cả trạng thái --</option>
-                <?php foreach ($valid_statuses as $status): ?>
-                    <option value="<?= e($status) ?>" <?= $filter_status == $status ? 'selected' : '' ?>><?= e($status_map[$status]['label']) ?></option>
-                <?php endforeach; ?>
-            </select>
+    <header class="mb-6 border-b pb-4">
+        <h1 class="text-2xl font-bold text-gray-800">Quản lý sản phẩm cá nhân</h1>
+        <p class="text-sm mt-2 text-gray-500">Xem, tìm kiếm và quản lý các sản phẩm.</p>
+    </header>
 
-            <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-full text-sm font-semibold hover:bg-red-600">
-                <i class="fas fa-filter"></i> Lọc
-            </button>
-        </form>
-    </div>
+    <!-- ===== KHU VỰC BỘ LỌC ĐÃ ĐƯỢC THIẾT KẾ LẠI ===== -->
+<div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
+    <form method="GET" class="flex flex-col sm:flex-row sm:items-center sm:flex-wrap gap-3">
+        <!-- Hidden input (giữ nguyên) -->
+        <input type="hidden" name="page" value="<?= htmlspecialchars($_GET['page'] ?? 'sanpham_canhan') ?>">
+        
+        <!-- 1. Ô tìm kiếm (Thành phần chính, chiếm nhiều không gian nhất) -->
+        <div class="relative flex-grow">
+            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+            <input 
+                type="text" 
+                name="search" 
+                placeholder="Tìm tiêu đề, khu vực..." 
+                value="<?= htmlspecialchars($search_term) ?>"
+                class="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150">
+        </div>
+        
+        <!-- 2. Lọc theo trạng thái -->
+        <select 
+            name="trang_thai" 
+            class="w-full sm:w-48 text-sm border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150">
+            <option value="tat_ca" <?= $filter_status == 'tat_ca' ? 'selected' : '' ?>>Tất cả trạng thái</option>
+            <?php foreach ($valid_statuses as $status): ?>
+                <option value="<?= htmlspecialchars($status) ?>" <?= $filter_status == $status ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($status_map[$status]['label']) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+
+        <!-- 3. Nút Lọc (Màu sắc chuyên nghiệp hơn) -->
+        <button 
+            type="submit" 
+            class="flex items-center justify-center w-full sm:w-auto px-5 py-2 bg-gray-800 text-white rounded-md text-sm font-medium hover:bg-gray-900 transition duration-150">
+            <i class="fas fa-filter -ml-1 mr-2 h-4 w-4"></i>
+            <span>Lọc</span>
+        </button>
+    </form>
+</div>
 
     <div class="bg-white shadow-lg rounded-xl overflow-hidden">
         <table class="min-w-full table-auto">

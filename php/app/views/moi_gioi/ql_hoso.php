@@ -59,15 +59,11 @@ $bieumau_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </head>
 <body class="font-sans text-gray-800">
 
-<div class="container mx-auto p-4 md:p-6">
+<div class="container">
 
-    <header class="mb-6">
-        <div class="flex items-center gap-3">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-800">Giấy tờ & Đơn từ</h1>
-                <p class="text-gray-500">Danh sách các hồ sơ, hợp đồng bạn đã tạo hoặc tham gia.</p>
-            </div>
-        </div>
+    <header class="mb-6 border-b pb-4">
+        <h1 class="text-2xl font-bold text-gray-800">Giấy tờ & Đơn từ</h1>
+        <p class="text-sm mt-2 text-gray-500">Danh sách các hồ sơ, hợp đồng bạn đã tạo hoặc tham gia.</p>
     </header>
 
     <form id="search-form" method="GET" class="flex items-center mb-6">
@@ -144,7 +140,7 @@ $bieumau_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <td class="p-4 text-sm text-gray-600"><?= htmlspecialchars($bm["ten_ben_mua"]) ?></td>
                                 <td class="p-4"><span class="px-3 py-1 text-xs font-medium rounded-full border shadow-sm <?= $status_info['classes'] ?>"><?= $status_info['text'] ?></span></td>
                                 <td class="p-4 text-sm text-gray-600 text-center">
-                                    <button data-modal-toggle="docModal<?= $bm['id'] ?>" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg flex items-center justify-center gap-1.5 mx-auto shadow-md transition transform hover:scale-105">
+                                    <button data-modal-toggle="docModal<?= $bm['id'] ?>" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-4 py-2 rounded-lg flex items-center justify-center gap-1.5 mx-auto shadow-md transition transform hover:scale-105">
                                         <i class="fa-solid fa-eye"></i> Xem
                                     </button>
                                 </td>

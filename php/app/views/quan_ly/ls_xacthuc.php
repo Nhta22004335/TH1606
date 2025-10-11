@@ -98,174 +98,178 @@
     }
 ?>
 
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lịch sử đăng nhập/đăng xuất</title>
+    <title>Lịch Sử Xác Thực</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
 
-<!-- Main -->
-<main class="flex-1 p-6">
+<div class="space-y-6">
+
     <?php if (!empty($_SESSION['message'])): ?>
-        <div id="alertBox" class="mb-4 p-3 rounded-lg bg-green-100 text-green-700 shadow">
-            <?= htmlspecialchars($_SESSION['message']) ?>
-        </div>
-        <?php unset($_SESSION['message']); ?>
+    <div id="alertBox" class="p-4 rounded-lg bg-emerald-100 text-emerald-800 shadow-md">
+        <?= htmlspecialchars($_SESSION['message']) ?>
+    </div>
+    <?php unset($_SESSION['message']); ?>
     <?php endif; ?>
 
-    <!-- Search & Export CSV -->
-    <div class="mb-4 flex justify-between items-center">
-        <a href="ls_xacthuc.php?export=csv" class="px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700">
-            Xuất CSV
-        </a>
+    <header class="mb-6 border-b pb-4">
+        <h1 class="text-2xl font-bold text-gray-800">Lịch Sử Xác Thực</h1>
+        <p class="text-sm mt-2 text-gray-500">Ghi nhận các hoạt động truy cập và bảo mật của người dùng.</p>
+    </header>
 
-        <form method="POST" class="flex space-x-2 items-center">
-            <input type="date" name="delete_from" class="border rounded-lg p-2 focus:outline-none" required>
-            <span>đến</span>
-            <input type="date" name="delete_to" class="border rounded-lg p-2 focus:outline-none" required>
-            <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg shadow hover:bg-red-700">Xóa</button>
-        </form>
+    <div class="bg-white p-4 rounded-lg shadow-sm border space-y-4">
+        
+        <div class="flex flex-col md:flex-row gap-4">
+            <form method="GET" class="flex-grow">
+                <input type="hidden" name="page" value="ls_xacthuc">
+                <div class="relative">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                    <input type="text" name="search" placeholder="Tìm theo tên đăng nhập..."
+                           value="<?= htmlspecialchars($search) ?>"
+                           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
+                </div>
+            </form>
+            
+            <a href="?page=ls_xacthuc&export=csv" class="flex-shrink-0 flex items-center justify-center px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md shadow-sm hover:bg-gray-900 transition">
+               <i class="fas fa-download mr-2"></i> Xuất Báo Cáo
+            </a>
+        </div>
 
-        <!-- Bộ lọc sự kiện -->
-        <div class="flex items-center space-x-2">
-            <select id="loaisukien" class="border rounded-lg p-2 text-sm focus:outline-none">
-                <option value="">Tất cả</option>
-                <option value="dangnhap" <?= (($filters['loaisukien'] ?? '') === 'dangnhap') ? 'selected' : '' ?>>Đăng nhập</option>
-                <option value="dangxuat" <?= (($filters['loaisukien'] ?? '') === 'dangxuat') ? 'selected' : '' ?>>Đăng xuất</option>
-                <option value="doimatkhau" <?= (($filters['loaisukien'] ?? '') === 'doimatkhau') ? 'selected' : '' ?>>Đổi mật khẩu</option>
-                <option value="quenmatkhau" <?= (($filters['loaisukien'] ?? '') === 'quenmatkhau') ? 'selected' : '' ?>>Quên mật khẩu</option>
-            </select>
-            <div class="flex gap-2">
-                <button id="btnloc" class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                    Áp dụng
-                </button>
-                <button id="btnhuy" class="px-3 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition">
-                    Hủy
-                </button>
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pt-4 border-t">
+            <div class="flex items-center gap-2">
+                <select id="loaisukien" class="border px-2 py-2 border-gray-300 rounded-md text-sm w-full md:w-auto focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                    <option value="">Tất cả sự kiện</option>
+                    <option value="dangnhap" <?= (($filters['loaisukien'] ?? '') === 'dangnhap') ? 'selected' : '' ?>>Đăng nhập</option>
+                    <option value="dangxuat" <?= (($filters['loaisukien'] ?? '') === 'dangxuat') ? 'selected' : '' ?>>Đăng xuất</option>
+                    <option value="doimatkhau" <?= (($filters['loaisukien'] ?? '') === 'doimatkhau') ? 'selected' : '' ?>>Đổi mật khẩu</option>
+                    <option value="quenmatkhau" <?= (($filters['loaisukien'] ?? '') === 'quenmatkhau') ? 'selected' : '' ?>>Quên mật khẩu</option>
+                </select>
+                <button id="btnloc" class="px-2 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md  hover:bg-indigo-700 transition">Lọc</button>
+                <button id="btnhuy" class="px-2 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-300 transition">Hủy</button>
             </div>
+
+            <form method="POST" class="flex flex-col sm:flex-row items-center gap-2">
+                <input type="date" name="delete_from" class="border-gray-300 rounded-md p-2 w-full sm:w-auto focus:outline-none transition" required>
+                <span class="hidden sm:inline text-gray-500">→</span>
+                <input type="date" name="delete_to" class="border-gray-300 rounded-md p-2 w-full sm:w-auto focus:outline-none transition" required>
+                <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md shadow-sm hover:bg-red-700 transition">Xóa</button>
+            </form>
         </div>
     </div>
 
-    <!-- Table -->
-    <div class="bg-white rounded-xl shadow overflow-x-auto">
-        <table class="w-full text-sm text-left border-collapse">
-            <thead class="bg-gray-50 border-b">
+    <div class="bg-white rounded-lg shadow-sm border overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Người dùng</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Loại sự kiện</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Thời gian bắt đầu</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Thời gian kết thúc</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Địa chỉ IP</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">User Agent</th>
-                    <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Hành động</th>
+                    <th class="p-3 text-left text-xs font-medium text-gray-500 uppercase ">Người dùng</th>
+                    <th class="p-3 text-left text-xs font-medium text-gray-500 uppercase ">Sự kiện</th>
+                    <th class="p-3 text-left text-xs font-medium text-gray-500 uppercase ">Thời gian</th>
+                    <th class="p-3 text-left text-xs font-medium text-gray-500 uppercase ">Địa chỉ IP</th>
+                    <th class="p-3 text-left text-xs font-medium text-gray-500 uppercase hidden xl:table-cell">User Agent</th>
+                    <th class="p-3 text-center text-xs font-medium text-gray-500 uppercase"></th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-gray-200">
                 <?php if (!empty($filters)): ?>
                     <?php foreach ($logs as $log): ?>
                         <?php
-                            $match = true;
-                            if (isset($filters['loaisukien']) && $filters['loaisukien'] !== $log['loai_su_kien']) $match = false;
-                            echo $match;
+                          $match = true;
+                          if (isset($filters['loaisukien']) && $filters['loaisukien'] !== $log['loai_su_kien']) $match = false;
                         ?>
                         <?php if ($match): ?>
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-2 border-b font-medium text-gray-700">
-                                    <?= htmlspecialchars($log['ten_dang_nhap']) ?>
-                                </td>
-                                <td class="px-4 py-2 border-b text-blue-600 font-semibold">
-                                    <?= htmlspecialchars($log['loai_su_kien']) ?>
-                                </td>
-                                <td class="px-4 py-2 border-b">
-                                    <?= htmlspecialchars($log['thoi_gian_bat_dau']) ?>
-                                </td>
-                                <td class="px-4 py-2 border-b text-gray-600">
-                                    <?= $log['thoi_gian_ket_thuc'] 
-                                        ? htmlspecialchars($log['thoi_gian_ket_thuc']) 
-                                        : '<span class="text-red-500">Chưa kết thúc</span>' ?>
-                                </td>
-                                <td class="px-4 py-2 border-b">
-                                    <?= htmlspecialchars($log['dia_chi_ip']) ?>
-                                </td>
-                                <td class="px-4 py-2 border-b truncate max-w-xs" 
-                                    title="<?= htmlspecialchars($log['user_agent']) ?>">
-                                    <?= htmlspecialchars(substr($log['user_agent'], 0, 50)) ?>...
-                                </td>
-                                <td class="px-4 py-2 border-b text-center">
-                                    <form method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa bản ghi này?');">
-                                        <input type="hidden" name="delete_id" value="<?= $log['id'] ?>">
-                                        <button type="submit" 
-                                            class="flex items-center justify-center w-full h-full text-red-600 hover:text-red-700"
-                                            title="Xóa">
-                                            <i class="fa-solid fa-trash"></i>
-                                        </button>
-
-                                    </form>
-                                </td>
-                            </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="p-3 font-medium text-gray-900"><?= htmlspecialchars($log['ten_dang_nhap']) ?></td>
+                            <td class="p-3">
+                                <span class="px-2.5 py-0.5 text-xs font-medium rounded-full 
+                                    <?= $log['loai_su_kien'] === 'dangnhap' ? 'bg-green-100 text-green-800' : '' ?>
+                                    <?= $log['loai_su_kien'] === 'dangxuat' ? 'bg-yellow-100 text-yellow-800' : '' ?>
+                                    <?= $log['loai_su_kien'] === 'doimatkhau' ? 'bg-blue-100 text-blue-800' : '' ?>
+                                    <?= $log['loai_su_kien'] === 'quenmatkhau' ? 'bg-purple-100 text-purple-800' : '' ?>
+                                ">
+                                    <?= htmlspecialchars(ucfirst($log['loai_su_kien'])) ?>
+                                </span>
+                            </td>
+                            <td class="p-3 text-gray-600 whitespace-nowrap"><?= htmlspecialchars($log['thoi_gian_bat_dau']) ?></td>
+                            <td class="p-3 text-gray-600"><?= htmlspecialchars($log['dia_chi_ip']) ?></td>
+                            <td class="p-3 text-gray-600 max-w-sm truncate hidden xl:table-cell" title="<?= htmlspecialchars($log['user_agent']) ?>">
+                                <?= htmlspecialchars($log['user_agent']) ?>
+                            </td>
+                            <td class="p-3 text-center">
+                                <form method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa bản ghi này?');">
+                                    <input type="hidden" name="delete_id" value="<?= $log['id'] ?>">
+                                    <button type="submit" class="text-gray-400 hover:text-red-600 transition" title="Xóa"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </td>
+                        </tr>
                         <?php endif; ?>
                     <?php endforeach; ?>
                 <?php else: ?>
                     <?php foreach ($logs as $log): ?>
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-2 border-b font-medium text-gray-700">
-                                <?= htmlspecialchars($log['ten_dang_nhap']) ?>
-                            </td>
-                            <td class="px-4 py-2 border-b text-blue-600 font-semibold">
-                                <?= htmlspecialchars($log['loai_su_kien']) ?>
-                            </td>
-                            <td class="px-4 py-2 border-b">
-                                <?= htmlspecialchars($log['thoi_gian_bat_dau']) ?>
-                            </td>
-                            <td class="px-4 py-2 border-b text-gray-600">
-                                <?= $log['thoi_gian_ket_thuc'] 
-                                    ? htmlspecialchars($log['thoi_gian_ket_thuc']) 
-                                    : '<span class="text-red-500">Chưa kết thúc</span>' ?>
-                            </td>
-                            <td class="px-4 py-2 border-b">
-                                <?= htmlspecialchars($log['dia_chi_ip']) ?>
-                            </td>
-                            <td class="px-4 py-2 border-b truncate max-w-xs" 
-                                title="<?= htmlspecialchars($log['user_agent']) ?>">
-                                <?= htmlspecialchars(substr($log['user_agent'], 0, 50)) ?>...
-                            </td>
-                            <td class="px-4 py-2 border-b text-center">
-                                <form method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa bản ghi này?');">
-                                    <input type="hidden" name="delete_id" value="<?= $log['id'] ?>">
-                                    <button type="submit" 
-                                        class="flex items-center justify-center w-full h-full text-red-600 hover:text-red-700"
-                                        title="Xóa">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </button>
-
-                                </form>
-                            </td>
-                        </tr>
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-3 font-medium text-gray-900"><?= htmlspecialchars($log['ten_dang_nhap']) ?></td>
+                        <td class="p-3">
+                            <span class="px-2.5 py-0.5 text-xs font-medium rounded-full 
+                                <?= $log['loai_su_kien'] === 'dangnhap' ? 'bg-green-100 text-green-800' : '' ?>
+                                <?= $log['loai_su_kien'] === 'dangxuat' ? 'bg-yellow-100 text-yellow-800' : '' ?>
+                                <?= $log['loai_su_kien'] === 'doimatkhau' ? 'bg-blue-100 text-blue-800' : '' ?>
+                                <?= $log['loai_su_kien'] === 'quenmatkhau' ? 'bg-purple-100 text-purple-800' : '' ?>
+                            ">
+                                <?= htmlspecialchars(ucfirst($log['loai_su_kien'])) ?>
+                            </span>
+                        </td>
+                        <td class="p-3 text-gray-500 whitespace-nowrap"><?= htmlspecialchars($log['thoi_gian_bat_dau']) ?></td>
+                        <td class="p-3 text-gray-500"><?= htmlspecialchars($log['dia_chi_ip']) ?></td>
+                        <td class="p-3 text-gray-500 max-w-sm truncate hidden xl:table-cell" title="<?= htmlspecialchars($log['user_agent']) ?>">
+                            <?= htmlspecialchars($log['user_agent']) ?>
+                        </td>
+                        <td class="p-3 text-center">
+                            <form method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa bản ghi này?');">
+                                <input type="hidden" name="delete_id" value="<?= $log['id'] ?>">
+                                <button type="submit" class="text-gray-400 hover:text-red-600 transition" title="Xóa"><i class="fas fa-trash-alt"></i></button>
+                            </form>
+                        </td>
+                    </tr>
                     <?php endforeach; ?>
+                <?php endif; ?>
+
+                <?php if (count($logs) === 0): ?>
+                <tr>
+                    <td colspan="6" class="p-8 text-center text-gray-500">
+                        <i class="fas fa-folder-open text-4xl mb-2"></i>
+                        <p class="font-medium">Không có dữ liệu</p>
+                        <p class="text-sm">Không tìm thấy bản ghi nào phù hợp với tiêu chí của bạn.</p>
+                    </td>
+                </tr>
                 <?php endif; ?>
             </tbody>
         </table>
     </div>
 
-    <!-- Pagination -->
-    <div class="mt-4 flex justify-center space-x-2">
-        <?php if ($page > 1): ?>
-            <a href="?page=ls_xacthuc&p=<?= $page-1 ?>" class="px-3 py-1 border rounded-lg hover:bg-gray-200">«</a>
-        <?php endif; ?>
+    <?php if ($totalPages > 1): ?>
+    <nav class="flex items-center justify-between">
+        <span class="text-sm text-gray-700">
+            Trang <span class="font-semibold"><?= $page ?></span> trên <span class="font-semibold"><?= $totalPages ?></span>
+        </span>
+        <div class="flex items-center space-x-2">
+            <a href="?page=ls_xacthuc&p=<?= $page - 1 ?>" class="flex items-center justify-center px-3 py-1.5 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-100 <?= ($page <= 1) ? 'pointer-events-none opacity-50' : '' ?>">
+                <i class="fas fa-arrow-left mr-1"></i> Trước
+            </a>
+            <a href="?page=ls_xacthuc&p=<?= $page + 1 ?>" class="flex items-center justify-center px-3 py-1.5 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-100 <?= ($page >= $totalPages) ? 'pointer-events-none opacity-50' : '' ?>">
+                Sau <i class="fas fa-arrow-right ml-1"></i>
+            </a>
+        </div>
+    </nav>
+    <?php endif; ?>
 
-        <?php for ($i=1; $i <= $totalPages; $i++): ?>
-            <a href="?page=ls_xacthuc&p=<?= $i ?>" class="px-3 py-1 border rounded-lg <?= $i == $page ? 'bg-blue-600 text-white' : 'hover:bg-gray-200' ?>"><?= $i ?></a>
-        <?php endfor; ?>
+</div>
 
-        <?php if ($page < $totalPages): ?>
-            <a href="?page=ls_xacthuc&p=<?= $page+1 ?>" class="px-3 py-1 border rounded-lg hover:bg-gray-200">»</a>
-        <?php endif; ?>
-    </div>
-</main>
 
 <script>
     function apdungloc() {

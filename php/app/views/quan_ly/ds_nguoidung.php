@@ -72,15 +72,14 @@ $statusColors = [
     <link rel="stylesheet" href="../../../public/assets/fontawesome/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
         @media (max-width: 768px) { .hide-on-mobile { display: none; } }
     </style>
 </head>
 <body>
 
-    <div class="mb-6">
+    <div class="mb-6 border-b pb-4">
         <h1 class="text-2xl font-bold text-gray-800">Danh sách Người dùng</h1>
-        <p class="text-gray-500">Quản lý, tìm kiếm và thực hiện các thao tác trên tài khoản người dùng.</p>
+        <p class="text-sm mt-2 text-gray-500">Quản lý, tìm kiếm và thực hiện các thao tác trên tài khoản người dùng.</p>
     </div>
 
     <form id="search-form" method="GET" class="flex items-center mb-4">

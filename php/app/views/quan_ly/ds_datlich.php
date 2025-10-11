@@ -68,19 +68,14 @@ $timelineStartHour = 8; // Timeline bắt đầu từ 8h sáng
 </head>
 <body class="h-full" x-data="{ isModalOpen: false, modalData: {} }">
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <header class="mb-8">
+
+    <header class="pb-4 border-b mb-6">
         <div class="sm:flex sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-3xl font-bold tracking-tight text-slate-900">Lịch trình trong ngày</h1>
-                <p class="mt-2 text-base text-slate-600">
+                <h1 class="text-2xl font-bold text-slate-800">Lịch trình trong ngày</h1>
+                <p class="mt-2 text-sm text-slate-600">
                     Tổng quan lịch hẹn của các môi giới. Hôm nay là: <strong><?= date('d/m/Y') ?></strong>.
                 </p>
-            </div>
-            <div class="mt-4 sm:mt-0 sm:ml-16">
-                <button type="button" class="inline-flex items-center gap-2 px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    <i class="fa-solid fa-plus"></i> Tạo lịch hẹn mới
-                </button>
             </div>
         </div>
     </header>
@@ -129,7 +124,6 @@ $timelineStartHour = 8; // Timeline bắt đầu từ 8h sáng
             <?php endforeach; ?>
         </div>
     </div>
-</div>
 
 <div x-show="isModalOpen" x-transition.opacity x-cloak class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
     <div @click.away="isModalOpen = false" class="bg-white rounded-xl shadow-2xl w-full max-w-lg transform transition-all"
