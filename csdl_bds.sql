@@ -99,6 +99,12 @@ CREATE TABLE IF NOT EXISTS phien_dang_nhap (
     CONSTRAINT chk_phien_dang_nhap_token_nonempty CHECK (length(trim(token_phien)) > 0)
 );
 
+alter table phien_dang_nhap
+add column selector VARCHAR(255)
+
+alter table phien_dang_nhap
+add column verifier_hash VARCHAR(255)
+
 SELECT * FROM phien_dang_nhap;
 
 -- 5. Bảng yeu_cau_otp (quản lý các mã OTP (One-Time Password) phục vụ cho xác thực người dùng trong hệ thống)
@@ -600,6 +606,18 @@ CREATE TABLE lich_su (
     ngay_tao TIMESTAMP NOT NULL DEFAULT now()     -- thời gian thực hiện
 );
 
+select * from lich_su
 
+CREATE TABLE IF NOT EXISTS ghi_chu_khach_hang (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id_nguoi_dung UUID NOT NULL, -- ID của khách hàng được ghi chú
+    id_bds UUID, -- Ghi chú này liên quan đến BĐS nào (có thể NULL nếu là ghi chú chung)
+    id_moi_gioi UUID NOT NULL, -- ID của môi giới tạo ghi chú
+    ghi_chu TEXT NOT NULL,
+    ngay_tao TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_ghichu_khachhang FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
+    CONSTRAINT fk_ghichu_bds FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE SET NULL,
+    CONSTRAINT fk_ghichu_moigioi FOREIGN KEY (id_moi_gioi) REFERENCES nguoi_dung(id) ON DELETE CASCADE
+);
 
 
