@@ -76,7 +76,7 @@ $status_map = [
     'daduyet'   => ['label' => 'Đã duyệt',  'class' => 'bg-green-100 text-green-800'],
     'daban'     => ['label' => 'Đã bán',    'class' => 'bg-red-100 text-red-800'],
     'dathue'    => ['label' => 'Đã thuê',   'class' => 'bg-blue-100 text-blue-800'],
-    'default'   => ['label' => 'Không rõ',  'class' => 'bg-gray-100 text-gray-700']
+    'chuacapnhat'   => ['label' => 'Chưa cập nhật',  'class' => 'bg-gray-100 text-gray-700']
 ];
 
 // Helper function để làm sạch output, tránh lặp lại htmlspecialchars

@@ -1,10 +1,15 @@
 <?php
- // ===== PHẦN LOGIC PHP CỦA BẠN - GIỮ NGUYÊN HOÀN TOÀN =====
- $media_list = [
-     ["id" => 1, "id_bai_dang" => 1, "loai" => "image", "ten_file" => "cay_xanh.jpg", "duong_dan" => "https://picsum.photos/300?random=1", "kich_thuoc" => 245678, "trang_thai" => "Bình thường"],
-     ["id" => 2, "id_bai_dang" => 1, "loai" => "image", "ten_file" => "vuon_rau.png", "duong_dan" => "https://picsum.photos/300?random=2", "kich_thuoc" => 187532, "trang_thai" => "Cảnh báo nhẹ"],
-     ["id" => 3, "id_bai_dang" => 2, "loai" => "video", "ten_file" => "gioi_thieu_trang_trai.mp4", "duong_dan" => "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", "kich_thuoc" => 10485760, "trang_thai" => "Cảnh báo trung bình"],
- ];
+require_once "../../../config/database.php"; 
+    $pdo = ketnoicsdl();
+
+ $sql = "SELECT id, id_bds, url, kich_thuoc, loai, trang_thai, mo_ta, ngay_tao 
+            FROM hinh_anh_bds 
+            ORDER BY ngay_tao DESC";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+    $media_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 
  function getStatusInfo($status) {
      $map = [
@@ -40,7 +45,7 @@
 
  $baseParams = ['searchTerm' => $searchTerm];
  $url_all = 'trangchu.php?page=ql_anh_video_bds&' . buildQueryString(array_merge($baseParams, ['filter' => 'all', 'view' => $view]));
- $url_image = 'trangchu.php?page=ql_anh_video_bds&' . buildQueryString(array_merge($baseParams, ['filter' => 'image', 'view' => $view]));
+ $url_image = 'trangchu.php?page=ql_anh_video_bds&' . buildQueryString(array_merge($baseParams, ['filter' => 'anh', 'view' => $view]));
  $url_video = 'trangchu.php?page=ql_anh_video_bds&' . buildQueryString(array_merge($baseParams, ['filter' => 'video', 'view' => $view]));
 
  $baseParamsForView = ['searchTerm' => $searchTerm, 'filter' => $filter];
@@ -72,7 +77,7 @@
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div class="bg-gray-100 p-1 rounded-lg flex text-sm font-medium w-full md:w-auto">
                 <a href="<?= $url_all ?>" class="flex-1 text-center px-4 py-1.5 rounded-md transition <?= $filter === 'all' ? 'bg-white shadow text-indigo-600' : 'text-gray-500 hover:bg-gray-200' ?>">Tất cả</a>
-                <a href="<?= $url_image ?>" class="flex-1 text-center px-4 py-1.5 rounded-md transition <?= $filter === 'image' ? 'bg-white shadow text-indigo-600' : 'text-gray-500 hover:bg-gray-200' ?>">Ảnh</a>
+                <a href="<?= $url_image ?>" class="flex-1 text-center px-4 py-1.5 rounded-md transition <?= $filter === 'anh' ? 'bg-white shadow text-indigo-600' : 'text-gray-500 hover:bg-gray-200' ?>">Ảnh</a>
                 <a href="<?= $url_video ?>" class="flex-1 text-center px-4 py-1.5 rounded-md transition <?= $filter === 'video' ? 'bg-white shadow text-indigo-600' : 'text-gray-500 hover:bg-gray-200' ?>">Video</a>
             </div>
 
@@ -98,14 +103,14 @@
                 <?php foreach ($filtered_media as $item): ?>
                     <div class="bg-white border rounded-lg shadow-sm hover:shadow-md transition cursor-pointer flex flex-col">
                         <div class="relative">
-                            <?php if ($item['loai'] === 'image'): ?>
-                                <img src="<?= htmlspecialchars($item['duong_dan']) ?>" class="w-full h-32 object-cover rounded-t-lg">
+                            <?php if ($item['loai'] === 'anh'): ?>
+                                <img src="../../../storage/pictures/bds/<?= htmlspecialchars($item['url']) ?>" class="w-full h-32 object-cover rounded-t-lg">
                             <?php else: ?>
                                 <div class="w-full h-32 bg-gray-800 rounded-t-lg flex items-center justify-center"><i class="fa-solid fa-play text-white text-2xl"></i></div>
                             <?php endif; ?>
                         </div>
                         <div class="p-3 flex-1 flex flex-col">
-                            <p class="font-semibold text-sm truncate" title="<?= htmlspecialchars($item['ten_file']) ?>"><?= htmlspecialchars($item['ten_file']) ?></p>
+                            <p class="font-semibold text-sm truncate" title="<?= htmlspecialchars($item['url']) ?>"><?= htmlspecialchars($item['url']) ?></p>
                             <div class="flex items-center justify-between text-xs text-gray-500 mt-2">
                                <?php $statusInfo = getStatusInfo($item['trang_thai']); ?>
                                <span class="px-2 py-0.5 font-medium rounded-full <?= $statusInfo['classes'] ?>"><?= $statusInfo['text'] ?></span>

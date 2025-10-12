@@ -246,9 +246,9 @@
             <?php endforeach; ?>
         </nav>
 
-        <footer class="flex-shrink-0 p-3 border-t flex flex-col space-y-2">
+        <footer class="flex-shrink-0 p-3 border-t flex flex-col justify-center">
             <?php if ($is_moigioi): ?>
-                <a href="trangchu.php?page=../moi_gioi/dang_tin" class="flex items-center justify-center p-2 text-sm font-semibold bg-transparent text-gray-700 rounded-lg hover:bg-gray-100 transition-colors md:hidden border border-gray-200"">
+                <a href="trangchu.php?page=../moi_gioi/dang_tin" class="flex items-center justify-center p-2 text-sm font-semibold bg-transparent text-gray-700 rounded-lg hover:bg-gray-100 transition-colors md:hidden border border-gray-200">
                     <span>Đăng tin</span>
                 </a>
             <?php endif; ?>

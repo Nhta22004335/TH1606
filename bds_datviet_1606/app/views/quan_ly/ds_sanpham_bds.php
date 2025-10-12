@@ -27,9 +27,10 @@ $search = $_GET['search'] ?? '';
 $sql = "
     SELECT 
         b.id, b.tieu_de, b.mo_ta, b.gia, b.dien_tich, b.dia_chi, b.loai, 
-        b.khu_vuc, b.ngay_dang, b.trang_thai, d.diem as rating
+        b.khu_vuc, b.ngay_dang, b.trang_thai, d.diem as rating, h.url
     FROM public.bat_dong_san b
     LEFT JOIN danh_gia_bds d ON d.id_bds = b.id
+    LEFT JOIN hinh_anh_bds h ON h.id_bds = b.id
 ";
 $params = [];
 
@@ -46,6 +47,8 @@ if (!empty($search)) {
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
 ?>
 <!DOCTYPE html>
 <html lang="vi" class="bg-slate-50">
@@ -136,7 +139,7 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <tr class="hover:bg-slate-50 transition duration-150">
                                 <td class="p-4">
                                     <div class="flex items-center gap-3">
-                                        <img src="https://picsum.photos/40?random=<?= $p['id'] ?>" class="w-10 h-10 rounded-md object-cover">
+                                        <img src="../../../storage/pictures/bds/<?= $p['url'] ?>" class="w-10 h-10 rounded-md object-cover">
                                         <div>
                                             <p class="font-medium text-sm text-gray-900 line-clamp-1" title="<?= htmlspecialchars($p['tieu_de']) ?>"><?= htmlspecialchars($p['tieu_de']) ?></p>
                                             <p class="text-xs text-gray-500 line-clamp-1" title="<?= htmlspecialchars($p['dia_chi']) ?>"><?= htmlspecialchars($p['dia_chi']) ?></p>

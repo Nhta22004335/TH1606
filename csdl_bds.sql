@@ -13,13 +13,6 @@ CREATE TABLE IF NOT EXISTS quyen (
     vai_tro VARCHAR(50) NOT NULL UNIQUE
 );
 
-INSERT INTO quyen (vai_tro) VALUES ('quantri'), ('moigioi'), ('khachhang');
-
-SELECT * FROM quyen;
-bd8fc7f4-7941-4bae-80c4-ede4e907a904 qt
-21ea2b50-e9d2-4894-bc4a-a9818ef226b1 mg
-6bc0b436-c0ab-4970-82b0-b0907136c9f0 kh
-
 -- 0. Bảng nguoi_dung
 CREATE TABLE IF NOT EXISTS nguoi_dung (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -28,7 +21,7 @@ CREATE TABLE IF NOT EXISTS nguoi_dung (
     email VARCHAR(255) NOT NULL UNIQUE,
     so_dt VARCHAR(20) DEFAULT 'chuacapnhat',
 	avt TEXT DEFAULT 'avt.png',
-	anh_bia TEXT DEFAULT 'anhbia.jpg',
+	anh_bia TEXT DEFAULT 'anhbia.png',
 	trang_thai VARCHAR(50) DEFAULT 'chuakichhoat',
     hoat_dong VARCHAR(50) DEFAULT 'offline', 
     ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -37,16 +30,6 @@ CREATE TABLE IF NOT EXISTS nguoi_dung (
     CONSTRAINT chk_nguoi_dung_so_dt CHECK (so_dt ~ '^[0-9]{1,11}$' OR so_dt = 'chuacapnhat')
 );
 
-INSERT INTO nguoi_dung (ten_dang_nhap, mat_khau, email, so_dt, trang_thai, hoat_dong) VALUES
-('anhnt', '$argon2id$v=19$m=65536,t=3,p=4$l4ptltIvcKNyDeuOZ2dfDg$XBg6sR18fXH+1Uj7DcfbXg08dz6tb61tko1U+JyIzIE', '22004335@st.vlute.edu.vn', '0702804594', 'danghoatdong', 'online'),
-('quynhln', '$argon2id$v=19$m=65536,t=3,p=4$l4ptltIvcKNyDeuOZ2dfDg$XBg6sR18fXH+1Uj7DcfbXg08dz6tb61tko1U+JyIzIE', '22004013@st.vlute.edu.vn', '0987654321', 'danghoatdong', 'online'),
-('dangtq', '$argon2id$v=19$m=65536,t=3,p=4$l4ptltIvcKNyDeuOZ2dfDg$XBg6sR18fXH+1Uj7DcfbXg08dz6tb61tko1U+JyIzIE', '22004069@st.vlute.edu.vn', '0897654321', 'danghoatdong', 'online');
-
-SELECT * FROM nguoi_dung;
-ab76fa3c-893e-487d-983f-d8429ee95436 anhnt
-ea5c0d77-9ce2-4309-b0e7-cbe579f9209d quynhln
-7a6fa374-5628-4870-be48-a4ea18aef621 dangtq
-
 CREATE TABLE IF NOT EXISTS phan_quyen (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     id_nguoi_dung UUID NOT NULL,
@@ -54,14 +37,7 @@ CREATE TABLE IF NOT EXISTS phan_quyen (
     CONSTRAINT fk_phan_quyen_nguoi_dung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
     CONSTRAINT fk_phan_quyen_quyen FOREIGN KEY (id_quyen) REFERENCES quyen(id) ON DELETE CASCADE,
     UNIQUE (id_nguoi_dung, id_quyen) 
-);
-
-INSERT INTO  phan_quyen (id_nguoi_dung, id_quyen) VALUES 
-('ab76fa3c-893e-487d-983f-d8429ee95436', '21ea2b50-e9d2-4894-bc4a-a9818ef226b1'),
-('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', '21ea2b50-e9d2-4894-bc4a-a9818ef226b1'),
-('7a6fa374-5628-4870-be48-a4ea18aef621', '6bc0b436-c0ab-4970-82b0-b0907136c9f0');
-
-SELECT * FROM phan_quyen;
+); 
 
 CREATE TABLE IF NOT EXISTS info_nguoi_dung (
 	id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -76,21 +52,12 @@ CREATE TABLE IF NOT EXISTS info_nguoi_dung (
     CONSTRAINT chk_quan_tri_tuoi CHECK (ngay_sinh <= CURRENT_DATE - INTERVAL '18 years')
 )
 
-ALTER TABLE info_nguoi_dung
-ADD COLUMN mo_ta TEXT DEFAULT 'chuacapnhat';
-
-INSERT INTO info_nguoi_dung (id_nguoi_dung, ho_ten, gioi_tinh, dia_chi, ngay_sinh) VALUES
-('ab76fa3c-893e-487d-983f-d8429ee95436', 'Nguyễn Tuấn Anh', 'nam', 'Cà Mau', '2004-09-21'),
-('ea5c0d77-9ce2-4309-b0e7-cbe579f9209d', 'Lê Ngọc Quỳnh', 'nu', 'Vĩnh Long', '2003-1-1'),
-('7a6fa374-5628-4870-be48-a4ea18aef621', 'Trương Quốc Đặng', 'nam', 'Cần Thơ', '2004-1-1');
-
-SELECT * FROM info_nguoi_dung;
-
 -- 4. Bảng phien_dang_nhap (lưu lại phiên làm việc của người dùng)
 CREATE TABLE IF NOT EXISTS phien_dang_nhap (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),              
     id_nguoi_dung UUID NOT NULL,           
-    token_phien VARCHAR(255) NOT NULL UNIQUE,             
+	selector VARCHAR(255),
+	verifier_hash VARCHAR(255),
     bat_dau TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  
     het_han TIMESTAMP,         
     dang_hoat_dong BOOLEAN DEFAULT TRUE, 
@@ -98,14 +65,6 @@ CREATE TABLE IF NOT EXISTS phien_dang_nhap (
     CONSTRAINT chk_phien_dang_nhap_time_range CHECK (het_han IS NULL OR het_han > bat_dau),
     CONSTRAINT chk_phien_dang_nhap_token_nonempty CHECK (length(trim(token_phien)) > 0)
 );
-
-alter table phien_dang_nhap
-add column selector VARCHAR(255)
-
-alter table phien_dang_nhap
-add column verifier_hash VARCHAR(255)
-
-SELECT * FROM phien_dang_nhap;
 
 -- 5. Bảng yeu_cau_otp (quản lý các mã OTP (One-Time Password) phục vụ cho xác thực người dùng trong hệ thống)
 CREATE TABLE IF NOT EXISTS yeu_cau_otp (
@@ -125,8 +84,6 @@ CREATE TABLE IF NOT EXISTS yeu_cau_otp (
     CONSTRAINT chk_yeu_cau_otp_time_range CHECK (het_han > bat_dau)
 );
 
-SELECT * FROM yeu_cau_otp
-
 -- 6. Bảng lich_su_xac_thuc (lưu lại vết đăng nhập, đăng ký hay đổi mật khẩu từ người dùng)
 CREATE TABLE IF NOT EXISTS lich_su_xac_thuc (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -142,85 +99,34 @@ CREATE TABLE IF NOT EXISTS lich_su_xac_thuc (
     CONSTRAINT chk_lich_su_xac_thuc_time_range CHECK (thoi_gian_ket_thuc IS NULL OR thoi_gian_ket_thuc >= thoi_gian_bat_dau)
 );
 
-select * from lich_su_xac_thuc
-
 -- 7. Bảng bat_dong_san (lưu thống tin các sản phẩm bất động sản)
 CREATE TABLE IF NOT EXISTS bat_dong_san (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     id_nguoi_dung UUID, 
     tieu_de VARCHAR(200) DEFAULT 'chuacapnhat',
     mo_ta TEXT DEFAULT 'chuacapnhat',
-    gia NUMERI	C(18,2) CHECK (gia >= 0) DEFAULT 0,
-    dien_tich NUMERIC(10,2) CHECK (dien_tich > 0) DEFAULT 0,
+    gia NUMERIC(18,2) CHECK (gia >= 0) DEFAULT 0,
+    dien_tich NUMERIC(10,2) CHECK (dien_tich > 0),
     dia_chi TEXT DEFAULT 'chuacapnhat',
     loai VARCHAR(100) DEFAULT 'chuacapnhat',
     khu_vuc VARCHAR(100) DEFAULT 'chuacapnhat',
-	trang_thai VARCHAR(50) DEFAULT 'chuaduyet',
-	hinh_thuc VARCHAR(50),
+    trang_thai VARCHAR(50) DEFAULT 'chuacapnhat',
+    hinh_thuc VARCHAR(50) DEFAULT 'chuacapnhat',
     ngay_dang TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_bds_nguoi_dung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE
+    CONSTRAINT fk_bds_nguoi_dung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE, 
+    CONSTRAINT chk_loai_bds CHECK (loai IN ('canho', 'nhapho', 'datnen', 'bietthu', 'chuacapnhat')),
+    CONSTRAINT chk_trang_thai_bds CHECK (trang_thai IN ('chuaduyet', 'daduyet', 'daban', 'dathue', 'chuacapnhat')),
+    CONSTRAINT chk_hinh_thuc_bds CHECK (hinh_thuc IN ('ban', 'chothue', 'chuacapnhat'))
 );
 
-ALTER TABLE bat_dong_san
-ADD COLUMN hinh_thuc VARCHAR(100) DEFAULT 'chuacapnhat'
-
-ALTER TABLE bat_dong_san
-ADD COLUMN loai VARCHAR(100) DEFAULT 'chuacapnhat'
-
-ALTER TABLE bat_dong_san
-DROP COLUMN loai VARCHAR(100) DEFAULT 'chuacapnhat'
-
-
-INSERT INTO bat_dong_san (id_nguoi_dung, tieu_de, mo_ta, gia, dien_tich, dia_chi, loai, khu_vuc)
-VALUES (
-    'ea5c0d77-9ce2-4309-b0e7-cbe579f9209d',
-    'Bán nhà vườn tại Vĩnh Long',
-    'Căn nhà vườn rộng rãi nằm ngay trung tâm Vĩnh Long, cách chợ khoảng 5 phút đi xe. 
-     Không gian thoáng mát, có sân trước và vườn sau trồng nhiều loại cây ăn trái. 
-     Nhà xây dựng kiên cố, thiết kế 1 trệt 1 lầu với 3 phòng ngủ, 2 nhà vệ sinh. 
-     Khu vực dân cư yên tĩnh, an ninh tốt, thích hợp cho gia đình định cư lâu dài 
-     hoặc đầu tư cho thuê nghỉ dưỡng cuối tuần.',
-    2800000000,
-    200.0,
-    'Phường 2, TP. Vĩnh Long, tỉnh Vĩnh Long',
-    'ban',
-    'Vĩnh Long'
-);
-
-INSERT INTO bat_dong_san (id_nguoi_dung, tieu_de, mo_ta, gia, dien_tich, dia_chi, loai, khu_vuc)
-VALUES (
-    'ea5c0d77-9ce2-4309-b0e7-cbe579f9209d',
-    'Dự án đất nền ven sông Vĩnh Long',
-    'Khu đất nền ven sông Vĩnh Long với vị trí đắc địa, gần trung tâm hành chính 
-     và trường học. Pháp lý minh bạch, sổ hồng riêng từng nền. Đường nội bộ 
-     rộng 8m, hạ tầng hoàn thiện với điện nước đầy đủ. Thích hợp để xây nhà ở 
-     hoặc đầu tư dài hạn do khu vực đang phát triển mạnh.',
-    950000000,
-    100.0,
-    'Xã Tân Hạnh, Long Hồ, Vĩnh Long',
-    'duan',
-    'Vĩnh Long'
-);
-
-INSERT INTO bat_dong_san (id_nguoi_dung, tieu_de, mo_ta, gia, dien_tich, dia_chi, loai, khu_vuc)
-VALUES (
-    'ea5c0d77-9ce2-4309-b0e7-cbe579f9209d',
-    'Cho thuê nhà phố Vĩnh Long',
-    'Nhà phố 1 trệt 2 lầu ngay mặt tiền đường chính, gần siêu thị Coopmart 
-     và bến xe Vĩnh Long. Diện tích sử dụng rộng rãi, gồm 4 phòng ngủ, 1 phòng 
-     khách và bếp. Nội thất cơ bản, có sẵn máy lạnh và tủ bếp. Thích hợp mở văn phòng, 
-     cửa hàng kinh doanh hoặc gia đình ở lâu dài.',
-    12000000,
-    150.0,
-    'Đường Phạm Hùng, Phường 9, TP. Vĩnh Long',
-    'thue',
-    'Vĩnh Long'
-);
+-- 8. Bảng anh (ảnh sản phẩm bất động sản)
 CREATE TABLE IF NOT EXISTS hinh_anh_bds (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     id_bds UUID NOT NULL,
-    url VARCHAR(300),
-    mo_ta VARCHAR(200),
+    url VARCHAR(300) NOT NULL,
+	kich_thuoc NUMERIC(10,2) DEFAULT 0,
+	trang_thai VARCHAR(255) CHECK (trang_thai IN ('binhthuong', 'nhe', 'trungbinh', 'nang'))DEFAULT 'binhthuong',
+    mo_ta VARCHAR(200) DEFAULT 'chuacapnhat',
     ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_hinh_anh_bds_bds FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE CASCADE
 );
