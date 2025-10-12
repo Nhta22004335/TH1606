@@ -17,24 +17,23 @@ function getLoaiText($loai) {
     return $map[$loai] ?? 'Không xác định';
 }
 
+// Kết nối DB
 $pdo = ketnoicsdl();
 $search = $_GET['search'] ?? '';
 $id = $_SESSION['id_nguoi_dung'] ?? '';
 
-// --- MAPPING SEARCH LOẠI HỒ SƠ ---
+// Mapping tên hiển thị sang mã loại
 $loai_map = [
     'hồ sơ mua bán' => 'hosomuaban',
     'hồ sơ thuê'    => 'hosothue',
     'biên bản'      => 'bienban'
 ];
-$search_mapped = mb_strtolower(trim($search), 'UTF-8');
-if (isset($loai_map[$search_mapped])) {
-    $search_mapped = $loai_map[$search_mapped];
-} else {
-    $search_mapped = $search; // giữ nguyên nếu không khớp mapping
+$search_sql = mb_strtolower(trim($search), 'UTF-8');
+if (isset($loai_map[$search_sql])) {
+    $search_sql = $loai_map[$search_sql];
 }
 
-// SQL
+// SQL chính
 $sql = "
     SELECT bm.id, bm.tieu_de, bm.loai, 
            info1.ho_ten AS ten_ben_mua,
@@ -57,7 +56,7 @@ if (!empty($search)) {
         info2.ho_ten ILIKE :search OR 
         bm.trang_thai ILIKE :search
     )";
-    $params[':search'] = "%$search_mapped%";
+    $params[':search'] = "%$search_sql%";
 }
 
 $sql .= " ORDER BY bm.ngay_tao DESC";
@@ -65,10 +64,6 @@ $sql .= " ORDER BY bm.ngay_tao DESC";
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $bieumau_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-
-// xem id đang đăng nhập:
-// echo "<pre>Đang đăng nhập ID: " . htmlspecialchars($id) . "</pre>";
 ?>
 <!DOCTYPE html>
 <html lang="vi" class="bg-gray-50">
@@ -241,7 +236,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
-
 
 function capNhatTrangThai(id, trangThai) {
     if (!confirm(`Bạn có chắc chắn muốn xác nhận đã ký cho đơn ID ${id} không?`)) return;
