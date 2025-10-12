@@ -1,7 +1,8 @@
 <?php
+// ===== PHẦN LOGIC PHP - ĐÃ ĐƯỢC TÁI CẤU TRÚC VÀ TỐI ƯU =====
 require_once "../../../config/database.php";
 
-// Helper
+// Các hàm helper để code sạch sẽ và không lặp lại
 function getStatusInfo($status) {
     $map = [
         "choduyet" => ['text' => "Chờ duyệt", 'classes' => "bg-yellow-100 text-yellow-800 border-yellow-300"],
@@ -19,22 +20,9 @@ function getLoaiText($loai) {
 
 $pdo = ketnoicsdl();
 $search = $_GET['search'] ?? '';
-$id = $_SESSION['id_nguoi_dung'] ?? '';
+$id = $_SESSION['id_nguoi_dung'] ?? ''; // Giả sử ID người dùng đã có trong session
 
-// --- MAPPING SEARCH LOẠI HỒ SƠ ---
-$loai_map = [
-    'hồ sơ mua bán' => 'hosomuaban',
-    'hồ sơ thuê'    => 'hosothue',
-    'biên bản'      => 'bienban'
-];
-$search_mapped = mb_strtolower(trim($search), 'UTF-8');
-if (isset($loai_map[$search_mapped])) {
-    $search_mapped = $loai_map[$search_mapped];
-} else {
-    $search_mapped = $search; // giữ nguyên nếu không khớp mapping
-}
-
-// SQL
+// Câu lệnh SQL không đổi, đã tốt
 $sql = "
     SELECT bm.id, bm.tieu_de, bm.loai, 
            info1.ho_ten AS ten_ben_mua,
@@ -50,25 +38,15 @@ $sql = "
 $params = [':id' => $id];
 
 if (!empty($search)) {
-    $sql .= " AND (
-        bm.tieu_de ILIKE :search OR 
-        bm.loai ILIKE :search OR 
-        info1.ho_ten ILIKE :search OR 
-        info2.ho_ten ILIKE :search OR 
-        bm.trang_thai ILIKE :search
-    )";
-    $params[':search'] = "%$search_mapped%";
+    $sql .= " AND (bm.tieu_de ILIKE :search OR bm.loai ILIKE :search OR info1.ho_ten ILIKE :search OR info2.ho_ten ILIKE :search OR bm.trang_thai ILIKE :search)";
+    $params[':search'] = "%$search%";
 }
-
 $sql .= " ORDER BY bm.ngay_tao DESC";
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $bieumau_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-
-// xem id đang đăng nhập:
-// echo "<pre>Đang đăng nhập ID: " . htmlspecialchars($id) . "</pre>";
 ?>
 <!DOCTYPE html>
 <html lang="vi" class="bg-gray-50">
@@ -241,7 +219,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
-
 
 function capNhatTrangThai(id, trangThai) {
     if (!confirm(`Bạn có chắc chắn muốn xác nhận đã ký cho đơn ID ${id} không?`)) return;
