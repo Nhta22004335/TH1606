@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Tìm kiếm BĐS</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  
 </head>
 <body class="bg-gray-100">
   <div class="max-w-5xl mx-auto py-10">

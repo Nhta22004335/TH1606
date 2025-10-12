@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Lịch làm việc</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  
 </head>
 <body class="bg-gray-50">
   <div class="max-w-4xl mx-auto py-10">

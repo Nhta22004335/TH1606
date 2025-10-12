@@ -1,75 +1,119 @@
 <?php
+// FILE: xacnhan_otp_dangky.php
+
+// Cài đặt session an toàn
+ini_set('session.use_only_cookies', 1);
+ini_set('session.cookie_httponly', 1);
+ini_set('session.cookie_secure', isset($_SERVER['HTTPS']));
+
+session_start();
 date_default_timezone_set('Asia/Ho_Chi_Minh');
-require_once "../../../config/database.php";
-$pdo = ketnoicsdl();
+header('Content-Type: application/json');
 
-if (!isset($_GET['tokenotp'])) {
-    die("Thiếu token!");
+// --- KẾT NỐI CSDL ---
+try {
+    require_once "../../../config/database.php";
+    $pdo = ketnoicsdl();
+} catch (Exception $e) {
+    error_log("Lỗi kết nối CSDL: " . $e->getMessage());
+    json_response(false, "Lỗi hệ thống, vui lòng thử lại sau.", 500);
 }
 
-$token_code = trim($_GET['tokenotp']);
-
-// Kiểm tra token trong DB
-$sql = "SELECT * FROM yeu_cau_otp WHERE token_code = :token_code LIMIT 1";
-$stmt = $pdo->prepare($sql);
-$stmt->execute([':token_code' => $token_code]);
-$otpData = $stmt->fetch(PDO::FETCH_ASSOC);
-
-if (!$otpData) {
-    die("Token không hợp lệ!");
-}
-
-// Kiểm tra thời gian hết hạn
-if (strtotime($otpData['het_han']) < time()) {
-    echo "Mã OTP đã hết hạn!";
-    echo "<br> <a href='yeucau_otp.php?tokenotp=". $token_code ."'>Gửi lại OTP</a>";
+// --- HÀM TIỆN ÍCH ---
+function json_response($success, $message, $http_code = 200) {
+    http_response_code($http_code);
+    echo json_encode(['success' => $success, 'message' => $message]);
     exit;
 }
 
-function xoaYeuCauOTP($pdo, $token_code, $otp_code) {
-    $sql = "DELETE FROM yeu_cau_otp WHERE token_code = :token_code AND otp_code = :otp_code";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([':token_code' => $token_code, ':otp_code' => $otp_code]);
+// --- LUỒNG XỬ LÝ CHÍNH ---
+if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+    json_response(false, "Phương thức không hợp lệ.", 405);
 }
 
-// Kiểm tra mã OTP
-if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['otp'])) {
-    $otp_code = trim($_POST['otp'] ?? '');
-    if ($otp_code !== $otpData['otp_code']) {
-        echo "<script>alert('Mã OTP không đúng!');</script>";
-    } else {
-        xoaYeuCauOTP($pdo, $token_code, $otp_code);
-        header("Location: ../../views/auth/dangnhap.html");
-        exit();
+// BƯỚC 1: Lấy và xác thực đầu vào
+$email = filter_var(trim($_POST['email'] ?? ''), FILTER_VALIDATE_EMAIL);
+$otp_code = trim($_POST['otp'] ?? '');
+
+if (empty($email) || empty($otp_code)) {
+    json_response(false, "Vui lòng nhập email và mã OTP.");
+}
+if (!preg_match('/^[0-9]{6}$/', $otp_code)) {
+    json_response(false, "Mã OTP phải là 6 chữ số.");
+}
+
+// --- BƯỚC 2: TÌM VÀ XÁC THỰC YÊU CẦU OTP ---
+try {
+    // Tìm yêu cầu OTP hợp lệ (chưa hết hạn) cho email
+    $sql = "SELECT otp_hash, user_data_json FROM yeu_cau_otp WHERE email = :email AND het_han > NOW() LIMIT 1";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([':email' => $email]);
+    $otp_request = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$otp_request) {
+        json_response(false, "Mã OTP không hợp lệ hoặc đã hết hạn. Vui lòng thử lại.");
     }
+
+    // So sánh OTP người dùng nhập với hash trong CSDL một cách an toàn
+    if (password_verify($otp_code, $otp_request['otp_hash'])) {
+        // --- OTP CHÍNH XÁC - TIẾN HÀNH TẠO NGƯỜI DÙNG ---
+
+        $user_data = json_decode($otp_request['user_data_json'], true);
+        if (!$user_data) {
+            json_response(false, "Lỗi dữ liệu đăng ký tạm thời. Vui lòng thử đăng ký lại.", 500);
+        }
+
+        // Bắt đầu một giao dịch để đảm bảo toàn vẹn dữ liệu
+        $pdo->beginTransaction();
+
+        try {
+            // 3a. Thêm tài khoản vào bảng `nguoi_dung`
+            $sql_insert_user = "INSERT INTO nguoi_dung (ten_dang_nhap, mat_khau, email, so_dt)
+                                VALUES (:ten_dang_nhap, :mat_khau, :email, :so_dt)
+                                RETURNING id";
+            $stmt_user = $pdo->prepare($sql_insert_user);
+            $stmt_user->execute([
+                ':ten_dang_nhap' => $user_data['ten_dang_nhap'],
+                ':mat_khau'      => $user_data['mat_khau_hashed'],
+                ':email'         => $email,
+                ':so_dt'         => $user_data['so_dt']
+            ]);
+            $new_user_id = $stmt_user->fetchColumn();
+
+            // 3b. Thêm thông tin chi tiết vào bảng `khach_hang` (hoặc bảng tương ứng)
+            // Giả sử có một trigger tự động tạo bản ghi `khach_hang` khi `nguoi_dung` được tạo.
+            // Nếu không, bạn phải INSERT thủ công. Ở đây ta dùng UPDATE.
+            $sql_update_profile = "UPDATE info_nguoi_dung SET ho_ten = :ho_ten WHERE id_nguoi_dung = :id";
+            $stmt_profile = $pdo->prepare($sql_update_profile);
+            $stmt_profile->execute([
+                ':ho_ten' => $user_data['ho_ten'],
+                ':id'     => $new_user_id
+            ]);
+
+            // 3c. Xóa yêu cầu OTP đã sử dụng
+            $sql_delete_otp = "DELETE FROM yeu_cau_otp WHERE email = :email";
+            $stmt_delete = $pdo->prepare($sql_delete_otp);
+            $stmt_delete->execute([':email' => $email]);
+
+            // Nếu tất cả thành công, xác nhận giao dịch
+            $pdo->commit();
+
+            json_response(true, "Xác thực thành công! Tài khoản của bạn đã được tạo.");
+
+        } catch (Exception $e) {
+            // Nếu có lỗi, hủy bỏ tất cả thay đổi
+            $pdo->rollBack();
+            error_log("Lỗi giao dịch khi tạo người dùng: " . $e->getMessage());
+            json_response(false, "Lỗi khi tạo tài khoản. Vui lòng thử lại.", 500);
+        }
+
+    } else {
+        // OTP sai
+        json_response(false, "Mã OTP không hợp lệ hoặc đã hết hạn. Vui lòng thử lại.");
+    }
+
+} catch (PDOException $e) {
+    error_log("Lỗi CSDL khi xác thực OTP: " . $e->getMessage());
+    json_response(false, "Lỗi hệ thống khi xác thực. Vui lòng thử lại.", 500);
 }
 ?>
-
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zolux 4335 - Xác nhận OTP</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-100 via-white to-blue-50">
-  <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
-    <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Xác nhận OTP</h1>
-    <form action="" method="POST" id="formXacNhan" class="space-y-5">
-      <div>
-        <label for="otp" class="block text-sm font-medium text-gray-600 mb-2">Nhập mã OTP</label>
-        <input type="text" id="otp" name="otp" placeholder="••••••"
-          class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent text-center text-lg tracking-widest" />
-      </div>
-      <button type="submit" id="btnXacNhan"
-        class="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-700 transition duration-300 shadow-md">
-        Xác nhận
-      </button>
-    </form>
-    <p class="text-sm text-gray-500 text-center mt-6">Chưa nhận được OTP? 
-      <a href="yeucau_otp.php" class="text-blue-600 hover:underline">Gửi lại</a>
-    </p>
-  </div>
-</body>
-</html>

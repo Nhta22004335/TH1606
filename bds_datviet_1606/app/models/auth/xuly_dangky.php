@@ -1,183 +1,140 @@
 <?php
+// FILE: xuly_dangky_gui_otp.php
+
+ini_set('session.use_only_cookies', 1);
+ini_set('session.cookie_httponly', 1);
+ini_set('session.cookie_secure', isset($_SERVER['HTTPS']));
+
 date_default_timezone_set('Asia/Ho_Chi_Minh');
-require_once "../../../config/database.php";
-$pdo = ketnoicsdl();
+header('Content-Type: application/json');
 
-require_once '../../../config/email.php';
-$mailer = createmailer();
+// --- KẾT NỐI CSDL VÀ EMAIL ---
+try {
+    require_once "../../../config/database.php";
+    $pdo = ketnoicsdl();
+    require_once '../../../config/email.php';
+    $mailer = createmailer();
+} catch (Exception $e) {
+    error_log("Lỗi khởi tạo: " . $e->getMessage());
+    json_response(false, "Lỗi hệ thống, vui lòng thử lại sau.", 500);
+}
+
+// --- CÁC HÀM TIỆN ÍCH VÀ BẢO MẬT ---
 
 /**
- * Tạo mã OTP gồm chữ và số
+ * Trả về phản hồi JSON và kết thúc kịch bản.
  */
-function generateOTP($length = 6) {
-    $chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    $otp = '';
-    for ($i = 0; $i < $length; $i++) {
-        $otp .= $chars[random_int(0, strlen($chars) - 1)];
-    }
-    return $otp;
+function json_response($success, $message, $http_code = 200) {
+    http_response_code($http_code);
+    echo json_encode(['success' => $success, 'message' => $message]);
+    exit;
 }
 
 /**
- * Tạo token ngẫu nhiên
+ * Tạo mã OTP an toàn, chỉ gồm số.
  */
-function generateToken($length = 32) {
-    return bin2hex(random_bytes($length / 2));
+function generateNumericOTP($length = 6) {
+    return str_pad(random_int(0, pow(10, $length) - 1), $length, '0', STR_PAD_LEFT);
 }
 
-/**
- * Kiểm tra xem email có hợp lệ không
- */
-function ckTaiKhoan($pdo, $email, $so_dt, $ten_dang_nhap) {
-    $sql = "SELECT COUNT(*) FROM nguoi_dung WHERE email = :email OR so_dt = :so_dt OR ten_dang_nhap = :ten_dang_nhap";
+
+// --- LUỒNG XỬ LÝ CHÍNH ---
+
+if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+    json_response(false, "Phương thức không hợp lệ.", 405);
+}
+
+// BƯỚC 1: Lấy và xác thực dữ liệu đầu vào
+$ho_ten        = trim($_POST['hoten'] ?? '');
+$ten_dang_nhap = trim($_POST['tendangnhap'] ?? '');
+$email         = filter_var(trim($_POST['email'] ?? ''), FILTER_VALIDATE_EMAIL);
+$so_dt         = trim($_POST['sodienthoai'] ?? '');
+$mat_khau      = $_POST['matkhau'] ?? '';
+$mat_khau_nhap_lai = $_POST['matkhaunhaplai'] ?? '';
+
+if (empty($ho_ten) || empty($ten_dang_nhap) || empty($email) || empty($mat_khau)) {
+    json_response(false, "Vui lòng điền đầy đủ các trường bắt buộc.");
+}
+if (!$email) {
+    json_response(false, "Định dạng email không hợp lệ.");
+}
+if ($mat_khau !== $mat_khau_nhap_lai) {
+    json_response(false, "Mật khẩu nhập lại không khớp.");
+}
+if (strlen($mat_khau) < 8) {
+    json_response(false, "Mật khẩu phải có ít nhất 8 ký tự.");
+}
+
+// BƯỚC 2: Kiểm tra sự tồn tại của tài khoản
+$stmt = $pdo->prepare("SELECT 1 FROM nguoi_dung WHERE email = :email OR ten_dang_nhap = :ten_dang_nhap LIMIT 1");
+$stmt->execute([':email' => $email, ':ten_dang_nhap' => $ten_dang_nhap]);
+if ($stmt->fetchColumn()) {
+    json_response(false, "Email hoặc Tên đăng nhập đã được sử dụng.");
+}
+
+$stmt = $pdo->prepare("SELECT 1 FROM yeu_cau_otp WHERE email = :email AND het_han > NOW()");
+$stmt->execute([':email' => $email]);
+if ($stmt->fetchColumn()) {
+    json_response(false, "Một mã OTP đã được gửi tới email này. Vui lòng kiểm tra hộp thư hoặc đợi 5 phút để thử lại.");
+}
+
+// BƯỚC 3: Tạo và lưu dữ liệu đăng ký tạm thời
+$otp_code = generateNumericOTP();
+$het_han  = new DateTime('+5 minutes');
+
+// Băm mật khẩu và OTP
+$mat_khau_hashed = password_hash($mat_khau, PASSWORD_ARGON2ID);
+$otp_hashed      = password_hash($otp_code, PASSWORD_DEFAULT);
+
+// Đóng gói dữ liệu người dùng vào JSON
+$user_data_json = json_encode([
+    'ho_ten' => $ho_ten,
+    'ten_dang_nhap' => $ten_dang_nhap,
+    'so_dt' => $so_dt,
+    'mat_khau_hashed' => $mat_khau_hashed
+]);
+
+try {
+    // Xóa các yêu cầu OTP cũ, hết hạn của email này
+    $pdo->prepare("DELETE FROM yeu_cau_otp WHERE email = :email")->execute([':email' => $email]);
+    
+    // Thêm yêu cầu mới
+    $sql = "INSERT INTO yeu_cau_otp (email, otp_hash, het_han, user_data_json) 
+            VALUES (:email, :otp_hash, :het_han, :user_data_json)";
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([':email' => $email, ':so_dt' => $so_dt, ':ten_dang_nhap' => $ten_dang_nhap]);
-    $taikhoan = $stmt->fetchColumn();
-    if ($taikhoan == 0) {
-        $sql = "SELECT COUNT(*) FROM yeu_cau_otp WHERE email = :email OR so_dt = :so_dt";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([':email' => $email, ':so_dt' => $so_dt]);
-        $yeu_cau_otp = $stmt->fetchColumn();
-        if ($yeu_cau_otp > 0) {
-            return ['success' => false, 'error' => 'Tài khoản này đã gửi yêu cầu!'];
-        } else {
-            return ['success' => true, 'tb' => 'OK!'];
-        }
-    } else {
-        return ['success' => false, 'error' => 'Tài khoản đã tồn tại!'];
-    }
+    $stmt->execute([
+        ':email'          => $email,
+        ':otp_hash'       => $otp_hashed,
+        ':het_han'        => $het_han->format('Y-m-d H:i:s'),
+        ':user_data_json' => $user_data_json
+    ]);
+} catch (PDOException $e) {
+   // Tạm thời hiển thị lỗi chi tiết để gỡ rối
+    json_response(false, "Lỗi CSDL: " . $e->getMessage(), 500);
 }
 
-/**
- * Lưu OTP vào PostgreSQL
- */
-function saveOTPToDatabase($pdo, $email, $so_dt, $otp_code, $token_code) {
-    try {
-        $het_han = date('Y-m-d H:i:s', strtotime('+5 minutes'));
-
-        $sql = "INSERT INTO yeu_cau_otp (email, so_dt, otp_code, token_code, het_han) 
-                VALUES (:email, :so_dt, :otp_code, :token_code, :het_han)";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([
-            ':email'       => $email,
-            ':so_dt' => $so_dt,
-            ':otp_code'         => $otp_code,
-            ':token_code'       => $token_code,
-            ':het_han' => $het_han
-        ]);
-
-        return ['success' => true];
-    } catch (Exception $e) {
-        return ['success' => false, 'error' => 'Lỗi cơ sở dữ liệu!'];
-    }
-}
-
-/**
- * Lưu thông tin cơ bản vào PostgreSQL
- */
-function saveUserInfo($pdo, $ho_ten, $ten_dang_nhap, $email, $so_dt) {
-    try {
-        $pdo->beginTransaction();
-
-        $command = "/opt/venv/bin/python ../../helpers/xuly_matkhau.py " . escapeshellarg("Demo@123");
-        $result = shell_exec($command);
-
-        // 1. Thêm vào bảng taikhoan và lấy id vừa thêm
-        $sql = "INSERT INTO nguoi_dung (ten_dang_nhap, mat_khau, email, so_dt)
-                VALUES (:ten_dang_nhap, :mat_khau, :email, :so_dt)
-                RETURNING id";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([
-            ':ten_dang_nhap' => $ten_dang_nhap,
-            ':mat_khau'     => trim($result), 
-            ':email'       => $email,
-            ':so_dt' => $so_dt
-        ]);
-        
-        $id = $stmt->fetchColumn();
-
-        //2. Thêm vào bảng nguoidung
-        $sql_update = "UPDATE khach_hang 
-               SET ho_ten = :ho_ten 
-               WHERE id_nguoi_dung = :id";
-        $stmt = $pdo->prepare($sql_update);
-        $stmt->execute([
-            ':ho_ten' => $ho_ten,
-            ':id' => $id
-        ]);
-
-        $pdo->commit();
-        return ['success' => true];
-    } catch (Exception $e) {
-        $pdo->rollBack();
-        return ['success' => false, 'error' => 'Lỗi lưu thông tin người dùng!'];
-    }
-}
-
-/**
- * Gửi OTP qua email kèm link xác nhận
- */
-function sendOTPEmail($mailer, $email, $ten_dang_nhap, $otp_code, $token_code, $het_han) {
-    $subject = "Mã xác thực OTP của bạn";
-
-    $verify_link = "http://localhost:8080/app/models/auth/xacnhan_otp.php?tokenotp=" . urlencode($token_code);
-
-    $body = "Xin chào $ten_dang_nhap,\n\n"
-          . "Mã OTP của bạn là: $otp_code\n"
-          . "Mã có hiệu lực đến: $het_han\n\n"
-          . "Vui lòng bấm vào liên kết dưới đây để xác nhận OTP:\n$verify_link\n\n"
+// BƯỚC 4: Gửi email OTP
+try {
+    $subject = "Mã xác thực đăng ký tài khoản";
+    $body = "Xin chào " . htmlspecialchars($ho_ten) . ",<br><br>"
+          . "Cảm ơn bạn đã đăng ký. Mã OTP của bạn là: <h1>$otp_code</h1>"
+          . "Mã này sẽ hết hạn trong vòng 5 phút.<br><br>"
+          . "Vui lòng sử dụng mã này để hoàn tất quá trình đăng ký.<br><br>"
           . "Trân trọng.";
 
-    try {
-        $mailer->clearAddresses();
-        $mailer->addAddress($email, $ten_dang_nhap);
-        $mailer->Subject = $subject;
-        $mailer->Body    = nl2br(htmlspecialchars($body));
-        $mailer->AltBody = $body;
+    $mailer->clearAddresses();
+    $mailer->addAddress($email, $ho_ten);
+    $mailer->Subject = $subject;
+    $mailer->Body    = $body;
+    $mailer->isHTML(true);
 
-        if ($mailer->send()) {
-            return ['success' => true];
-        } else {
-            return ['success' => false, 'error' => 'Lỗi gửi email!'];
-        }
-    } catch (Exception $e) {
-        return ['success' => false, 'error' => 'Lỗi gửi email!'];
+    if ($mailer->send()) {
+        json_response(true, "Mã OTP đã được gửi đến email của bạn. Vui lòng kiểm tra và nhập mã.");
+    } else {
+        json_response(false, "Không thể gửi email OTP. Vui lòng thử lại sau.", 500);
     }
-}
-
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $ho_ten       = trim($_POST['hoten'] ?? '');
-    $ten_dang_nhap = trim($_POST['tendangnhap'] ?? '');
-    $email       = trim($_POST['email'] ?? '');
-    $so_dt = trim($_POST['sodienthoai'] ?? '');
-
-    $otp_code = generateOTP();
-    $token_code = generateToken();
-    $het_han = date('Y-m-d H:i:s', strtotime('+5 minutes'));
-
-    
-    $result = ckTaiKhoan($pdo, $email, $so_dt, $ten_dang_nhap);
-    if (!$result['success']) {
-        echo $result['error'];
-        exit;
-    }
-
-    $result1 = saveUserInfo($pdo, $ho_ten, $ten_dang_nhap, $email, $so_dt);
-    if (!$result1['success']) {
-        echo $result1['error'];
-        exit;
-    }
-
-    $result2 = saveOTPToDatabase($pdo, $email, $so_dt, $otp_code, $token_code);
-    if (!$result2['success']) {
-        echo $result2['error'];
-        exit;
-    }
-
-    $result3 = sendOTPEmail($mailer, $email, $ten_dang_nhap, $otp_code, $token_code, $het_han);
-    if (!$result3['success']) {
-        echo $result3['error'];
-        exit;
-    }
+} catch (Exception $e) {
+    error_log("Lỗi PHPMailer: " . $mailer->ErrorInfo);
+    json_response(false, "Lỗi hệ thống khi gửi email. Vui lòng thử lại sau.", 500);
 }
 ?>

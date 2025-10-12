@@ -1,20 +1,24 @@
-2025-10-11 17:14:19,642 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
-2025-10-11 17:14:19,665 INFO supervisord started with pid 1
-2025-10-11 17:14:20,672 INFO spawned: 'apache' with pid 7
-2025-10-11 17:14:20,686 INFO spawned: 'socketio' with pid 8
-2025-10-11 17:14:21,067 WARN exited: socketio (exit status 1; not expected)
-2025-10-11 17:14:22,195 INFO success: apache entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
-2025-10-11 17:14:22,759 INFO spawned: 'socketio' with pid 17
-2025-10-11 17:14:23,219 WARN exited: socketio (exit status 1; not expected)
-2025-10-11 17:14:25,732 INFO spawned: 'socketio' with pid 29
-2025-10-11 17:14:25,955 WARN exited: socketio (exit status 1; not expected)
-2025-10-11 17:14:28,962 INFO spawned: 'socketio' with pid 36
-2025-10-11 17:14:29,012 WARN exited: socketio (exit status 1; not expected)
-2025-10-11 17:14:30,014 INFO gave up: socketio entered FATAL state, too many start retries too quickly
-
-2025-10-11 17:19:04,387 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
-2025-10-11 17:19:04,422 INFO supervisord started with pid 1
-2025-10-11 17:19:05,431 INFO spawned: 'apache' with pid 7
-2025-10-11 17:19:05,437 INFO spawned: 'socketio' with pid 8
-2025-10-11 17:19:06,469 INFO success: apache entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
-2025-10-11 17:19:06,471 INFO success: socketio entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-11 19:20:16,744 INFO Set uid to user 0 succeeded
+2025-10-11 19:20:16,764 INFO supervisord started with pid 1
+2025-10-11 19:20:17,776 INFO spawned: 'apache' with pid 7
+2025-10-11 19:20:17,805 INFO spawned: 'socketio' with pid 8
+2025-10-11 19:20:17,812 INFO spawned: 'tailwind' with pid 10
+2025-10-11 19:20:19,599 INFO success: apache entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-11 19:20:19,600 INFO success: socketio entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-11 19:20:19,600 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-12 01:39:12,155 INFO Set uid to user 0 succeeded
+2025-10-12 01:39:12,163 INFO supervisord started with pid 1
+2025-10-12 01:39:13,169 INFO spawned: 'apache' with pid 7
+2025-10-12 01:39:13,174 INFO spawned: 'socketio' with pid 8
+2025-10-12 01:39:13,180 INFO spawned: 'tailwind' with pid 9
+2025-10-12 01:39:14,847 INFO success: apache entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-12 01:39:14,848 INFO success: socketio entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-12 01:39:14,848 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-12 04:10:49,036 INFO Set uid to user 0 succeeded
+2025-10-12 04:10:49,045 INFO supervisord started with pid 1
+2025-10-12 04:10:50,050 INFO spawned: 'apache' with pid 7
+2025-10-12 04:10:50,054 INFO spawned: 'socketio' with pid 8
+2025-10-12 04:10:50,060 INFO spawned: 'tailwind' with pid 9
+2025-10-12 04:10:51,675 INFO success: apache entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-12 04:10:51,676 INFO success: socketio entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-12 04:10:51,676 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)

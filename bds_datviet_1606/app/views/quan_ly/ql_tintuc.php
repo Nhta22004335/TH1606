@@ -61,8 +61,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Tin tức Bất động sản</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>[x-cloak] { display: none !important; }</style>
 </head>
 <body class="h-full">

@@ -102,7 +102,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chi tiết môi giới</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  
   <link rel="stylesheet" href="../../../public/assets/fontawesome/css/all.min.css">
 </head>
 <body>
@@ -229,20 +229,7 @@
                 <p class="flex items-center">
                     <strong>Trạng thái:</strong> 
                     <span id="trangthaitext" class="ml-2"><?= $chitiet['trang_thai'] ?></span>
-                    <button onclick="btnvaitro('trangthai')" class="ml-2 text-blue-500 hover:text-blue-700">
-                        <i class="fas fa-edit"></i>
-                    </button>
                 </p>
-                <div id="trangthaiedit" class="hidden">
-                    <select id="trangthaiselect" class="border rounded px-2 py-1">
-                        <option value="danghoatdong" <?= $chitiet['trang_thai']=='danghoatdong'?'selected':'' ?>>Hoạt động</option>
-                        <option value="chuakichhoat" <?= $chitiet['trang_thai']=='chuakichhoat'?'selected':'' ?>>Ngưng hoạt động</option>
-                        <option value="khoa" <?= $chitiet['trang_thai']=='khoa'?'selected':'' ?>>Khóa</option>
-                    </select>
-                    <button onclick="capnhattrangthai('<?= $chitiet['id'] ?>')" class="px-2 py-1 bg-green-500 text-white rounded">Lưu</button>
-                    <button onclick="huycapnhat('trangthai')" class="px-2 py-1 bg-gray-400 text-white rounded">Hủy</button>
-                </div>
-
                 <p><strong>Ngày tạo:</strong> <?= htmlspecialchars($chitiet['ngay_tao']) ?></p>
             </div>
         </div>

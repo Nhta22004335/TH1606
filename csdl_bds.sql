@@ -99,6 +99,12 @@ CREATE TABLE IF NOT EXISTS phien_dang_nhap (
     CONSTRAINT chk_phien_dang_nhap_token_nonempty CHECK (length(trim(token_phien)) > 0)
 );
 
+alter table phien_dang_nhap
+add column selector VARCHAR(255)
+
+alter table phien_dang_nhap
+add column verifier_hash VARCHAR(255)
+
 SELECT * FROM phien_dang_nhap;
 
 -- 5. Bảng yeu_cau_otp (quản lý các mã OTP (One-Time Password) phục vụ cho xác thực người dùng trong hệ thống)

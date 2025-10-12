@@ -70,14 +70,12 @@ $bieumau_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý Biểu mẫu | Hệ thống</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         .modal-content { max-height: 90vh; overflow-y: auto; }
         .table-cell-content { max-width: 250px; }
     </style>
 </head>
-<body class="font-sans text-gray-800">
+<body>
 
 <div class="container">
 

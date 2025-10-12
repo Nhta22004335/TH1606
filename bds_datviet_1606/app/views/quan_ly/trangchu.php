@@ -1,4 +1,8 @@
 <?php
+    require_once "../../../config/database.php";
+    session_start();
+    $pdo = ketnoicsdl();
+
     $id = $_SESSION['id_nguoi_dung'] ?? null;
     $dsQuyen = [];
     $ind = ['ho_ten' => 'Khách', 'avt' => 'default_avatar.png'];
@@ -50,8 +54,8 @@
                 'Danh sách người dùng' => ['link' => 'ds_nguoidung', 'roles' => ['quantri']],
                 'Lịch sử xác thực' => ['link' => 'ls_xacthuc', 'roles' => ['quantri']],
                 'Quản lý biểu mẫu' => ['link' => 'ql_bieumau', 'roles' => ['quantri']],
-                'Quản lý đơn từ' => ['link' => '../moi_gioi/ql_hoso', 'roles' => ['moigioi']],
-                'Tạo hồ sơ mới' => ['link' => '../moi_gioi/cn_hoso', 'roles' => ['moigioi']],
+                'Quản lý hồ sơ (MG)' => ['link' => '../moi_gioi/ql_hoso', 'roles' => ['moigioi']],
+                'Tạo hồ sơ mới' => ['link' => '../moi_gioi/tao_hoso_moi', 'roles' => ['moigioi']],
             ]
         ],
         [
@@ -138,9 +142,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | Đất Việt Bất Động Sản</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://unpkg.com/alpinejs"></script>
-    <link rel="stylesheet" href="../../../public/assets/fontawesome/css/all.min.css">
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    <!-- <script defer src="https://unpkg.com/alpinejs"></script> -->
+    <link rel="stylesheet" href="../../../public/css/style.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="../../../public/fontawesome/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     
     <style>
@@ -179,7 +185,7 @@
         <div class="flex-shrink-0 flex items-center justify-center h-16 bg-white border-b shadow-sm">
             <a href="trangchu.php" class="flex items-center space-x-2 cursor-pointer p-2">
                 <div class="relative h-14 w-14 flex items-center justify-center">
-                    <img src="../../../public/assets/anhht/0/datviet.png" alt="Logo" class="transform scale-150">
+                    <img src="../../../public/images/datviet.png" alt="Logo" class="transform scale-150">
                 </div>
                 <div class="flex flex-col justify-center leading-none">
                     <span class="text-2xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-teal-500 drop-shadow-sm">
@@ -267,7 +273,7 @@
             <div x-show="!sidebarOpen" class="md:hidden">
                 <a href="trangchu.php" class="flex items-center space-x-2 cursor-pointer p-2">
                     <div class="relative h-14 w-14 flex items-center justify-center">
-                        <img src="../../../public/assets/anhht/0/datviet.png" alt="Logo" class="transform scale-150">
+                        <img src="../../../public/images/datviet.png" alt="Logo" class="transform scale-150">
                     </div>
                     <div class="flex flex-col justify-center leading-none">
                         <span class="text-2xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-teal-500 drop-shadow-sm">

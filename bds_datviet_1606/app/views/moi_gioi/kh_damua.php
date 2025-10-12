@@ -88,19 +88,14 @@ function e(?string $string): string {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lịch sử Giao dịch</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <title>Khách hàng đã mua</title>
 </head>
 
 <body class="bg-gray-50">
 
 <div class="max-w-7xl mx-auto p-2 sm:p-2 lg:p-2">
     <header class="mb-8">
-        <h1 class="text-2xl font-bold text-slate-900">Lịch sử Giao dịch</h1>
+        <h1 class="text-2xl font-bold text-slate-900">Khách hàng đã mua</h1>
         <p class="text-slate-500 mt-1 text-sm">Tổng quan các giao dịch đã hoàn tất trên hệ thống.</p>
     </header>
 

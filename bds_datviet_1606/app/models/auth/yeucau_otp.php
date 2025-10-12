@@ -107,7 +107,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['btnGuiLaiOTP'])) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Zolux 4335 - Gửi lại OTP</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  
 </head>
 <body class="min-h-screen flex items-center justify-center bg-gradient-to-r from-indigo-100 via-white to-indigo-50">
   <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">

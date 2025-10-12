@@ -118,8 +118,6 @@ function format_price_vietnamese(float $price): string {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý bất động sản cá nhân</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="../../../public/assets/fontawesome/css/all.min.css">
 </head>
 <body class="bg-gray-50">
 

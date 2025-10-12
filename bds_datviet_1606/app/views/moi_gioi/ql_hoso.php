@@ -52,17 +52,15 @@ $bieumau_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <html lang="vi" class="bg-gray-50">
 <head>
     <meta charset="UTF-8">
-    <title>Giấy tờ & Đơn từ của tôi</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <title>Quản lý hồ sơ (MG)</title>
     <style>.modal-content { max-height: 90vh; overflow-y: auto; }</style>
 </head>
-<body class="font-sans text-gray-800">
+<body>
 
 <div class="container">
 
     <header class="mb-6 border-b pb-4">
-        <h1 class="text-2xl font-bold text-gray-800">Giấy tờ & Đơn từ</h1>
+        <h1 class="text-2xl font-bold text-gray-800">Quản lý hồ sơ (MG)</h1>
         <p class="text-sm mt-2 text-gray-500">Danh sách các hồ sơ, hợp đồng bạn đã tạo hoặc tham gia.</p>
     </header>
 

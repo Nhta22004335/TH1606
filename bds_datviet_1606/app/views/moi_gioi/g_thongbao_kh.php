@@ -49,18 +49,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['khach_hang_ids'], $_P
 <!DOCTYPE html>
 <html lang="vi" class="h-full bg-slate-50">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gửi Thông báo cho Khách hàng</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-<style>
-    [x-cloak] { display: none !important; }
-    .card-selected {
-        border-color: #4f46e5 !important; /* indigo-600 */
-        background-color: #eef2ff; /* indigo-50 */
-    }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gửi Thông báo cho Khách hàng</title>
+    <style>
+        [x-cloak] { display: none !important; }
+        .card-selected {
+            border-color: #4f46e5 !important; /* indigo-600 */
+            background-color: #eef2ff; /* indigo-50 */
+        }
+    </style>
 </head>
 <body class="h-full">
 

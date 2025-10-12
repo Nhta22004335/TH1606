@@ -95,7 +95,7 @@ $phan_tram_tt = ($tong_gia_tri > 0) ? round(($so_tien_da_tt / $tong_gia_tri) * 1
 
 $status_tt_tong = formatStatus($ke_hoach['trang_thai_tt'] ?? 'chuathanhtoan');
 ?>
-<script src="https://cdn.tailwindcss.com"></script>
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <div class="max-w-3xl mx-auto p-4 md:p-6 ">
     <div class="bg-white rounded-xl shadow-2xl p-6 border border-gray-200">

@@ -44,8 +44,6 @@ if (!$not_logged_in) {
 <head>
     <meta charset="UTF-8">
     <title>Quản Lý Thông Báo Cá Nhân</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLMDJ8S+anWHD9+lWlI/Bw4g8q6uL+yqT2S8cRAB6XQp9r/9C7M/dFm3J8mN/K2uYmQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         .notification-item {
             cursor: pointer;

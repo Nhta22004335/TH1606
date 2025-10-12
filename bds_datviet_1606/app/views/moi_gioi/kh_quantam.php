@@ -47,17 +47,15 @@ catch (PDOException $e) {
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Khách hàng quan tâm BĐS</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-:root { font-family: 'Inter', sans-serif; }
-.custom-scrollbar::-webkit-scrollbar { width: 6px; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background-color: #a5b4fc; border-radius: 3px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: #e0e7ff; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khách hàng quan tâm BĐS</title>
+    <style>
+        :root { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #a5b4fc; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #e0e7ff; }
+    </style>
 </head>
 
 <body class="bg-slate-100 text-slate-800">

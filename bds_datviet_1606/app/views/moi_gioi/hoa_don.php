@@ -59,7 +59,7 @@ if (empty($id_giao_dich_url)) {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hóa đơn Giao dịch</title>
-<script src="https://cdn.tailwindcss.com"></script>
+
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
     :root { font-family: 'Be Vietnam Pro', sans-serif; }

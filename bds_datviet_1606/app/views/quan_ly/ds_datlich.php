@@ -61,9 +61,7 @@ $timelineStartHour = 8; // Timeline bắt đầu từ 8h sáng
 <html lang="vi" class="h-full bg-slate-50">
 <head>
     <meta charset="UTF-8">
-    <title>Lịch trình Hẹn theo Ngày</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <title>Danh sách đặt lịch</title>
     <style>[x-cloak] { display: none !important; }</style>
 </head>
 <body class="h-full" x-data="{ isModalOpen: false, modalData: {} }">

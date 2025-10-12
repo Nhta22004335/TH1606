@@ -71,7 +71,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Sửa tin đăng</title>
-    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
     <div class="max-w-xl mx-auto bg-white p-6 rounded shadow mt-4">
