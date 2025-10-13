@@ -223,9 +223,11 @@ function uploadAnh() {
 
     const formData = new FormData();
     formData.append('file_anh', file);
-    formData.append('id_bds', document.querySelector('input[name="id_bds"]').value);
+    // Tên biến phải là 'id_bds' để khớp với logic xử lý trong file xuly_capnhat_spcn.php
+    formData.append('id_bds', document.querySelector('input[name="id"]').value); 
 
-    fetch("../../models/xuly_capnhat_spcn.php", {
+    // Gọi đến file xử lý duy nhất
+    fetch("../../models/xuly_capnhat_spcn.php", { 
         method: "POST",
         body: formData
     })
@@ -233,8 +235,21 @@ function uploadAnh() {
     .then(data => {
         if (data.status === "success") {
             const preview = document.getElementById('preview-container');
-            preview.innerHTML = `<img src='../../../storage/pictures/bds/${data.filename}' class='object-cover w-full h-full rounded-lg' alt='Ảnh BĐS'>`;
-            fileInput.value = ""; // reset input sau khi upload
+            const noImageDiv = document.getElementById('no-image');
+            if (noImageDiv) noImageDiv.remove(); 
+            
+            let previewImg = document.getElementById('preview-image');
+            if (!previewImg) {
+                previewImg = document.createElement('img');
+                previewImg.id = 'preview-image';
+                previewImg.className = 'object-cover w-full h-full';
+                previewImg.alt = 'Ảnh BĐS';
+                preview.appendChild(previewImg);
+            }
+            previewImg.src = `../../../storage/pictures/bds/${data.filename}`;
+            
+            fileInput.value = ""; 
+            alert("✅ Upload ảnh thành công!");
         } else {
             alert("❌ " + data.message);
         }
@@ -245,6 +260,5 @@ function uploadAnh() {
     });
 }
 </script>
-
 </body>
 </html>
