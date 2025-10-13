@@ -130,10 +130,16 @@ function getStatusBadge($count) {
                             <?= getStatusBadge((int)$sp['can_kiem_duyet']) ?>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                            <a href="trangchu.php?page=ql_danhgia_ct&id=<?= $sp['id'] ?>" class="text-indigo-600 hover:text-indigo-800 transition-colors">
-                                Xem chi tiết
-                            </a>
+                            <?php if ($sp['so_binh_luan'] == 0): ?>
+                                <span class="text-gray-500 italic">Chưa có đánh giá nào</span>
+                            <?php else: ?>
+                                <a href="trangchu.php?page=ql_danhgia_ct&id=<?= urlencode($sp['id']) ?>" 
+                                class="text-indigo-600 hover:text-indigo-800 transition-colors">
+                                    Xem chi tiết
+                                </a>
+                            <?php endif; ?>
                         </td>
+
                     </tr>
                 <?php endforeach; ?>
             </tbody>

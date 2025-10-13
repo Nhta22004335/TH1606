@@ -119,6 +119,14 @@ CREATE TABLE IF NOT EXISTS bat_dong_san (
     CONSTRAINT chk_hinh_thuc_bds CHECK (hinh_thuc IN ('ban', 'chothue', 'chuacapnhat'))
 );
 
+CREATE INDEX idx_bds_id_nguoi_dung ON bat_dong_san(id_nguoi_dung);
+CREATE INDEX idx_bds_loai ON bat_dong_san(loai);
+CREATE INDEX idx_bds_khu_vuc ON bat_dong_san(khu_vuc);
+CREATE INDEX idx_bds_trang_thai ON bat_dong_san(trang_thai);
+CREATE INDEX idx_bds_hinh_thuc ON bat_dong_san(hinh_thuc);
+CREATE INDEX idx_bds_gia_dientich ON bat_dong_san(gia, dien_tich);
+CREATE INDEX idx_bds_ngay_dang ON bat_dong_san(ngay_dang DESC);
+
 -- 8. Bảng anh (ảnh sản phẩm bất động sản)
 CREATE TABLE IF NOT EXISTS hinh_anh_bds (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -131,20 +139,29 @@ CREATE TABLE IF NOT EXISTS hinh_anh_bds (
     CONSTRAINT fk_hinh_anh_bds_bds FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE CASCADE
 );
 
+CREATE INDEX idx_hinhanh_id_bds ON hinh_anh_bds(id_bds);
+CREATE INDEX idx_hinhanh_trang_thai ON hinh_anh_bds(trang_thai);
+CREATE INDEX idx_hinhanh_ngay_tao ON hinh_anh_bds(ngay_tao DESC);
+
 -- 9. Bảng video (video sản phẩm bất động sản)
 CREATE TABLE IF NOT EXISTS video_bds (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     id_bds UUID NOT NULL,
-    url VARCHAR(300),
+    url VARCHAR(300) NOT NULL,
+	kich_thuoc NUMERIC(10,2) DEFAULT 0,
+	trang_thai VARCHAR(255) CHECK (trang_thai IN ('binhthuong', 'nhe', 'trungbinh', 'nang'))DEFAULT 'binhthuong',
     mo_ta VARCHAR(200),
     ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_video_bds_bds FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE CASCADE
 );
-SELECT * FROM bat_dong_san;
-9b17fb30-8c6e-4494-920a-cbdd1621ee20
-ba11e8d1-b68b-42e9-b35d-40eaea043fc3
-6c064758-3b9f-4ab0-af99-bcdbb8efa989
-+
+
+CREATE INDEX idx_video_id_bds ON video_bds(id_bds);
+CREATE INDEX idx_video_ngay_tao ON video_bds(ngay_tao DESC);
+
+CREATE INDEX IF NOT EXISTS idx_bds_tsvector
+ON bat_dong_san
+USING gin (to_tsvector('simple', tieu_de || ' ' || mo_ta || ' ' || dia_chi));
+
 -- 10. Bảng danh_gia_bds (khách hàng đánh giá các sản phẩm BĐS mà môi giới rao bán)
 CREATE TABLE IF NOT EXISTS danh_gia_bds (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

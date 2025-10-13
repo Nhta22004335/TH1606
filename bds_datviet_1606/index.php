@@ -8,7 +8,6 @@ session_start();
 
 require_once "config/database.php";
 $pdo = ketnoicsdl();
-
 // ==============================================================================
 // BƯỚC 1: KHÔI PHỤC PHIÊN TỪ COOKIE "REMEMBER ME" (NẾU CẦN)
 // Khối này chỉ chạy khi session hiện tại chưa tồn tại.

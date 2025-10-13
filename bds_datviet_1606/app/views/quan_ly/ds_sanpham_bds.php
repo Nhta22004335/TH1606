@@ -1,53 +1,49 @@
 <?php
-// ===== PHẦN LOGIC PHP - ĐƯỢC TỐI ƯU HÓA =====
-require_once "../../../config/database.php";
+    // ===== PHẦN LOGIC PHP - ĐƯỢC TỐI ƯU HÓA =====
+    require_once "../../../config/database.php";
 
-// Các hàm helper để code sạch sẽ
-function formatPrice($price) {
-    if ($price >= 1000000000) {
-        return round($price / 1000000000, 2) . ' tỷ';
-    } elseif ($price >= 1000000) {
-        return round($price / 1000000, 2) . ' triệu';
+    // Các hàm helper để code sạch sẽ
+    function formatPrice($price) {
+        if ($price >= 1000000000) {
+            return round($price / 1000000000, 2) . ' tỷ';
+        } elseif ($price >= 1000000) {
+            return round($price / 1000000, 2) . ' triệu';
+        }
+        return number_format($price) . ' đ';
     }
-    return number_format($price) . ' đ';
-}
 
-function getStatusInfo($status) {
-    $map = [
-        'chuaduyet' => ['text' => 'Chờ duyệt', 'classes' => 'bg-yellow-100 text-yellow-800'],
-        'daduyet'   => ['text' => 'Đã duyệt', 'classes' => 'bg-green-100 text-green-800'],
-    ];
-    return $map[$status] ?? ['text' => 'Không rõ', 'classes' => 'bg-gray-100 text-gray-800'];
-}
+    function getStatusInfo($status) {
+        $map = [
+            'chuaduyet' => ['text' => 'Chờ duyệt', 'classes' => 'bg-yellow-100 text-yellow-800'],
+            'daduyet'   => ['text' => 'Đã duyệt', 'classes' => 'bg-green-100 text-green-800'],
+        ];
+        return $map[$status] ?? ['text' => 'Không rõ', 'classes' => 'bg-gray-100 text-gray-800'];
+    }
 
-$pdo = ketnoicsdl();
-$search = $_GET['search'] ?? '';
+    $pdo = ketnoicsdl();
+    $search = $_GET['search'] ?? '';
 
-// TỐI ƯU: Chỉ dùng MỘT câu lệnh SQL duy nhất
-$sql = "
-    SELECT 
-        b.id, b.tieu_de, b.mo_ta, b.gia, b.dien_tich, b.dia_chi, b.loai, 
-        b.khu_vuc, b.ngay_dang, b.trang_thai, d.diem as rating, h.url
-    FROM public.bat_dong_san b
-    LEFT JOIN danh_gia_bds d ON d.id_bds = b.id
-    LEFT JOIN hinh_anh_bds h ON h.id_bds = b.id
-";
-$params = [];
+    // ===== TỐI ƯU: Chỉ dùng MỘT câu lệnh SQL duy nhất =====
+    $sql = "
+        SELECT b.id, b.tieu_de, b.mo_ta, b.gia, b.dien_tich, b.dia_chi, b.loai, 
+            b.khu_vuc, b.ngay_dang, b.trang_thai
+        FROM bat_dong_san b
+    ";
 
-// Thêm điều kiện tìm kiếm nếu có
-if (!empty($search)) {
-    // Sử dụng Full-Text Search của PostgreSQL cho hiệu quả
-    $sql .= " WHERE to_tsvector('simple', b.tieu_de || ' ' || b.mo_ta || ' ' || b.dia_chi) @@ plainto_tsquery('simple', :search)";
-    $params[':search'] = $search;
-    $sql .= " ORDER BY ts_rank_cd(to_tsvector('simple', b.tieu_de || ' ' || b.mo_ta || ' ' || b.dia_chi), plainto_tsquery('simple', :search)) DESC";
-} else {
-    $sql .= " ORDER BY b.ngay_dang DESC";
-}
+    $params = [];
 
-$stmt = $pdo->prepare($sql);
-$stmt->execute($params);
-$products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // ===== Thêm điều kiện tìm kiếm nếu có =====
+    if (!empty($search)) {
+        $sql .= " WHERE b.tieu_de ILIKE :search OR b.mo_ta ILIKE :search OR b.dia_chi ILIKE :search";
+        $params[':search'] = '%' . $search . '%';
+    }
 
+    // ===== Thứ tự sắp xếp để DISTINCT ON hoạt động đúng =====
+    $sql .= " ORDER BY b.id, b.ngay_dang DESC";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
 <!DOCTYPE html>
@@ -139,7 +135,6 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <tr class="hover:bg-slate-50 transition duration-150">
                                 <td class="p-4">
                                     <div class="flex items-center gap-3">
-                                        <img src="../../../storage/pictures/bds/<?= $p['url'] ?>" class="w-10 h-10 rounded-md object-cover">
                                         <div>
                                             <p class="font-medium text-sm text-gray-900 line-clamp-1" title="<?= htmlspecialchars($p['tieu_de']) ?>"><?= htmlspecialchars($p['tieu_de']) ?></p>
                                             <p class="text-xs text-gray-500 line-clamp-1" title="<?= htmlspecialchars($p['dia_chi']) ?>"><?= htmlspecialchars($p['dia_chi']) ?></p>
@@ -155,9 +150,14 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 </td>
                                 <td class="p-4 text-gray-500 text-sm"><?= date("d/m/Y", strtotime($p['ngay_dang'])) ?></td>
                                 <td class="p-4">
-                                    <div class="flex justify-center items-center gap-3">
-                                        <button class="text-blue-600 hover:text-blue-800" title="Sửa"><i class="fa-solid fa-pencil"></i></button>
-                                        <button class="text-red-600 hover:text-red-800" title="Xóa"><i class="fa-solid fa-trash-can"></i></button>
+                                    <div class="flex justify-center items-center">
+                                        
+                                        <a href="trangchu.php?page=ct_sanpham&id=<?= htmlspecialchars($p['id']) ?>" 
+                                        class="text-blue-600 hover:text-blue-800 text-sm font-medium" 
+                                        title="Xem chi tiết">
+                                        Xem chi tiết
+                                        </a>
+                                        
                                     </div>
                                 </td>
                             </tr>

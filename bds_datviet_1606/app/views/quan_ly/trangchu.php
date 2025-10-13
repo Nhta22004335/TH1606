@@ -64,7 +64,6 @@
             'roles' => ['quantri', 'moigioi'],
             'submenu' => [
                 'Danh sách BĐS' => ['link' => 'ds_sanpham_bds', 'roles' => ['quantri']],
-                'QL Hình ảnh/Videos' => ['link' => 'ql_anh_video_bds', 'roles' => ['quantri']],
                 'QL Đánh giá' => ['link' => 'ql_danhgia', 'roles' => ['quantri']],
                 'Sản phẩm cá nhân' => ['link' => '../moi_gioi/sp_canhan', 'roles' => ['moigioi']],
                 'Đăng sản phẩm' => ['link' => '../moi_gioi/dang_sp', 'roles' => ['moigioi']],

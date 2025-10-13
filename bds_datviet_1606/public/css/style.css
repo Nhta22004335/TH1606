@@ -749,6 +749,10 @@ video {
   top: 2rem;
 }
 
+.top-9 {
+  top: 2.25rem;
+}
+
 .top-full {
   top: 100%;
 }
