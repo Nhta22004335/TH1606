@@ -259,11 +259,6 @@ CREATE TABLE bieu_mau (
 	CONSTRAINT chk_trangthai CHECK (trang_thai IN ('choduyet','daduyet', 'daky', 'huy'))
 );
 
--- select nd.id from nguoi_dung nd
--- left join phan_quyen pq on pq.id_nguoi_dung = nd.id
--- left join quyen q on q.id=pq.id_quyen
--- where q.vai_tro='khachhang'
-
 CREATE TABLE IF NOT EXISTS yeu_cau (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), 
     
@@ -281,9 +276,6 @@ CREATE TABLE IF NOT EXISTS yeu_cau (
 	CONSTRAINT chk_yeucau_loai CHECK (loai IN ('mua', 'ban', 'thue'))
 );
 
--- Cần có extension uuid-ossp để sử dụng uuid_generate_v4()
--- CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
 CREATE TABLE IF NOT EXISTS lich_trinh (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     id_khach_hang UUID NOT NULL,
@@ -298,7 +290,6 @@ CREATE TABLE IF NOT EXISTS lich_trinh (
     CONSTRAINT chk_lichtrinh_trangthai CHECK (trang_thai IN ('choxacnhan', 'daxacnhan', 'dahuy'))
 );
 
-select * from lich_trinh
 -- 1. Bảng tin đăng
 -- CREATE TABLE tin_tuc (
 --     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),       
@@ -352,7 +343,6 @@ select * from lich_trinh
 
 --     CONSTRAINT uq_kqt UNIQUE (id_khach_hang, id_bat_dong_san)
 -- );
-
 
 -- CREATE TABLE lich_su (
 --     id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- mã lịch sử tự sinh
