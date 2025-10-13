@@ -115,3 +115,31 @@
 2025-10-13 01:54:48,949 INFO success: apache entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
 2025-10-13 01:54:48,950 INFO success: socketio entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
 2025-10-13 01:54:48,950 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-13 12:05:19,642 INFO Set uid to user 0 succeeded
+2025-10-13 12:05:19,660 INFO supervisord started with pid 1
+2025-10-13 12:05:20,666 INFO spawned: 'apache' with pid 7
+2025-10-13 12:05:20,671 INFO spawned: 'socketio' with pid 8
+2025-10-13 12:05:20,714 INFO spawned: 'tailwind' with pid 11
+2025-10-13 12:05:21,716 INFO success: apache entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-13 12:05:21,719 INFO success: socketio entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-13 12:05:21,719 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-13 12:05:23,719 WARN exited: socketio (exit status 1; not expected)
+2025-10-13 12:05:24,487 INFO spawned: 'socketio' with pid 33
+2025-10-13 12:05:24,533 WARN exited: socketio (exit status 1; not expected)
+2025-10-13 12:05:25,536 INFO spawned: 'socketio' with pid 54
+2025-10-13 12:05:25,573 WARN exited: tailwind (exit status 127; not expected)
+2025-10-13 12:05:25,597 INFO spawned: 'tailwind' with pid 61
+2025-10-13 12:05:25,599 WARN exited: socketio (exit status 1; not expected)
+2025-10-13 12:05:26,131 WARN exited: tailwind (exit status 127; not expected)
+2025-10-13 12:05:27,135 INFO spawned: 'tailwind' with pid 86
+2025-10-13 12:05:27,608 INFO spawned: 'socketio' with pid 111
+2025-10-13 12:05:27,624 WARN exited: tailwind (exit status 127; not expected)
+2025-10-13 12:05:27,652 WARN exited: socketio (exit status 1; not expected)
+2025-10-13 12:05:29,672 INFO spawned: 'tailwind' with pid 118
+2025-10-13 12:05:30,142 WARN exited: tailwind (exit status 127; not expected)
+2025-10-13 12:05:31,145 INFO spawned: 'socketio' with pid 143
+2025-10-13 12:05:31,201 WARN exited: socketio (exit status 1; not expected)
+2025-10-13 12:05:32,204 INFO gave up: socketio entered FATAL state, too many start retries too quickly
+2025-10-13 12:05:33,210 INFO spawned: 'tailwind' with pid 150
+2025-10-13 12:05:33,692 WARN exited: tailwind (exit status 127; not expected)
+2025-10-13 12:05:34,693 INFO gave up: tailwind entered FATAL state, too many start retries too quickly
