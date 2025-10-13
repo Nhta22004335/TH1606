@@ -19,17 +19,6 @@ $sql_yeucau = "
 $stmt_yeucau = $pdo->query($sql_yeucau);
 $yeucau_list = $stmt_yeucau->fetchAll(PDO::FETCH_ASSOC);
 
-$sql_agents = "
-    SELECT nd.id, info.ho_ten
-    FROM nguoi_dung nd
-    JOIN info_nguoi_dung info ON nd.id = info.id_nguoi_dung
-    JOIN phan_quyen pq ON nd.id = pq.id_nguoi_dung
-    JOIN quyen q ON pq.id_quyen = q.id
-    WHERE q.vai_tro = 'moigioi' ORDER BY info.ho_ten ASC
-";
-$stmt_agents = $pdo->query($sql_agents);
-$agents = $stmt_agents->fetchAll(PDO::FETCH_ASSOC);
-
 function getRequestBadgeInfo($type, $value) {
     $map = [
         'loai' => [
@@ -64,50 +53,27 @@ $stats = [
 
 <div class="space-y-8">
     
-    <header>
+    <header class="border-b pb-4">
         <div class="sm:flex sm:items-center sm:justify-between">
             <div>
                 <h1 class="text-2xl font-bold text-gray-800">Quản lý Yêu cầu</h1>
-                <p class="mt-1 text-sm text-gray-500">Xem, xử lý và phân công các yêu cầu từ khách hàng.</p>
-            </div>
-            <div class="mt-4 sm:mt-0">
-                <button type="button" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md shadow-sm hover:bg-gray-900 transition">
-                    <i class="fas fa-plus fa-sm"></i> Thêm yêu cầu
-                </button>
+                <p class="mt-1 text-sm text-gray-500">Xem và xử lý các yêu cầu từ khách hàng.</p>
             </div>
         </div>
     </header>
 
     <div class="grid grid-cols-3 gap-2 sm:gap-4">
-    
         <div class="bg-white p-3 sm:p-4 rounded-lg shadow-sm border flex items-center gap-3">
-            <div class="flex-shrink-0 bg-orange-100 p-2 rounded-full">
-                <i class="fas fa-hourglass-half text-orange-600"></i>
-            </div>
-            <div>
-                <dt class="text-xs font-medium text-gray-500">Chờ xử lý</dt>
-                <dd class="mt-0.5 text-2xl font-semibold text-gray-900"><?= $stats['pending'] ?></dd>
-            </div>
+            <div class="flex-shrink-0 bg-orange-100 p-2 rounded-full"><i class="fas fa-hourglass-half text-orange-600"></i></div>
+            <div><dt class="text-xs font-medium text-gray-500">Chờ xử lý</dt><dd class="mt-0.5 text-2xl font-semibold text-gray-900"><?= $stats['pending'] ?></dd></div>
         </div>
-        
         <div class="bg-white p-3 sm:p-4 rounded-lg shadow-sm border flex items-center gap-3">
-            <div class="flex-shrink-0 bg-green-100 p-2 rounded-full">
-                <i class="fas fa-check-circle text-green-600"></i>
-            </div>
-            <div>
-                <dt class="text-xs font-medium text-gray-500">Đã duyệt</dt>
-                <dd class="mt-0.5 text-2xl font-semibold text-gray-900"><?= $stats['approved'] ?></dd>
-            </div>
+            <div class="flex-shrink-0 bg-green-100 p-2 rounded-full"><i class="fas fa-check-circle text-green-600"></i></div>
+            <div><dt class="text-xs font-medium text-gray-500">Đã duyệt</dt><dd class="mt-0.5 text-2xl font-semibold text-gray-900"><?= $stats['approved'] ?></dd></div>
         </div>
-        
         <div class="bg-white p-3 sm:p-4 rounded-lg shadow-sm border flex items-center gap-3">
-            <div class="flex-shrink-0 bg-blue-100 p-2 rounded-full">
-                <i class="fas fa-layer-group text-blue-600"></i>
-            </div>
-            <div>
-                <dt class="text-xs font-medium text-gray-500">Tổng cộng</dt>
-                <dd class="mt-0.5 text-2xl font-semibold text-gray-900"><?= $stats['total'] ?></dd>
-            </div>
+            <div class="flex-shrink-0 bg-blue-100 p-2 rounded-full"><i class="fas fa-layer-group text-blue-600"></i></div>
+            <div><dt class="text-xs font-medium text-gray-500">Tổng cộng</dt><dd class="mt-0.5 text-2xl font-semibold text-gray-900"><?= $stats['total'] ?></dd></div>
         </div>
     </div>
 
@@ -140,9 +106,10 @@ $stats = [
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?= date('d/m/Y', strtotime($row["ngay_tao"])) ?></td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">
                                 <div class="flex justify-center items-center gap-4">
-                                    <button onclick='requestManager.viewDetails(<?= htmlspecialchars(json_encode($row)) ?>)' class="text-gray-400 hover:text-indigo-600 transition" title="Xem & Phân công">
+                                    <button onclick='requestManager.viewDetails(<?= htmlspecialchars(json_encode($row)) ?>)' class="text-gray-400 hover:text-indigo-600 transition" title="Xem chi tiết">
                                         <i class="fas fa-eye"></i>
                                     </button>
+
                                     <?php if($row["trang_thai"] == "choxuly"): ?>
                                         <button onclick="requestManager.updateStatus('<?= $row['id'] ?>', 'daduyet')" class="text-gray-400 hover:text-green-600 transition" title="Đánh dấu đã duyệt">
                                             <i class="fas fa-check"></i>
@@ -150,7 +117,12 @@ $stats = [
                                         <button onclick="requestManager.updateStatus('<?= $row['id'] ?>', 'dahuy')" class="text-gray-400 hover:text-red-600 transition" title="Hủy yêu cầu">
                                             <i class="fas fa-times-circle"></i>
                                         </button>
+                                    <?php elseif($row["trang_thai"] == "daduyet" || $row["trang_thai"] == "dahuy"): ?>
+                                        <button onclick="requestManager.updateStatus('<?= $row['id'] ?>', 'choxuly')" class="text-gray-400 hover:text-yellow-600 transition" title="Hoàn tác về 'Chờ xử lý'">
+                                            <i class="fas fa-rotate-left"></i>
+                                        </button>
                                     <?php endif; ?>
+                                    
                                 </div>
                             </td>
                         </tr>
@@ -176,53 +148,22 @@ $stats = [
                     <div><dt class="font-medium text-gray-500">Mô tả chi tiết</dt><dd id="modalDescription" class="mt-1 text-gray-600 italic p-3 bg-gray-50 rounded-md border"></dd></div>
                 </dl>
             </div>
-            <div id="modalFooter" class="bg-gray-50 px-6 py-4 rounded-b-xl">
-               <label for="agent_id" class="block text-sm font-medium text-gray-800">Phân công cho Môi giới</label>
-               <div class="mt-2 flex gap-3">
-                   <select id="agentSelect" class="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
-                       <option value="">-- Chọn môi giới --</option>
-                       <?php foreach($agents as $agent): ?>
-                           <option value="<?= $agent['id'] ?>"><?= htmlspecialchars($agent['ho_ten']) ?></option>
-                       <?php endforeach; ?>
-                   </select>
-                   <button id="assignButton" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed">Lưu</button>
-               </div>
-            </div>
         </div>
     </div>
 </div>
 
 <script>
     const requestManager = {
-        agents: <?= json_encode($agents) ?>,
         currentRequest: {},
         
         viewDetails(request) {
             this.currentRequest = request;
-            
-            // Lấy các element trong modal
             const modal = document.getElementById('detailModal');
-            const modalFooter = document.getElementById('modalFooter');
-            const assignButton = document.getElementById('assignButton');
-            const agentSelect = document.getElementById('agentSelect');
-
-            // Đổ dữ liệu vào modal
-            document.getElementById('modalRequestId').textContent = request.id;
+            document.getElementById('modalRequestId').textContent = request.id.substring(0, 8);
             document.getElementById('modalCustomerName').textContent = request.ho_ten || request.nguoi_dung;
             document.getElementById('modalRequestDate').textContent = new Date(request.ngay_tao).toLocaleDateString('vi-VN');
             document.getElementById('modalPropertyName').textContent = request.tieu_de || 'Chưa có BĐS cụ thể';
             document.getElementById('modalDescription').textContent = request.mo_ta_chi_tiet || 'Không có mô tả.';
-            
-            // Xử lý hiển thị phần phân công
-            if (request.trang_thai === 'choxuly') {
-                modalFooter.classList.remove('hidden');
-                agentSelect.value = ''; // Reset select
-                assignButton.disabled = true; // Vô hiệu hóa nút lưu
-            } else {
-                modalFooter.classList.add('hidden');
-            }
-
-            // Mở modal
             modal.classList.remove('hidden');
         },
         
@@ -249,51 +190,34 @@ $stats = [
         },
         
         updateStatus(id, newStatus) {
-            const formData = { id, newStatus };
-            const confirmMsg = `Bạn có chắc muốn chuyển yêu cầu #${id} sang trạng thái '${newStatus.toUpperCase()}'?`;
-            this.handleAction("../../models/cn_trangthai_yc.php", formData, confirmMsg);
-        },
-        
-        assignAgent() {
-            const agentSelect = document.getElementById('agentSelect');
-            const assignedAgentId = agentSelect.value;
-            
-            if (!assignedAgentId) {
-                alert('Vui lòng chọn một môi giới để phân công.');
-                return;
+            // ===== CẬP NHẬT HÀM XÁC NHẬN =====
+            let actionDescription = '';
+            switch (newStatus) {
+                case 'daduyet':
+                    actionDescription = 'DUYỆT';
+                    break;
+                case 'dahuy':
+                    actionDescription = 'HỦY';
+                    break;
+                case 'choxuly':
+                    actionDescription = 'HOÀN TÁC về trạng thái "Chờ xử lý"';
+                    break;
+                default:
+                    actionDescription = `cập nhật sang '${newStatus.toUpperCase()}'`;
             }
-            
-            const formData = {
-                request_id: this.currentRequest.id,
-                agent_id: assignedAgentId
-            };
-            const confirmMsg = `Bạn có chắc muốn phân công yêu cầu #${this.currentRequest.id} cho môi giới đã chọn?`;
-            this.handleAction("../../models/cn_phancong_yc.php", formData, confirmMsg); 
-        }
+
+            const confirmMsg = `Bạn có chắc muốn ${actionDescription} yêu cầu #${id.substring(0,8)}?`;
+            this.handleAction("../../models/cn_trangthai_yc.php", { id, newStatus }, confirmMsg);
+        },
     };
 
-    // Thêm event listeners sau khi DOM đã tải
     document.addEventListener('DOMContentLoaded', () => {
         const modal = document.getElementById('detailModal');
         const modalContent = document.getElementById('modalContent');
-        const agentSelect = document.getElementById('agentSelect');
-        const assignButton = document.getElementById('assignButton');
-
-        // Đóng modal khi click ra ngoài
         modal.addEventListener('click', (event) => {
             if (!modalContent.contains(event.target)) {
                 requestManager.closeModal();
             }
-        });
-
-        // Kích hoạt/Vô hiệu hóa nút Lưu khi chọn môi giới
-        agentSelect.addEventListener('change', () => {
-            assignButton.disabled = !agentSelect.value;
-        });
-
-        // Gán sự kiện cho nút Lưu
-        assignButton.addEventListener('click', () => {
-            requestManager.assignAgent();
         });
     });
 </script>

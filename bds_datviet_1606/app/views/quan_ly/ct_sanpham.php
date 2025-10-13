@@ -1,60 +1,54 @@
 <?php
-// ===== PHẦN LOGIC PHP (Giữ nguyên) =====
-require_once "../../../config/database.php";
+    // ===== PHẦN LOGIC PHP (Giữ nguyên) =====
+    require_once "../../../config/database.php";
 
-function formatPrice($price) {
-    if ($price >= 1000000000) return round($price / 1000000000, 2) . ' tỷ';
-    if ($price >= 1000000) return round($price / 1000000, 2) . ' triệu';
-    return number_format($price) . ' đ';
-}
-function getLoaiBDS($key) {
-    $map = ['canho' => 'Căn hộ', 'nhapho' => 'Nhà phố', 'datnen' => 'Đất nền', 'bietthu' => 'Biệt thự'];
-    return $map[$key] ?? 'N/A';
-}
-function getHinhThuc($key) {
-    $map = ['ban' => 'Rao bán', 'chothue' => 'Cho thuê'];
-    return $map[$key] ?? 'N/A';
-}
-function getStatusInfo($status) {
-    $map = [
-        'binhthuong' => ['text' => "Bình thường", 'classes' => "bg-green-100 text-green-800"],
-        'nhe'        => ['text' => "Nhẹ", 'classes' => "bg-yellow-100 text-yellow-800"],
-        'trungbinh'  => ['text' => "Trung bình", 'classes' => "bg-orange-100 text-orange-800"],
-        'nang'       => ['text' => "Nặng", 'classes' => "bg-red-100 text-red-800"]
-    ];
-    return $map[$status] ?? ['text' => ucfirst($status), 'classes' => "bg-gray-100 text-gray-800"];
-}
+    function formatPrice($price) {
+        if ($price >= 1000000000) return round($price / 1000000000, 2) . ' tỷ';
+        if ($price >= 1000000) return round($price / 1000000, 2) . ' triệu';
+        return number_format($price) . ' đ';
+    }
+    function getLoaiBDS($key) {
+        $map = ['canho' => 'Căn hộ', 'nhapho' => 'Nhà phố', 'datnen' => 'Đất nền', 'bietthu' => 'Biệt thự'];
+        return $map[$key] ?? 'N/A';
+    }
+    function getHinhThuc($key) {
+        $map = ['ban' => 'Rao bán', 'chothue' => 'Cho thuê'];
+        return $map[$key] ?? 'N/A';
+    }
+    function getStatusInfo($status) {
+        $map = [
+            'binhthuong' => ['text' => "Bình thường", 'classes' => "bg-green-100 text-green-800"],
+            'nhe'        => ['text' => "Nhẹ", 'classes' => "bg-yellow-100 text-yellow-800"],
+            'trungbinh'  => ['text' => "Trung bình", 'classes' => "bg-orange-100 text-orange-800"],
+            'nang'       => ['text' => "Nặng", 'classes' => "bg-red-100 text-red-800"]
+        ];
+        return $map[$status] ?? ['text' => ucfirst($status), 'classes' => "bg-gray-100 text-gray-800"];
+    }
 
-if (!isset($_GET['id']) || empty($_GET['id'])) {
-    die("Lỗi: Không tìm thấy ID của bất động sản.");
-}
-$bds_id = $_GET['id'];
+    if (!isset($_GET['id']) || empty($_GET['id'])) {
+        die("Lỗi: Không tìm thấy ID của bất động sản.");
+    }
+    $bds_id = $_GET['id'];
 
-$pdo = ketnoicsdl();
-$sql_main = "
-    SELECT b.*, nd.email, nd.so_dt, nd.avt, info.ho_ten
-    FROM bat_dong_san b
-    LEFT JOIN nguoi_dung nd ON b.id_nguoi_dung = nd.id
-    LEFT JOIN info_nguoi_dung info ON nd.id = info.id_nguoi_dung
-    WHERE b.id = :id";
-$stmt_main = $pdo->prepare($sql_main);
-$stmt_main->execute([':id' => $bds_id]);
-$bds = $stmt_main->fetch(PDO::FETCH_ASSOC);
+    $pdo = ketnoicsdl();
+    $sql_main = "
+        SELECT b.*, nd.email, nd.so_dt, nd.avt, info.ho_ten
+        FROM bat_dong_san b
+        LEFT JOIN nguoi_dung nd ON b.id_nguoi_dung = nd.id
+        LEFT JOIN info_nguoi_dung info ON nd.id = info.id_nguoi_dung
+        WHERE b.id = :id";
+    $stmt_main = $pdo->prepare($sql_main);
+    $stmt_main->execute([':id' => $bds_id]);
+    $bds = $stmt_main->fetch(PDO::FETCH_ASSOC);
 
-if (!$bds) {
-    die("Không tìm thấy bất động sản với ID này.");
-}
+    if (!$bds) {
+        die("Không tìm thấy bất động sản với ID này.");
+    }
 
-$sql_images = "SELECT id, url, trang_thai FROM hinh_anh_bds WHERE id_bds = :id_bds ORDER BY ngay_tao ASC";
-$stmt_images = $pdo->prepare($sql_images);
-$stmt_images->execute([':id_bds' => $bds_id]);
-$images = $stmt_images->fetchAll(PDO::FETCH_ASSOC);
-
-// Video query is not used in the final display but kept for logic consistency
-$sql_videos = "SELECT url FROM video_bds WHERE id_bds = :id_bds ORDER BY ngay_tao ASC";
-$stmt_videos = $pdo->prepare($sql_videos);
-$stmt_videos->execute([':id_bds' => $bds_id]);
-$videos = $stmt_videos->fetchAll(PDO::FETCH_ASSOC);
+    $sql_images = "SELECT id, url, trang_thai FROM hinh_anh_bds WHERE id_bds = :id_bds ORDER BY ngay_tao ASC";
+    $stmt_images = $pdo->prepare($sql_images);
+    $stmt_images->execute([':id_bds' => $bds_id]);
+    $images = $stmt_images->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="vi" class="bg-gray-50">
@@ -169,7 +163,7 @@ $videos = $stmt_videos->fetchAll(PDO::FETCH_ASSOC);
              <div>
                 <h3 class="text-xl font-semibold mb-4">Thông tin liên hệ</h3>
                 <div class="bg-gray-50 p-5 rounded-lg flex flex-col sm:flex-row items-center gap-5">
-                    <img class="h-20 w-20 rounded-full object-cover border-2 border-indigo-200 flex-shrink-0" 
+                    <img class="h-14 w-14 rounded-full object-cover border-2 border-indigo-200 flex-shrink-0" 
                          src="../../../storage/pictures/avt/<?= htmlspecialchars($bds['avt'] ?? 'avt.png') ?>" 
                          alt="Avatar">
                     <div class="flex-grow text-center sm:text-left">

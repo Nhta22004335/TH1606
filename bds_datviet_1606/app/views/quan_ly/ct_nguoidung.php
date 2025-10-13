@@ -7,35 +7,38 @@
     // Lấy thông tin môi giới
     $stmt = $pdo->prepare("
         SELECT 
-            nd.id,
-            nd.ten_dang_nhap,
-            nd.email,
-            nd.so_dt,
-            nd.avt,
-            nd.anh_bia,
-            nd.trang_thai,
-            nd.hoat_dong,
-            nd.ngay_tao,
-            info.ho_ten,
-            info.gioi_tinh,
-            info.mo_ta,
-            COALESCE(array_agg(q.vai_tro) FILTER (WHERE q.vai_tro IS NOT NULL), '{}') AS vai_tro,
-            COALESCE(array_agg(pq.id_quyen) FILTER (WHERE pq.id_quyen IS NOT NULL), '{}') AS id_quyen
-        FROM nguoi_dung nd
-        LEFT JOIN info_nguoi_dung info ON nd.id = info.id_nguoi_dung
-        LEFT JOIN phan_quyen pq ON nd.id = pq.id_nguoi_dung
-        LEFT JOIN quyen q ON pq.id_quyen = q.id
-        LEFT JOIN bat_dong_san bds ON nd.id = bds.id_nguoi_dung
-        WHERE nd.id = :id
-        GROUP BY nd.id, nd.ten_dang_nhap, nd.email, nd.so_dt, nd.avt, nd.anh_bia,
-                nd.trang_thai, nd.hoat_dong, info.ho_ten, info.gioi_tinh, info.mo_ta;
+    nd.id,
+    nd.ten_dang_nhap,
+    nd.email,
+    nd.so_dt,
+    nd.avt,
+    nd.anh_bia,
+    nd.trang_thai,
+    nd.hoat_dong,
+    nd.ngay_tao,
+    info.ho_ten,
+    info.gioi_tinh,
+    info.mo_ta,
+    -- Dùng DISTINCT để đảm bảo mỗi vai trò chỉ xuất hiện 1 lần (phòng trường hợp cấu hình sai)
+    COALESCE(array_agg(DISTINCT q.vai_tro) FILTER (WHERE q.vai_tro IS NOT NULL), '{}') AS vai_tro,
+    COALESCE(array_agg(DISTINCT pq.id_quyen) FILTER (WHERE pq.id_quyen IS NOT NULL), '{}') AS id_quyen
+FROM nguoi_dung nd
+LEFT JOIN info_nguoi_dung info ON nd.id = info.id_nguoi_dung
+LEFT JOIN phan_quyen pq ON nd.id = pq.id_nguoi_dung
+LEFT JOIN quyen q ON pq.id_quyen = q.id
+-- KHÔNG CẦN DÒNG NÀY NỮA -- LEFT JOIN bat_dong_san bds ON nd.id = bds.id_nguoi_dung
+WHERE nd.id = :id
+-- SỬA LẠI GROUP BY, BỎ CÁC CỘT TỔNG HỢP
+GROUP BY 
+    nd.id, 
+    info.ho_ten, 
+    info.gioi_tinh, 
+    info.mo_ta;
     ");
 
     $stmt->execute([':id' => $id]);
     $chitiet = $stmt->fetch(PDO::FETCH_ASSOC);
-// echo "<pre>";
-// print_r($chitiet);   
-// echo "</pre>";
+
     if (!$chitiet) {
         echo "<p class='text-red-500'>❌ Không tìm thấy môi giới.</p>";
         exit;

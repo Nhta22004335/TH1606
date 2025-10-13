@@ -32,6 +32,7 @@ try {
 }
 
 $search = $_GET['search'] ?? '';
+$params = [];
 
 // Tối ưu SQL: Dùng ILIKE cho PostgreSQL để tìm kiếm không phân biệt hoa thường
 $sql = "
@@ -53,8 +54,6 @@ if (!empty($search)) {
               OR info2.ho_ten ILIKE :search 
               OR bm.trang_thai ILIKE :search";
     $params[':search'] = "%$search%";
-} else {
-    $params = [];
 }
 
 $sql .= " ORDER BY bm.ngay_tao DESC";
@@ -90,7 +89,7 @@ $bieumau_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <i class="fas fa-search text-gray-400"></i>
             </div>
             <input type="search" name="search" id="search-input" class="bg-white outline-none border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 p-2" 
-                placeholder="Tìm kiếm biểu mẫu..." value="<?= htmlspecialchars($search) ?>">
+                   placeholder="Tìm kiếm biểu mẫu..." value="<?= htmlspecialchars($search) ?>">
         </div>
         <button type="submit" id="search-button" class="ml-2 px-4 py-2 text-sm font-medium text-white bg-gray-400 rounded-lg hover:bg-gray-500">
             Tìm
@@ -98,40 +97,26 @@ $bieumau_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </form>
 
     <script>
-        // 1. Lấy các phần tử HTML cần thiết qua ID
+        // Logic tìm kiếm không thay đổi
         const searchForm = document.getElementById('search-form');
         const searchInput = document.getElementById('search-input');
         const searchButton = document.getElementById('search-button');
 
-        // 2. Hàm để thực hiện submit
         function submitSearch() {
-            console.log('Đang chuẩn bị chuyển hướng bằng window.location...');
-
-            // 1. Lấy giá trị từ ô input
             const searchValue = searchInput.value;
-
-            // 2. (Quan trọng) Mã hóa giá trị để đảm bảo URL hợp lệ
-            //    Ví dụ: "áo thun" -> "ao%20thun"
             const encodedSearchValue = encodeURIComponent(searchValue.trim());
-
-            // 3. Xây dựng URL mới một cách thủ công
-            //    Hãy chắc chắn rằng đường dẫn cơ sở '/app/trangchu.php' là đúng với cấu trúc dự án của bạn
             const newUrl = `trangchu.php?page=ql_bieumau&search=${encodedSearchValue}`;
-
-            // 4. Dùng window.location.href để chuyển hướng trình duyệt đến URL mới
             window.location.href = newUrl;
         }
 
-        // 3. Gán sự kiện cho nút bấm
         searchButton.addEventListener('click', function(event) {
-            event.preventDefault(); // Ngăn hành vi mặc định của nút
+            event.preventDefault();
             submitSearch();
         });
 
-        // 4. Gán sự kiện cho ô input (submit khi nhấn Enter)
         searchInput.addEventListener('keydown', function(event) {
             if (event.key === 'Enter') {
-                event.preventDefault(); // Ngăn form bị gửi đi 2 lần
+                event.preventDefault();
                 submitSearch();
             }
         });
@@ -184,79 +169,96 @@ $bieumau_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
     <div id="docModal<?= $bm["id"] ?>" class="fixed inset-0 bg-gray-900/60 hidden flex items-center justify-center z-50 p-4 transition-opacity duration-300 opacity-0" data-modal>
-    <div class="bg-white rounded-lg shadow-2xl w-full max-w-md p-5 relative modal-content transform transition-transform duration-300 scale-95">
-        
-        <button data-modal-close="docModal<?= $bm['id'] ?>" class="absolute top-3 right-3 text-gray-400 hover:text-gray-800 transition-colors">
-            <i class="fa-solid fa-xmark text-xl"></i>
-        </button>
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-md p-5 relative modal-content transform transition-transform duration-300 scale-95">
+            
+            <button data-modal-close="docModal<?= $bm['id'] ?>" class="absolute top-3 right-3 text-gray-400 hover:text-gray-800 transition-colors">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
 
-        <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <i class="fa-solid fa-file-lines text-blue-600"></i>
-            Chi tiết Biểu mẫu
-        </h2>
+            <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-file-lines text-blue-600"></i>
+                Chi tiết Biểu mẫu
+            </h2>
 
-        <div class="border-t border-gray-200 pt-4 space-y-3 text-sm">
-
-            <div class="flex justify-between items-start">
-                <span class="text-gray-500">Tiêu đề:</span>
-                <p class="font-bold text-gray-800 text-right w-3/5"><?= htmlspecialchars($bm["tieu_de"]) ?></p>
+            <div class="border-t border-gray-200 pt-4 space-y-3 text-sm">
+                <div class="flex justify-between items-start">
+                    <span class="text-gray-500">Tiêu đề:</span>
+                    <p class="font-bold text-gray-800 text-right w-3/5"><?= htmlspecialchars($bm["tieu_de"]) ?></p>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-500">Loại:</span>
+                    <span class="font-semibold text-gray-800 flex items-center gap-1.5">
+                        <i class="fa-solid fa-tags text-blue-500"></i>
+                        <?= htmlspecialchars(getLoaiText($bm["loai"])) ?>
+                    </span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-500">Trạng thái:</span>
+                    <span class="px-2.5 py-0.5 text-xs font-bold rounded-full border <?= $status_info['classes'] ?>">
+                        <?= $status_info['text'] ?>
+                    </span>
+                </div>
+                <div class="flex justify-between items-start">
+                    <span class="text-gray-500">Người mua:</span>
+                    <span class="font-semibold text-gray-800"><?= htmlspecialchars($bm["ten_ben_mua"]) ?></span>
+                </div>
+                <div class="flex justify-between items-start">
+                    <span class="text-gray-500">Người bán:</span>
+                    <span class="font-semibold text-gray-800"><?= htmlspecialchars($bm["ten_ben_ban"]) ?></span>
+                </div>
+                <div class="!mt-4 pt-3 border-t border-gray-200 flex justify-between items-center">
+                     <span class="text-gray-500 flex items-center gap-2">
+                         <i class="fa-solid fa-paperclip"></i> Tệp đính kèm:
+                    </span>
+                    <a href="../../../storage/documents/<?= htmlspecialchars($bm["tep_dk"]) ?>" 
+                       class="text-blue-600 hover:underline font-bold flex items-center gap-1.5 transition" 
+                       target="_blank">
+                        <i class="fa-solid fa-download"></i> Tải về
+                    </a>
+                </div>
             </div>
 
-            <div class="flex justify-between items-center">
-                <span class="text-gray-500">Loại:</span>
-                <span class="font-semibold text-gray-800 flex items-center gap-1.5">
-                    <i class="fa-solid fa-tags text-blue-500"></i>
-                    <?= htmlspecialchars(getLoaiText($bm["loai"])) ?>
-                </span>
-            </div>
+            <div class="mt-5 pt-4 border-t border-gray-200 flex justify-end gap-3">
+                <?php switch($bm['trang_thai']):
+                    case 'choduyet': // Trạng thái ban đầu ?>
+                        <button data-action-button data-id="<?= $bm['id'] ?>" data-status="huy" class="bg-gray-200 hover:bg-red-100 text-sm text-red-500 font-bold px-4 py-2 rounded-md transition-colors">
+                            Từ chối
+                        </button>
+                        <button data-action-button data-id="<?= $bm['id'] ?>" data-status="daduyet" class="bg-green-500 hover:bg-green-600 text-sm text-white font-bold px-4 py-2 rounded-md shadow-lg shadow-green-500/20 transition">
+                            Duyệt
+                        </button>
+                        <?php break; ?>
 
-            <div class="flex justify-between items-center">
-                <span class="text-gray-500">Trạng thái:</span>
-                <span class="px-2.5 py-0.5 text-xs font-bold rounded-full border <?= $status_info['classes'] ?>">
-                    <?= $status_info['text'] ?>
-                </span>
+                    <?php case 'daduyet': // Đã duyệt, có thể hoàn tác hoặc ký ?>
+                        <button data-action-button data-id="<?= $bm['id'] ?>" data-status="choduyet" class="bg-yellow-400 hover:bg-yellow-500 text-sm text-white font-bold px-4 py-2 rounded-md transition flex items-center gap-2">
+                            <i class="fa-solid fa-rotate-left"></i> Hoàn tác
+                        </button>
+                        <button data-action-button data-id="<?= $bm['id'] ?>" data-status="daky" class="bg-blue-500 hover:bg-blue-600 text-sm text-white font-bold px-4 py-2 rounded-md shadow-lg shadow-blue-500/20 transition flex items-center gap-2">
+                            <i class="fa-solid fa-signature"></i> Ký hợp đồng
+                        </button>
+                        <?php break; ?>
+
+                    <?php case 'huy': // Đã hủy, có thể hoàn tác ?>
+                         <button data-action-button data-id="<?= $bm['id'] ?>" data-status="choduyet" 
+                            class="bg-yellow-400 hover:bg-yellow-500 text-sm text-white font-bold px-4 py-2 rounded-md transition flex items-center gap-2">
+                            <i class="fa-solid fa-rotate-left"></i> Hoàn tác
+                        </button>
+                        <?php break; ?>
+                    
+                    <?php case 'daky': // Đã ký, không có hành động tiếp theo ?>
+                        <p class="text-sm text-gray-500 italic">Biểu mẫu đã được ký và hoàn tất.</p>
+                        <?php break; ?>
+
+                <?php endswitch; ?>
             </div>
             
-            <div class="flex justify-between items-start">
-                <span class="text-gray-500">Người mua:</span>
-                <span class="font-semibold text-gray-800"><?= htmlspecialchars($bm["ten_ben_mua"]) ?></span>
-            </div>
-
-            <div class="flex justify-between items-start">
-                <span class="text-gray-500">Người bán:</span>
-                <span class="font-semibold text-gray-800"><?= htmlspecialchars($bm["ten_ben_ban"]) ?></span>
-            </div>
-
-            <div class="!mt-4 pt-3 border-t border-gray-200 flex justify-between items-center">
-                 <span class="text-gray-500 flex items-center gap-2">
-                    <i class="fa-solid fa-paperclip"></i> Tệp đính kèm:
-                </span>
-                <a href="../../../storage/documents/<?= htmlspecialchars($bm["tep_dk"]) ?>" 
-                   class="text-blue-600 hover:underline font-bold flex items-center gap-1.5 transition" 
-                   target="_blank">
-                    <i class="fa-solid fa-download"></i> Tải về
-                </a>
-            </div>
         </div>
-
-        <?php if($bm["trang_thai"]=="choduyet"): ?>
-            <div class="mt-5 pt-4 border-t border-gray-200 flex justify-end gap-3">
-                <button data-action-button data-id="<?= $bm['id'] ?>" data-status="huy" class="bg-gray-200 hover:bg-red-100 text-red-500 font-bold px-4 py-2 rounded-md transition-colors">
-                    Từ chối
-                </button>
-                <button data-action-button data-id="<?= $bm['id'] ?>" data-status="daduyet" class="bg-green-400 hover:bg-green-600 text-white font-bold px-4 py-2 rounded-md shadow-lg shadow-blue-500/20 transition">
-                    Duyệt
-                </button>
-            </div>
-        <?php endif; ?>
     </div>
-</div>
-
 <?php endforeach; ?>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // Xử lý mở/đóng Modal
+    // Xử lý mở/đóng Modal (Không thay đổi)
     const modalToggles = document.querySelectorAll('[data-modal-toggle]');
     modalToggles.forEach(button => {
         button.addEventListener('click', () => {
@@ -285,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
     
-    // Xử lý nút hành động (Duyệt/Từ chối)
+    // Xử lý nút hành động (Duyệt/Từ chối/Hoàn tác)
     const actionButtons = document.querySelectorAll('[data-action-button]');
     actionButtons.forEach(button => {
         button.addEventListener('click', () => {
@@ -297,8 +299,33 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function capNhatTrangThai(id, trangThai) {
-    const actionText = trangThai === 'daduyet' ? 'DUYỆT' : 'TỪ CHỐI';
-    if (!confirm(`Bạn có chắc chắn muốn ${actionText} biểu mẫu ID ${id} này không?`)) return;
+    // ===== THAY ĐỔI LỚN: CẬP NHẬT HÀM XÁC NHẬN =====
+    let actionText = '';
+    let confirmMessage = '';
+    
+    switch (trangThai) {
+        case 'daduyet':
+            actionText = 'DUYỆT';
+            confirmMessage = `Bạn có chắc chắn muốn ${actionText} biểu mẫu này không?`;
+            break;
+        case 'huy':
+            actionText = 'TỪ CHỐI';
+            confirmMessage = `Bạn có chắc chắn muốn ${actionText} biểu mẫu này không?`;
+            break;
+        case 'daky':
+            actionText = 'KÝ';
+            confirmMessage = `Xác nhận ${actionText} hợp đồng? Hành động này không thể hoàn tác.`;
+            break;
+        case 'choduyet':
+            actionText = 'HOÀN TÁC';
+            confirmMessage = `Bạn có chắc chắn muốn ${actionText} và đưa biểu mẫu về trạng thái "Chờ duyệt"?`;
+            break;
+        default:
+            actionText = 'CẬP NHẬT';
+            confirmMessage = `Bạn có chắc chắn muốn ${actionText} biểu mẫu này không?`;
+    }
+
+    if (!confirm(confirmMessage)) return;
 
     const formData = new URLSearchParams({ id: id, trang_thai: trangThai });
 

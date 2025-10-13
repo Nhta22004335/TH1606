@@ -12,7 +12,7 @@
     // Lấy thông tin sản phẩm
     $sql_sanpham = "SELECT 
                     bds.id, bds.tieu_de, bds.mo_ta, bds.gia, bds.dien_tich, bds.dia_chi, bds.loai, bds.khu_vuc, bds.trang_thai, bds.ngay_dang, bds.id_nguoi_dung,
-                    info.ho_ten,
+                    info.ho_ten, nd.avt,
                     COUNT(dg.id) AS tong_so_danh_gia,
                     ROUND(AVG(dg.diem), 1) AS diem_trung_binh
                 FROM bat_dong_san bds
@@ -20,7 +20,8 @@
                 LEFT JOIN info_nguoi_dung info ON info.id_nguoi_dung = bds.id_nguoi_dung
                 LEFT JOIN danh_gia_bds dg ON bds.id = dg.id_bds
                 WHERE bds.id = :id
-                GROUP BY bds.id, info.ho_ten";
+                GROUP BY bds.id, info.ho_ten, nd.avt";
+
 
     $stmt_sanpham = $pdo->prepare($sql_sanpham);
     $stmt_sanpham->bindValue(':id', $id, PDO::PARAM_INT);
@@ -31,26 +32,40 @@
         die("<p class='text-red-500 font-bold p-4'>Sản phẩm không tồn tại!</p>");
     }
     
-    // Lấy hình ảnh (tạm thời)
+    $sql = "SELECT url FROM hinh_anh_bds WHERE id_bds = :id_bds";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':id_bds', $id, PDO::PARAM_STR);
+    $stmt->execute();
+    $spha = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+   // 2. Dùng array_column để trích xuất tất cả giá trị của cột 'url' thành một mảng đơn giản
+    $url_list = array_column($spha, 'url');
+    // Bây giờ $url_list sẽ là: ['hinh-anh-1.jpg', 'hinh-anh-2.png', ...]
+
+    // 3. Định nghĩa đường dẫn gốc
+    $base_path = '../../../storage/pictures/bds/'; 
+
+    // 4. Dùng array_map để thêm đường dẫn gốc vào từng tên file
+    $full_image_urls = array_map(function($filename) use ($base_path) {
+        return $base_path . $filename;
+    }, $url_list);
+
     $spha = [
-        'hinh_anh' => [
-            'https://picsum.photos/800/600?random=1',
-            'https://picsum.photos/800/600?random=2',
-            'https://picsum.photos/800/600?random=3',
-        ]
+        'hinh_anh' => $full_image_urls
     ];
 
     // Lấy danh sách đánh giá
     $sql_danhgia = "
         SELECT 
             dg.id AS id_danh_gia, dg.id_bds, dg.id_nguoi_dung, dg.diem, dg.binh_luan, dg.ngay_tao, dg.trang_thai,
-            info.ho_ten,
+            info.ho_ten, nd.avt,
             (SELECT ARRAY_AGG(url) FROM hinh_anh_danh_gia_bds WHERE id_dg_bds = dg.id) as ds_hinh_anh,
             (SELECT ARRAY_AGG(url) FROM video_danh_gia_bds WHERE id_dg_bds = dg.id) as ds_video
         FROM danh_gia_bds dg
         LEFT JOIN info_nguoi_dung info ON info.id_nguoi_dung = dg.id_nguoi_dung
+        LEFT JOIN nguoi_dung nd ON nd.id = dg.id_nguoi_dung
         WHERE dg.id_bds = :id
-        GROUP BY dg.id, info.ho_ten
+        GROUP BY dg.id, info.ho_ten, nd.avt
         ORDER BY dg.trang_thai ASC, dg.ngay_tao DESC
     ";
 
@@ -141,7 +156,7 @@
                 </div>
 
                 <div class="mt-4 border-t border-gray-200 pt-4 flex items-center">
-                    <img src="https://i.pravatar.cc/40?u=<?= urlencode($sanpham['id_nguoi_dung']) ?>" class="w-10 h-10 rounded-full object-cover mr-3">
+                    <img src="../../../storage/pictures/avt/<?= urlencode($sanpham['avt']) ?>" class="w-10 h-10 rounded-full object-cover mr-3">
                     <div>
                         <p class="font-semibold text-gray-800"><?= htmlspecialchars($sanpham['ho_ten']) ?></p>
                         <p class="text-xs text-gray-500">Người đăng</p>
@@ -167,7 +182,7 @@
                         $is_hidden = $dg['trang_thai'] !== 'hien';
                     ?>
                     <li id="review-<?= $dg['id_danh_gia'] ?>" class="p-5 flex gap-4 <?= $is_hidden ? 'bg-orange-50/50 border-l-4 border-orange-400' : '' ?>">
-                        <img src="https://i.pravatar.cc/48?u=<?= urlencode($dg['id_nguoi_dung']) ?>" class="w-12 h-12 rounded-full object-cover mt-1 flex-shrink-0">
+                        <img src="../../../storage/pictures/avt/<?= urlencode($dg['avt']) ?>" class="w-12 h-12 rounded-full object-cover mt-1 flex-shrink-0">
                         
                         <div class="flex-1">
                             <div class="flex items-center justify-between">
