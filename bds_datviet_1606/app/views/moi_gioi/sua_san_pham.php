@@ -66,9 +66,9 @@ $current_status = $status_map[$product['trang_thai']] ?? $status_map['default'];
 
 <div class="container mx-auto p-4 sm:p-6 lg:p-8">
     <div class="max-w-7xl mx-auto mb-8">
-        <a href="sanpham_canhan.php" class="text-sm text-slate-600 hover:text-sky-600 flex items-center gap-2 mb-4">
+        <a href="trangchu.php?page=../moi_gioi/sp_canhan" class="text-sm text-slate-600 hover:text-sky-600 flex items-center gap-2 mb-4">
             <i class="fas fa-arrow-left"></i>
-            Quay lại danh sách
+             Quay lại danh sách
         </a>
         <h1 class="text-3xl font-bold text-slate-900">Chỉnh sửa Bất động sản</h1>
         <p class="text-slate-500 mt-1">Cập nhật thông tin chi tiết cho sản phẩm của bạn.</p>
