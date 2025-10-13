@@ -197,9 +197,6 @@ CREATE TABLE IF NOT EXISTS dot_thanh_toan (
     UNIQUE (id_giao_dich, lan_tt) -- Đảm bảo không có 2 đợt cùng số lần trong 1 giao dịch
 );
 
-select id_bds from giao_dich
-select id from dot_thanh_toan
-
 CREATE TABLE IF NOT EXISTS dot_thanh_toan_ct (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     id_dot_thanh_toan UUID NOT NULL,
@@ -291,19 +288,21 @@ CREATE TABLE IF NOT EXISTS lich_trinh (
 );
 
 -- 1. Bảng tin đăng
--- CREATE TABLE tin_tuc (
---     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),       
---     id_khach_hang UUID NOT NULL,                                                   
---     tieu_de VARCHAR(200) NOT NULL DEFAULT 'chuacapnhat',
---     mo_ta TEXT DEFAULT 'chuacapnhat',
---     chuyen_muc VARCHAR(100) DEFAULT 'chuacapnhat',                  
---     trang_thai VARCHAR(50) DEFAULT 'choduyet',  
--- 	   anh_tin TEXT DEFAULT 'chuacapnhat.png',
---     luot_xem INT,
---     ngay_dang TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
---     CONSTRAINT chk_trang_thai_tin CHECK (trang_thai IN ('choduyet','dangban','daban','dathue')),
---     CONSTRAINT fk_tin_khachhang FOREIGN KEY (id_khach_hang) REFERENCES nguoi_dung(id) ON DELETE CASCADE
--- );
+CREATE TABLE tin_tuc (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),       
+    id_khach_hang UUID NOT NULL,                                                   
+    tieu_de VARCHAR(200) NOT NULL DEFAULT 'chuacapnhat',
+    mo_ta TEXT DEFAULT 'chuacapnhat',
+    chuyen_muc VARCHAR(100) DEFAULT 'chuacapnhat',                  
+    trang_thai VARCHAR(50) DEFAULT 'choduyet',  
+	anh_tin TEXT DEFAULT 'chuacapnhat.png',
+    luot_xem INT,
+    ngay_dang TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_trang_thai_tin CHECK (trang_thai IN ('choduyet','dangban','daban','dathue')),
+    CONSTRAINT fk_tin_khachhang FOREIGN KEY (id_khach_hang) REFERENCES nguoi_dung(id) ON DELETE CASCADE
+);
+
+select * from tin_tuc
 
 -- CREATE TABLE hop_thoai (
 -- 	id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), 
