@@ -340,12 +340,13 @@
                 }
             ?>
         </main>
-        
+
         <footer class="flex-shrink-0 h-12 bg-white border-t border-gray-200 flex items-center justify-center text-xs text-gray-500 shadow-inner">
             <span>© 2025 Đất Việt BDS. Quản trị BĐS: Minh bạch, Hiệu quả, Tăng trưởng.</span>
         </footer>
     </div>
 </div>
+
 
 </body>
 </html>

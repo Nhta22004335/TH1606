@@ -22,7 +22,6 @@ CREATE TABLE IF NOT EXISTS nguoi_dung (
     email VARCHAR(255) NOT NULL UNIQUE,
     so_dt VARCHAR(20) DEFAULT 'chuacapnhat',
 	avt TEXT DEFAULT 'avt.png',
-	anh_bia TEXT DEFAULT 'anhbia.png',
 	trang_thai VARCHAR(50) DEFAULT 'chuakichhoat',
     hoat_dong VARCHAR(50) DEFAULT 'offline', 
     ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -173,6 +172,7 @@ CREATE TABLE IF NOT EXISTS giao_dich (
     CONSTRAINT fk_giao_dich_bds FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE SET NULL
 );
 
+select * from giao_dich
 CREATE TABLE IF NOT EXISTS ke_hoach_thanh_toan (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     id_giao_dich UUID NOT NULL UNIQUE,
@@ -229,17 +229,17 @@ CREATE TABLE IF NOT EXISTS dot_thanh_toan_ct (
 -- );
 
 -- 15. Bảng danh_gia_mg (đánh giá môi giới)
--- CREATE TABLE IF NOT EXISTS danh_gia_mg (
---     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
---     id_khach_hang UUID NOT NULL,
---     id_moi_gioi UUID NOT NULL,
---     diem INT CHECK (diem >= 1 AND diem <= 5),
---     binh_luan TEXT,
---     ngay_dg TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
---     CONSTRAINT fk_danh_gia_kh_nd FOREIGN KEY (id_khach_hang) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
---     CONSTRAINT fk_danh_gia_mg_nd FOREIGN KEY (id_moi_gioi) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
---     CONSTRAINT chk_kh_mg_khacnhau CHECK (id_khach_hang <> id_moi_gioi)
--- );
+CREATE TABLE IF NOT EXISTS danh_gia_mg (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id_khach_hang UUID NOT NULL,
+    id_moi_gioi UUID NOT NULL,
+    diem INT CHECK (diem >= 1 AND diem <= 5),
+    binh_luan TEXT,
+    ngay_dg TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_danh_gia_kh_nd FOREIGN KEY (id_khach_hang) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
+    CONSTRAINT fk_danh_gia_mg_nd FOREIGN KEY (id_moi_gioi) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
+    CONSTRAINT chk_kh_mg_khacnhau CHECK (id_khach_hang <> id_moi_gioi)
+);
 
 CREATE TABLE bieu_mau (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),           
@@ -367,4 +367,5 @@ CREATE TABLE tin_nhan (
 --     CONSTRAINT fk_ghichu_moigioi FOREIGN KEY (id_moi_gioi) REFERENCES nguoi_dung(id) ON DELETE CASCADE
 -- );
 
+ALTER USER postgres WITH PASSWORD '123456';
 
