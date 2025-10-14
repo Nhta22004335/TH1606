@@ -191,7 +191,7 @@ function format_price_vietnamese(float $price): string {
                     <?php foreach ($products as $product): ?>
                         <tr class="hover:bg-gray-50 transition">
                             <td class="px-4 py-3">
-                                <img src="../../../storage/bds/<?= e($product['anh_dai_dien']) ?>" alt="Ảnh <?= e($product['tieu_de']) ?>" class="w-16 h-16 object-cover rounded-lg border">
+                                <img src="../../../storage/pictures/bds/<?= e($product['anh_dai_dien']) ?>" alt="Ảnh <?= e($product['tieu_de']) ?>" class="w-16 h-16 object-cover rounded-lg border">
                             </td>
                             <td class="px-4 py-3 text-sm font-semibold text-gray-800">
                                 <?= e($product['tieu_de']) ?>
