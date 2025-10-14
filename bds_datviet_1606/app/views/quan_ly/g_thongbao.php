@@ -1,12 +1,16 @@
 <?php
-// PHP data array for users (as provided in the original code)
-    $nd = [
-        ["id"=>1, "name"=>"Nguyễn Văn A", "email"=>"a@gmail.com"],
-        ["id"=>2, "name"=>"Trần Thị B", "email"=>"b@gmail.com"],
-        ["id"=>3, "name"=>"Lê Văn C", "email"=>"c@gmail.com"],
-        ["id"=>4, "name"=>"Phạm Thị D", "email"=>"d@gmail.com"],
-        ["id"=>5, "name"=>"Hoàng Văn E", "email"=>"e@gmail.com"],
-    ];
+    require_once "../../../config/database.php";
+    $pdo = ketnoicsdl();
+    // Câu truy vấn
+    $sql = "
+        SELECT nd.id, inf.ho_ten as name, nd.email
+        FROM nguoi_dung nd
+        JOIN info_nguoi_dung inf ON nd.id = inf.id_nguoi_dung
+    ";
+
+    // Thực thi
+    $stmt = $pdo->query($sql);
+    $nd = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -20,7 +24,7 @@
 <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
 
     <header class="flex items-center gap-4 bg-white shadow p-4 border-b-2 border-gray-100">
-        <img src="../../../public/assets/anhht/0/notification.gif" alt="Notification" class="w-12 h-12 rounded-full border p-1">
+        <img src="../../../public/images/notification.gif" alt="Notification" class="w-12 h-12 rounded-full border p-1">
         <h1 class="text-2xl font-bold text-blue-600">Gửi thông báo</h1>
     </header>
 
@@ -170,11 +174,10 @@
                 <i class="fa-solid fa-users mr-1"></i>Tất cả người dùng
             </span>
             `;
-            // Clear chosenUsers so it's not confused with "All"
             chosenUsers = [];
         } else {
             userSelectArea.style.display = "block"; 
-            renderSelectedUsers(); // Re-render if there were previous selections
+            renderSelectedUsers(); 
         }
     });
     
@@ -185,15 +188,15 @@
         const method = document.querySelector("input[name='sendMethod']:checked");
 
         if (!title || !content) {
-            alert("⚠️ Vui lòng nhập đầy đủ tiêu đề và nội dung!");
+            alert("Vui lòng nhập đầy đủ tiêu đề và nội dung!");
             return;
         }
         if (!method) {
-            alert("⚠️ Vui lòng chọn hình thức gửi (Email hoặc Chat)!");
+            alert("Vui lòng chọn hình thức gửi (Email hoặc Chat)!");
             return;
         }
         if (!selectAll.checked && chosenUsers.length === 0) {
-            alert("⚠️ Vui lòng chọn ít nhất một tài khoản hoặc chọn 'Tất cả tài khoản'!");
+            alert("Vui lòng chọn ít nhất một tài khoản hoặc chọn 'Tất cả tài khoản'!");
             return;
         }
 
@@ -201,7 +204,7 @@
         const methodDisplay = method.value === 'email' ? 'Email' : 'Hộp thoại chat';
 
         // Prepare the final alert message
-        alert(`✅ Gửi thành công!\n\n👥 Người nhận: ${recipients}\n📢 Tiêu đề: ${title}\n📧 Hình thức: ${methodDisplay}\n\nNội dung đã gửi: "${content.substring(0, 50)}..."`);
+        alert(`Gửi thành công!\n\n Người nhận: ${recipients}\nTiêu đề: ${title}\nHình thức: ${methodDisplay}\n\nNội dung đã gửi: "${content.substring(0, 50)}..."`);
     });
     
     // Initial render

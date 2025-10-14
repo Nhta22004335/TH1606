@@ -7,9 +7,13 @@
         $port = "5432";
         $dbname = "csdl_bds";
         $user = "postgres";
+<<<<<<< HEAD
 
         $pass = "22004335";
         //  $pass = "123456";
+=======
+        $pass = "123456";
+>>>>>>> 0b8ade80e7b2869bc6afec9646433b2582431fe6
 
         try {
             $dsn = "pgsql:host=$host;port=$port;dbname=$dbname";
