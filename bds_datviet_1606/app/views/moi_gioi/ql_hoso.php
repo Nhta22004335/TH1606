@@ -300,6 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // 2. Tạo và chèn iframe xem trước (iframe src="../../../storage/documents/${data.filename}")
                     // 3. Chèn link tải về mới.
 
+
                 } else {
                     resultDiv.textContent = data.message;
                     resultDiv.className = 'upload-result text-sm mt-1 text-red-600 font-semibold';
