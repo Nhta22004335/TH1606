@@ -1,9 +1,9 @@
 <?php
 // Cấu hình ban đầu
-require_once "../../../config/database.php";
+require_once "../../config/database.php";
 $pdo = ketnoicsdl();
 
-// Bắt đầu phiên (cần ở đầu file)
+// // Bắt đầu phiên (cần ở đầu file)
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -11,6 +11,8 @@ if (session_status() === PHP_SESSION_NONE) {
 $id_nguoi_dung = $_SESSION['id_nguoi_dung'] ?? null;
 // Lấy ID từ POST cho Form Chính, hoặc từ POST cho AJAX
 $id_bds = $_POST['id'] ?? $_POST['id_bds'] ?? null; 
+
+
 
 // --- Kiểm tra bảo mật cơ bản ---
 if (!$id_nguoi_dung || !$id_bds) {
@@ -21,7 +23,7 @@ if (!$id_nguoi_dung || !$id_bds) {
         exit;
     }
     // Nếu là Form POST, chuyển hướng
-    header("Location: ../../views/moi_gioi/sp_canhan.php?status=error&message=Thiếu thông tin người dùng hoặc ID sản phẩm.");
+    // header("Location: ../../views/moi_gioi/sp_canhan.php?status=error&message=Thiếu thông tin người dùng hoặc ID sản phẩm.");
     exit;
 }
 
@@ -93,7 +95,6 @@ $khu_vuc = trim($_POST['khu_vuc'] ?? '');
 $dia_chi = trim($_POST['dia_chi'] ?? '');
 $mo_ta = trim($_POST['mo_ta'] ?? '');
 
-
 // 2. Cập nhật vào DB
 try {
     $sql = "UPDATE bat_dong_san SET 
@@ -105,7 +106,7 @@ try {
                 khu_vuc = :khu_vuc,
                 dia_chi = :dia_chi,
                 mo_ta = :mo_ta,
-                ngay_cap_nhat = NOW()
+                ngay_dang = NOW()
             WHERE id = :id AND id_nguoi_dung = :id_nguoi_dung"; 
 
     $stmt = $pdo->prepare($sql);
@@ -122,13 +123,16 @@ try {
         ':id_nguoi_dung' => $id_nguoi_dung
     ]);
 
-    // Chuyển hướng thành công (POST/Redirect/GET Pattern)
-    header("Location: ../../views/moi_gioi/sua_san_pham.php?id=$id_bds&status=success&message=Cập nhật thông tin thành công.");
-    exit;
+    echo "<script>
+        window.location.href = '../views/quan_ly/trangchu.php?page=../moi_gioi/sua_san_pham&id={$id_bds}&status=success';
+        exit();
+        </script>";
 
 } catch (PDOException $e) {
-    header("Location: ../../views/moi_gioi/sua_san_pham.php?id=$id_bds&status=error&message=Lỗi cơ sở dữ liệu khi cập nhật thông tin.");
-    exit;
+    echo "<script>
+        window.location.href = '../views/quan_ly/trangchu.php?page=../moi_gioi/sua_san_pham&id={$id_bds}&status=notsuccess';
+        exit();
+        </script>";
 }
 
 ?>

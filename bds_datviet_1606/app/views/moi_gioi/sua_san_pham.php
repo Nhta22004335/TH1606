@@ -128,11 +128,34 @@ $current_status = $status_map[$product['trang_thai']] ?? $status_map['default'];
                         Vị trí & Mô tả
                     </h2>
                     <div class="space-y-6">
-                        <div>
+                        <!-- <div>
                             <label for="khu_vuc" class="block text-sm font-medium text-slate-700">Tỉnh / Thành phố</label>
                             <input type="text" name="khu_vuc" id="khu_vuc" value="<?= e($product['khu_vuc']) ?>" 
                             class="mt-1 block w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
+                        </div> -->
+                        <div>
+                        <label for="khu_vuc" class="block text-sm font-medium text-slate-700">
+                            Tỉnh / Thành phố
+                        </label>
+                        <select name="khu_vuc" id="khu_vuc"
+                            class="mt-1 block w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
+                            <?php 
+                            $provinces = [
+                                "Hà Nội","Huế","Lai Châu","Điện Biên","Sơn La","Lạng Sơn","Quảng Ninh","Thanh Hóa",
+                                "Nghệ An","Hà Tĩnh","Cao Bằng","Tuyên Quang","Lào Cai","Thái Nguyên","Phú Thọ",
+                                "Bắc Ninh","Hưng Yên","Hải Phòng","Ninh Bình","Quảng Trị","Đà Nẵng","Quảng Ngãi",
+                                "Gia Lai","Khánh Hòa","Lâm Đồng","Đắk Lắk","TP. Hồ Chí Minh","Đồng Nai","Tây Ninh",
+                                "Cần Thơ","Vĩnh Long","Đồng Tháp","Cà Mau"
+                            ];
+
+                            foreach ($provinces as $p) {
+                                $selected = ($product['khu_vuc'] === $p) ? 'selected' : '';
+                                echo "<option value='$p' $selected>$p</option>";
+                            }
+                            ?>
+                        </select>
                         </div>
+
                         <div>
                             <label for="dia_chi" class="block text-sm font-medium text-slate-700">Địa chỉ chi tiết</label>
                             <textarea name="dia_chi" id="dia_chi" rows="2" class="mt-1 block w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500"><?= e($product['dia_chi']) ?></textarea>
@@ -249,7 +272,7 @@ function uploadAnh() {
             previewImg.src = `../../../storage/pictures/bds/${data.filename}`;
             
             fileInput.value = ""; 
-            alert("✅ Upload ảnh thành công!");
+            // window.location.href = 'trangchu.php?page=../moi_gioi/sp_canhan';
         } else {
             alert("❌ " + data.message);
         }
