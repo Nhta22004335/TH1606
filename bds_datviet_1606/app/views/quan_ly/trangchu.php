@@ -115,7 +115,8 @@
                 'Gửi thông báo (Admin)' => ['link' => 'g_thongbao', 'roles' => ['quantri']],
                 'Quản lý hộp thoại chat' => ['link' => 'ql_hopthoai', 'roles' => ['quantri']],
                 'Gửi thông báo khách (MG)' => ['link' => '../moi_gioi/g_thongbao_kh', 'roles' => ['moigioi']],
-                'Quản lý thông báo' => ['link' => '../moi_gioi/ql_thongbao', 'roles' => ['quantri', 'moigioi']],
+                'Quản lý thông báo (MG)' => ['link' => '../moi_gioi/ql_thongbao', 'roles' => ['moigioi']],
+                'Quản lý thông báo' => ['link' => 'ql_thongbao', 'roles' => ['quantri']]
             ]
         ],
         [

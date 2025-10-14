@@ -302,29 +302,32 @@ CREATE TABLE tin_tuc (
     CONSTRAINT fk_tin_khachhang FOREIGN KEY (id_khach_hang) REFERENCES nguoi_dung(id) ON DELETE CASCADE
 );
 
-select * from tin_tuc
+-- select nd.id from nguoi_dung nd
+-- left join phan_quyen pq on pq.id_nguoi_dung=nd.id
+-- left join quyen q on q.id=pq.id_quyen
+-- where q.vai_tro='khachhang'
 
--- CREATE TABLE hop_thoai (
--- 	id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), 
--- 	da_khoa INT DEFAULT 0,
--- 	da_xoa INT DEFAULT 0
--- )
+CREATE TABLE hop_thoai (
+	id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), 
+	da_khoa INT DEFAULT 0,
+	da_xoa INT DEFAULT 0
+)
 
--- CREATE TABLE tin_nhan (
---     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), 
--- 	id_hop_thoai UUID,
---     nguoi_gui UUID NOT NULL,                 -- Người gửi
---     nguoi_nhan UUID NOT NULL,                   -- Người nhận
---     noi_dung TEXT, -- Không cho phép rỗng
--- 	anh_tn TEXT,
--- 	video_tn TEXT,
---     tg_gui TIMESTAMP NOT NULL DEFAULT NOW(),
---     -- Ràng buộc khóa ngoại
---     CONSTRAINT fk_gui FOREIGN KEY (nguoi_gui) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
---     CONSTRAINT fk_nhan  FOREIGN KEY (nguoi_nhan)   REFERENCES nguoi_dung(id) ON DELETE CASCADE,
--- 	CONSTRAINT fk_id_hop_thoai FOREIGN KEY (id_hop_thoai) REFERENCES hop_thoai(id) ON DELETE CASCADE,
---     -- Ràng buộc: người gửi và người nhận không được trùng
---     CONSTRAINT chk_gui_nhan CHECK (nguoi_gui <> nguoi_nhan)
+CREATE TABLE tin_nhan (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), 
+	id_hop_thoai UUID,
+    nguoi_gui UUID NOT NULL,                 -- Người gửi
+    nguoi_nhan UUID NOT NULL,                   -- Người nhận
+    noi_dung TEXT, -- Không cho phép rỗng
+	anh_tn TEXT,
+	video_tn TEXT,
+    tg_gui TIMESTAMP NOT NULL DEFAULT NOW(),
+    -- Ràng buộc khóa ngoại
+    CONSTRAINT fk_gui FOREIGN KEY (nguoi_gui) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
+    CONSTRAINT fk_nhan  FOREIGN KEY (nguoi_nhan)   REFERENCES nguoi_dung(id) ON DELETE CASCADE,
+	CONSTRAINT fk_id_hop_thoai FOREIGN KEY (id_hop_thoai) REFERENCES hop_thoai(id) ON DELETE CASCADE,
+    -- Ràng buộc: người gửi và người nhận không được trùng
+    CONSTRAINT chk_gui_nhan CHECK (nguoi_gui <> nguoi_nhan)
 );
 
 -- CREATE TABLE IF NOT EXISTS khach_quan_tam_bds (

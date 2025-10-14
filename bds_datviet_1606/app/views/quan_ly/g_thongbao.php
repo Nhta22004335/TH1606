@@ -20,7 +20,7 @@
 <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
 
     <header class="flex items-center gap-4 bg-white shadow p-4 border-b-2 border-gray-100">
-        <img src="../../../public/assets/anhht/0/notification.gif" alt="Notification" class="w-12 h-12 rounded-full border p-1">
+        <img src="../../../public/images/notification.gif" alt="Notification" class="w-12 h-12 rounded-full border p-1">
         <h1 class="text-2xl font-bold text-blue-600">Gửi thông báo</h1>
     </header>
 

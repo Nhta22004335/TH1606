@@ -71,11 +71,6 @@
                 <h1 class="text-2xl font-bold text-slate-800">Bảng tin Bất động sản</h1>
                 <p class="mt-2 text-sm text-slate-600">Khám phá các tin tức, xu hướng và cơ hội đầu tư mới nhất.</p>
             </div>
-            <div class="mt-4 sm:mt-0">
-                <a href="#" class="inline-flex items-center gap-2 px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    <i class="fa-solid fa-plus"></i> Thêm tin mới
-                </a>
-            </div>
         </div>
     </header>
 
