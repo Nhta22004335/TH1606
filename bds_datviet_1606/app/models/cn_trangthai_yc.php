@@ -1,65 +1,69 @@
 <?php
-// Đặt header để đảm bảo trình duyệt biết rằng phản hồi là JSON
 header('Content-Type: application/json');
+require_once "../../config/database.php"; // Đảm bảo đường dẫn này chính xác
 
-// Thêm cấu hình và kết nối CSDL (Đảm bảo đường dẫn chính xác)
-require_once "../../config/database.php";
-
-// Hàm phản hồi JSON và thoát script
-function sendResponse($status, $message, $httpCode = 200) {
-    http_response_code($httpCode);
-    echo json_encode(["status" => $status, "message" => $message]);
-    exit;
+/**
+ * Hàm helper để tạo HTML cho badge trạng thái mới.
+ */
+function getStatusBadgeHtml($status) {
+    $map = [
+        'choxuly' => ['text' => 'Chờ xử lý', 'class' => 'bg-orange-100 text-orange-800'],
+        'daduyet' => ['text' => 'Đã duyệt', 'class' => 'bg-green-100 text-green-800'],
+        'dahuy'   => ['text' => 'Đã hủy', 'class' => 'bg-red-100 text-red-700'],
+    ];
+    $info = $map[$status] ?? ['text' => ucfirst($status), 'class' => 'bg-gray-100 text-gray-700'];
+    $text = htmlspecialchars($info['text']);
+    return "<span class=\"px-2.5 py-0.5 {$info['class']} rounded-full text-xs font-medium\">{$text}</span>";
 }
 
-// 1. Kiểm tra Phương thức HTTP
-if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-    sendResponse("error", "Phương thức không hợp lệ. Chỉ chấp nhận POST.", 405);
+/**
+ * Hàm helper để tạo lại các nút hành động tương ứng với trạng thái mới.
+ */
+function getActionsHtml($id, $newStatus) {
+    $html = '<div class="flex justify-center items-center gap-4">';
+    // Nút xem chi tiết luôn hiển thị
+    $html .= '<button class="action-btn text-sm text-indigo-600 hover:text-indigo-800 transition" data-id="' . $id . '" data-action="view"><i class="fas fa-eye"></i></button>';
+
+    if ($newStatus == "choxuly") {
+        $html .= '<button class="action-btn text-sm text-green-600 hover:text-green-800 transition" data-id="' . $id . '" data-action="daduyet"><i class="fas fa-check"></i></button>';
+        $html .= '<button class="action-btn text-sm text-red-600 hover:text-red-800 transition" data-id="' . $id . '" data-action="dahuy"><i class="fas fa-times-circle"></i></button>';
+    } else { // 'daduyet' hoặc 'dahuy'
+        $html .= '<button class="action-btn text-sm text-yellow-400 hover:text-yellow-500 transition" data-id="' . $id . '" data-action="choxuly"><i class="fas fa-rotate-left"></i></button>';
+    }
+    $html .= '</div>';
+    return $html;
 }
 
-// 2. Kết nối CSDL
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    echo json_encode(['status' => 'error', 'message' => 'Phương thức không hợp lệ.']);
+    exit();
+}
+
+$id = $_POST['id'] ?? null;
+$newStatus = $_POST['newStatus'] ?? null;
+
+if (!$id || !$newStatus) {
+    echo json_encode(['status' => 'error', 'message' => 'Thiếu ID hoặc trạng thái mới.']);
+    exit();
+}
+
 try {
     $pdo = ketnoicsdl();
-} catch (PDOException $e) {
-    sendResponse("error", "Lỗi kết nối CSDL.", 500);
-}
-
-// 3. Lấy dữ liệu từ $_POST (Tương thích với hàm updateStatus gửi dữ liệu form)
-$id = trim($_POST['id'] ?? '');
-$trang_thai = trim($_POST['newStatus'] ?? ''); // Lấy tên tham số từ JS
-
-// 4. Kiểm tra dữ liệu bắt buộc và tính hợp lệ của trạng thái
-if (empty($id) || empty($trang_thai)) {
-    sendResponse("error", "Thiếu ID hoặc Trạng thái.", 400);
-}
-
-// Danh sách trạng thái hợp lệ (dựa trên CONSTRAINT CHECK của bảng yeu_cau)
-$valid_statuses = ['choxuly', 'daduyet', 'dahuy'];
-if (!in_array($trang_thai, $valid_statuses)) {
-    sendResponse("error", "Giá trị trạng thái không hợp lệ.", 400);
-}
-
-
-// 5. Thực hiện truy vấn CSDL
-try {
-    $sql = "UPDATE yeu_cau 
-            SET trang_thai = :trang_thai, ngay_tao = CURRENT_TIMESTAMP 
-            WHERE id = :id";
-    $stmt = $pdo->prepare($sql);
-    
-    $stmt->execute([
-        ":trang_thai" => $trang_thai,
-        ":id" => $id
-    ]);
+    $stmt = $pdo->prepare("UPDATE yeu_cau SET trang_thai = :trang_thai WHERE id = :id");
+    $stmt->execute([':trang_thai' => $newStatus, ':id' => $id]);
 
     if ($stmt->rowCount() > 0) {
-        sendResponse("success", "Cập nhật trạng thái thành công!");
+        echo json_encode([
+            'status' => 'success',
+            'message' => 'Cập nhật trạng thái thành công!',
+            'newStatusHtml' => getStatusBadgeHtml($newStatus),
+            'newActionsHtml' => getActionsHtml($id, $newStatus)
+        ]);
     } else {
-        // Có thể ID không tồn tại hoặc trạng thái không thay đổi
-        sendResponse("warning", "Không có yêu cầu nào được cập nhật.", 200);
+        echo json_encode(['status' => 'error', 'message' => 'Không tìm thấy yêu cầu hoặc không có gì thay đổi.']);
     }
-    
+
 } catch (PDOException $e) {
-    sendResponse("error", "Lỗi truy vấn CSDL: " . $e->getMessage(), 500);
+    echo json_encode(['status' => 'error', 'message' => 'Lỗi cơ sở dữ liệu.']);
 }
 ?>

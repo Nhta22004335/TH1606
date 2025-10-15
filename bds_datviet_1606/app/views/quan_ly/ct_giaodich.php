@@ -1,8 +1,4 @@
 <?php
-// PHẦN LOGIC PHP CỦA BẠN - GIỮ NGUYÊN HOÀN TOÀN
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 
 require_once "../../../config/database.php";
 
@@ -105,9 +101,6 @@ $con_lai = $tong_gia_tri - $tong_da_tt;
             <a href="javascript:history.back()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition">
                 <i class="fas fa-arrow-left mr-2"></i> Quay lại
             </a>
-            <button onclick="window.print()" class="px-4 py-2 text-sm font-medium text-white bg-gray-800 rounded-md hover:bg-gray-900 transition">
-                <i class="fas fa-print mr-2"></i> In Hóa Đơn
-            </button>
         </div>
     </header>
 
