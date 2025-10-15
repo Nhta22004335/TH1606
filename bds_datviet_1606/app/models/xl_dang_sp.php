@@ -25,7 +25,7 @@ function redirectWithMessage($message, $status = 'success') {
 }
 
 // Thư mục upload
-$upload_dir = "../../../storage/bds/";
+$upload_dir = "../../../storage/pictures/bds/";
 // Đảm bảo thư mục tồn tại
 if (!is_dir($upload_dir)) {
     if (!mkdir($upload_dir, 0777, true)) {
@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         $sql_bds = "
             INSERT INTO bat_dong_san (id_nguoi_dung, tieu_de, mo_ta, loai, khu_vuc, gia, dien_tich, dia_chi, trang_thai)
-            VALUES (:id_nguoi_dung, :tieu_de, :mo_ta, :loai_hinhthuc, :khu_vuc, :gia, :dien_tich, :dia_chi, 'chuaduyet')
+            VALUES (:id_nguoi_dung, :tieu_de, :mo_ta, :loai, :khu_vuc, :gia, :dien_tich, :dia_chi, 'chuaduyet')
             RETURNING id
         ";
 
@@ -71,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':id_nguoi_dung' => $id_nguoi_dung,
             ':tieu_de'       => $tieu_de,
             ':mo_ta'         => $mo_ta,
-            ':loai_hinhthuc' => $hinh_thuc, 
+            ':loai'          => $loai,
             ':khu_vuc'       => $khu_vuc, 
             ':gia'           => $gia,
             ':dien_tich'     => $dien_tich,
@@ -154,5 +154,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         error_log("Lỗi xử lý đăng BĐS: " . $e->getMessage());
         redirectWithMessage("Lỗi: Không thể hoàn tất đăng sản phẩm. Chi tiết: " . $e->getMessage(), 'error');
     }
+
 }
 ?>
