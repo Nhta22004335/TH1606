@@ -16,34 +16,87 @@ if (!isset($pdo)) {
                 ['id' => 'kh006', 'ho_ten' => 'Hoàng Kim Em', 'email' => 'em.hoang@example.com'],
             ];
         }
+        public function beginTransaction() {}
+        public function commit() {}
+        public function rollBack() {}
     }
+    // Đây chỉ là mock, trong môi trường thực tế, bạn cần include database.php và lấy $pdo thực
     $pdo = new MockPDO();
 }
 
 try {
+    // Lưu ý: Nếu cột 'ho_ten' trong 'info_nguoi_dung' là null, hàm join sẽ hoạt động, 
+    // nhưng bạn cần đảm bảo cấu trúc bảng là chính xác.
     $sql = "SELECT nd.id, info.ho_ten, nd.email FROM nguoi_dung nd JOIN phan_quyen pq ON nd.id = pq.id_nguoi_dung JOIN quyen q ON pq.id_quyen = q.id LEFT JOIN info_nguoi_dung info ON nd.id = info.id_nguoi_dung WHERE q.vai_tro = 'khachhang' ORDER BY info.ho_ten ASC";
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
     $khach_hang = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    die("Lỗi truy vấn khách hàng: " . $e->getMessage());
+    die("Lỗi truy vấn danh sách khách hàng: " . $e->getMessage());
 }
 
 $success_msg = null;
 $error_msg = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['khach_hang_ids'], $_POST['tieu_de'], $_POST['noi_dung'])) {
+    
+    // Khởi tạo session nếu chưa có (cần thiết cho $_SESSION["id_nguoi_dung"])
+    if (session_status() === PHP_SESSION_NONE) session_start();
+    $id_admin = $_SESSION["id_nguoi_dung"] ?? null; 
+
     $id_nguoi_dung_arr = $_POST['khach_hang_ids'];
     $tieu_de = trim($_POST['tieu_de']);
     $noi_dung = trim($_POST['noi_dung']);
 
-    if (!empty($id_nguoi_dung_arr) && !empty($tieu_de) && !empty($noi_dung)) {
-        // ... (Logic gửi thông báo của bạn ở đây) ...
-        $success_msg = "Đã gửi thông báo cho " . count($id_nguoi_dung_arr) . " khách hàng thành công!";
-    } else {
+    if (!$id_admin) {
+        $error_msg = "Lỗi: Không tìm thấy ID người gửi. Vui lòng đăng nhập lại.";
+    } elseif (empty($id_nguoi_dung_arr) || empty($tieu_de) || empty($noi_dung)) {
         $error_msg = "Vui lòng chọn khách hàng và điền đầy đủ tiêu đề, nội dung.";
+    } else {
+        $loai_thong_bao = 'admin_gửi'; 
+        $pdo->beginTransaction();
+        try {
+            $sql_insert = "INSERT INTO thong_bao 
+                           (id_nguoi_dung, id_nguoi_gui, loai, tieu_de, noi_dung, thoi_gian_gui, trang_thai) 
+                           VALUES (:id_nd, :id_gui, :loai, :tieu_de, :noi_dung, NOW(), 'chuaxem')";
+            $stmt_insert = $pdo->prepare($sql_insert);
+
+            $total_sent = 0;
+            foreach ($id_nguoi_dung_arr as $id_nd) {
+                // Kiểm tra ID có hợp lệ không trước khi gửi
+                if (is_string($id_nd) && !empty($id_nd)) { 
+                    $stmt_insert->execute([
+                        ':id_nd' => $id_nd,      // ID người nhận (Khách hàng)
+                        ':id_gui' => $id_admin,      // ID người gửi (Admin)
+                        ':loai' => $loai_thong_bao,
+                        ':tieu_de' => $tieu_de,
+                        ':noi_dung' => $noi_dung
+                    ]);
+                    $total_sent++;
+                }
+            }
+
+            $pdo->commit();
+            // Đảm bảo chỉ set thông báo thành công ở đây
+            $success_msg = "Đã gửi thông báo cho $total_sent khách hàng thành công!";
+
+        } catch (\PDOException $e) {
+            $pdo->rollBack();
+            // Ghi log và hiển thị lỗi thân thiện
+            error_log("Lỗi CSDL khi gửi thông báo: " . $e->getMessage()); 
+            $error_msg = "Lỗi CSDL khi gửi thông báo. Vui lòng kiểm tra log hệ thống hoặc thử lại.";
+        }
     }
 }
+if (!empty(trim($search))) {
+        try {
+            $sql = "INSERT INTO lich_su_tim_kiem (id_nguoi_dung, tu_khoa_tim_kiem) VALUES (?, ?)";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$id, $search]);
+        } catch (PDOException $e) {
+            // error_log("Lỗi khi lưu lịch sử tìm kiếm: " . $e->getMessage());
+        }
+    }
 ?>
 
 <!DOCTYPE html>
@@ -52,6 +105,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['khach_hang_ids'], $_P
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gửi Thông báo cho Khách hàng</title>
+    <!-- Thêm Tailwind CSS và Font Awesome Icons (chắc chắn bạn đã load chúng ở file layout chính) -->
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> -->
+    <!-- Thêm Alpine.js -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script> -->
+
     <style>
         [x-cloak] { display: none !important; }
         .card-selected {
@@ -73,7 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['khach_hang_ids'], $_P
         <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md mb-6" role="alert"><p><?= htmlspecialchars($success_msg) ?></p></div>
     <?php endif; ?>
     <?php if ($error_msg): ?>
-        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md mb-6" role="alert"><p><?= htmlspecialchars($error_msg) ?></p></div>
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md mb-6" role="alert"><p><i class="fas fa-exclamation-triangle mr-2"></i><?= htmlspecialchars($error_msg) ?></p></div>
     <?php endif; ?>
 
     <form method="post" action="" class="lg:grid lg:grid-cols-12 lg:gap-8">
@@ -120,7 +179,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['khach_hang_ids'], $_P
                 <h2 class="text-xl font-bold text-slate-800 border-b pb-4 mb-6">Soạn thông báo</h2>
                 
                 <template x-for="id in selectedIds" :key="id">
-                    <input type="hidden" name="khach_hang_ids[]" :value="id">
+                    <!-- Đây là input ẩn quan trọng để gửi danh sách ID khách hàng đến PHP -->
+                    <input type="hidden" name="khach_hang_ids[]" :value="id"> 
                 </template>
 
                 <div class="space-y-6">
