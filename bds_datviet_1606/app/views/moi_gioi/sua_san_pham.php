@@ -187,7 +187,7 @@ $current_status = $status_map[$product['trang_thai']] ?? $status_map['default'];
                         </h2>
                         <div class="flex flex-col items-center justify-center space-y-4">
                             <?php
-                            $stmtImg = $pdo->prepare("SELECT url FROM hinh_anh_bds WHERE id_bds = :id_bds ORDER BY ngay_tao ASC LIMIT 1");
+                            $stmtImg = $pdo->prepare("SELECT url FROM hinh_anh_bds WHERE id_bds = :id_bds ORDER BY ngay_tao DESC LIMIT 1");
                             $stmtImg->execute([':id_bds' => $id_bds]);
                             $img = $stmtImg->fetch(PDO::FETCH_ASSOC);
                             ?>
