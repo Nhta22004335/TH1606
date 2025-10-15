@@ -91,8 +91,8 @@
         <div class="flex items-center space-x-4">
             <nav class="hidden xl:flex space-x-6 font-medium text-base">
                 <a href="#" class="text-gray-700 hover:text-blue-600 transition duration-200">Trang chủ</a>
-                <a href="#" class="text-gray-700 hover:text-blue-600 transition duration-200">Dự án</a>
-                <a href="#" class="text-gray-700 hover:text-blue-600 transition duration-200">Tin tức</a>
+                <a href="duan.php" class="text-gray-700 hover:text-blue-600 transition duration-200">Dự án</a>
+                <a href="tintuc.php" class="text-gray-700 hover:text-blue-600 transition duration-200">Tin tức</a>
                 <a href="#" class="text-gray-700 hover:text-blue-600 transition duration-200">Liên hệ</a>
             </nav>
 
@@ -148,8 +148,8 @@
         
         <nav class="flex flex-col p-4 space-y-1 border-t border-gray-100">
             <a href="#" class="py-3 px-4 text-gray-800 hover:bg-blue-50 hover:text-blue-600 rounded-lg font-medium transition">Trang chủ</a>
-            <a href="#" class="py-3 px-4 text-gray-800 hover:bg-blue-50 hover:text-blue-600 rounded-lg font-medium transition">Dự án</a>
-            <a href="#" class="py-3 px-4 text-gray-800 hover:bg-blue-50 hover:text-blue-600 rounded-lg font-medium transition">Tin tức</a>
+            <a href="duan.php" class="py-3 px-4 text-gray-800 hover:bg-blue-50 hover:text-blue-600 rounded-lg font-medium transition">Dự án</a>
+           <a href="tintuc.php" class="py-3 px-4 text-gray-800 hover:bg-blue-50 hover:text-blue-600 rounded-lg font-medium transition">Tin tức</a>
             <a href="#" class="py-3 px-4 text-gray-800 hover:bg-blue-50 hover:text-blue-600 rounded-lg font-medium transition">Liên hệ</a>
         </nav>
     </div>
@@ -310,7 +310,7 @@
                 <li><a href="trangchu.php?page=gioithieuvesan" class="hover:text-blue-500">Giới thiệu sàn</a></li>
                 <li><a href="trangchu.php?page=danhmucduan" class="hover:text-blue-500">Dự án nổi bật</a></li>
                 <li><a href="trangchu.php?page=kinhnghiemdautu" class="hover:text-blue-500">Kinh nghiệm đầu tư</a></li>
-                <li><a href="trangchu.php?page=blog" class="hover:text-blue-500">Blog & Tin tức</a></li>
+                <li><a href="tintuc.php" class="hover:text-blue-500">Blog & Tin tức</a></li>
             </ul>
         </div>
 
