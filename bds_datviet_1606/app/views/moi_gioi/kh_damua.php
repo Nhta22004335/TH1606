@@ -36,6 +36,25 @@ try {
     $search_term = trim($_GET['search'] ?? '');
     $filter_date = trim($_GET['date'] ?? '');
     
+    // =============================================
+    // === CHÈN LOGIC LƯU LỊCH SỬ TÌM KIẾM TẠI ĐÂY ===
+    // =============================================
+    $id = $_SESSION['id_nguoi_dung'] ?? null; // Lấy ID người dùng từ session
+
+    if (!empty(trim($search_term)) && !empty($id)) {
+        try {
+            $sql_insert = "INSERT INTO lich_su_tim_kiem (id_nguoi_dung, tu_khoa_tim_kiem, thoi_gian_tim) VALUES (?, ?, NOW())";
+            $stmt_insert = $pdo->prepare($sql_insert);
+            $stmt_insert->execute([$id, $search_term]);
+        } catch (PDOException $e) {
+            // Có thể ghi log lỗi vào file
+            // error_log("Lỗi khi lưu lịch sử tìm kiếm: " . $e->getMessage());
+        }
+    }
+    // =============================================
+    // === KẾT THÚC CHÈN ===
+    // =============================================
+
     $where_conditions = ["gd.trang_thai = 'hoantat'"];
     $params = [];
 
@@ -43,15 +62,7 @@ try {
         $where_conditions[] = "(bds.tieu_de ILIKE :search OR info_mua.ho_ten ILIKE :search OR info_ban.ho_ten ILIKE :search)";
         $params[':search'] = "%{$search_term}%";
     }
-if (!empty(trim($search))) {
-        try {
-            $sql = "INSERT INTO lich_su_tim_kiem (id_nguoi_dung, tu_khoa_tim_kiem) VALUES (?, ?)";
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([$id, $search]);
-        } catch (PDOException $e) {
-            // error_log("Lỗi khi lưu lịch sử tìm kiếm: " . $e->getMessage());
-        }
-    }
+
     if (!empty($filter_date)) {
         $where_conditions[] = "gd.ngay_giao_dich::date = :filter_date";
         $params[':filter_date'] = $filter_date;

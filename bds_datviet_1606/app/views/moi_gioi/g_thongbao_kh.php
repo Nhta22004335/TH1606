@@ -1,6 +1,14 @@
 <?php
 // g_thongbao_kh.php
 
+// Khởi tạo session an toàn để lấy ID người dùng
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Lấy ID Admin
+$id_admin = $_SESSION["id_nguoi_dung"] ?? null; 
+
 // Giả lập PDO và dữ liệu nếu cần
 if (!isset($pdo)) {
     class MockPDO {
@@ -20,9 +28,50 @@ if (!isset($pdo)) {
         public function commit() {}
         public function rollBack() {}
     }
-    // Đây chỉ là mock, trong môi trường thực tế, bạn cần include database.php và lấy $pdo thực
     $pdo = new MockPDO();
 }
+
+// =======================================================
+// ====[ LÔ-GIC MỚI: XỬ LÝ YÊU CẦU AJAX ĐỂ LƯU LỊCH SỬ TÌM KIẾM ]====
+// Kiểm tra nếu là yêu cầu POST từ AJAX và có chứa trường 'action' đặc biệt
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'save_search') {
+    $search = trim($_POST['search'] ?? '');
+    
+    // Gán $id_admin thành $id để khớp với yêu cầu của bạn ($id trong context này là $id_admin)
+    $id = $id_admin; 
+
+    // Chỉ thực hiện khi có ID người dùng, từ khóa không rỗng và không phải là MockPDO
+    if ($id && !empty($search) && !($pdo instanceof MockPDO)) {
+        try {
+            // Đây là đoạn code bạn muốn thêm
+            $sql = "INSERT INTO lich_su_tim_kiem (id_nguoi_dung, tu_khoa_tim_kiem) VALUES (?, ?)";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$id, $search]);
+            
+            // Phản hồi thành công
+            header('Content-Type: application/json');
+            http_response_code(200);
+            echo json_encode(['status' => 'search_saved']);
+        } catch (PDOException $e) {
+            // Ghi log lỗi CSDL nhưng không hiển thị cho người dùng cuối
+            error_log("Lỗi khi lưu lịch sử tìm kiếm: " . $e->getMessage());
+            header('Content-Type: application/json');
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => 'Lỗi CSDL khi lưu lịch sử.']);
+        }
+    } else {
+        // Phản hồi khi bị bỏ qua (ví dụ: đang dùng mock hoặc thiếu dữ liệu)
+        header('Content-Type: application/json');
+        http_response_code(200); 
+        echo json_encode(['status' => 'skipped', 'message' => 'Không đủ điều kiện để lưu lịch sử.']);
+    }
+    // DỪNG KỊCH BẢN để chỉ trả về JSON
+    exit; 
+}
+// =======================================================
+// KẾT THÚC LÔ-GIC XỬ LÝ AJAX
+// =======================================================
+
 
 try {
     // Lưu ý: Nếu cột 'ho_ten' trong 'info_nguoi_dung' là null, hàm join sẽ hoạt động, 
@@ -38,12 +87,8 @@ try {
 $success_msg = null;
 $error_msg = null;
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['khach_hang_ids'], $_POST['tieu_de'], $_POST['noi_dung'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['khach_hang_ids'], $_POST['tieu_de'], $_POST['noi_dung']) && !isset($_POST['action'])) {
     
-    // Khởi tạo session nếu chưa có (cần thiết cho $_SESSION["id_nguoi_dung"])
-    if (session_status() === PHP_SESSION_NONE) session_start();
-    $id_admin = $_SESSION["id_nguoi_dung"] ?? null; 
-
     $id_nguoi_dung_arr = $_POST['khach_hang_ids'];
     $tieu_de = trim($_POST['tieu_de']);
     $noi_dung = trim($_POST['noi_dung']);
@@ -54,7 +99,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['khach_hang_ids'], $_P
         $error_msg = "Vui lòng chọn khách hàng và điền đầy đủ tiêu đề, nội dung.";
     } else {
         $loai_thong_bao = 'admin_gửi'; 
-        $pdo->beginTransaction();
+        if (!($pdo instanceof MockPDO)) { 
+            $pdo->beginTransaction();
+        }
         try {
             $sql_insert = "INSERT INTO thong_bao 
                            (id_nguoi_dung, id_nguoi_gui, loai, tieu_de, noi_dung, thoi_gian_gui, trang_thai) 
@@ -63,11 +110,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['khach_hang_ids'], $_P
 
             $total_sent = 0;
             foreach ($id_nguoi_dung_arr as $id_nd) {
-                // Kiểm tra ID có hợp lệ không trước khi gửi
                 if (is_string($id_nd) && !empty($id_nd)) { 
                     $stmt_insert->execute([
-                        ':id_nd' => $id_nd,      // ID người nhận (Khách hàng)
-                        ':id_gui' => $id_admin,      // ID người gửi (Admin)
+                        ':id_nd' => $id_nd,        
+                        ':id_gui' => $id_admin,        
                         ':loai' => $loai_thong_bao,
                         ':tieu_de' => $tieu_de,
                         ':noi_dung' => $noi_dung
@@ -76,27 +122,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['khach_hang_ids'], $_P
                 }
             }
 
-            $pdo->commit();
-            // Đảm bảo chỉ set thông báo thành công ở đây
+            if (!($pdo instanceof MockPDO)) { 
+                $pdo->commit();
+            }
             $success_msg = "Đã gửi thông báo cho $total_sent khách hàng thành công!";
 
         } catch (\PDOException $e) {
-            $pdo->rollBack();
-            // Ghi log và hiển thị lỗi thân thiện
+            if (!($pdo instanceof MockPDO)) { 
+                $pdo->rollBack();
+            }
             error_log("Lỗi CSDL khi gửi thông báo: " . $e->getMessage()); 
             $error_msg = "Lỗi CSDL khi gửi thông báo. Vui lòng kiểm tra log hệ thống hoặc thử lại.";
         }
     }
 }
-if (!empty(trim($search))) {
-        try {
-            $sql = "INSERT INTO lich_su_tim_kiem (id_nguoi_dung, tu_khoa_tim_kiem) VALUES (?, ?)";
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([$id, $search]);
-        } catch (PDOException $e) {
-            // error_log("Lỗi khi lưu lịch sử tìm kiếm: " . $e->getMessage());
-        }
-    }
 ?>
 
 <!DOCTYPE html>
@@ -105,12 +144,6 @@ if (!empty(trim($search))) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gửi Thông báo cho Khách hàng</title>
-    <!-- Thêm Tailwind CSS và Font Awesome Icons (chắc chắn bạn đã load chúng ở file layout chính) -->
-    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
-    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> -->
-    <!-- Thêm Alpine.js -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script> -->
-
     <style>
         [x-cloak] { display: none !important; }
         .card-selected {
@@ -140,7 +173,11 @@ if (!empty(trim($search))) {
         <aside class="lg:col-span-5 xl:col-span-4">
             <div class="bg-white p-5 shadow-lg rounded-lg">
                 <div class="mb-4">
-                    <input type="text" placeholder="Tìm kiếm khách hàng..." x-model="search" class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-sm">
+                    <input type="text" 
+                            placeholder="Tìm kiếm khách hàng..." 
+                            x-model="search" 
+                            x-on:input.debounce.500ms="sendSearchToBackend($event.target.value)"
+                            class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-sm">
                 </div>
                 <div class="flex items-center justify-between border-t border-b border-slate-200 py-2 mb-4">
                     <div class="flex items-center">
@@ -179,7 +216,6 @@ if (!empty(trim($search))) {
                 <h2 class="text-xl font-bold text-slate-800 border-b pb-4 mb-6">Soạn thông báo</h2>
                 
                 <template x-for="id in selectedIds" :key="id">
-                    <!-- Đây là input ẩn quan trọng để gửi danh sách ID khách hàng đến PHP -->
                     <input type="hidden" name="khach_hang_ids[]" :value="id"> 
                 </template>
 
@@ -227,6 +263,34 @@ function notificationApp() {
             ];
         }, $khach_hang)) ?>,
 
+        // HÀM MỚI: Gửi từ khóa tìm kiếm qua AJAX tới CHÍNH FILE NÀY
+        sendSearchToBackend(term) {
+            const trimmedTerm = term.trim();
+            // Chỉ gửi khi từ khóa có ít nhất 2 ký tự (để tránh lưu các ký tự gõ ban đầu)
+            if (trimmedTerm.length < 2) { 
+                return; 
+            }
+            
+            // Gửi yêu cầu POST tới chính file này.
+            fetch(window.location.href, { 
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                // Thêm action=save_search để PHP biết đây là yêu cầu AJAX
+                body: `action=save_search&search=${encodeURIComponent(trimmedTerm)}` 
+            })
+            .then(response => {
+                if (!response.ok) {
+                    // Cảnh báo nếu có lỗi từ server (ví dụ: lỗi CSDL)
+                    console.warn('Lỗi AJAX khi lưu lịch sử:', response.statusText);
+                }
+            })
+            .catch(error => {
+                console.error('Lỗi kết nối khi gửi từ khóa:', error);
+            });
+        },
+
         get filteredCustomers() {
             if (this.search === '') return this.customers;
             const searchLower = this.search.toLowerCase();
@@ -253,11 +317,9 @@ function notificationApp() {
         toggleSelectAll(event) {
             let visibleIds = this.filteredCustomers.map(c => c.id);
             if (event.target.checked) {
-                // Add only those not already selected
                 let newIds = visibleIds.filter(id => !this.selectedIds.includes(id));
                 this.selectedIds.push(...newIds);
             } else {
-                // Remove all visible ids from selection
                 this.selectedIds = this.selectedIds.filter(id => !visibleIds.includes(id));
             }
         }
