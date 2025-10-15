@@ -1,40 +1,7 @@
 <?php
     require_once "../../../config/database.php";
 
-    // --- XỬ LÝ HÀNH ĐỘNG POST (DUYỆT, HOÀN TÁC, XÓA) ---
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['action'])) {
-        $pdo = ketnoicsdl();
-        $id = $_POST['id'];
-        $action = $_POST['action'];
-        $message = "Hành động không hợp lệ.";
-        $msg_type = 'error';
-
-        try {
-            if ($action === 'duyet' || $action === 'hoantac') {
-                $new_status = ($action === 'duyet') ? 'daduyet' : 'chuaduyet';
-                $stmt = $pdo->prepare("UPDATE bat_dong_san SET trang_thai = :trang_thai WHERE id = :id");
-                $stmt->execute([':trang_thai' => $new_status, ':id' => $id]);
-                $message = "Cập nhật trạng thái thành công!";
-                $msg_type = 'success';
-
-            } elseif ($action === 'xoa') {
-                $stmt = $pdo->prepare("DELETE FROM bat_dong_san WHERE id = :id");
-                $stmt->execute([':id' => $id]);
-                $message = ($stmt->rowCount() > 0) ? "Đã xóa tin đăng thành công!" : "Không tìm thấy tin đăng để xóa.";
-                $msg_type = 'success';
-            }
-        } catch (PDOException $e) {
-            $message = "Lỗi cơ sở dữ liệu: " . $e->getMessage();
-            $msg_type = 'error';
-        }
-
-        // Chuyển hướng chung (không còn `updated_id`)
-        $redirect_url = "trangchu.php?page=ds_sanpham_bds&message=" . urlencode($message) . "&msg_type=" . $msg_type;
-        echo "<script>window.location.href = '$redirect_url';</script>";
-        exit();
-    }
-
-    // --- CÁC HÀM HELPER VÀ LOGIC LẤY DỮ LIỆU ---
+    // --- CÁC HÀM HELPER VÀ LOGIC LẤY DỮ LIỆU (Giữ nguyên) ---
     function formatPrice($price) {
         if ($price >= 1000000000) return round($price / 1000000000, 2) . ' tỷ';
         if ($price >= 1000000) return round($price / 1000000, 2) . ' triệu';
@@ -54,10 +21,20 @@
 
     $sql = "SELECT id, tieu_de, gia, dien_tich, dia_chi, ngay_dang, trang_thai FROM bat_dong_san";
     $params = [];
+
+    // --- THAY ĐỔI CHÍNH NẰM Ở ĐÂY ---
     if (!empty($search)) {
-        $sql .= " WHERE tieu_de ILIKE :search OR dia_chi ILIKE :search";
+        // 1. Nối các cột cần tìm kiếm thành một chuỗi duy nhất
+        $searchable_columns = "tieu_de || ' ' || dia_chi";
+        
+        // 2. Áp dụng unaccent và replace cho cả cột và từ khóa tìm kiếm
+        // Điều này giúp tìm kiếm không phân biệt dấu, khoảng trắng và chữ hoa/thường
+        $sql .= " WHERE REPLACE(unaccent({$searchable_columns}), ' ', '') ILIKE REPLACE(unaccent(:search), ' ', '')";
+        
         $params[':search'] = '%' . $search . '%';
     }
+    // --- KẾT THÚC THAY ĐỔI ---
+    
     $sql .= " ORDER BY ngay_dang DESC, id DESC";
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
@@ -72,12 +49,6 @@
 </head>
 <body class="p-4 md:p-6">
     <div class="max-w-7xl mx-auto">
-        <?php if (!empty($_GET['message'])): ?>
-            <div id="alertBox" class="p-4 rounded-md border bg-green-50 border-green-200 text-green-800 mb-4">
-                <?= htmlspecialchars(urldecode($_GET['message'])) ?>
-            </div>
-        <?php endif; ?>
-
         <header class="mb-6 border-b pb-4">
             <h1 class="text-2xl font-bold text-gray-800">Quản lý Bất động sản</h1>
             <p class="text-sm mt-2 text-gray-500">Xem, tìm kiếm và quản lý các tin đăng bất động sản.</p>
@@ -87,7 +58,7 @@
             <input type="hidden" name="page" value="ds_sanpham_bds">
             <div class="relative w-full md:w-72">
                 <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                <input type="search" id="search-input" name="search" class="bg-white outline-none border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 p-2" 
+                <input type="text" id="search-input" name="search" class="bg-white outline-none border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 p-2" 
                        placeholder="Tìm kiếm tin đăng..." value="<?= htmlspecialchars($search) ?>">
             </div>
             <button type="submit" class="ml-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">Tìm</button>
@@ -106,50 +77,36 @@
                             <th class="p-3 text-center text-xs font-bold text-gray-500 uppercase">Hành động</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200">
+                    <tbody id="product-table-body" class="divide-y divide-gray-200">
                         <?php if (empty($products)): ?>
                             <tr><td colspan="6" class="p-8 text-center text-gray-500">Không tìm thấy bất động sản nào.</td></tr>
                         <?php else: ?>
                             <?php foreach($products as $p): ?>
-                                <tr class="hover:bg-slate-50 transition duration-150">
+                                <tr id="product-row-<?= $p['id'] ?>" class="hover:bg-slate-50 transition duration-150">
                                     <td class="p-4">
                                         <p class="font-medium text-sm text-gray-900 line-clamp-1"><?= htmlspecialchars($p['tieu_de']) ?></p>
                                         <p class="text-xs text-gray-500 line-clamp-1"><?= htmlspecialchars($p['dia_chi']) ?></p>
                                     </td>
                                     <td class="p-4 font-semibold text-red-600 text-sm"><?= formatPrice($p['gia']) ?></td>
                                     <td class="p-4 text-gray-700 text-sm"><?= htmlspecialchars($p['dien_tich']) ?> m²</td>
-                                    <td class="p-4">
+                                    <td class="p-4 status-cell">
                                         <?php $status_info = getStatusInfo($p["trang_thai"]); ?>
                                         <span class="px-2.5 py-1 text-xs font-semibold rounded-full <?= $status_info['classes'] ?>">
                                             <?= $status_info['text'] ?>
                                         </span>
                                     </td>
                                     <td class="p-4 text-gray-500 text-sm"><?= date("d/m/Y", strtotime($p['ngay_dang'])) ?></td>
-                                    <td class="p-4">
+                                    <td class="p-4 actions-cell">
                                         <div class="flex justify-center items-center gap-4">
-                                            
                                             <?php if ($p['trang_thai'] === 'chuaduyet'): ?>
-                                                <form method="POST" onsubmit="return confirm('Bạn có chắc muốn duyệt tin này?');" class="m-0">
-                                                    <input type="hidden" name="id" value="<?= $p['id'] ?>">
-                                                    <input type="hidden" name="action" value="duyet">
-                                                    <button type="submit" class="text-green-600 hover:text-green-800 text-sm font-medium">Duyệt</button>
-                                                </form>
+                                                <button type="button" class="action-btn text-green-600 hover:text-green-800 text-sm font-medium" data-id="<?= $p['id'] ?>" data-action="duyet">Duyệt</button>
                                             <?php elseif ($p['trang_thai'] === 'daduyet'): ?>
-                                                <form method="POST" onsubmit="return confirm('Bạn có chắc muốn hoàn tác? Tin này sẽ trở về trạng thái Chờ duyệt.');" class="m-0">
-                                                    <input type="hidden" name="id" value="<?= $p['id'] ?>">
-                                                    <input type="hidden" name="action" value="hoantac">
-                                                    <button type="submit" class="text-yellow-600 hover:text-yellow-800 text-sm font-medium">Hoàn tác</button>
-                                                </form>
+                                                <button type="button" class="action-btn text-yellow-600 hover:text-yellow-800 text-sm font-medium" data-id="<?= $p['id'] ?>" data-action="hoantac">Hoàn tác</button>
                                             <?php endif; ?>
                                             
                                             <a href="trangchu.php?page=ct_sanpham&id=<?= $p['id'] ?>" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Chi tiết</a>
                                             
-                                            <form method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa tin này? Hành động này không thể hoàn tác.');" class="m-0">
-                                                <input type="hidden" name="id" value="<?= $p['id'] ?>">
-                                                <input type="hidden" name="action" value="xoa">
-                                                <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-medium">Xóa</button>
-                                            </form>
-
+                                            <button type="button" class="action-btn text-red-600 hover:text-red-800 text-sm font-medium" data-id="<?= $p['id'] ?>" data-action="xoa">Xóa</button>
                                         </div>
                                     </td>
                                 </tr>
@@ -162,29 +119,85 @@
     </div>
 
     <script>
-        document.getElementById('search-form').addEventListener('submit', function(event) {
-            event.preventDefault();
+    document.addEventListener('DOMContentLoaded', function() {
+
+        function submitSearch() {
             const searchValue = document.getElementById('search-input').value.trim();
-            const url = new URL(window.location.href);
-            url.searchParams.set('search', searchValue);
-            window.location.href = url.toString();
+
+            const encodedSearchValue = encodeURIComponent(searchValue.trim());
+
+            const newUrl = `trangchu.php?page=ds_sanpham_bds&search=${encodedSearchValue}`;
+            const trove = `trangchu.php?page=ds_sanpham_bds`;
+            if (searchValue) {
+                window.location.href = newUrl;          
+            } else {
+                window.location.href = trove;
+            }
+        }
+
+        document.getElementById('search-input').addEventListener('blur', function() {
+            submitSearch(); // thực hiện tìm kiếm khi rời khỏi ô input
         });
 
-        // Tự động ẩn thông báo và làm sạch URL
-        const alertBox = document.getElementById("alertBox");
-        if (alertBox) {
-            setTimeout(() => {
-                alertBox.style.transition = 'opacity 0.5s';
-                alertBox.style.opacity = '0';
-                setTimeout(() => alertBox.remove(), 500);
+        // Xử lý tìm kiếm
+        document.getElementById('search-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            submitSearch();
+        });
+
+        // Xử lý các hành động Duyệt, Hoàn tác, Xóa
+        const productTableBody = document.getElementById('product-table-body');
+        const apiUrl = '../../models/cn_trangthai_bds.php'; // Đường dẫn tuyệt đối đến file API
+
+        if (productTableBody) {
+            productTableBody.addEventListener('click', async function(event) {
+                const targetButton = event.target.closest('.action-btn');
+                if (!targetButton) return;
+
+                const id = targetButton.dataset.id;
+                const action = targetButton.dataset.action;
                 
-                const url = new URL(window.location.href);
-                url.searchParams.delete('message');
-                url.searchParams.delete('msg_type');
-                // Không cần xóa updated_id nữa
-                history.replaceState(null, '', url.toString());
-            }, 3000);
+                const messages = {
+                    duyet: 'Bạn có chắc muốn duyệt tin này?',
+                    hoantac: 'Bạn có chắc muốn hoàn tác? Tin này sẽ trở về trạng thái Chờ duyệt.',
+                    xoa: 'Bạn có chắc chắn muốn xóa tin này? Hành động này không thể hoàn tác.'
+                };
+
+                if (!confirm(messages[action] || 'Bạn có chắc?')) return;
+
+                const formData = new FormData();
+                formData.append('id', id);
+                formData.append('action', action);
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    if (!response.ok) throw new Error('Yêu cầu mạng thất bại.');
+                    
+                    const result = await response.json();
+
+                    if (result.status === 'success') {
+                        const row = document.getElementById(`product-row-${id}`);
+                        if (action === 'xoa') {
+                            row.style.transition = 'opacity 0.3s';
+                            row.style.opacity = '0';
+                            setTimeout(() => row.remove(), 300);
+                        } else {
+                            row.querySelector('.status-cell').innerHTML = result.newStatusHtml;
+                            row.querySelector('.actions-cell').innerHTML = result.newActionsHtml;
+                        }
+                    } else {
+                        alert('Lỗi: ' + result.message);
+                    }
+                } catch (error) {
+                    console.error('Lỗi Fetch:', error);
+                    alert('Đã xảy ra lỗi khi gửi yêu cầu.');
+                }
+            });
         }
+    });
     </script>
 </body>
 </html>
