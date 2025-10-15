@@ -120,9 +120,10 @@
             ]
         ],
         [
-            'title' => 'Quản lý Vi phạm',
+            'title' => 'Quản lý ...',
             'icon' => 'fas fa-ban',
-            'link' => 'trangchu.php?page=ds_vipham',
+            // 'link' => 'trangchu.php?page=ds_vipham',
+            'link' => '#',
             'roles' => ['quantri'],
         ],
     ];

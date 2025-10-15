@@ -182,30 +182,84 @@
     });
     
     // Gửi thông báo
-    document.getElementById("sendBtn").addEventListener("click", () => {
-        const title = document.getElementById("title").value.trim();
-        const content = document.getElementById("content").value.trim();
-        const method = document.querySelector("input[name='sendMethod']:checked");
+document.getElementById("sendBtn").addEventListener("click", () => {
+    const sendBtn = document.getElementById("sendBtn");
+    const title = document.getElementById("title").value.trim();
+    const content = document.getElementById("content").value.trim();
+    const methodElement = document.querySelector("input[name='sendMethod']:checked");
 
-        if (!title || !content) {
-            alert("Vui lòng nhập đầy đủ tiêu đề và nội dung!");
-            return;
-        }
-        if (!method) {
-            alert("Vui lòng chọn hình thức gửi (Email hoặc Chat)!");
-            return;
-        }
-        if (!selectAll.checked && chosenUsers.length === 0) {
-            alert("Vui lòng chọn ít nhất một tài khoản hoặc chọn 'Tất cả tài khoản'!");
-            return;
-        }
+    // 1. Kiểm tra điều kiện bắt buộc
+    if (!title || !content) {
+        alert("Vui lòng nhập đầy đủ tiêu đề và nội dung!");
+        return;
+    }
+    if (!methodElement) {
+        alert("Vui lòng chọn hình thức gửi (Email hoặc Chat)!");
+        return;
+    }
+    if (!selectAll.checked && chosenUsers.length === 0) {
+        alert("Vui lòng chọn ít nhất một tài khoản hoặc chọn 'Tất cả tài khoản'!");
+        return;
+    }
 
-        const recipients = selectAll.checked ? "Tất cả người dùng" : chosenUsers.map(u => u.name).join(", ");
-        const methodDisplay = method.value === 'email' ? 'Email' : 'Hộp thoại chat';
+    const sendMethod = methodElement.value; // 'email' hoặc 'chat'
+    const recipients = selectAll.checked 
+        ? users.map(u => u.id) // Gửi ID của tất cả người dùng
+        : chosenUsers.map(u => u.id); // Gửi ID của những người dùng được chọn
 
-        // Prepare the final alert message
-        alert(`Gửi thành công!\n\n Người nhận: ${recipients}\nTiêu đề: ${title}\nHình thức: ${methodDisplay}\n\nNội dung đã gửi: "${content.substring(0, 50)}..."`);
+    // 2. Chuẩn bị dữ liệu gửi đi
+    const postData = {
+        title: title,
+        content: content,
+        recipients_id: recipients,
+        send_to_all: selectAll.checked
+    };
+
+    // 3. Xác định URL backend tương ứng
+    const apiUrl = (sendMethod === 'email') 
+        ? '../../models/g_thongbaoemail.php' 
+        : '../../models/g_thongbaoht.php'; // Giả định thư mục models chứa file xử lý
+
+    // 4. Gửi yêu cầu Fetch API
+    sendBtn.disabled = true;
+    sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang gửi...';
+
+    fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(postData),
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Lỗi mạng hoặc server không phản hồi 200');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.status === 'success') {
+            alert(`Gửi thông báo qua ${methodElement.value.toUpperCase()} thành công!\nTổng cộng: ${data.sent_count} người nhận.`);
+            // Xóa nội dung sau khi gửi thành công
+            document.getElementById("title").value = '';
+            document.getElementById("content").value = '';
+            chosenUsers = [];
+            selectAll.checked = false;
+            userSelectArea.style.display = "block";
+            renderSelectedUsers();
+        } else {
+            alert(`Lỗi khi gửi thông báo: ${data.message}`);
+        }
+    })
+    .catch(error => {
+        console.error('Lỗi khi gửi:', error);
+        alert('Đã xảy ra lỗi không xác định khi gửi thông báo. Vui lòng kiểm tra console.');
+    })
+    .finally(() => {
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Gửi thông báo';
     });
+});
     
     // Initial render
     renderSelectedUsers();
