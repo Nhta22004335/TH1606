@@ -36,6 +36,25 @@ try {
     $search_term = trim($_GET['search'] ?? '');
     $filter_date = trim($_GET['date'] ?? '');
     
+    // =============================================
+    // === CHÈN LOGIC LƯU LỊCH SỬ TÌM KIẾM TẠI ĐÂY ===
+    // =============================================
+    $id = $_SESSION['id_nguoi_dung'] ?? null; // Lấy ID người dùng từ session
+
+    if (!empty(trim($search_term)) && !empty($id)) {
+        try {
+            $sql_insert = "INSERT INTO lich_su_tim_kiem (id_nguoi_dung, tu_khoa_tim_kiem, thoi_gian_tim) VALUES (?, ?, NOW())";
+            $stmt_insert = $pdo->prepare($sql_insert);
+            $stmt_insert->execute([$id, $search_term]);
+        } catch (PDOException $e) {
+            // Có thể ghi log lỗi vào file
+            // error_log("Lỗi khi lưu lịch sử tìm kiếm: " . $e->getMessage());
+        }
+    }
+    // =============================================
+    // === KẾT THÚC CHÈN ===
+    // =============================================
+
     $where_conditions = ["gd.trang_thai = 'hoantat'"];
     $params = [];
 

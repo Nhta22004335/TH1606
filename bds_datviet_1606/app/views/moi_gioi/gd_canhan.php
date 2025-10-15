@@ -46,7 +46,15 @@ try {
     error_log("Lỗi CSDL: " . $e->getMessage());
     $giaodich = [];
 }
-
+if (!empty(trim($search))) {
+        try {
+            $sql = "INSERT INTO lich_su_tim_kiem (id_nguoi_dung, tu_khoa_tim_kiem) VALUES (?, ?)";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$id, $search]);
+        } catch (PDOException $e) {
+            // error_log("Lỗi khi lưu lịch sử tìm kiếm: " . $e->getMessage());
+        }
+    }
 // THÊM MỚI: Mảng ánh xạ trạng thái để code gọn gàng và dễ bảo trì
 $status_map = [
     'choxuly'  => ['text' => 'Chờ xử lý', 'class' => 'bg-yellow-100 text-yellow-800'],

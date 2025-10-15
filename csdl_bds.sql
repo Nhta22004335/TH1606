@@ -99,9 +99,10 @@ CREATE TABLE IF NOT EXISTS lich_su_xac_thuc (
     user_agent TEXT,
     ghi_chu TEXT,
     CONSTRAINT fk_lich_su_xac_thuc_nguoi_dung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
-    CONSTRAINT chk_lich_su_xac_thuc_loai_su_kien CHECK (loai_su_kien IN ('dangnhap', 'dangxuat', 'doimatkhau', 'quenmatkhau')),
     CONSTRAINT chk_lich_su_xac_thuc_time_range CHECK (thoi_gian_ket_thuc IS NULL OR thoi_gian_ket_thuc >= thoi_gian_bat_dau)
 );
+
+select * from lich_su_xac_thuc
 
 -- 7. Bảng bat_dong_san (Lưu thống tin các sản phẩm bất động sản)
 CREATE TABLE IF NOT EXISTS bat_dong_san (
@@ -356,7 +357,6 @@ CREATE TABLE lich_su_tim_kiem (
     thoi_gian_tim_kiem TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-select * from lich_su_tim_kiem
 
 CREATE TABLE lich_su_xem_bds (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

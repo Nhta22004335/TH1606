@@ -12,7 +12,11 @@
 
     foreach ($keywords as $i => $word) {
         if (!empty($word)) {
-            $where[] = "REPLACE(unaccent(LOWER(i.ho_ten)), ' ', '') ILIKE REPLACE(unaccent(:kw$i), ' ', '')";
+            $where[] = "(REPLACE(unaccent(LOWER(i.ho_ten)), ' ', '') ILIKE REPLACE(unaccent(:kw$i), ' ', '')
+                OR unaccent(LOWER(nd.ten_dang_nhap)) ILIKE unaccent(:kw$i)
+                OR unaccent(LOWER(nd.email)) ILIKE unaccent(:kw$i)
+                OR unaccent(LOWER(nd.so_dt)) ILIKE unaccent(:kw$i)
+            )";
             $params[":kw$i"] = "%$word%";
         }
     }
@@ -79,7 +83,7 @@
             <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                 <i class="fas fa-search text-gray-400"></i>
             </div>
-            <input type="search" name="search" id="search-input" 
+            <input type="text" name="search" id="search-input" 
                 class="bg-white outline-none border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 p-2" 
                 placeholder="Tìm kiếm..." 
                 value="<?= htmlspecialchars($search) ?>">
@@ -135,7 +139,9 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border <?= $statusColors[$u['trang_thai']] ?>">
+                                <span 
+                                    class="status-badge px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border <?= $statusColors[$u['trang_thai']] ?>"
+                                    data-userid="<?= $u['id'] ?>"> 
                                     <?= htmlspecialchars($labeltrangthai[$u['trang_thai']]) ?>
                                 </span>
                             </td>
@@ -148,11 +154,17 @@
                                     <i class="fas fa-eye text-sm"></i>
                                 </a>
                                 <?php if ($u['trang_thai'] === 'danghoatdong'): ?>
-                                    <a href="trangchu.php?page=../../models/cn_trangthai_nd&id=<?= $u['id'] ?>&new_status=khoa" class="text-red-600 hover:text-red-900 ml-4">
+                                    <a href="javascript:void(0);" 
+                                    class="text-red-600 hover:text-red-900 ml-4 toggle-status-btn"
+                                    data-id="<?= $u['id'] ?>"
+                                    data-status="khoa">
                                         <i class="fas fa-lock text-sm"></i>
                                     </a>
                                 <?php else: ?>
-                                    <a href="trangchu.php?page=../../models/cn_trangthai_nd&id=<?= $u['id'] ?>&new_status=danghoatdong" class="text-green-600 hover:text-green-900 ml-4">
+                                    <a href="javascript:void(0);"
+                                    class="text-green-600 hover:text-green-900 ml-4 toggle-status-btn"
+                                    data-id="<?= $u['id'] ?>"
+                                    data-status="danghoatdong">
                                         <i class="fas fa-check-circle text-sm"></i>
                                     </a>
                                 <?php endif; ?>
@@ -194,6 +206,79 @@
         // 4. Gán sự kiện bỏ focus cho ô tìm kiếm
         searchInput.addEventListener('blur', function() {
             submitSearch(); // thực hiện tìm kiếm khi rời khỏi ô input
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const statusButtons = document.querySelectorAll('.toggle-status-btn');
+
+            statusButtons.forEach(button => {
+                button.addEventListener('click', async function(e) {
+                    if (!confirm('Bạn có chắc chắn muốn thực hiện thao tác này?')) {
+                        return;
+                    }
+                    e.preventDefault();
+
+                    const userId = this.dataset.id;
+                    const newStatus = this.dataset.status;
+
+                    const formData = new FormData();
+                    formData.append('id', userId);
+                    formData.append('new_status', newStatus);
+
+                    try {
+                        const response = await fetch('../../models/cn_trangthai_nd.php', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`Lỗi HTTP! Trạng thái: ${response.status}`);
+                        }
+
+                        const result = await response.json();
+
+                        if (result.status === 'success') {
+                            // ----- PHẦN 1: CẬP NHẬT ICON VÀ NÚT BẤM (như cũ) -----
+                            const icon = this.querySelector('i');
+                            if (result.newState === 'danghoatdong') {
+                                this.classList.remove('text-green-600', 'hover:text-green-900');
+                                this.classList.add('text-red-600', 'hover:text-red-900');
+                                icon.classList.remove('fa-check-circle');
+                                icon.classList.add('fa-lock');
+                                this.dataset.status = 'khoa';
+                            } else {
+                                this.classList.remove('text-red-600', 'hover:text-red-900');
+                                this.classList.add('text-green-600', 'hover:text-green-900');
+                                icon.classList.remove('fa-lock');
+                                icon.classList.add('fa-check-circle');
+                                this.dataset.status = 'danghoatdong';
+                            }
+
+                            // ----- PHẦN 2: CẬP NHẬT SPAN TRẠNG THÁI (phần mới) ----- ✨
+                            // Tìm span trạng thái tương ứng dựa trên data-userid
+                            const statusSpan = document.querySelector(`.status-badge[data-userid="${userId}"]`);
+
+                            if (statusSpan) {
+                                // 1. Cập nhật nội dung text
+                                statusSpan.textContent = result.newLabel;
+                                
+                                // 2. Cập nhật class màu sắc
+                                // Định nghĩa các class cơ bản không đổi
+                                const baseClasses = 'status-badge px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border';
+                                // Gán lại toàn bộ class = class cơ bản + class màu mới từ server
+                                statusSpan.className = `${baseClasses} ${result.newClasses}`;
+                            }
+
+                        } else {
+                            alert('Lỗi: ' + result.message);
+                        }
+
+                    } catch (error) {
+                        console.error('Không thể thực hiện yêu cầu:', error);
+                        alert('Đã xảy ra lỗi kết nối. Vui lòng thử lại.');
+                    }
+                });
+            });
         });
     </script>
 </body>

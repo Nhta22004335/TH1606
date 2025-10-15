@@ -50,6 +50,15 @@ function format_day_of_week($date_string) {
     $days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
     return $days[date('w', strtotime($date_string))];
 }
+if (!empty(trim($search))) {
+        try {
+            $sql = "INSERT INTO lich_su_tim_kiem (id_nguoi_dung, tu_khoa_tim_kiem) VALUES (?, ?)";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$id, $search]);
+        } catch (PDOException $e) {
+            // error_log("Lỗi khi lưu lịch sử tìm kiếm: " . $e->getMessage());
+        }
+    }
 ?>
 <!DOCTYPE html>
 <html lang="vi" class="h-full bg-slate-50">

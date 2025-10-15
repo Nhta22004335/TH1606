@@ -16,12 +16,17 @@
         }
     }
 
-    $stmt = $pdo->prepare("
-        UPDATE lich_su_xac_thuc
-        SET thoi_gian_ket_thuc = CURRENT_TIMESTAMP
-        WHERE id = :id
+    $stmt = $pdo->prepare("INSERT INTO lich_su_xac_thuc (id_nguoi_dung, loai_su_kien, dia_chi_ip, user_agent, ghi_chu)
+             VALUES (:id_nguoi_dung, :loai_su_kien, :dia_chi_ip, :user_agent, :ghi_chu)
     ");
-    $stmt->execute([':id' => $_SESSION['id_lich_su']]);
+
+    $stmt->execute([
+            ':id_nguoi_dung' => $id,
+            ':loai_su_kien'  => 'dangxuat',
+            ':dia_chi_ip'    => $_SERVER['REMOTE_ADDR'] ?? 'UNKNOWN',
+            ':user_agent'    => $_SERVER['HTTP_USER_AGENT'] ?? 'UNKNOWN',
+            ':ghi_chu'       => 'Đăng xuất thành công!'
+        ]);
     unset($_SESSION['id_lich_su']);
 
     $_SESSION = [];

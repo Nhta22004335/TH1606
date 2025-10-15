@@ -13,6 +13,43 @@ $pdo = ketnoicsdl();
 
 $id_khach = $_SESSION['id_nguoi_dung'];
 
+// =======================================================
+// ====[ VỊ TRÍ CHÈN: XỬ LÝ YÊU CẦU AJAX ĐỂ LƯU LỊCH SỬ TÌM KIẾM ]====
+// =======================================================
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'save_search') {
+    $search = trim($_POST['search'] ?? '');
+    
+    // ID người dùng là $id_khach
+    $id = $id_khach; 
+
+    // Chỉ thực hiện khi có ID người dùng và từ khóa không rỗng
+    if ($id && !empty($search)) { 
+        try {
+            // Lưu ý: Đảm bảo bảng lich_su_tim_kiem tồn tại và có cột id_nguoi_dung, tu_khoa_tim_kiem
+            $sql = "INSERT INTO lich_su_tim_kiem (id_nguoi_dung, tu_khoa_tim_kiem, thoi_gian_tim) VALUES (?, ?, NOW())";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$id, $search]);
+            
+            // Phản hồi JSON và thoát
+            header('Content-Type: application/json');
+            http_response_code(200);
+            echo json_encode(['status' => 'search_saved']);
+        } catch (PDOException $e) {
+            error_log("Lỗi khi lưu lịch sử tìm kiếm (Khách hàng): " . $e->getMessage());
+            header('Content-Type: application/json');
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => 'Lỗi CSDL khi lưu lịch sử.']);
+        }
+    } else {
+        header('Content-Type: application/json');
+        http_response_code(200); 
+        echo json_encode(['status' => 'skipped', 'message' => 'Không đủ điều kiện để lưu lịch sử.']);
+    }
+    // DỪNG KỊCH BẢN
+    exit; 
+}
+// =======================================================
+
 // --- CẬP NHẬT TRUY VẤN: Thêm cột `anh_tin` và `luot_xem` để giao diện đẹp hơn ---
 $stmt = $pdo->prepare("SELECT id, tieu_de, mo_ta, chuyen_muc, trang_thai, ngay_dang, anh_tin, luot_xem
                        FROM tin_tuc
@@ -49,6 +86,8 @@ $stats = [
     'pending' => count(array_filter($tin_dang, fn($p) => $p['trang_thai'] === 'choduyet')),
     'total_views' => array_sum(array_column($tin_dang, 'luot_xem')),
 ];
+
+
 ?>
 <!DOCTYPE html>
 <html lang="vi" class="h-full bg-slate-50">

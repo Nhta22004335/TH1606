@@ -22,6 +22,24 @@ if (!$id_moigioi) {
 
 // --- LÀM SẠCH ĐẦU VÀO: Lấy và chuẩn hóa các tham số filter ---
 $search_term = trim($_GET['search'] ?? '');
+
+// --- THÊM ĐOẠN CODE LƯU LỊCH SỬ TÌM KIẾM ---
+$search = $search_term; // Sử dụng biến đã chuẩn hóa
+$id = $id_moigioi; // Sử dụng ID người dùng đã được xác thực
+if (!empty(trim($search))) {
+    try {
+        $sql_history = "INSERT INTO lich_su_tim_kiem (id_nguoi_dung, tu_khoa_tim_kiem) VALUES (?, ?)";
+        $stmt_history = $pdo->prepare($sql_history);
+        $stmt_history->execute([$id, $search]);
+    } catch (PDOException $e) {
+        // error_log("Lỗi khi lưu lịch sử tìm kiếm: " . $e->getMessage());
+        
+    }
+}
+
+
+
+
 $filter_status = trim($_GET['trang_thai'] ?? 'tat_ca');
 
 // Whitelist: Chỉ cho phép các giá trị trạng thái hợp lệ
