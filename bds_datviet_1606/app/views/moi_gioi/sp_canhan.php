@@ -54,7 +54,15 @@ if ($search_term !== '') {
     $sql .= " AND (b.tieu_de ILIKE :search OR b.khu_vuc ILIKE :search OR b.dia_chi ILIKE :search)";
     $params[':search'] = "%$search_term%";
 }
-
+if (!empty(trim($search))) {
+        try {
+            $sql = "INSERT INTO lich_su_tim_kiem (id_nguoi_dung, tu_khoa_tim_kiem) VALUES (?, ?)";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$id, $search]);
+        } catch (PDOException $e) {
+            // error_log("Lỗi khi lưu lịch sử tìm kiếm: " . $e->getMessage());
+        }
+    }
 // Thêm điều kiện lọc trạng thái nếu có
 if ($filter_status !== 'tat_ca') {
     $sql .= " AND b.trang_thai = :trang_thai";
