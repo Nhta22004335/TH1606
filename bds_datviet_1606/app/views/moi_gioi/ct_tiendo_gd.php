@@ -5,7 +5,7 @@
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
-require_once "../../../config/database.php";
+
 
 $pdo = ketnoicsdl();
 $id_giao_dich = $_GET['id'] ?? null;
