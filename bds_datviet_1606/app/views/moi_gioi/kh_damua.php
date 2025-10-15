@@ -43,7 +43,15 @@ try {
         $where_conditions[] = "(bds.tieu_de ILIKE :search OR info_mua.ho_ten ILIKE :search OR info_ban.ho_ten ILIKE :search)";
         $params[':search'] = "%{$search_term}%";
     }
-
+if (!empty(trim($search))) {
+        try {
+            $sql = "INSERT INTO lich_su_tim_kiem (id_nguoi_dung, tu_khoa_tim_kiem) VALUES (?, ?)";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$id, $search]);
+        } catch (PDOException $e) {
+            // error_log("Lỗi khi lưu lịch sử tìm kiếm: " . $e->getMessage());
+        }
+    }
     if (!empty($filter_date)) {
         $where_conditions[] = "gd.ngay_giao_dich::date = :filter_date";
         $params[':filter_date'] = $filter_date;

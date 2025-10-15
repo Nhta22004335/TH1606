@@ -46,6 +46,15 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $bieumau_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+if (!empty(trim($search))) {
+        try {
+            $sql = "INSERT INTO lich_su_tim_kiem (id_nguoi_dung, tu_khoa_tim_kiem) VALUES (?, ?)";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$id, $search]);
+        } catch (PDOException $e) {
+            // error_log("Lỗi khi lưu lịch sử tìm kiếm: " . $e->getMessage());
+        }
+    }
 ?>
 <!DOCTYPE html>
 <html lang="vi" class="bg-gray-50">
