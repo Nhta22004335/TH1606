@@ -2,6 +2,7 @@
     require_once "../../../config/database.php";
     $pdo = ketnoicsdl();
 
+    // Hàm tiện ích để lấy class màu cho badge
     function get_status_badge($status) {
         $styles = [
             'dangnhap'    => 'bg-green-100 text-green-800',
@@ -13,16 +14,19 @@
         return $styles[$status] ?? $styles['default'];
     }
 
+    // --- Xử lý Phân trang và Lấy dữ liệu ---
     $limit  = 10;
     $page   = isset($_GET['p']) && is_numeric($_GET['p']) ? intval($_GET['p']) : 1;
     $offset = ($page - 1) * $limit;
 
+    // --- Xử lý Xuất file CSV ---
     if (isset($_GET['export']) && $_GET['export'] === 'csv') {
         header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename=lich_su_xac_thuc.csv');
         $output = fopen('php://output', 'w');
-        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF)); // BOM for UTF-8 Excel compatibility
         fputcsv($output, ['Người dùng', 'Loại sự kiện', 'Thời gian bắt đầu', 'Thời gian kết thúc', 'Địa chỉ IP', 'User Agent', 'Ghi chú']);
+        
         $stmt = $pdo->query("SELECT nd.ten_dang_nhap, lsxt.loai_su_kien, lsxt.thoi_gian_bat_dau, lsxt.thoi_gian_ket_thuc, lsxt.dia_chi_ip, lsxt.user_agent, lsxt.ghi_chu FROM lich_su_xac_thuc lsxt JOIN nguoi_dung nd ON nd.id = lsxt.id_nguoi_dung ORDER BY lsxt.thoi_gian_bat_dau DESC");
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             fputcsv($output, $row);
@@ -31,9 +35,8 @@
         exit;
     }
 
+    // --- Xử lý Tìm kiếm ---
     $search = $_GET['search'] ?? '';
-    $filters = isset($_GET['boloc']) ? json_decode($_GET['boloc'], true) : [];
-
     $baseSql = "FROM lich_su_xac_thuc lsxt JOIN nguoi_dung nd ON nd.id = lsxt.id_nguoi_dung";
     $whereClauses = [];
     $params = [];
@@ -41,10 +44,6 @@
     if ($search !== '') {
         $whereClauses[] = "nd.ten_dang_nhap ILIKE :search";
         $params[':search'] = "%$search%";
-    }
-    if (!empty($filters['loaisukien'])) {
-        $whereClauses[] = "lsxt.loai_su_kien = :loaisukien";
-        $params[':loaisukien'] = $filters['loaisukien'];
     }
 
     $sql = "SELECT lsxt.*, nd.ten_dang_nhap " . $baseSql;
@@ -55,11 +54,13 @@
         $countSql .= " WHERE " . implode(' AND ', $whereClauses);
     }
 
+    // --- Lấy tổng số bản ghi để phân trang ---
     $totalStmt = $pdo->prepare($countSql);
     $totalStmt->execute($params);
     $totalRows = $totalStmt->fetchColumn();
     $totalPages = ceil($totalRows / $limit);
 
+    // --- Lấy dữ liệu hiển thị cho trang hiện tại ---
     $sql .= " ORDER BY lsxt.thoi_gian_bat_dau DESC LIMIT :limit OFFSET :offset";
     $stmt = $pdo->prepare($sql);
     
@@ -70,28 +71,6 @@
     $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
     $stmt->execute();
     $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        if (isset($_POST['delete_from'], $_POST['delete_to'])) {
-            $from = $_POST['delete_from'];
-            $to   = $_POST['delete_to'];
-            if ($from && $to) {
-                $stmt = $pdo->prepare("DELETE FROM lich_su_xac_thuc WHERE thoi_gian_bat_dau BETWEEN :from AND :to");
-                $stmt->execute([':from' => $from, ':to' => $to]);
-                echo "<script>alert('Xóa thành công!')</script>";
-            } else {
-                echo "<script>alert('Vui lòng chọn đầy đủ khoảng thời gian.')</script>";
-            }
-        } elseif (isset($_POST['delete_id'])) {
-            $id = $_POST['delete_id'];
-            $stmt = $pdo->prepare("DELETE FROM lich_su_xac_thuc WHERE id = :id");
-            $stmt->execute([':id' => $id]);
-            if ($stmt->rowCount() > 0) {
-                echo "<script>alert('Đã xóa bản ghi thành công!')</script>";
-            } else
-                echo "<script>alert('Không tìm thấy bản ghi!')</script>";
-        }
-    }
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -104,9 +83,7 @@
 
     <div class="space-y-6">
         <header>
-            <h1 class="text-2xl font-bold text-gray-900">
-                Lịch Sử Xác Thực
-            </h1>
+            <h1 class="text-2xl font-bold text-gray-900">Lịch Sử Xác Thực</h1>
             <p class="mt-1 text-sm text-gray-600">Ghi nhận các hoạt động truy cập và bảo mật của người dùng.</p>
         </header>
 
@@ -121,32 +98,27 @@
                             name="search"
                             id="search-input"
                             placeholder="Tìm theo tên đăng nhập..."
-                            value="<?= htmlspecialchars($_GET['search'] ?? '') ?>"
+                            value="<?= htmlspecialchars($search) ?>"
                             class="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none"
                         >
                     </div>
                 </form>
 
-                <!-- Xuất báo cáo -->
                 <a href="?page=ls_xacthuc&export=csv"
-                class="flex items-center justify-center px-4 py-2 bg-green-500 border border-gray-300 font-medium text-sm rounded-md text-white hover:bg-gray-100 transition flex-shrink-0">
+                   class="flex items-center justify-center px-4 py-2 bg-green-500 border border-gray-300 font-medium text-sm rounded-md text-white hover:bg-green-600 transition flex-shrink-0">
                     <i class="fas fa-file-csv mr-2"></i>
                     Xuất Báo Cáo
                 </a>
 
-                <!-- Chọn khoảng thời gian -->
-                <form method="POST" class="flex flex-col sm:flex-row items-center gap-2 flex-shrink-0">
-                    <input type="date" name="delete_from"
-                        class="border border-gray-300 text-sm rounded-md p-2 focus:border-blue-500 focus:outline-none"
-                        required>
+                <form id="delete-range-form" class="flex flex-col sm:flex-row items-center gap-2 flex-shrink-0">
+                    <input type="date" name="delete_from" id="delete-from-input"
+                           class="border border-gray-300 text-sm rounded-md p-2 focus:border-blue-500 focus:outline-none" required>
                     <span class="hidden sm:inline text-gray-500">→</span>
-                    <input type="date" name="delete_to"
-                        class="border border-gray-300 text-sm rounded-md p-2 focus:border-blue-500 focus:outline-none"
-                        required>
-
-                    <!-- Nút Xóa -->
+                    <input type="date" name="delete_to" id="delete-to-input"
+                           class="border border-gray-300 text-sm rounded-md p-2 focus:border-blue-500 focus:outline-none" required>
+                    
                     <button type="submit"
-                        class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md transition">
+                            class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md transition">
                         <i class="fas fa-trash-alt mr-1"></i> Xóa
                     </button>
                 </form>
@@ -166,50 +138,50 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
-                    <?php foreach ($logs as $log): ?>
-                    <tr>
-                        <td class="p-3 font-medium text-gray-800"><?= htmlspecialchars($log['ten_dang_nhap']) ?></td>
-                        <td class="p-3">
-                            <span class="px-2 py-0.5 text-xs font-medium rounded-full <?= get_status_badge($log['loai_su_kien']) ?>">
-                                <?= htmlspecialchars(ucfirst($log['loai_su_kien'])) ?>
-                            </span>
-                        </td>
-                        <td class="p-3 text-gray-600 whitespace-nowrap"><?= htmlspecialchars($log['thoi_gian_bat_dau']) ?></td>
-                        <td class="p-3 text-gray-600"><?= htmlspecialchars($log['dia_chi_ip']) ?></td>
-                        <td class="p-3 text-gray-600 max-w-sm truncate hidden xl:table-cell" title="<?= htmlspecialchars($log['user_agent']) ?>">
-                            <?= htmlspecialchars($log['user_agent']) ?>
-                        </td>
-                        <td class="p-3 text-center">
-                            <form method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa bản ghi này?');">
-                                <input type="hidden" name="delete_id" value="<?= $log['id'] ?>">
-                                <button type="submit" class="text-gray-500" title="Xóa"><i class="fas fa-trash-alt"></i></button>
-                            </form>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-
                     <?php if (empty($logs)): ?>
-                    <tr>
-                        <td colspan="6" class="p-8 text-center text-gray-500">
-                            <p class="font-medium">Không có dữ liệu</p>
-                            <p class="text-sm mt-1">Không tìm thấy bản ghi nào phù hợp.</p>
-                        </td>
-                    </tr>
+                        <tr>
+                            <td colspan="6" class="p-8 text-center text-gray-500">
+                                <p class="font-medium">Không có dữ liệu</p>
+                                <p class="text-sm mt-1">Không tìm thấy bản ghi nào phù hợp.</p>
+                            </td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($logs as $log): ?>
+                        <tr data-log-id="<?= $log['id'] ?>">
+                            <td class="p-3 font-medium text-gray-800"><?= htmlspecialchars($log['ten_dang_nhap']) ?></td>
+                            <td class="p-3">
+                                <span class="px-2 py-0.5 text-xs font-medium rounded-full <?= get_status_badge($log['loai_su_kien']) ?>">
+                                    <?= htmlspecialchars(ucfirst($log['loai_su_kien'])) ?>
+                                </span>
+                            </td>
+                            <td class="p-3 text-gray-600 whitespace-nowrap"><?= htmlspecialchars($log['thoi_gian_bat_dau']) ?></td>
+                            <td class="p-3 text-gray-600"><?= htmlspecialchars($log['dia_chi_ip']) ?></td>
+                            <td class="p-3 text-gray-600 max-w-sm truncate hidden xl:table-cell" title="<?= htmlspecialchars($log['user_agent']) ?>">
+                                <?= htmlspecialchars($log['user_agent']) ?>
+                            </td>
+                            <td class="p-3 text-center">
+                                <button type="button" class="text-gray-500 hover:text-red-600 delete-log-btn" 
+                                        data-id="<?= $log['id'] ?>" title="Xóa">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
                     <?php endif; ?>
                 </tbody>
             </table>
         </div>
 
-        <?php if (($totalPages ?? 1) > 1): ?>
+        <?php if ($totalPages > 1): ?>
         <nav class="flex items-center justify-between pt-2">
             <span class="text-sm text-gray-700">
                 Trang <span class="font-semibold"><?= $page ?></span> / <span class="font-semibold"><?= $totalPages ?></span>
             </span>
             <div class="flex items-center space-x-2">
-                <a href="?page=ls_xacthuc&p=<?= $page - 1 ?>" class="px-3 py-1.5 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md <?= ($page <= 1) ? 'pointer-events-none opacity-50' : '' ?>">
+                <a href="?page=ls_xacthuc&p=<?= $page - 1 ?>&search=<?= urlencode($search) ?>" class="px-3 py-1.5 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md <?= ($page <= 1) ? 'pointer-events-none opacity-50' : '' ?>">
                     Trước
                 </a>
-                <a href="?page=ls_xacthuc&p=<?= $page + 1 ?>" class="px-3 py-1.5 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md <?= ($page >= $totalPages) ? 'pointer-events-none opacity-50' : '' ?>">
+                <a href="?page=ls_xacthuc&p=<?= $page + 1 ?>&search=<?= urlencode($search) ?>" class="px-3 py-1.5 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md <?= ($page >= $totalPages) ? 'pointer-events-none opacity-50' : '' ?>">
                     Sau
                 </a>
             </div>
@@ -219,55 +191,91 @@
     </div>
 
     <script>
-        // 1. Lấy các phần tử HTML cần thiết qua ID
-        const searchForm = document.getElementById('search-form');
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- XỬ LÝ TÌM KIẾM ---
         const searchInput = document.getElementById('search-input');
-
-        // 2. Hàm để thực hiện submit
-        function submitSearch() {
-            const searchValue = searchInput.value;
-
-            const encodedSearchValue = encodeURIComponent(searchValue.trim());
-
-            const newUrl = `trangchu.php?page=ls_xacthuc&search=${encodedSearchValue}`;
-            const trove = `trangchu.php?page=ls_xacthuc`;
-            if (searchValue) {
-                window.location.href = newUrl;          
-            } else {
-                window.location.href = trove;
-            }
+        if (searchInput) {
+            searchInput.addEventListener('blur', function() {
+                const searchValue = this.value.trim();
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('search', searchValue);
+                currentUrl.searchParams.set('p', '1'); // Quay về trang 1 khi tìm kiếm mới
+                window.location.href = currentUrl.toString();
+            });
         }
 
-        // 3. Gán sự kiện bỏ focus cho ô tìm kiếm
-        searchInput.addEventListener('blur', function() {
-            submitSearch(); // thực hiện tìm kiếm khi rời khỏi ô input
+        // --- XỬ LÝ XÓA BẰNG FETCH ---
+        const apiUrl = '../../models/xoa_ls_xacthuc.php'; // Đảm bảo đường dẫn này đúng!
+
+        // Xử lý xóa từng bản ghi
+        document.querySelectorAll('.delete-log-btn').forEach(button => {
+            button.addEventListener('click', async function() {
+                if (!confirm('Bạn có chắc chắn muốn xóa bản ghi này?')) {
+                    return;
+                }
+
+                const logId = this.dataset.id;
+                const row = this.closest('tr');
+                const formData = new FormData();
+                formData.append('delete_id', logId);
+
+                try {
+                    const response = await fetch(apiUrl, { method: 'POST', body: formData });
+                    const result = await response.json();
+
+                    if (result.status === 'success') {
+                        row.style.transition = 'opacity 0.3s ease-out';
+                        row.style.opacity = '0';
+                        setTimeout(() => row.remove(), 300);
+                        // Cân nhắc hiển thị một thông báo tinh tế hơn alert
+                        // Ví dụ: toastr.success(result.message);
+                    } else {
+                        alert('Lỗi: ' + result.message);
+                    }
+                } catch (error) {
+                    console.error('Lỗi fetch:', error);
+                    alert('Không thể kết nối đến máy chủ.');
+                }
+            });
         });
 
-        function applyFilters() {
-            const filterValue = document.getElementById("loaisukien").value;
-            const currentUrl = new URL(window.location.href);
-            const params = new URLSearchParams(currentUrl.search);
-            
-            if (filterValue) {
-                params.set('boloc', JSON.stringify({ loaisukien: filterValue }));
-            } else {
-                params.delete('boloc');
-            }
-            params.set('p', '1'); // Reset về trang 1 khi lọc
-            window.location.href = `${currentUrl.pathname}?${params.toString()}`;
+        // Xử lý xóa theo khoảng thời gian
+        const deleteRangeForm = document.getElementById('delete-range-form');
+        if (deleteRangeForm) {
+            deleteRangeForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const fromDate = document.getElementById('delete-from-input').value;
+                const toDate = document.getElementById('delete-to-input').value;
+
+                if (!fromDate || !toDate) {
+                    alert('Vui lòng chọn đầy đủ khoảng thời gian.');
+                    return;
+                }
+
+                if (!confirm(`Bạn có chắc muốn xóa tất cả log từ ${fromDate} đến ${toDate}?`)) {
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('delete_from', fromDate);
+                formData.append('delete_to', toDate);
+
+                try {
+                    const response = await fetch(apiUrl, { method: 'POST', body: formData });
+                    const result = await response.json();
+                    
+                    alert(result.message);
+
+                    if (result.status === 'success') {
+                        location.reload(); 
+                    }
+                } catch (error) {
+                    console.error('Lỗi fetch:', error);
+                    alert('Không thể kết nối đến máy chủ.');
+                }
+            });
         }
-
-        document.getElementById("btnloc").addEventListener("click", applyFilters);
-
-        function clearFilters() {
-            const currentUrl = new URL(window.location.href);
-            const params = new URLSearchParams(currentUrl.search);
-            params.delete('boloc');
-            params.set('p', '1');
-            window.location.href = `${currentUrl.pathname}?${params.toString()}`;
-        }
-
-        document.getElementById("btnhuy").addEventListener("click", clearFilters);
+    });
     </script>
 
 </body>

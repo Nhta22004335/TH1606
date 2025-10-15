@@ -4,6 +4,27 @@
     $pdo = ketnoicsdl();
 
     $id = $_SESSION['id_nguoi_dung'] ?? null;
+
+    $sql = "SELECT trang_thai FROM nguoi_dung WHERE id = :id";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':id', $id);
+    $stmt->execute();
+    $tt = $stmt->fetch();
+
+    if ($tt) {
+        $trang_thai = $tt['trang_thai'];
+        if ($trang_thai === 'danghoatdong') {
+
+        } else if ($trang_thai === 'chuakichhoat' || $trang_thai === 'khoa') {
+            session_unset();
+            session_destroy();
+
+            // Chuyển hướng đến trang đăng nhập
+            header("Location: ../../models/auth/xuly_dangxuat.php");
+            exit();
+        } 
+    }
+
     $dsQuyen = [];
     $ind = ['ho_ten' => 'Khách', 'avt' => 'default_avatar.png'];
     $nd = ['avt' => 'default_avatar.png'];
@@ -120,10 +141,9 @@
             ]
         ],
         [
-            'title' => 'Quản lý ...',
-            'icon' => 'fas fa-ban',
-            // 'link' => 'trangchu.php?page=ds_vipham',
-            'link' => '#',
+            'title' => 'Quản lý lịch sử',
+            'icon' => 'fas fa-history',
+            'link' => 'trangchu.php?page=ql_lichsu',
             'roles' => ['quantri'],
         ],
     ];

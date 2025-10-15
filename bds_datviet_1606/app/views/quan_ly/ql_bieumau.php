@@ -1,66 +1,55 @@
 <?php
-// ===== PHẦN LOGIC PHP - ĐÃ ĐƯỢC TÁI CẤU TRÚC VÀ TỐI ƯU =====
+    require_once "../../../config/database.php"; 
 
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
-// BƯỚC 1: TÁI CẤU TRÚC CODE
-// Thay vì dùng đường dẫn tương đối, hãy định nghĩa BASE_URL trong file config
-// Ví dụ: define('BASE_URL', '/du_an_cua_ban');
-require_once "../../../config/database.php"; 
-
-// Hàm helper để loại bỏ code lặp lại
-function getStatusInfo($status) {
-    switch ($status) {
-        case "choduyet": return ['text' => "Chờ duyệt", 'classes' => "bg-yellow-100 text-yellow-800 border-yellow-300"];
-        case "daduyet": return ['text' => "Đã duyệt", 'classes' => "bg-green-100 text-green-800 border-green-300"];
-        case "daky": return ['text' => "Đã ký", 'classes' => "bg-blue-100 text-blue-800 border-blue-300"];
-        case "huy": return ['text' => "Đã hủy", 'classes' => "bg-red-100 text-red-800 border-red-300"];
-        default: return ['text' => $status, 'classes' => "bg-gray-100 text-gray-600 border-gray-300"];
+    function getStatusInfo($status) {
+        switch ($status) {
+            case "choduyet": return ['text' => "Chờ duyệt", 'classes' => "bg-yellow-100 text-yellow-800 border-yellow-300"];
+            case "daduyet": return ['text' => "Đã duyệt", 'classes' => "bg-green-100 text-green-800 border-green-300"];
+            case "daky": return ['text' => "Đã ký", 'classes' => "bg-blue-100 text-blue-800 border-blue-300"];
+            case "huy": return ['text' => "Đã hủy", 'classes' => "bg-red-100 text-red-800 border-red-300"];
+            default: return ['text' => $status, 'classes' => "bg-gray-100 text-gray-600 border-gray-300"];
+        }
     }
-}
 
-function getLoaiText($loai) {
-    $map = ['hosomuaban' => 'Hồ sơ mua bán', 'hosothue' => 'Hồ sơ thuê', 'bienban' => 'Biên bản'];
-    return $map[$loai] ?? 'Không xác định';
-}
+    function getLoaiText($loai) {
+        $map = ['hosomuaban' => 'Hồ sơ mua bán', 'hosothue' => 'Hồ sơ thuê', 'bienban' => 'Biên bản'];
+        return $map[$loai] ?? 'Không xác định';
+    }
 
-try {
-    $pdo = ketnoicsdl();
-} catch (PDOException $e) {
-    die("Lỗi kết nối CSDL: " . $e->getMessage());
-}
+    try {
+        $pdo = ketnoicsdl();
+    } catch (PDOException $e) {
+        die("Lỗi kết nối CSDL: " . $e->getMessage());
+    }
 
-$search = $_GET['search'] ?? '';
-$params = [];
+    $search = $_GET['search'] ?? '';
+    $params = [];
 
-// Tối ưu SQL: Dùng ILIKE cho PostgreSQL để tìm kiếm không phân biệt hoa thường
-$sql = "
-    SELECT bm.id, bm.tieu_de, bm.loai, 
-           info1.ho_ten AS ten_ben_mua,
-           info2.ho_ten AS ten_ben_ban,
-           bm.trang_thai, bm.tep_dk, bm.ngay_tao, bm.ngay_cn
-    FROM bieu_mau bm
-    JOIN nguoi_dung nd1 ON bm.ben_mua = nd1.id
-    JOIN nguoi_dung nd2 ON bm.ben_ban = nd2.id
-    JOIN info_nguoi_dung info1 ON info1.id_nguoi_dung = nd1.id
-    JOIN info_nguoi_dung info2 ON info2.id_nguoi_dung = nd2.id
-";
+    $sql = "
+        SELECT bm.id, bm.tieu_de, bm.loai, 
+            info1.ho_ten AS ten_ben_mua,
+            info2.ho_ten AS ten_ben_ban,
+            bm.trang_thai, bm.tep_dk, bm.ngay_tao, bm.ngay_cn
+        FROM bieu_mau bm
+        JOIN nguoi_dung nd1 ON bm.ben_mua = nd1.id
+        JOIN nguoi_dung nd2 ON bm.ben_ban = nd2.id
+        JOIN info_nguoi_dung info1 ON info1.id_nguoi_dung = nd1.id
+        JOIN info_nguoi_dung info2 ON info2.id_nguoi_dung = nd2.id
+    ";
 
-if (!empty($search)) {
-    $sql .= " WHERE bm.tieu_de ILIKE :search 
-              OR bm.loai ILIKE :search 
-              OR info1.ho_ten ILIKE :search 
-              OR info2.ho_ten ILIKE :search 
-              OR bm.trang_thai ILIKE :search";
-    $params[':search'] = "%$search%";
-}
+    if (!empty($search)) {
+        $searchable_columns = "bm.tieu_de || ' ' || bm.loai || ' ' || info1.ho_ten || ' ' || info2.ho_ten || ' ' || bm.trang_thai";
 
-$sql .= " ORDER BY bm.ngay_tao DESC";
+        $sql .= " WHERE REPLACE(unaccent({$searchable_columns}), ' ', '') ILIKE REPLACE(unaccent(:search), ' ', '')";
+        
+        $params[':search'] = "%" . $search . "%";
+    }
 
-$stmt = $pdo->prepare($sql);
-$stmt->execute($params);
-$bieumau_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $sql .= " ORDER BY bm.ngay_tao DESC";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    $bieumau_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
 <!DOCTYPE html>
@@ -88,7 +77,7 @@ $bieumau_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <i class="fas fa-search text-gray-400"></i>
                 </div>
-                <input type="search" name="search" id="search-input" class="bg-white outline-none border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 p-2" 
+                <input type="text" name="search" id="search-input" class="bg-white outline-none border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 p-2" 
                     placeholder="Tìm kiếm biểu mẫu..." value="<?= htmlspecialchars($search) ?>">
             </div>
             <button type="submit" id="search-button" class="ml-2 px-4 py-2 text-sm font-medium text-white bg-gray-400 rounded-lg hover:bg-gray-500">
@@ -100,7 +89,7 @@ $bieumau_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <div class="bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-100">
+                        <thead class="bg-gray-50">
                             <tr>
                                 <th class="py-3 px-4 text-left text-xs font-bold text-gray-500 uppercase">Tiêu đề</th>
                                 <th class="py-3 px-4 text-left text-xs font-bold text-gray-500 uppercase">Loại</th>
@@ -117,13 +106,13 @@ $bieumau_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <?php foreach($bieumau_list as $bm): 
                                     $status_info = getStatusInfo($bm["trang_thai"]);
                                 ?>
-                                    <tr class="hover:bg-blue-50/50 transition duration-150">
-                                        <td class="p-4"><div class="px-4 py-2 text-sm font-medium text-gray-900" title="<?= htmlspecialchars($bm["tieu_de"]) ?>"><?= htmlspecialchars($bm["tieu_de"]) ?></div></td>
-                                        <td class="p-4 text-sm text-gray-600"><?= htmlspecialchars(getLoaiText($bm["loai"])) ?></td>
-                                        <td class="p-4 text-sm text-gray-600"><?= htmlspecialchars($bm["ten_ben_mua"]) ?></td>
-                                        <td class="p-4 text-sm text-gray-600"><?= htmlspecialchars($bm["ten_ben_ban"]) ?></td>
-                                        <td class="p-4"><span class="px-3 py-1 text-xs font-medium rounded-full border shadow-sm <?= $status_info['classes'] ?>"><?= $status_info['text'] ?></span></td>
-                                        <td class="p-4 text-center">
+                                    <tr>
+                                        <td class="p-3"><div class="px-3 py-2 text-sm font-medium text-gray-800"><?= htmlspecialchars($bm["tieu_de"]) ?></div></td>
+                                        <td class="p-3 text-sm text-gray-600"><?= htmlspecialchars(getLoaiText($bm["loai"])) ?></td>
+                                        <td class="p-3 text-sm text-gray-600"><?= htmlspecialchars($bm["ten_ben_mua"]) ?></td>
+                                        <td class="p-3 text-sm text-gray-600"><?= htmlspecialchars($bm["ten_ben_ban"]) ?></td>
+                                        <td class="p-3"><span class="px-3 py-1 text-xs font-medium rounded-full border shadow-sm <?= $status_info['classes'] ?>"><?= $status_info['text'] ?></span></td>
+                                        <td class="p-3 text-center">
                                             <button data-modal-toggle="docModal<?= $bm['id'] ?>" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-4 py-2 rounded-lg flex items-center justify-center gap-1.5 mx-auto shadow-md transition transform hover:scale-105">
                                                 <i class="fa-solid fa-folder-open"></i> Xem
                                             </button>
@@ -181,7 +170,7 @@ $bieumau_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </div>
                     <div class="!mt-4 pt-3 border-t border-gray-200 flex justify-between items-center">
                         <span class="text-gray-500 flex items-center gap-2">
-                            <i class="fa-solid fa-paperclip"></i> Tệp đính kèm:
+                            <i class="fa-solid fa-paperclip"></i> Tệp đính kèm: <?= htmlspecialchars($bm["tep_dk"]) ?>
                         </span>
                         <a href="../../../storage/documents/<?= htmlspecialchars($bm["tep_dk"]) ?>" 
                         class="text-blue-600 hover:underline font-bold flex items-center gap-1.5 transition" 
