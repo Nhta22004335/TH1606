@@ -136,29 +136,11 @@ $bieumau_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <td class="p-4 text-sm text-gray-600"><?= htmlspecialchars(getLoaiText($bm["loai"])) ?></td>
                                 <td class="p-4 text-sm text-gray-600"><?= htmlspecialchars($bm["ten_ben_mua"]) ?></td>
                                 <td class="p-4"><span class="px-3 py-1 text-xs font-medium rounded-full border shadow-sm <?= $status_info['classes'] ?>"><?= $status_info['text'] ?></span></td>
-                                <td class="p-4 text-sm text-gray-600 text-center flex justify-center gap-2">
-                                <td class="p-4 text-sm text-gray-600 text-center flex justify-center gap-2">
-                                <!-- Nút Xem -->
-                                <button data-modal-toggle="docModal<?= $bm['id'] ?>" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-4 py-2 rounded-lg flex items-center justify-center gap-1.5 shadow-md transition transform hover:scale-105">
-                                    <i class="fa-solid fa-eye"></i> Xem
-                                </button>
-
-                                <!-- Nút Xóa -->
-                                <?php
-                                $canDelete = in_array($bm["trang_thai"], ["choduyet","huy"]);
-                                $deleteClasses = $canDelete 
-                                    ? "bg-red-600 hover:bg-red-700 text-white" 
-                                    : "bg-gray-400 text-gray-200 cursor-not-allowed";
-                                ?>
-                                <button 
-                                    data-delete-id="<?= $bm['id'] ?>" 
-                                    class="<?= $deleteClasses ?> text-xs font-medium px-4 py-2 rounded-lg flex items-center justify-center gap-1.5 shadow-md transition transform <?= $canDelete ? "hover:scale-105" : "" ?>" 
-                                    <?= $canDelete ? "" : "disabled" ?>>
-                                    <i class="fa-solid fa-trash"></i> Xóa
-                                </button>
-                            </td>
-
-
+                                <td class="p-4 text-sm text-gray-600 text-center">
+                                    <button data-modal-toggle="docModal<?= $bm['id'] ?>" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-4 py-2 rounded-lg flex items-center justify-center gap-1.5 mx-auto shadow-md transition transform hover:scale-105">
+                                        <i class="fa-solid fa-eye"></i> Xem
+                                    </button>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -399,41 +381,6 @@ function capNhatTrangThai(id, trangThai, buttonElement) {
         buttonElement.innerHTML = originalButtonHtml;
     });
 }
-document.addEventListener('click', function(e) {
-    const deleteBtn = e.target.closest('[data-delete-id]');
-    if (!deleteBtn || deleteBtn.disabled) return;
-
-    const id = deleteBtn.dataset.deleteId;
-    if (!confirm("Bạn có chắc chắn muốn xóa hồ sơ này không?")) return;
-
-    fetch("../../models/xoa_bm.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `id=${encodeURIComponent(id)}`
-    })
-    .then(res => res.ok ? res.json() : Promise.reject(`Lỗi HTTP: ${res.status}`))
-    .then(data => {
-        alert(data.message);
-        if (data.status === "success") {
-            // Xóa row trong bảng ngay lập tức
-            const row = deleteBtn.closest('tr');
-            if (row) row.remove();
-
-            // Đóng modal nếu đang mở
-            const modal = document.getElementById(`docModal${id}`);
-            if (modal) {
-                modal.classList.remove('opacity-100');
-                modal.querySelector('.modal-content').classList.remove('scale-100');
-                setTimeout(() => modal.classList.add('hidden'), 300);
-            }
-        }
-    })
-    .catch(err => {
-        console.error("Lỗi xóa:", err);
-        alert("Đã xảy ra lỗi khi xóa hồ sơ.");
-    });
-});
-
 </script>
 </body>
 </html>
