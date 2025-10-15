@@ -1,12 +1,13 @@
 <?php
+
 require_once "../../../config/database.php";
 
 function getStatusInfo($status) {
     $map = [
         "choduyet" => ['text' => "Chờ duyệt", 'classes' => "bg-yellow-100 text-yellow-800 border-yellow-300"],
         "daduyet"  => ['text' => "Đã duyệt",  'classes' => "bg-green-100 text-green-800 border-green-300"],
-        "daky"     => ['text' => "Đã ký",    'classes' => "bg-blue-100 text-blue-800 border-blue-300"],
-        "huy"      => ['text' => "Đã hủy",   'classes' => "bg-red-100 text-red-800 border-red-300"]
+        "daky"     => ['text' => "Đã ký",      'classes' => "bg-blue-100 text-blue-800 border-blue-300"],
+        "huy"      => ['text' => "Đã hủy",     'classes' => "bg-red-100 text-red-800 border-red-300"]
     ];
     return $map[$status] ?? ['text' => $status, 'classes' => "bg-gray-100 text-gray-600 border-gray-300"];
 }
@@ -18,35 +19,33 @@ function getLoaiText($loai) {
 
 $pdo = ketnoicsdl();
 $search = $_GET['search'] ?? '';
+$id = $_SESSION['id_nguoi_dung'] ?? ''; // Giả sử ID người dùng đã có trong session
 
-// -------------------------------
-// Query sửa để load tất cả hồ sơ, không phụ thuộc session
-// -------------------------------
+// Câu lệnh SQL không đổi, đã tốt
 $sql = "
     SELECT bm.id, bm.tieu_de, bm.loai, 
            info1.ho_ten AS ten_ben_mua,
            info2.ho_ten AS ten_ben_ban,
            bm.trang_thai, bm.tep_dk, bm.ngay_tao, bm.ngay_cn
     FROM bieu_mau bm
-    LEFT JOIN nguoi_dung nd1 ON bm.ben_mua = nd1.id
-    LEFT JOIN nguoi_dung nd2 ON bm.ben_ban = nd2.id
-    LEFT JOIN info_nguoi_dung info1 ON info1.id_nguoi_dung = nd1.id
-    LEFT JOIN info_nguoi_dung info2 ON info2.id_nguoi_dung = nd2.id
-    WHERE 1=1
+    JOIN nguoi_dung nd1 ON bm.ben_mua = nd1.id
+    JOIN nguoi_dung nd2 ON bm.ben_ban = nd2.id
+    JOIN info_nguoi_dung info1 ON info1.id_nguoi_dung = nd1.id
+    JOIN info_nguoi_dung info2 ON info2.id_nguoi_dung = nd2.id
+    WHERE nd2.id = :id
 ";
-
-$params = [];
+$params = [':id' => $id];
 
 if (!empty($search)) {
     $sql .= " AND (bm.tieu_de ILIKE :search OR bm.loai ILIKE :search OR info1.ho_ten ILIKE :search OR info2.ho_ten ILIKE :search OR bm.trang_thai ILIKE :search)";
     $params[':search'] = "%$search%";
 }
-
 $sql .= " ORDER BY bm.ngay_tao DESC";
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $bieumau_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 ?>
 <!DOCTYPE html>
 <html lang="vi" class="bg-gray-50">
