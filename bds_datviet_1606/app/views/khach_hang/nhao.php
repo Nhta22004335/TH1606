@@ -81,6 +81,8 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+//echo print_r($rows); // debug
+
 // helper
 function e($s){ return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 ?>
@@ -122,11 +124,11 @@ function e($s){ return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
         <?php else: ?>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <?php foreach ($rows as $p): 
-                    $img = !empty($p['anh_dai_dien']) ? "/storage/bds/" . e($p['anh_dai_dien']) : "/public/assets/no-image.png";
+                    $img = !empty($p['anh_dai_dien']) ? "../../../storage/pictures/bds/" . e($p['anh_dai_dien']) : "../../../storage/pictures/bds/";
                 ?>
                     <div class="bg-white rounded-lg shadow p-4">
                        <a href="/app/views/khach_hang/chitiet_bds.php<?= e($p['id']) ?>">
-                            <img src="<?= e($img) ?>" alt="<?= e($p['tieu_de']) ?>" class="w-full h-44 object-cover rounded-md mb-3">
+                            <img src="../../../storage/pictures/bds/<?= $p['anh_dai_dien'] ?>" alt="<?= e($p['tieu_de']) ?>" class="w-full h-44 object-cover rounded-md mb-3">
                         </a>
                         <h3 class="text-lg font-semibold"><?= e($p['tieu_de']) ?></h3>
                         <p class="text-sm text-gray-600"><?= e($p['khu_vuc']) ?> • <?= e($p['dien_tich']) ?> m²</p>

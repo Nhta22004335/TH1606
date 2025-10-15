@@ -61,7 +61,7 @@
             <div class="flex items-center space-x-2">
                 <div class="relative h-12 w-12 flex items-center justify-center overflow-visible">
                     <img 
-                        src="../../../public/assets/anhht/0/datviet.png" 
+                        src="../../../public/images/datviet.png" 
                         alt="Logo Đất Việt BĐS" 
                         class="h-10 transform scale-[2] translate-x-[-15%] object-contain"
                     >
@@ -296,7 +296,7 @@
         
         <!-- Logo + mô tả + liên hệ nhanh -->
         <div class="col-span-2 md:col-span-1">
-            <img src="../../../public/assets/anhht/0/datviet.png" alt="Logo" class="h-12 transform scale-[2.8] ml-4 mt-0">
+            <img src="../../../public/images/datviet.png" alt="Logo" class="h-12 transform scale-[2.8] ml-4 mt-0">
             <p class="text-sm leading-relaxed text-gray-600 mb-4 mt-8">
                 Sàn giao dịch bất động sản uy tín, cung cấp thông tin chính xác, dịch vụ tư vấn chuyên nghiệp 
                 và hỗ trợ khách hàng trong việc mua, bán, cho thuê bất động sản.
