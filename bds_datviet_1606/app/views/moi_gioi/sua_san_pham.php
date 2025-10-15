@@ -86,7 +86,7 @@ $current_status = $status_map[$product['trang_thai']] ?? $status_map['default'];
                             <label for="loai" class="block text-sm font-medium text-slate-700">Loại Bất động sản</label>
                             <select name="loai" id="loai" class="mt-1 block w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
                                 <?php
-                                $loai_options = ["Căn hộ", "Nhà phố", "Đất nền", "Biệt thự", "Văn phòng"];
+                                $loai_options = ["canho", "nhapho", "datnen", "bietthu"];
                                 foreach ($loai_options as $opt) {
                                     $sel = ($product['loai'] == $opt) ? 'selected' : '';
                                     echo "<option value='$opt' $sel>$opt</option>";
