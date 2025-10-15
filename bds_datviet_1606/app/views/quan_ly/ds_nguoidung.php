@@ -3,6 +3,19 @@
     $pdo = ketnoicsdl();
 
     $search = $_GET['search'] ?? '';
+    $id = $_SESSION['id_nguoi_dung'] ?? null;
+
+    $keywords = preg_split('/\s+/', $search);
+
+    $where = [];
+    $params = [];
+
+    foreach ($keywords as $i => $word) {
+        if (!empty($word)) {
+            $where[] = "REPLACE(unaccent(LOWER(i.ho_ten)), ' ', '') ILIKE REPLACE(unaccent(:kw$i), ' ', '')";
+            $params[":kw$i"] = "%$word%";
+        }
+    }
 
     $baseSql = "
         SELECT 
@@ -16,16 +29,8 @@
         LEFT JOIN quyen q ON pq.id_quyen = q.id
     ";
 
-    $whereConditions = [];
-    $params = [];
-
-    if (!empty($search)) {
-        $whereConditions[] = "(i.ho_ten ILIKE :search OR nd.email ILIKE :search OR nd.so_dt ILIKE :search OR i.dia_chi ILIKE :search)";
-        $params[':search'] = "%" . $search . "%";
-    }
-
-    if (!empty($whereConditions)) {
-        $baseSql .= " WHERE " . implode(' AND ', $whereConditions);
+    if (!empty($where)) {
+        $baseSql .= " WHERE " . implode(" OR ", $where);
     }
     
     $baseSql .= "

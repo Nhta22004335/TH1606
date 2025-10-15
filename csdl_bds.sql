@@ -8,6 +8,8 @@
 -- =========================== tuấn anh 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+CREATE EXTENSION IF NOT EXISTS unaccent;
+
 -- . Bảng quyen (Bao gồm các quyền cụ thể của hệ thống)
 CREATE TABLE IF NOT EXISTS quyen (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -196,7 +198,6 @@ CREATE TABLE IF NOT EXISTS giao_dich (
     CONSTRAINT fk_giao_dich_bds FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE SET NULL
 );
 
-select * from giao_dich
 CREATE TABLE IF NOT EXISTS ke_hoach_thanh_toan (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     id_giao_dich UUID NOT NULL UNIQUE,
@@ -232,7 +233,6 @@ CREATE TABLE IF NOT EXISTS dot_thanh_toan_ct (
     CONSTRAINT fk_dttct_bds FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE SET NULL
 );
 	
-
 -- 14. Bảng thong_bao
 CREATE TABLE IF NOT EXISTS thong_bao (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -274,7 +274,7 @@ CREATE TABLE bieu_mau (
     CONSTRAINT fk_benban FOREIGN KEY (ben_ban) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
 	CONSTRAINT chk_trangthai CHECK (trang_thai IN ('choduyet','daduyet', 'daky', 'huy'))
 );
-select*from bieu_mau
+
 CREATE TABLE IF NOT EXISTS yeu_cau (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), 
     
@@ -331,7 +331,7 @@ CREATE TABLE hop_thoai (
 	da_khoa INT DEFAULT 0,
 	da_xoa INT DEFAULT 0
 )
-select * from tin_nhan
+
 CREATE TABLE tin_nhan (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), 
 	id_hop_thoai UUID,
@@ -347,6 +347,33 @@ CREATE TABLE tin_nhan (
 	CONSTRAINT fk_id_hop_thoai FOREIGN KEY (id_hop_thoai) REFERENCES hop_thoai(id) ON DELETE CASCADE,
     -- Ràng buộc: người gửi và người nhận không được trùng
     CONSTRAINT chk_gui_nhan CHECK (nguoi_gui <> nguoi_nhan)
+);
+
+CREATE TABLE lich_su_tim_kiem (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id_nguoi_dung UUID REFERENCES nguoi_dung(id) ON DELETE SET NULL,
+    tu_khoa_tim_kiem TEXT NOT NULL,
+    thoi_gian_tim_kiem TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+select * from lich_su_tim_kiem
+
+CREATE TABLE lich_su_xem_bds (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id_nguoi_dung UUID NOT NULL REFERENCES nguoi_dung(id) ON DELETE CASCADE,
+    id_bds UUID NOT NULL REFERENCES bat_dong_san(id) ON DELETE CASCADE,
+    thoi_gian_xem TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE lich_su_mua_hang (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id_nguoi_dung UUID NOT NULL REFERENCES nguoi_dung(id) ON DELETE RESTRICT,
+    id_bds UUID NOT NULL REFERENCES bat_dong_san(id) ON DELETE RESTRICT,
+    so_luong INT NOT NULL CHECK (so_luong > 0),
+    gia_tai_thoi_diem_mua DECIMAL(12, 2) NOT NULL CHECK (gia_tai_thoi_diem_mua >= 0),
+    tong_tien DECIMAL(15, 2) NOT NULL,
+    ngay_mua TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT check_tong_tien CHECK (tong_tien = so_luong * gia_tai_thoi_diem_mua)
 );
 
 -- CREATE TABLE IF NOT EXISTS khach_quan_tam_bds (
