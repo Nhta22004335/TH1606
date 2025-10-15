@@ -77,7 +77,7 @@
                 <?php elseif (!empty($m['anh_tn'])): ?>
                     <img src="../../../storage/pictures/messages/<?= htmlspecialchars($m['anh_tn']) ?>" alt="Image" class="max-w-xs rounded-md shadow mb-1">
                 <?php else: ?>
-                    <p><?= nl2br(htmlspecialchars($m['noi_dung'])) ?></p>
+                    <p><?= ($m['noi_dung']) ?></p>
                 <?php endif; ?>
                 <p class="text-xs opacity-60 text-right mt-1"><?= date('H:i', strtotime($m['tg_gui'])) ?></p>
             </div>
