@@ -25,7 +25,7 @@ function redirectWithMessage($message, $status = 'success') {
 }
 
 // Thư mục upload
-$upload_dir = "../../../storage/bds/";
+$upload_dir = "../../../storage/pictures/bds/";
 // Đảm bảo thư mục tồn tại
 if (!is_dir($upload_dir)) {
     if (!mkdir($upload_dir, 0777, true)) {

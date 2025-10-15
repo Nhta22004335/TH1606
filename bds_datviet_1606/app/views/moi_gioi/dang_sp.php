@@ -34,7 +34,7 @@
         <p class="mt-2 text-base text-slate-600">Cung cấp thông tin chi tiết để thu hút khách hàng tiềm năng.</p>
     </header>
 
-    <form method="POST" action="trangchu.php?page=../../models/xl_dang_sp" enctype="multipart/form-data">
+    <form method="POST" action="trangchu.php?page=../moi_gioi/dang_sp" enctype="multipart/form-data">
         <div class="lg:grid lg:grid-cols-3 lg:gap-12">
 
             <aside class="lg:col-span-1 lg:sticky lg:top-8 self-start hidden lg:block">
