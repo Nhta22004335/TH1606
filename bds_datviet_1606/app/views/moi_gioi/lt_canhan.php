@@ -163,11 +163,6 @@ if (!empty(trim($search))) {
                 <h1 class="text-2xl font-bold text-slate-800">Lịch trình của tôi</h1>
                 <p class="mt-2 text-sm text-slate-600">Tổng quan các công việc và cuộc hẹn sắp tới.</p>
             </div>
-            <div class="mt-4 sm:mt-0">
-                <a href="../../models/them_lichtrinh.php" class="inline-flex items-center gap-2 px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    <i class="fa-solid fa-plus"></i> Thêm lịch trình mới
-                </a>
-            </div>
         </div>
     </header>
 
