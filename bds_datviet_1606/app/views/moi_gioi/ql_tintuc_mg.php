@@ -68,7 +68,7 @@ function truncate_string($string, $word_limit) {
     return $string;
 }
 
-// Hàm tạo badge trạng thái
+// Hàm tạo badge trạng thái 
 function getStatusBadge($status) {
     $map = [
         'choduyet' => ['text' => 'Chờ duyệt', 'class' => 'bg-orange-100 text-orange-800'],
@@ -98,97 +98,122 @@ $stats = [
 </head>
 <body class="h-full">
 
-    <header>
-        <div class="sm:flex sm:items-center sm:justify-between mb-6 pb-4 border-b">
+<header class="mb-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-slate-800">Bài đăng của tôi</h1>
+            <p class="mt-1 text-sm text-slate-500">Quản lý và theo dõi hiệu suất các tin bạn đã đăng.</p>
+        </div>
+        <div>
+            <a href="trangchu.php?page=../moi_gioi/dang_tin" class="inline-flex items-center gap-2 px-5 py-2 text-sm font-semibold rounded-md text-white bg-indigo-600 hover:bg-indigo-700 shadow-lg">
+                <i class="fa-solid fa-plus"></i> Đăng tin mới
+            </a>
+        </div>
+    </div>
+
+    <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div class="bg-green-50 rounded-xl shadow p-5 flex items-center gap-4">
+            <div class="text-green-600 text-3xl">
+                <i class="fa-solid fa-eye"></i>
+            </div>
             <div>
-                <h1 class="text-2xl font-bold text-slate-800">Bài đăng của tôi</h1>
-                <p class="mt-2 text-sm text-slate-600">Quản lý, chỉnh sửa và theo dõi hiệu suất các tin bạn đã đăng.</p>
-            </div>
-            <div class="mt-4 sm:mt-0">
-                 <a href="trangchu.php?page=../moi_gioi/dang_tin" class="mt-4 inline-flex items-center gap-2 px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
-                         <i class="fa-solid fa-plus"></i> Đăng tin mới
-                 </a>
+                <p class="text-sm font-medium text-slate-500">Tin đang hiển thị</p>
+                <p class="text-2xl font-bold text-green-700"><?= $stats['active'] ?></p>
             </div>
         </div>
-
-        <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
-            <div class="bg-white overflow-hidden shadow rounded-lg"><div class="p-5"><dl><dt class="text-sm font-medium text-slate-500 truncate">Tin đang hiển thị</dt><dd class="mt-1 text-3xl font-semibold text-green-600"><?= $stats['active'] ?></dd></dl></div></div>
-            <div class="bg-white overflow-hidden shadow rounded-lg"><div class="p-5"><dl><dt class="text-sm font-medium text-slate-500 truncate">Tin chờ duyệt</dt><dd class="mt-1 text-3xl font-semibold text-orange-500"><?= $stats['pending'] ?></dd></dl></div></div>
-            <div class="bg-white overflow-hidden shadow rounded-lg"><div class="p-5"><dl><dt class="text-sm font-medium text-slate-500 truncate">Tổng lượt xem</dt><dd class="mt-1 text-3xl font-semibold text-slate-900"><?= number_format($stats['total_views']) ?></dd></dl></div></div>
-        </div>
-    </header>
-
-    <main class="mt-8">
-        <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-            <div class="p-4 border-b border-slate-200">
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <input type="text" placeholder="Tìm theo tiêu đề..." class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                    <select class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                        <option value="">Tất cả trạng thái</option>
-                        <option value="dangban">Đang hiển thị</option>
-                        <option value="choduyet">Chờ duyệt</option>
-                    </select>
-                </div>
+        <div class="bg-orange-50 rounded-xl shadow p-5 flex items-center gap-4">
+            <div class="text-orange-600 text-3xl">
+                <i class="fa-solid fa-clock"></i>
             </div>
-            
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-slate-200">
-                    <thead class="bg-slate-50">
+            <div>
+                <p class="text-sm font-medium text-slate-500">Tin chờ duyệt</p>
+                <p class="text-2xl font-bold text-orange-700"><?= $stats['pending'] ?></p>
+            </div>
+        </div>
+        <div class="bg-slate-50 rounded-xl shadow p-5 flex items-center gap-4">
+            <div class="text-slate-600 text-3xl">
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-slate-500">Tổng lượt xem</p>
+                <p class="text-2xl font-bold text-slate-800"><?= number_format($stats['total_views'] ?? 0) ?></p>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main>
+    <div class="bg-white rounded-xl shadow overflow-hidden">
+        <div class="p-4 border-b border-slate-200 flex flex-col sm:flex-row gap-3 sm:gap-4 items-center">
+            <div class="relative flex-1">
+                <input type="text" placeholder="Tìm theo tiêu đề..." class="w-full border border-slate-300 rounded-lg px-4 py-2 pl-10 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </span>
+            </div>
+            <select class="w-48 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                <option value="">Tất cả trạng thái</option>
+                <option value="dangban">Đang hiển thị</option>
+                <option value="choduyet">Chờ duyệt</option>
+            </select>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200">
+                <thead class="bg-slate-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-slate-600">Tiêu đề</th>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-slate-600">Chuyên mục</th>
+                        <th class="px-6 py-3 text-center text-sm font-semibold text-slate-600">Trạng thái</th>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-slate-600">Ngày đăng</th>
+                        <th class="px-6 py-3"><span class="sr-only">Hành động</span></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    <?php if (empty($tin_dang)): ?>
                         <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-sm font-semibold text-slate-600">Tiêu đề</th>
-                            <th scope="col" class="px-6 py-3 text-left text-sm font-semibold text-slate-600">Chuyên mục</th>
-                            <th scope="col" class="px-6 py-3 text-center text-sm font-semibold text-slate-600">Trạng thái</th>
-                            <th scope="col" class="px-6 py-3 text-left text-sm font-semibold text-slate-600">Ngày đăng</th>
-                            <th scope="col" class="relative px-6 py-3"><span class="sr-only">Hành động</span></th>
+                            <td colspan="5">
+                                <div class="text-center py-20 px-4">
+                                    <i class="fa-solid fa-file-circle-question fa-4x text-slate-300 mb-4"></i>
+                                    <h3 class="text-xl font-bold text-slate-800">Bạn chưa có bài đăng nào</h3>
+                                    <p class="text-slate-500 mt-1">Hãy bắt đầu tạo bài đăng đầu tiên của bạn.</p>
+                                </div>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        <?php if (empty($tin_dang)): ?>
-                            <tr>
-                                <td colspan="5">
-                                    <div class="text-center py-16 px-4">
-                                        <i class="fa-solid fa-file-circle-question fa-3x text-slate-400 mb-4"></i>
-                                        <h3 class="text-lg font-semibold text-slate-800">Bạn chưa có bài đăng nào</h3>
-                                        <p class="text-slate-500 mt-1">Hãy bắt đầu tạo bài đăng đầu tiên của bạn.</p>
-                                        <!-- <a href="trangchu.php?page=../moi_gioi/dang_tin" class="mt-4 inline-flex items-center gap-2 px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
-                                            <i class="fa-solid fa-plus"></i> Đăng tin ngay
-                                        </a> -->
+                    <?php else: ?>
+                        <?php foreach ($tin_dang as $tin): ?>
+                            <tr class="hover:bg-indigo-50 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-4">
+                                        <img src="../../../storage/pictures/anhtin/<?= htmlspecialchars($tin['anh_tin'] ?: 'chuacapnhat.png') ?>" class="w-24 h-16 rounded-md object-cover flex-shrink-0 hidden sm:block">
+                                        <div>
+                                            <p class="font-semibold text-slate-800 text-sm" title="<?= htmlspecialchars($tin['tieu_de']) ?>"><?= htmlspecialchars(truncate_string($tin['tieu_de'], 10)) ?></p>
+                                            <p class="text-xs text-slate-500" title="<?= htmlspecialchars($tin['mo_ta']) ?>"><?= htmlspecialchars(truncate_string($tin['mo_ta'], 15)) ?></p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-slate-600"><?= htmlspecialchars($tin['chuyen_muc']) ?></td>
+                                <td class="px-6 py-4 text-center"><?= getStatusBadge($tin['trang_thai']) ?></td>
+                                <td class="px-6 py-4 text-sm text-slate-500"><?= date('d/m/Y H:i', strtotime($tin['ngay_dang'])) ?></td>
+                                <td class="px-6 py-4 text-center text-sm">
+                                    <div class="flex items-center justify-center gap-4 text-slate-500">
+                                        <a href="trangchu.php?page=../../models/cn_tin_mg&id=<?= $tin['id'] ?>" class="hover:text-indigo-600" title="Chỉnh sửa">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </a>
+                                        <a href="trangchu.php?page=../../models/xoa_tin_mg&id=<?= $tin['id'] ?>" onclick="return confirm('Bạn có chắc muốn xóa tin này?')" class="hover:text-red-600" title="Xóa">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </a>
                                     </div>
                                 </td>
                             </tr>
-                        <?php else: ?>
-                            <?php foreach ($tin_dang as $tin): ?>
-                                <tr class="hover:bg-slate-50 transition-colors">
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center gap-4">
-                                            <img src="../../../storage/pictures/anhtin/<?= htmlspecialchars($tin['anh_tin'] ?: 'chuacapnhat.png') ?>" class="w-24 h-16 rounded-md object-cover flex-shrink-0 hidden sm:block">
-                                            <div>
-                                                <p class="font-semibold text-slate-800 text-sm" title="<?= htmlspecialchars($tin['tieu_de']) ?>"><?= htmlspecialchars(truncate_string($tin['tieu_de'], 10)) ?></p>
-                                                <p class="text-xs text-slate-500" title="<?= htmlspecialchars($tin['mo_ta']) ?>"><?= htmlspecialchars(truncate_string($tin['mo_ta'], 15)) ?></p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600"><?= htmlspecialchars($tin['chuyen_muc']) ?></td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-center"><?= getStatusBadge($tin['trang_thai']) ?></td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500"><?= date('d/m/Y H:i', strtotime($tin['ngay_dang'])) ?></td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
-                                        <div class="flex items-center justify-center gap-4 text-slate-500">
-                                            <a href="trangchu.php?page=../../models/cn_tin_mg&id=<?= $tin['id'] ?>" class="hover:text-indigo-600" title="Chỉnh sửa">
-                                                <i class="fa-solid fa-pen-to-square"></i>
-                                            </a>
-                                            <a href="trangchu.php?page=../../models/xoa_tin_mg&id=<?= $tin['id'] ?>" onclick="return confirm('Bạn có chắc muốn xóa tin này?')" class="hover:text-red-600" title="Xóa">
-                                                <i class="fa-solid fa-trash-can"></i>
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
-    </main>
+    </div>
+</main>
+
 
 </body>
 </html>

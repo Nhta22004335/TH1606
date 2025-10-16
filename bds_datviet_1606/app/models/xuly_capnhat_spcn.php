@@ -138,21 +138,22 @@ try {
         ':id' => $id_bds,
         ':id_nguoi_dung' => $id_nguoi_dung
     ]);
+if ($stmt->rowCount() > 0) {
+    // Cập nhật thành công → thông báo và quay về trang sản phẩm cá nhân
+    echo "<script>
+        alert('Cập nhật sản phẩm thành công!');
+        window.location.href = '../views/quan_ly/trangchu.php?page=../moi_gioi/sp_canhan';
+    </script>";
+    exit;
+} else {
+    // Cập nhật thất bại
+    echo "<script>
+        alert('Cập nhật thất bại. Kiểm tra ID sản phẩm và quyền sở hữu.');
+        window.history.back();
+    </script>";
+    exit;
+}
 
-    if ($stmt->rowCount() > 0) {
-        // Cập nhật thành công
-        echo "<script>
-            window.location.href = '../views/quan_ly/trangchu.php?page=../moi_gioi/sua_san_pham&id={$id_bds}&status=success';
-            </script>";
-        exit; // BẮT BUỘC DỪNG SCRIPT SAU LỆNH CHUYỂN HƯỚNG
-    } else {
-        // Cập nhật không thành công (do ID sai hoặc không có quyền sở hữu)
-        echo "<script>
-            alert('Cập nhật thất bại. Kiểm tra ID sản phẩm và quyền sở hữu.');
-            window.history.back();
-            </script>";
-        exit; // BẮT BUỘC DỪNG SCRIPT
-    }
 
 } catch (PDOException $e) {
     // Xử lý lỗi DB

@@ -49,7 +49,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['capnhattintuc'])) {
         // --- Xử lý Upload File ---
         $anh_tin_path = '';
         if (!empty($_FILES['anh_tin']['name'])) {
-            $uploadDir = __DIR__ . '/uploads/tintuc/'; 
+            $uploadDir = __DIR__ . '../../storage/anhtin'; 
             if (!file_exists($uploadDir)) mkdir($uploadDir, 0755, true);
 
             $fileExtension = pathinfo($_FILES['anh_tin']['name'], PATHINFO_EXTENSION);
@@ -57,7 +57,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['capnhattintuc'])) {
             $targetFile = $uploadDir . $filename;
 
             if (move_uploaded_file($_FILES['anh_tin']['tmp_name'], $targetFile)) {
-                $anh_tin_path = 'uploads/tintuc/' . $filename; 
+                $anh_tin_path = '../../storage/pictures/anhtin' . $filename; 
             } else {
                 echo "<script>alert('❌ Lỗi upload ảnh! Vui lòng kiểm tra quyền ghi thư mục: " . htmlspecialchars($uploadDir) . "');</script>";
                 exit;

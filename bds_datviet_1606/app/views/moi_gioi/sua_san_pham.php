@@ -217,7 +217,7 @@ $current_status = $status_map[$product['trang_thai']] ?? $status_map['default'];
                         <button type="submit" form="main-form" class="w-full px-5 py-3 rounded-lg text-sm font-medium text-white bg-sky-600 hover:bg-sky-700 shadow transition flex items-center justify-center gap-2">
                             <i class="fas fa-save"></i> Lưu thay đổi
                         </button>
-                        <a href="trangchu.php?page=../moi_gioi/sanpham_canhan" class="w-full block text-center px-5 py-2.5 border border-slate-300 rounded-lg shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 transition">
+                        <a href="trangchu.php?page=../moi_gioi/sp_canhan" class="w-full block text-center px-5 py-2.5 border border-slate-300 rounded-lg shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 transition">
                             Hủy
                         </a>
                     </div>
@@ -269,7 +269,8 @@ function uploadAnh() {
                 previewImg.alt = 'Ảnh BĐS';
                 preview.appendChild(previewImg);
             }
-            previewImg.src = `../../../storage/pictures/bds/${data.filename}`;
+            previewImg.src = `../../../storage/pictures/bds/${data.filename}?t=` + new Date().getTime();
+
             
             fileInput.value = ""; 
             // window.location.href = 'trangchu.php?page=../moi_gioi/sp_canhan';
