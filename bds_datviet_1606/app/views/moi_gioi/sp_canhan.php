@@ -145,12 +145,11 @@ function format_price_vietnamese(float $price): string {
 <th class="py-3 px-4 text-left text-sm font-semibold text-slate-500 uppercase">Trạng thái</th>
 <th class="py-3 px-4 text-left text-sm font-semibold text-slate-500 uppercase">Đánh giá</th>
 <th class="px-4 py-3 text-center text-sm font-semibold text-slate-500 uppercase">Hành động</th>
-<th class="px-4 py-3 text-center text-sm font-semibold text-slate-500 uppercase">Chi tiết</th>
 </tr>
 </thead>
 <tbody class="divide-y divide-gray-100">
 <?php if(empty($products)): ?>
-<tr><td colspan="8" class="text-center text-gray-500 py-6">Không có sản phẩm nào phù hợp.</td></tr>
+<tr><td colspan="7" class="text-center text-gray-500 py-6">Không có sản phẩm nào phù hợp.</td></tr>
 <?php else: ?>
 <?php foreach($products as $product): ?>
 <tr class="hover:bg-gray-50 transition">
@@ -175,47 +174,30 @@ function format_price_vietnamese(float $price): string {
 <td class="px-4 py-3 text-sm text-yellow-500 font-semibold">
 <?= number_format((float)$product['rating'],1) ?> ⭐
 </td>
-<td class="px-4 py-3 text-center">
-<a href="trangchu.php?page=../moi_gioi/sua_san_pham&id=<?= e($product['id']) ?>" class="text-blue-600 hover:text-blue-800 mr-2">
-<i class="fas fa-edit"></i> Sửa</a>
-<a href="xoa_san_pham.php?id=<?= e($product['id']) ?>" class="text-red-600 hover:text-red-800"
-   onclick="return confirm('Bạn có chắc muốn xóa sản phẩm này?');">
-<i class="fas fa-trash"></i> Xóa</a>
-</td>
-<td class="px-4 py-3 text-center">
-    <button onclick="toggleDetail('detail-<?= $product['id'] ?>')" 
-            class="text-indigo-600 hover:text-indigo-800">
+<td class="px-4 py-3 text-center space-x-2">
+    <!-- Nút Xem -->
+    <a href="trangchu.php?page=../moi_gioi/xem_san_pham&id=<?= e($product['id']) ?>" 
+       class="text-indigo-600 hover:text-indigo-800">
         <i class="fas fa-eye"></i> Xem
-    </button>
-</td>
-</tr>
-<tr id="detail-<?= $product['id'] ?>" class="detail-row hidden bg-gray-50">
-    <td colspan="8" class="px-4 py-3 text-sm text-gray-700">
-        <p><b>Địa chỉ:</b> <?= e($product['dia_chi'] ?? 'Chưa cập nhật') ?></p>
-        <p><b>Mô tả:</b> <?= e($product['mo_ta'] ?? 'Chưa cập nhật') ?></p>
-        <p><b>Hình thức:</b> <?= e($product['hinh_thuc'] ?? 'Chưa cập nhật') ?></p>
-        <p><b>Ảnh phụ:</b>
-            <?php
-            $stmtImgs = $pdo->prepare("SELECT url FROM hinh_anh_bds WHERE id_bds=:id_bds ORDER BY ngay_tao DESC");
-            $stmtImgs->execute([':id_bds'=>$product['id']]);
-            $imgs = $stmtImgs->fetchAll(PDO::FETCH_ASSOC);
-            foreach($imgs as $im){ 
-                echo '<img src="../../../storage/pictures/bds/'.e($im['url']).'" class="w-16 h-16 object-cover inline-block mr-2 mt-1 rounded border">';
-            }
-            ?>
-        </p>
-    </td>
-</tr>
+    </a>
 
+    <!-- Nút Sửa -->
+    <a href="trangchu.php?page=../moi_gioi/sua_san_pham&id=<?= e($product['id']) ?>" 
+       class="text-blue-600 hover:text-blue-800">
+        <i class="fas fa-edit"></i> Sửa
+    </a>
+
+    <!-- Nút Xóa -->
+    <a href="xoa_san_pham.php?id=<?= e($product['id']) ?>" 
+       class="text-red-600 hover:text-red-800"
+       onclick="return confirm('Bạn có chắc muốn xóa sản phẩm này?');">
+        <i class="fas fa-trash"></i> Xóa
+    </a>
+</td>
+
+</tr>
 <?php endforeach; ?>
 <?php endif; ?>
-<script>
-function toggleDetail(id){
-    const row = document.getElementById(id);
-    row.classList.toggle('hidden');
-}
-</script>
-
 </tbody>
 </table>
 </div>
