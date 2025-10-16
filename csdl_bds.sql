@@ -306,6 +306,10 @@ CREATE TABLE IF NOT EXISTS lich_trinh (
     CONSTRAINT chk_lichtrinh_trangthai CHECK (trang_thai IN ('choxacnhan', 'daxacnhan', 'dahuy'))
 );
 
+alter table lich_trinh add column dia_diem VARCHAR(255)
+select * from lich_trinh
+update lich_trinh set tieu_de='hè lô ì vé rì quan'
+
 -- 1. Bảng tin đăng
 CREATE TABLE tin_tuc (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),       
@@ -313,17 +317,18 @@ CREATE TABLE tin_tuc (
     tieu_de VARCHAR(200) NOT NULL DEFAULT 'chuacapnhat',
     mo_ta TEXT DEFAULT 'chuacapnhat',
     chuyen_muc VARCHAR(100) DEFAULT 'chuacapnhat',                  
-    trang_thai VARCHAR(50) DEFAULT 'choduyet',  -- 'choduyet','dangban','daban','dathue', 
+    trang_thai VARCHAR(50) DEFAULT 'choduyet',  
 	anh_tin TEXT DEFAULT 'chuacapnhat.png',
     luot_xem INT,
     ngay_dang TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_tin_khachhang FOREIGN KEY (id_khach_hang) REFERENCES nguoi_dung(id) ON DELETE CASCADE
 );
 
--- select nd.id from nguoi_dung nd
--- left join phan_quyen pq on pq.id_nguoi_dung=nd.id
--- left join quyen q on q.id=pq.id_quyen
--- where q.vai_tro='moigioi'
+select nd.id, i.ho_ten from nguoi_dung nd
+left join info_nguoi_dung i on i.id_nguoi_dung = nd.id
+left join phan_quyen pq on pq.id_nguoi_dung=nd.id
+left join quyen q on q.id=pq.id_quyen
+where q.vai_tro='khachhang'
 
 CREATE TABLE hop_thoai (
 	id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), 
