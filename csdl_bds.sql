@@ -123,6 +123,7 @@ CREATE TABLE IF NOT EXISTS bat_dong_san (
     CONSTRAINT chk_hinh_thuc_bds CHECK (hinh_thuc IN ('ban', 'chothue', 'chuacapnhat'))
 );
 
+select * from bai_dang where id='0481aadb-9e87-4148-bc89-45b4542e0c35'
 CREATE TABLE IF NOT EXISTS bai_dang (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     id_nguoi_dung UUID NOT NULL,     -- Người đăng bài tin này

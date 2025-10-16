@@ -127,6 +127,7 @@
                 'Quản lý tin tức (Admin)' => ['link' => 'ql_tintuc', 'roles' => ['quantri']],
                 'Quản lý bài đăng (Admin)' => ['link' => 'ql_baidang', 'roles' => ['quantri']],
                 'Quản lý tin tức (MG)' => ['link' => '../moi_gioi/ql_tintuc_mg', 'roles' => ['moigioi']],
+                'Quản lý bài đăng (MG)' => ['link' => '../moi_gioi/ql_baidang_mg', 'roles' => ['moigioi']],
             ]
         ],
         [
@@ -138,7 +139,8 @@
                 'Quản lý hộp thoại chat' => ['link' => 'ql_hopthoai', 'roles' => ['quantri']],
                 'Gửi thông báo khách (MG)' => ['link' => '../moi_gioi/g_thongbao_kh', 'roles' => ['moigioi']],
                 'Quản lý thông báo (MG)' => ['link' => '../moi_gioi/ql_thongbao', 'roles' => ['moigioi']],
-                'Quản lý thông báo' => ['link' => 'ql_thongbao', 'roles' => ['quantri']]
+                'Quản lý thông báo' => ['link' => 'ql_thongbao', 'roles' => ['quantri']],
+                'Chat trực tuyến' => ['link' => '../moi_gioi/chat_tt', 'roles' => ['moigioi']]
             ]
         ],
         [
