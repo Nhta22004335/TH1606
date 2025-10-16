@@ -1,82 +1,51 @@
 <?php 
-// =================================================================
-// 1. KẾT NỐI CƠ SỞ DỮ LIỆU
-// =================================================================
 require_once "../../../config/database.php"; 
 try {
-    $pdo = ketnoicsdl(); // Hàm này trả về đối tượng PDO
+    $pdo = ketnoicsdl();
 } catch (PDOException $e) {
     die("Không thể kết nối đến cơ sở dữ liệu: " . $e->getMessage());
 }
 
-// Lấy từ khóa tìm kiếm (nếu có)
 $search = $_GET['search'] ?? '';
-$search = trim($search); // loại bỏ khoảng trắng thừa
+$search = trim($search); 
 
-// =================================================================
-// 2. TRUY VẤN DỮ LIỆU (CÓ LỌC THEO TỪ KHÓA)
-// =================================================================
 $sql = "
     SELECT 
-        bd.id,
-        bd.tieu_de,
-        bd.gia,
-        bd.ngay_dang,
-        bd.luot_xem,
-        bd.trang_thai,
-        bds.dien_tich,
-        bds.khu_vuc AS dia_chi,
-        info.ho_ten AS ten_moigioi,
-        nd.avt AS avatar_moigioi,
+        bd.id, bd.tieu_de, bd.gia, bd.ngay_dang, bd.luot_xem, bd.trang_thai,
+        bds.dien_tich, bds.khu_vuc AS dia_chi,
+        info.ho_ten AS ten_moigioi, nd.avt AS avatar_moigioi,
         (SELECT url FROM hinh_anh_bds WHERE id_bds = bds.id ORDER BY ngay_tao ASC LIMIT 1) AS anh_bia
-    FROM 
-        bai_dang AS bd
-    JOIN 
-        bat_dong_san AS bds ON bd.id_bat_dong_san = bds.id
-    JOIN 
-        nguoi_dung AS nd ON bd.id_nguoi_dung = nd.id
-    LEFT JOIN 
-        info_nguoi_dung AS info ON nd.id = info.id_nguoi_dung
+    FROM bai_dang AS bd
+    JOIN bat_dong_san AS bds ON bd.id_bat_dong_san = bds.id
+    JOIN nguoi_dung AS nd ON bd.id_nguoi_dung = nd.id
+    LEFT JOIN info_nguoi_dung AS info ON nd.id = info.id_nguoi_dung
 ";
 
-// Nếu có nhập từ khóa thì thêm điều kiện WHERE
+$params = [];
+
 if (!empty($search)) {
-    $sql .= "
-        WHERE 
-            LOWER(bd.tieu_de) LIKE LOWER(:search)
-            OR LOWER(bds.khu_vuc) LIKE LOWER(:search)
-            OR LOWER(info.ho_ten) LIKE LOWER(:search)
-    ";
+    $searchable_columns = "bd.tieu_de || ' ' || bds.khu_vuc || ' ' || COALESCE(info.ho_ten, '')";
+    $sql .= " WHERE REPLACE(unaccent({$searchable_columns}), ' ', '') ILIKE REPLACE(unaccent(:search), ' ', '')";
+    $params[':search'] = "%" . $search . "%";
 }
 
 $sql .= " ORDER BY bd.ngay_dang DESC;";
-
 $stmt = $pdo->prepare($sql);
-
-// Nếu có từ khóa thì gán giá trị vào câu truy vấn
 if (!empty($search)) {
-    $stmt->bindValue(':search', "%$search%", PDO::PARAM_STR);
+    $stmt->bindValue(':search', $params[':search'], PDO::PARAM_STR);
 }
-
 $stmt->execute();
 $baidang = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// =================================================================
-// 3. XỬ LÝ ẢNH, AVATAR, GIÁ TRỊ MẶC ĐỊNH
-// =================================================================
 foreach ($baidang as $key => $post) {
     if (empty($post['anh_bia'])) {
         $baidang[$key]['anh_bia'] = 'https://picsum.photos/300/200?random=' . $key;
     } else {
         $baidang[$key]['anh_bia'] = '../../../storage/pictures/bds/' . $post['anh_bia'];
     }
-
     $baidang[$key]['avatar_moigioi'] = '../../../storage/pictures/avt/' . ($post['avatar_moigioi'] ?? 'default-avatar.png');
 }
 
-// =================================================================
-// 4. HÀM HIỂN THỊ VÀ THỐNG KÊ
-// =================================================================
 function getStatusBadge($status) {
     $map = [
         'chuaduyet' => ['text' => 'Chờ duyệt', 'class' => 'bg-orange-100 text-orange-800'],
@@ -97,12 +66,9 @@ $stats = [
     'total'   => count($baidang),
 ];
 
-// Hàm rút gọn tiêu đề
 function truncate_string($string, $word_limit) {
     $words = explode(' ', $string);
-    return (count($words) > $word_limit) 
-        ? implode(' ', array_slice($words, 0, $word_limit)) . '...' 
-        : $string;
+    return (count($words) > $word_limit) ? implode(' ', array_slice($words, 0, $word_limit)) . '...' : $string;
 }
 ?>
 
@@ -113,14 +79,10 @@ function truncate_string($string, $word_limit) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý Bài đăng</title>
     <style>
-        [x-cloak] { display: none !important; }
         summary::marker { content: ''; }
     </style>
 </head>
-<body class="h-full">
-
-
-    
+<body class="h-full p-6">
     <header>
         <div class="sm:flex sm:items-center sm:justify-between mb-6 pb-4 border-b">
             <div>
@@ -138,23 +100,9 @@ function truncate_string($string, $word_limit) {
     </header>
 
     <main class="mt-6">
-
-        <form action="" id="search-form" method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <input 
-                type="text" 
-                id="search-input"
-                name="keyword" 
-                value="<?= htmlspecialchars($_GET['search'] ?? '') ?>" 
-                placeholder="Tìm theo tiêu đề, địa chỉ..." 
-                class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
-            >
-            
-            <button 
-                type="submit" id="search-button"
-                class="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-indigo-700"
-            >
-                Tìm
-            </button>
+        <form action="" id="search-form" method="GET" class="mb-6">
+             <input type="hidden" name="page" value="ql_baidang">
+             <input type="text" id="search-input" name="search" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>" placeholder="Tìm theo tiêu đề, địa chỉ..." class="w-full sm:w-80 border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
         </form>
     
         <div class="bg-white shadow-lg rounded-lg overflow-hidden">
@@ -173,26 +121,8 @@ function truncate_string($string, $word_limit) {
                     <tbody class="divide-y divide-slate-100">
                         <?php foreach ($baidang as $post): ?>
                             <tr class="hover:bg-slate-50 transition-colors">
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-4">
-                                        <img src="<?= htmlspecialchars($post['anh_bia']) ?>" class="w-24 h-16 rounded-md object-cover flex-shrink-0">
-                                        <div>
-                                            <p class="font-semibold text-slate-800 text-sm" title="<?= htmlspecialchars($post['tieu_de']) ?>">
-                                                <?= htmlspecialchars(truncate_string($post['tieu_de'], 8)) ?>
-                                            </p>
-                                            <p class="text-xs text-slate-500">
-                                                <?= number_format($post['gia'], 0, ',', '.') ?> VNĐ &bull; 
-                                                <?= htmlspecialchars($post['dien_tich']) ?>m²
-                                            </p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center gap-2">
-                                        <img src="<?= htmlspecialchars($post['avatar_moigioi']) ?>" class="w-8 h-8 rounded-full">
-                                        <span class="text-sm font-medium text-slate-700"><?= htmlspecialchars($post['ten_moigioi'] ?? 'Chưa cập nhật') ?></span>
-                                    </div>
-                                </td>
+                                <td class="px-6 py-4"><div class="flex items-center gap-4"><img src="<?= htmlspecialchars($post['anh_bia']) ?>" class="w-24 h-16 rounded-md object-cover flex-shrink-0"><div><p class="font-semibold text-slate-800 text-sm" title="<?= htmlspecialchars($post['tieu_de']) ?>"><?= htmlspecialchars(truncate_string($post['tieu_de'], 8)) ?></p><p class="text-xs text-slate-500"><?= number_format($post['gia'], 0, ',', '.') ?> VNĐ &bull; <?= htmlspecialchars($post['dien_tich']) ?>m²</p></div></div></td>
+                                <td class="px-6 py-4 whitespace-nowrap"><div class="flex items-center gap-2"><img src="<?= htmlspecialchars($post['avatar_moigioi']) ?>" class="w-8 h-8 rounded-full"><span class="text-sm font-medium text-slate-700"><?= htmlspecialchars($post['ten_moigioi'] ?? 'Chưa cập nhật') ?></span></div></td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500"><?= date('d/m/Y H:i', strtotime($post['ngay_dang'])) ?></td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium text-slate-700"><?= number_format($post['luot_xem']) ?></td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center"><?= getStatusBadge($post['trang_thai']) ?></td>
@@ -201,24 +131,20 @@ function truncate_string($string, $word_limit) {
                                         <summary class="list-none cursor-pointer p-2 text-slate-500 hover:text-slate-800"><i class="fa-solid fa-ellipsis-vertical"></i></summary>
                                         <div class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
                                             <div class="py-1" role="menu">
-                                                <?php if ($post['trang_thai'] === 'chuaduyet'): ?>
-                                                    <a href="#" class="block px-4 py-2 text-sm text-green-700 hover:bg-slate-100 btn-action" 
-                                                    data-id="<?= htmlspecialchars($post['id']) ?>" data-action="approve" role="menuitem">
-                                                    <i class="fa-solid fa-check mr-2"></i>Duyệt bài
-                                                    </a>
-                                                    <a href="#" class="block px-4 py-2 text-sm text-red-700 hover:bg-slate-100 btn-action" 
-                                                    data-id="<?= htmlspecialchars($post['id']) ?>" data-action="reject" role="menuitem">
-                                                    <i class="fa-solid fa-ban mr-2"></i>Từ chối
-                                                    </a>
-                                                <?php else: ?>
-                                                    <a href="#" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" role="menuitem"
-                                                    data-id="<?= htmlspecialchars($post['id']) ?>" data-action="gobai">
-                                                        <i class="fa-solid fa-eye-slash mr-2"></i>Gỡ bài
-                                                    </a>
+                                                <?php if ($post['trang_thai'] !== 'hethan'): ?>
+                                                    <?php if ($post['trang_thai'] === 'chuaduyet'): ?>
+                                                        <a href="#" class="block px-4 py-2 text-sm text-green-700 hover:bg-slate-100 btn-action" data-id="<?= htmlspecialchars($post['id']) ?>" data-action="approve" role="menuitem"><i class="fa-solid fa-check mr-2"></i>Duyệt bài</a>
+                                                    <?php endif; ?>
+
+                                                    <?php if (in_array($post['trang_thai'], ['daduyet', 'daban', 'dathue', 'hethan'])): ?>
+                                                        <a href="#" class="block px-4 py-2 text-sm text-red-700 hover:bg-slate-100 btn-action" data-id="<?= htmlspecialchars($post['id']) ?>" data-action="reject" role="menuitem"><i class="fa-solid fa-ban mr-2"></i>Gỡ bài</a>
+                                                    <?php endif; ?>
+                                                    
+                                                    <?php if ($post['trang_thai'] === 'an'): ?>
+                                                        <a href="#" class="block px-4 py-2 text-sm text-blue-700 hover:bg-slate-100 btn-action" data-id="<?= htmlspecialchars($post['id']) ?>" data-action="redisplay" role="menuitem"><i class="fa-solid fa-eye mr-2"></i>Hiển thị lại</a>
+                                                    <?php endif; ?>
                                                 <?php endif; ?>
-                                                <a href="trangchu.php?page=chitiet_baidang&id=<?= htmlspecialchars($post['id']) ?>" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" role="menuitem">
-                                                    <i class="fa-solid fa-circle-info mr-2"></i>Xem chi tiết
-                                                </a>
+                                                <a href="trangchu.php?page=chitiet_baidang&id=<?= htmlspecialchars($post['id']) ?>" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" role="menuitem"><i class="fa-solid fa-circle-info mr-2"></i>Xem chi tiết</a>
                                             </div>
                                         </div>
                                     </details>
@@ -230,96 +156,92 @@ function truncate_string($string, $word_limit) {
             </div>
             <div class="p-4 flex items-center justify-between border-t border-slate-200">
                 <span class="text-sm text-slate-600">Hiển thị <strong>1-<?= count($baidang) ?></strong> trên <strong><?= count($baidang) ?></strong> kết quả</span>
-                </div>
+            </div>
         </div>
     </main>
+</body>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Lắng nghe sự kiện click trên toàn bộ tài liệu
-            document.body.addEventListener('click', function(event) {
-                
-                // Kiểm tra xem phần tử được click có phải là nút hành động không
-                const actionButton = event.target.closest('.btn-action');
-                
-                if (actionButton) {
-                    event.preventDefault(); // Ngăn hành vi mặc định của thẻ <a>
-                    
-                    const postId = actionButton.dataset.id;
-                    const action = actionButton.dataset.action;
-                    
-                    let confirmationMessage = '';
-                    if (action === 'approve') {
-                        confirmationMessage = 'Bạn có chắc chắn muốn DUYỆT bài đăng này?';
-                    } else if (action === 'reject') {
-                        confirmationMessage = 'Bạn có chắc chắn muốn TỪ CHỐI bài đăng này? Bài đăng sẽ bị ẩn đi.';
-                    } else if (action === 'gobai') {
-                        confirmationMessage = 'Bạn có chắc chắn muốn Gỡ bài đăng này? Bài đăng sẽ bị gỡ đi.';
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // --- PHẦN 1: LOGIC GIAO DIỆN (MENU, TÌM KIẾM) ---
+
+    // Tự động đóng menu <details>
+    const allDetails = document.querySelectorAll('details');
+    allDetails.forEach(details => {
+        details.addEventListener('toggle', event => {
+            if (details.open) {
+                allDetails.forEach(otherDetails => {
+                    if (otherDetails !== details) {
+                        otherDetails.open = false;
                     }
-
-                    // Hiển thị hộp thoại xác nhận
-                    if (!confirm(confirmationMessage)) {
-                        return; // Nếu người dùng hủy, không làm gì cả
-                    }
-
-                    // Gửi yêu cầu đến server
-                    fetch('../../models/duyet_baidang.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            id: postId,
-                            action: action
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        // Hiển thị thông báo kết quả và tải lại trang để cập nhật
-                        alert(data.message);
-                        if (data.status === 'success') {
-                            location.reload();
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Lỗi:', error);
-                        alert('Đã xảy ra lỗi khi thực hiện hành động. Vui lòng thử lại.');
-                    });
-                }
-            });
-        });
-
-        // 1. Lấy các phần tử HTML cần thiết qua ID
-        const searchForm = document.getElementById('search-form');
-        const searchInput = document.getElementById('search-input');
-        const searchButton = document.getElementById('search-button');
-
-        // 2. Hàm để thực hiện submit
-        function submitSearch() {
-            const searchValue = searchInput.value;
-
-            const encodedSearchValue = encodeURIComponent(searchValue.trim());
-
-            const newUrl = `trangchu.php?page=ql_baidang&search=${encodedSearchValue}`;
-            const trove = `trangchu.php?page=ql_baidang `;
-            if (searchValue) {
-                window.location.href = newUrl;          
-            } else {
-                window.location.href = trove;
+                });
             }
+        });
+    });
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('details')) {
+            allDetails.forEach(details => {
+                details.open = false;
+            });
+        }
+    });
+
+    // Tự động tìm kiếm khi người dùng ngừng gõ
+    const searchForm = document.getElementById('search-form');
+    if(searchForm){
+        const searchInput = document.getElementById('search-input');
+        let searchTimeout;
+        searchInput.addEventListener('keyup', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                searchForm.submit();
+            }, 500);
+        });
+        searchForm.addEventListener('submit', function() {
+            clearTimeout(searchTimeout);
+        });
+    }
+
+    // --- PHẦN 2: LOGIC XỬ LÝ HÀNH ĐỘNG VỚI FETCH ---
+    const apiUrl = '../../models/duyet_baidang.php'; // Đường dẫn đến file API
+
+    document.body.addEventListener('click', function(event) {
+        const actionButton = event.target.closest('.btn-action');
+        if (!actionButton) return;
+        
+        event.preventDefault(); // Ngăn hành vi mặc định của thẻ <a>
+        
+        const postId = actionButton.dataset.id;
+        const action = actionButton.dataset.action;
+        
+        const messages = {
+            approve: 'Bạn có chắc chắn muốn DUYỆT bài đăng này?',
+            reject: 'Bạn có chắc chắn muốn GỠ bài đăng này? Bài đăng sẽ bị ẩn đi.',
+            redisplay: 'Bạn có chắc chắn muốn HIỂN THỊ LẠI bài đăng này?'
+        };
+
+        if (!confirm(messages[action] || 'Bạn có chắc chắn muốn thực hiện hành động này?')) {
+            return;
         }
 
-        // 3. Gán sự kiện nhấn cho nút bấm
-        searchButton.addEventListener('click', function(event) {
-            event.preventDefault(); 
-            submitSearch();
+        // Gửi yêu cầu đến server
+        fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: postId, action: action })
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            if (data.status === 'success') {
+                location.reload(); // Tải lại trang để cập nhật giao diện
+            }
+        })
+        .catch(error => {
+            console.error('Lỗi:', error);
+            alert('Đã xảy ra lỗi khi thực hiện hành động. Vui lòng thử lại.');
         });
-
-        // 4. Gán sự kiện bỏ focus cho ô tìm kiếm
-        searchInput.addEventListener('blur', function() {
-            submitSearch(); // thực hiện tìm kiếm khi rời khỏi ô input
-        });
-    </script>
-
-</body>
+    });
+});
+</script>
 </html>

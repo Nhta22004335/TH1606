@@ -25,7 +25,7 @@ function redirectWithMessage($message, $status = 'success') {
 }
 
 // Thư mục upload
-$upload_dir = "../../../storage/bds/";
+$upload_dir = "../../../storage/pictures/bds/";
 // Đảm bảo thư mục tồn tại
 if (!is_dir($upload_dir)) {
     if (!mkdir($upload_dir, 0777, true)) {
@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($tieu_de) || empty($mo_ta) || empty($hinh_thuc) || $gia <= 0 || $dien_tich <= 0 || empty($dia_chi) || empty($khu_vuc)) {
         redirectWithMessage("Vui lòng điền đầy đủ và chính xác các thông tin bắt buộc.", 'error');
     }
-    
+    echo '123';
     // Bắt đầu Transaction
     $pdo->beginTransaction();
     $error = false;
@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         $sql_bds = "
             INSERT INTO bat_dong_san (id_nguoi_dung, tieu_de, mo_ta, loai, khu_vuc, gia, dien_tich, dia_chi, trang_thai)
-            VALUES (:id_nguoi_dung, :tieu_de, :mo_ta, :loai_hinhthuc, :khu_vuc, :gia, :dien_tich, :dia_chi, 'chuaduyet')
+            VALUES (:id_nguoi_dung, :tieu_de, :mo_ta, :loai, :khu_vuc, :gia, :dien_tich, :dia_chi, 'chuaduyet')
             RETURNING id
         ";
 
@@ -71,13 +71,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':id_nguoi_dung' => $id_nguoi_dung,
             ':tieu_de'       => $tieu_de,
             ':mo_ta'         => $mo_ta,
-            ':loai_hinhthuc' => $hinh_thuc, 
+            ':loai'          => $loai,
             ':khu_vuc'       => $khu_vuc, 
             ':gia'           => $gia,
             ':dien_tich'     => $dien_tich,
             ':dia_chi'       => $dia_chi
         ]);
-        
         // Lấy ID BĐS vừa tạo (Chỉ định rõ cột 'id' từ lệnh RETURNING)
         $id_bds_moi = $stmt->fetchColumn(); 
         
@@ -148,11 +147,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         if ($media_paths['video'] && file_exists($upload_dir . $media_paths['video'])) {
-            @unlink($upload_dir . $media_paths['video']);
+            unlink($upload_dir . $media_paths['video']);
         }
         
         error_log("Lỗi xử lý đăng BĐS: " . $e->getMessage());
         redirectWithMessage("Lỗi: Không thể hoàn tất đăng sản phẩm. Chi tiết: " . $e->getMessage(), 'error');
     }
+
 }
 ?>

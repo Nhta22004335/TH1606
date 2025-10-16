@@ -1,7 +1,6 @@
 <?php
     require_once "../../../config/database.php";
 
-    // --- 1. THIẾT LẬP KẾT NỐI VÀ CÁC HÀM HELPER ---
     try {
         $pdo = ketnoicsdl();
     } catch (PDOException $e) {
@@ -22,13 +21,11 @@
         return $html;
     }
 
-    // --- 2. XỬ LÝ ĐẦU VÀO (PAGINATION & SEARCH) ---
-    $limit = 10; // Số sản phẩm mỗi trang
+    $limit = 10;
     $page = isset($_GET['p']) && is_numeric($_GET['p']) ? (int)$_GET['p'] : 1;
     $offset = ($page - 1) * $limit;
     $search = $_GET['search'] ?? '';
 
-    // --- 3. XÂY DỰNG VÀ THỰC THI CÂU TRUY VẤN ---
     $baseSql = "
         FROM bat_dong_san bds
         LEFT JOIN danh_gia_bds dg ON bds.id = dg.id_bds
@@ -37,7 +34,8 @@
     $params = [];
 
     if (!empty($search)) {
-        $whereClauses[] = "bds.tieu_de ILIKE :search";
+        // Áp dụng unaccent và replace để tìm kiếm không phân biệt dấu, khoảng trắng, chữ hoa/thường
+        $whereClauses[] = "REPLACE(unaccent(bds.tieu_de), ' ', '') ILIKE REPLACE(unaccent(:search), ' ', '')";
         $params[':search'] = '%' . $search . '%';
     }
     
@@ -94,16 +92,16 @@
 
     <!-- Khối tìm kiếm và thông tin -->
     <div class="mb-5">
-        <form method="GET">
+        <form method="GET" id="search-form">
             <input type="hidden" name="page" value="ql_danhgia">
             <div class="flex items-center">
                 <div class="relative flex-grow">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <i class="fa-solid fa-search text-gray-400"></i>
                     </div>
-                    <input type="search" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Tìm theo tên bất động sản..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    <input type="search" id="search-input" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Tìm theo tên bất động sản..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                 </div>
-                <button type="submit" class="ml-3 px-5 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition">Tìm</button>
+                <button type="submit" id="search-button" class="ml-3 px-5 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition">Tìm</button>
             </div>
         </form>
         <p class="text-xs text-gray-500 mt-2">
@@ -163,7 +161,7 @@
                             </td>
                             <td class="px-4 py-4 whitespace-nowrap text-center text-sm font-medium">
                                 <a href="trangchu.php?page=ql_danhgia_ct&id=<?= urlencode($sp['id']) ?>" 
-                                   class="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-900 disabled:opacity-50 disabled:pointer-events-none transition-colors"
+                                   class="inline-flex items-center gap-2 text-sm text-indigo-500 hover:text-indigo-800 disabled:opacity-50 disabled:pointer-events-none transition-colors"
                                    <?= ($sp['tong_so_danh_gia'] == 0) ? 'aria-disabled="true" tabindex="-1"' : '' ?>>
                                     Xem chi tiết
                                     <i class="fa-solid fa-arrow-right text-xs"></i>
@@ -195,5 +193,37 @@
         </nav>
     <?php endif; ?>
 
+    <script>
+        // 1. Lấy các phần tử HTML cần thiết qua ID
+        const searchForm = document.getElementById('search-form');
+        const searchInput = document.getElementById('search-input');
+        const searchButton = document.getElementById('search-button');
+
+        // 2. Hàm để thực hiện submit
+        function submitSearch() {
+            const searchValue = searchInput.value;
+
+            const encodedSearchValue = encodeURIComponent(searchValue.trim());
+
+            const newUrl = `trangchu.php?page=ql_danhgia&search=${encodedSearchValue}`;
+            const trove = `trangchu.php?page=ql_danhgia`;
+            if (searchValue) {
+                window.location.href = newUrl;          
+            } else {
+                window.location.href = trove;
+            }
+        }
+
+        // 3. Gán sự kiện nhấn cho nút bấm
+        searchButton.addEventListener('click', function(event) {
+            event.preventDefault(); 
+            submitSearch();
+        });
+
+        // 4. Gán sự kiện bỏ focus cho ô tìm kiếm
+        searchInput.addEventListener('blur', function() {
+            submitSearch(); // thực hiện tìm kiếm khi rời khỏi ô input
+        });
+    </script>
 </body>
 </html>

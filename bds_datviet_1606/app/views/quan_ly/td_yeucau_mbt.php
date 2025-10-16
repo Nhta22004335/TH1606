@@ -1,5 +1,4 @@
 <?php
-// PHẦN LOGIC PHP CỦA BẠN - GIỮ NGUYÊN HOÀN TOÀN
 if (session_status() == PHP_SESSION_NONE) { session_start(); }
 require_once "../../../config/database.php";
 $pdo = ketnoicsdl();
@@ -12,9 +11,7 @@ $sql_yeucau = "
     JOIN nguoi_dung nd ON yc.id_nguoi_dung = nd.id
     LEFT JOIN bat_dong_san bds ON yc.id_bds = bds.id
     LEFT JOIN info_nguoi_dung info ON info.id_nguoi_dung = nd.id
-    ORDER BY
-        CASE yc.trang_thai WHEN 'choxuly' THEN 1 WHEN 'daduyet' THEN 2 WHEN 'dahuy' THEN 3 ELSE 4 END ASC,
-        yc.ngay_tao DESC
+    ORDER BY yc.ngay_tao DESC
 ";
 $stmt_yeucau = $pdo->query($sql_yeucau);
 $yeucau_list = $stmt_yeucau->fetchAll(PDO::FETCH_ASSOC);
@@ -27,7 +24,7 @@ function getRequestBadgeInfo($type, $value) {
             'thue' => ['text' => 'Thuê', 'class' => 'bg-yellow-100 text-yellow-800'],
         ],
         'trang_thai' => [
-            'choxuly' => ['text' => 'Chờ xử lý', 'class' => 'bg-orange-100 text-orange-800 animate-pulse'],
+            'choxuly' => ['text' => 'Chờ xử lý', 'class' => 'bg-orange-100 text-orange-800'],
             'daduyet' => ['text' => 'Đã duyệt', 'class' => 'bg-green-100 text-green-800'],
             'dahuy' => ['text' => 'Đã hủy', 'class' => 'bg-red-100 text-red-700'],
         ]
@@ -81,48 +78,39 @@ $stats = [
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
-                    <tr>
-                        <th scope="col" class="py-3 px-4 text-left text-xs font-bold text-gray-500 uppercase">Khách hàng</th>
-                        <th scope="col" class="py-3 px-4 text-left text-xs font-bold text-gray-500 uppercase">Loại YC</th>
-                        <th scope="col" class="py-3 px-4 text-left text-xs font-bold text-gray-500 uppercase">BĐS Quan tâm</th>
-                        <th scope="col" class="py-3 px-4 text-left text-xs font-bold text-gray-500 uppercase">Trạng thái</th>
-                        <th scope="col" class="py-3 px-4 text-left text-xs font-bold text-gray-500 uppercase">Ngày tạo</th>
-                        <th scope="col" class="py-3 px-4 text-left text-xs font-bold text-gray-500 uppercase">Hành động</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200">
+                    </thead>
+                <tbody id="requests-table-body" class="divide-y divide-gray-200">
                     <?php foreach ($yeucau_list as $row): ?>
-                        <tr class="hover:bg-gray-50">
+                        <tr id="request-row-<?= $row['id'] ?>" class="hover:bg-gray-50">
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><?= htmlspecialchars($row["ho_ten"] ?? $row["nguoi_dung"]) ?></td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <?php $badge = getRequestBadgeInfo('loai', $row['loai']); ?>
                                 <span class="px-2.5 py-0.5 <?= $badge['class'] ?> rounded-full text-xs font-medium"><?= $badge['text'] ?></span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate max-w-xs" title="<?= htmlspecialchars($row["tieu_de"] ?? '') ?>"><?= htmlspecialchars($row["tieu_de"] ?? "—") ?></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <td class="px-6 py-4 whitespace-nowrap text-center status-cell">
                                 <?php $badge = getRequestBadgeInfo('trang_thai', $row['trang_thai']); ?>
                                 <span class="px-2.5 py-0.5 <?= $badge['class'] ?> rounded-full text-xs font-medium"><?= $badge['text'] ?></span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?= date('d/m/Y', strtotime($row["ngay_tao"])) ?></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <td class="px-6 py-4 whitespace-nowrap text-center actions-cell">
                                 <div class="flex justify-center items-center gap-4">
-                                    <button onclick='requestManager.viewDetails(<?= htmlspecialchars(json_encode($row)) ?>)' class="text-gray-400 hover:text-indigo-600 transition" title="Xem chi tiết">
+                                    <button class="action-btn text-sm text-indigo-600 hover:text-indigo-800 transition" data-action="view" data-request='<?= htmlspecialchars(json_encode($row)) ?>'>
                                         <i class="fas fa-eye"></i>
                                     </button>
 
                                     <?php if($row["trang_thai"] == "choxuly"): ?>
-                                        <button onclick="requestManager.updateStatus('<?= $row['id'] ?>', 'daduyet')" class="text-gray-400 hover:text-green-600 transition" title="Đánh dấu đã duyệt">
+                                        <button class="action-btn text-sm text-green-600 hover:text-green-800 transition" data-id="<?= $row['id'] ?>" data-action="daduyet">
                                             <i class="fas fa-check"></i>
                                         </button>
-                                        <button onclick="requestManager.updateStatus('<?= $row['id'] ?>', 'dahuy')" class="text-gray-400 hover:text-red-600 transition" title="Hủy yêu cầu">
+                                        <button class="action-btn text-sm text-red-600 hover:text-red-800 transition" data-id="<?= $row['id'] ?>" data-action="dahuy">
                                             <i class="fas fa-times-circle"></i>
                                         </button>
                                     <?php elseif($row["trang_thai"] == "daduyet" || $row["trang_thai"] == "dahuy"): ?>
-                                        <button onclick="requestManager.updateStatus('<?= $row['id'] ?>', 'choxuly')" class="text-gray-400 hover:text-yellow-600 transition" title="Hoàn tác về 'Chờ xử lý'">
+                                        <button class="action-btn text-sm text-yellow-400 hover:text-yellow-500 transition" data-id="<?= $row['id'] ?>" data-action="choxuly">
                                             <i class="fas fa-rotate-left"></i>
                                         </button>
                                     <?php endif; ?>
-                                    
                                 </div>
                             </td>
                         </tr>
@@ -153,70 +141,83 @@ $stats = [
 </div>
 
 <script>
-    const requestManager = {
-        currentRequest: {},
-        
-        viewDetails(request) {
-            this.currentRequest = request;
-            const modal = document.getElementById('detailModal');
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- QUẢN LÝ MODAL (Giữ nguyên) ---
+        const modal = document.getElementById('detailModal');
+        const modalContent = document.getElementById('modalContent');
+        const closeModal = () => modal.classList.add('hidden');
+
+        modal.addEventListener('click', (event) => {
+            if (!modalContent.contains(event.target)) {
+                closeModal();
+            }
+        });
+        document.querySelector('#modalContent button').addEventListener('click', closeModal);
+
+        const viewDetails = (request) => {
             document.getElementById('modalRequestId').textContent = request.id.substring(0, 8);
             document.getElementById('modalCustomerName').textContent = request.ho_ten || request.nguoi_dung;
             document.getElementById('modalRequestDate').textContent = new Date(request.ngay_tao).toLocaleDateString('vi-VN');
             document.getElementById('modalPropertyName').textContent = request.tieu_de || 'Chưa có BĐS cụ thể';
             document.getElementById('modalDescription').textContent = request.mo_ta_chi_tiet || 'Không có mô tả.';
             modal.classList.remove('hidden');
-        },
-        
-        closeModal() {
-            document.getElementById('detailModal').classList.add('hidden');
-        },
-        
-        handleAction(url, formData, confirmMsg) {
-            if (confirmMsg && !confirm(confirmMsg)) return;
-            
-            fetch(url, {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: new URLSearchParams(formData).toString()
-            })
-            .then(res => res.json())
-            .then(data => {
-                alert(data.message);
-                if (data.status === "success" || data.status === "warning") {
-                    location.reload();
-                }
-            })
-            .catch(err => console.error("Lỗi:", err));
-        },
-        
-        updateStatus(id, newStatus) {
-            // ===== CẬP NHẬT HÀM XÁC NHẬN =====
-            let actionDescription = '';
-            switch (newStatus) {
-                case 'daduyet':
-                    actionDescription = 'DUYỆT';
-                    break;
-                case 'dahuy':
-                    actionDescription = 'HỦY';
-                    break;
-                case 'choxuly':
-                    actionDescription = 'HOÀN TÁC về trạng thái "Chờ xử lý"';
-                    break;
-                default:
-                    actionDescription = `cập nhật sang '${newStatus.toUpperCase()}'`;
+        };
+
+        // --- XỬ LÝ CÁC HÀNH ĐỘNG VỚI FETCH VÀ EVENT DELEGATION ---
+        const tableBody = document.getElementById('requests-table-body');
+        const apiUrl = '../../models/cn_trangthai_yc.php';
+
+        tableBody.addEventListener('click', async (event) => {
+            const targetButton = event.target.closest('.action-btn');
+            if (!targetButton) return;
+
+            const action = targetButton.dataset.action;
+
+            // Xử lý xem chi tiết
+            if (action === 'view') {
+                const requestData = JSON.parse(targetButton.dataset.request);
+                viewDetails(requestData);
+                return;
             }
 
-            const confirmMsg = `Bạn có chắc muốn ${actionDescription} yêu cầu #${id.substring(0,8)}?`;
-            this.handleAction("../../models/cn_trangthai_yc.php", { id, newStatus }, confirmMsg);
-        },
-    };
+            // Xử lý các hành động cập nhật (Duyệt, Hủy, Hoàn tác)
+            const id = targetButton.dataset.id;
+            const newStatus = action;
 
-    document.addEventListener('DOMContentLoaded', () => {
-        const modal = document.getElementById('detailModal');
-        const modalContent = document.getElementById('modalContent');
-        modal.addEventListener('click', (event) => {
-            if (!modalContent.contains(event.target)) {
-                requestManager.closeModal();
+            const messages = {
+                daduyet: `Bạn có chắc muốn DUYỆT yêu cầu #${id.substring(0,8)}?`,
+                dahuy: `Bạn có chắc muốn HỦY yêu cầu #${id.substring(0,8)}?`,
+                choxuly: `Bạn có chắc muốn HOÀN TÁC yêu cầu #${id.substring(0,8)}?`
+            };
+
+            if (!confirm(messages[newStatus])) return;
+
+            const formData = new FormData();
+            formData.append('id', id);
+            formData.append('newStatus', newStatus);
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('Yêu cầu mạng thất bại.');
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    const row = document.getElementById(`request-row-${id}`);
+                    if (row) {
+                        // Cập nhật giao diện với HTML mới từ server
+                        row.querySelector('.status-cell').innerHTML = result.newStatusHtml;
+                        row.querySelector('.actions-cell').innerHTML = result.newActionsHtml;
+                    }
+                } else {
+                    alert('Lỗi: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Lỗi Fetch:', error);
+                alert('Đã xảy ra lỗi khi gửi yêu cầu.');
             }
         });
     });

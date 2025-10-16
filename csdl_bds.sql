@@ -75,7 +75,8 @@ CREATE TABLE IF NOT EXISTS yeu_cau_otp (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), 
     so_dt VARCHAR(20) NULL,
     email VARCHAR(255) NULL,
-    otp_code VARCHAR(10) NOT NULL,
+	user_data_json jsonb,
+	otp_hash VARCHAR(255),
     trang_thai VARCHAR(20) DEFAULT 'choxacnhan',
     bat_dau TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     het_han TIMESTAMP NOT NULL,
@@ -101,8 +102,6 @@ CREATE TABLE IF NOT EXISTS lich_su_xac_thuc (
     CONSTRAINT fk_lich_su_xac_thuc_nguoi_dung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
     CONSTRAINT chk_lich_su_xac_thuc_time_range CHECK (thoi_gian_ket_thuc IS NULL OR thoi_gian_ket_thuc >= thoi_gian_bat_dau)
 );
-
-select * from lich_su_xac_thuc
 
 -- 7. Bảng bat_dong_san (Lưu thống tin các sản phẩm bất động sản)
 CREATE TABLE IF NOT EXISTS bat_dong_san (
@@ -314,18 +313,17 @@ CREATE TABLE tin_tuc (
     tieu_de VARCHAR(200) NOT NULL DEFAULT 'chuacapnhat',
     mo_ta TEXT DEFAULT 'chuacapnhat',
     chuyen_muc VARCHAR(100) DEFAULT 'chuacapnhat',                  
-    trang_thai VARCHAR(50) DEFAULT 'choduyet',  
+    trang_thai VARCHAR(50) DEFAULT 'choduyet',  -- 'choduyet','dangban','daban','dathue', 
 	anh_tin TEXT DEFAULT 'chuacapnhat.png',
     luot_xem INT,
     ngay_dang TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT chk_trang_thai_tin CHECK (trang_thai IN ('choduyet','dangban','daban','dathue')),
     CONSTRAINT fk_tin_khachhang FOREIGN KEY (id_khach_hang) REFERENCES nguoi_dung(id) ON DELETE CASCADE
 );
 
-select nd.id from nguoi_dung nd
-left join phan_quyen pq on pq.id_nguoi_dung=nd.id
-left join quyen q on q.id=pq.id_quyen
-where q.vai_tro='moigioi'
+-- select nd.id from nguoi_dung nd
+-- left join phan_quyen pq on pq.id_nguoi_dung=nd.id
+-- left join quyen q on q.id=pq.id_quyen
+-- where q.vai_tro='moigioi'
 
 CREATE TABLE hop_thoai (
 	id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), 
@@ -349,6 +347,11 @@ CREATE TABLE tin_nhan (
     -- Ràng buộc: người gửi và người nhận không được trùng
     CONSTRAINT chk_gui_nhan CHECK (nguoi_gui <> nguoi_nhan)
 );
+
+-- select nd.id from nguoi_dung nd
+-- left join phan_quyen pq on pq.id_nguoi_dung=nd.id
+-- left join quyen q on q.id=pq.id_quyen
+-- where q.vai_tro='moigioi' or q.vai_tro='khachhang'
 
 CREATE TABLE lich_su_tim_kiem (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
