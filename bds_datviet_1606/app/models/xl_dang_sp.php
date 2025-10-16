@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($tieu_de) || empty($mo_ta) || empty($hinh_thuc) || $gia <= 0 || $dien_tich <= 0 || empty($dia_chi) || empty($khu_vuc)) {
         redirectWithMessage("Vui lòng điền đầy đủ và chính xác các thông tin bắt buộc.", 'error');
     }
-    
+    echo '123';
     // Bắt đầu Transaction
     $pdo->beginTransaction();
     $error = false;
@@ -77,7 +77,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':dien_tich'     => $dien_tich,
             ':dia_chi'       => $dia_chi
         ]);
-        
         // Lấy ID BĐS vừa tạo (Chỉ định rõ cột 'id' từ lệnh RETURNING)
         $id_bds_moi = $stmt->fetchColumn(); 
         
@@ -148,7 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         if ($media_paths['video'] && file_exists($upload_dir . $media_paths['video'])) {
-            @unlink($upload_dir . $media_paths['video']);
+            unlink($upload_dir . $media_paths['video']);
         }
         
         error_log("Lỗi xử lý đăng BĐS: " . $e->getMessage());

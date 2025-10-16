@@ -105,10 +105,53 @@
                             <label for="dien_tich" class="block text-sm font-medium text-slate-900">Diện tích (m²) <span class="text-red-500">*</span></label>
                             <input type="number" id="dien_tich" name="dien_tich" step="0.1" required placeholder="VD: 80" class="mt-2 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"/>
                         </div>
-                        <div>
+                        <!-- <div>
                             <label for="khu_vuc" class="block text-sm font-medium text-slate-900">Khu vực (Tỉnh/Thành) <span class="text-red-500">*</span></label>
                             <input type="text" id="khu_vuc" name="khu_vuc" required placeholder="VD: TP. Hồ Chí Minh" class="mt-2 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"/>
+                        </div> -->
+                        <div>
+                            <label for="khu_vuc" class="block text-sm font-medium text-slate-900">
+                                Khu vực (Tỉnh/Thành) <span class="text-red-500">*</span>
+                            </label>
+                            <select id="khu_vuc" name="khu_vuc" required
+                                class="mt-2 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                                <option value="">-- Chọn tỉnh/thành --</option>
+                                <option value="Hà Nội">Hà Nội</option>
+                                <option value="Huế">Huế</option>
+                                <option value="Lai Châu">Lai Châu</option>
+                                <option value="Điện Biên">Điện Biên</option>
+                                <option value="Sơn La">Sơn La</option>
+                                <option value="Lạng Sơn">Lạng Sơn</option>
+                                <option value="Quảng Ninh">Quảng Ninh</option>
+                                <option value="Thanh Hóa">Thanh Hóa</option>
+                                <option value="Nghệ An">Nghệ An</option>
+                                <option value="Hà Tĩnh">Hà Tĩnh</option>
+                                <option value="Cao Bằng">Cao Bằng</option>
+                                <option value="Tuyên Quang">Tuyên Quang</option>
+                                <option value="Lào Cai">Lào Cai</option>
+                                <option value="Thái Nguyên">Thái Nguyên</option>
+                                <option value="Phú Thọ">Phú Thọ</option>
+                                <option value="Bắc Ninh">Bắc Ninh</option>
+                                <option value="Hưng Yên">Hưng Yên</option>
+                                <option value="Hải Phòng">Hải Phòng</option>
+                                <option value="Ninh Bình">Ninh Bình</option>
+                                <option value="Quảng Trị">Quảng Trị</option>
+                                <option value="Đà Nẵng">Đà Nẵng</option>
+                                <option value="Quảng Ngãi">Quảng Ngãi</option>
+                                <option value="Gia Lai">Gia Lai</option>
+                                <option value="Khánh Hòa">Khánh Hòa</option>
+                                <option value="Lâm Đồng">Lâm Đồng</option>
+                                <option value="Đắk Lắk">Đắk Lắk</option>
+                                <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
+                                <option value="Đồng Nai">Đồng Nai</option>
+                                <option value="Tây Ninh">Tây Ninh</option>
+                                <option value="Cần Thơ">Cần Thơ</option>
+                                <option value="Vĩnh Long">Vĩnh Long</option>
+                                <option value="Đồng Tháp">Đồng Tháp</option>
+                                <option value="Cà Mau">Cà Mau</option>
+                            </select>
                         </div>
+
                         <div>
                             <label for="dia_chi" class="block text-sm font-medium text-slate-900">Địa chỉ chi tiết <span class="text-red-500">*</span></label>
                             <input type="text" id="dia_chi" name="dia_chi" required placeholder="Số nhà, đường, phường/xã, quận/huyện" class="mt-2 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"/>
