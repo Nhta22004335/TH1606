@@ -1,17 +1,13 @@
 <?php
-// =======================================================
-// TRANG XEM CHI TIẾT SẢN PHẨM - DÀNH CHO MÔI GIỚI
-// =======================================================
-
 require_once "../../../config/database.php";
 $pdo = ketnoicsdl();
 
 if (session_status() === PHP_SESSION_NONE) session_start();
 
 // --- Lấy ID sản phẩm ---
-$id = $_GET['id'] ?? null;
+$id_bds = $_GET['id'] ?? null;
 
-if (!$id) {
+if (!$id_bds) {
     echo "<p class='text-center text-red-600 mt-10 font-semibold'>❌ Thiếu ID sản phẩm!</p>";
     exit;
 }
@@ -28,7 +24,7 @@ $stmt = $pdo->prepare("
     ) ha ON TRUE
     WHERE b.id = :id
 ");
-$stmt->execute(['id' => $id]);
+$stmt->execute(['id' => $id_bds]);
 $sp = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$sp) {
@@ -45,8 +41,19 @@ function format_price_vn($price) {
 }
 
 function e($str) { return htmlspecialchars($str, ENT_QUOTES, 'UTF-8'); }
-?>
 
+// --- Lấy danh sách đánh giá ---
+$stmt = $pdo->prepare("
+    SELECT dg.diem, dg.binh_luan, dg.ngay_tao, i.ho_ten, ha.url AS hinh
+    FROM danh_gia_bds dg
+    LEFT JOIN info_nguoi_dung i ON i.id_nguoi_dung = dg.id_nguoi_dung
+    LEFT JOIN hinh_anh_danh_gia_bds ha ON ha.id_dg_bds = dg.id
+    WHERE dg.id_bds = :id_bds AND dg.trang_thai='hien'
+    ORDER BY dg.ngay_tao DESC
+");
+$stmt->execute([':id_bds'=>$id_bds]);
+$ds_danh_gia = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -91,7 +98,7 @@ function e($str) { return htmlspecialchars($str, ENT_QUOTES, 'UTF-8'); }
 
     <!-- Nút hành động -->
     <div class="flex justify-center gap-4 p-6 border-t">
-        <a href="trangchu.php?page=../moi_gioi/load_bm" 
+        <a href="trangchu.php?page=../moi_gioi/sp_canhan" 
            class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-5 py-2 rounded-lg font-medium">
             ⬅ Quay lại danh sách
         </a>
@@ -100,6 +107,57 @@ function e($str) { return htmlspecialchars($str, ENT_QUOTES, 'UTF-8'); }
             ✏️ Sửa sản phẩm
         </a>
     </div>
+</div>
+
+<!-- Form đánh giá -->
+<div class="max-w-6xl mx-auto mt-6 bg-white p-6 rounded-xl shadow-md">
+    <h3 class="text-xl font-semibold mb-4">Đánh giá BĐS này</h3>
+    <form action="trangchu.php?page=../../models/xu_ly_danh_gia" method="POST" enctype="multipart/form-data" class="space-y-4">
+        <input type="hidden" name="id_bds" value="<?= $id_bds ?>">
+
+        <div>
+            <label for="diem" class="block font-medium">Điểm (1-5):</label>
+            <select name="diem" id="diem" required class="border rounded px-2 py-1">
+                <?php for($i=1;$i<=5;$i++): ?>
+                    <option value="<?= $i ?>"><?= $i ?> ⭐</option>
+                <?php endfor; ?>
+            </select>
+        </div>
+
+        <div>
+            <label for="binh_luan" class="block font-medium">Bình luận:</label>
+            <textarea name="binh_luan" id="binh_luan" rows="4" placeholder="Viết cảm nhận của bạn..." required
+                      class="border rounded w-full px-2 py-1"></textarea>
+        </div>
+
+        <div>
+            <label for="hinh_anh" class="block font-medium">Ảnh (nếu có):</label>
+            <input type="file" name="hinh_anh[]" id="hinh_anh" multiple class="border rounded px-2 py-1 w-full">
+        </div>
+
+        <button  type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium">
+            Gửi đánh giá
+        </button>
+    </form>
+</div>
+
+<!-- Hiển thị danh sách đánh giá -->
+<div class="max-w-6xl mx-auto mt-6 bg-white p-6 rounded-xl shadow-md">
+    <h3 class="text-xl font-semibold mb-4">Danh sách đánh giá</h3>
+    <?php if($ds_danh_gia): ?>
+        <?php foreach($ds_danh_gia as $dg): ?>
+            <div class="border-b py-4">
+                <p class="font-medium"><?= e($dg['ho_ten'] ?? 'Khách') ?> đánh giá <?= e($dg['diem']) ?> ⭐</p>
+                <p class="text-gray-700"><?= nl2br(e($dg['binh_luan'])) ?></p>
+                <?php if($dg['hinh']): ?>
+                    <img src="<?= e($dg['hinh']) ?>" alt="Ảnh đánh giá" class="w-32 mt-2">
+                <?php endif; ?>
+                <p class="text-xs text-gray-500 mt-1"><?= date("d/m/Y H:i", strtotime($dg['ngay_tao'])) ?></p>
+            </div>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <p>Chưa có đánh giá nào.</p>
+    <?php endif; ?>
 </div>
 
 </body>

@@ -42,22 +42,24 @@ if (!in_array($filter_status, $valid_statuses) && $filter_status !== 'tat_ca') {
 $params = [':id_moigioi' => $id_moigioi];
 
 $sql = "
-    SELECT 
-        b.id, b.tieu_de, b.gia, b.dien_tich, b.khu_vuc, b.loai, 
-        b.ngay_dang, b.trang_thai,
-        COALESCE(d.diem, 0) AS rating,
-        COALESCE(ha.url, 'chuacapnhat.jpg') AS anh_dai_dien
-    FROM public.bat_dong_san b
-    LEFT JOIN danh_gia_bds d ON d.id_bds = b.id
-    LEFT JOIN LATERAL (
-        SELECT url 
-        FROM hinh_anh_bds 
-        WHERE id_bds = b.id 
-        ORDER BY ngay_tao DESC -- lấy ảnh mới nhất
-        LIMIT 1
-    ) ha ON TRUE
-    WHERE b.id_nguoi_dung = :id_moigioi
+SELECT 
+    b.id, b.tieu_de, b.gia, b.dien_tich, b.khu_vuc, b.loai, 
+    b.ngay_dang, b.trang_thai,
+    (SELECT COALESCE(AVG(diem),0) 
+     FROM danh_gia_bds 
+     WHERE id_bds = b.id) AS rating,
+    COALESCE(ha.url, 'chuacapnhat.jpg') AS anh_dai_dien
+FROM public.bat_dong_san b
+LEFT JOIN LATERAL (
+    SELECT url 
+    FROM hinh_anh_bds 
+    WHERE id_bds = b.id 
+    ORDER BY ngay_tao DESC
+    LIMIT 1
+) ha ON TRUE
+WHERE b.id_nguoi_dung = :id_moigioi
 ";
+
 
 if ($search_term !== '') {
     $sql .= " AND (b.tieu_de ILIKE :search OR b.khu_vuc ILIKE :search OR b.dia_chi ILIKE :search)";
