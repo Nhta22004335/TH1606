@@ -105,9 +105,9 @@ $stats = [
                 <p class="mt-2 text-sm text-slate-600">Quản lý, chỉnh sửa và theo dõi hiệu suất các tin bạn đã đăng.</p>
             </div>
             <div class="mt-4 sm:mt-0">
-                <a href="trangchu.php?page=dang_sp" class="inline-flex items-center gap-2 px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
-                    <i class="fa-solid fa-plus"></i> Đăng tin mới
-                </a>
+                 <a href="trangchu.php?page=../moi_gioi/dang_tin" class="mt-4 inline-flex items-center gap-2 px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+                         <i class="fa-solid fa-plus"></i> Đăng tin mới
+                 </a>
             </div>
         </div>
 
@@ -150,9 +150,9 @@ $stats = [
                                         <i class="fa-solid fa-file-circle-question fa-3x text-slate-400 mb-4"></i>
                                         <h3 class="text-lg font-semibold text-slate-800">Bạn chưa có bài đăng nào</h3>
                                         <p class="text-slate-500 mt-1">Hãy bắt đầu tạo bài đăng đầu tiên của bạn.</p>
-                                        <a href="trangchu.php?page=dang_sp" class="mt-4 inline-flex items-center gap-2 px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+                                        <!-- <a href="trangchu.php?page=../moi_gioi/dang_tin" class="mt-4 inline-flex items-center gap-2 px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
                                             <i class="fa-solid fa-plus"></i> Đăng tin ngay
-                                        </a>
+                                        </a> -->
                                     </div>
                                 </td>
                             </tr>
