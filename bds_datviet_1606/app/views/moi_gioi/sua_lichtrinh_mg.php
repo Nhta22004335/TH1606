@@ -152,7 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <?php if ($schedule): ?>
-        <form class="mt-8 space-y-6" action="sua_lichtrinh.php?id=<?= htmlspecialchars($id_lich_trinh) ?>" method="POST">
+        <form class="mt-8 space-y-6" action="" method="POST">
             <div class="rounded-md shadow-sm -space-y-px">
                 
                 <div>

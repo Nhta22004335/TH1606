@@ -423,6 +423,7 @@
 2025-10-15 15:30:26,794 WARN exited: tailwind (exit status 127; not expected)
 2025-10-15 15:30:26,935 INFO gave up: tailwind entered FATAL state, too many start retries too quickly
 >>>>>>> d0748f3acb2a5eb3f4a534727d3c745d0202af8c
+<<<<<<< Updated upstream
 2025-10-15 23:58:00,396 INFO Set uid to user 0 succeeded
 2025-10-15 23:58:00,441 INFO supervisord started with pid 1
 2025-10-15 23:58:01,487 INFO spawned: 'apache' with pid 7
@@ -460,3 +461,21 @@
 2025-10-15 23:58:17,361 INFO spawned: 'tailwind' with pid 162
 2025-10-15 23:58:17,979 WARN exited: tailwind (exit status 127; not expected)
 2025-10-15 23:58:18,981 INFO gave up: tailwind entered FATAL state, too many start retries too quickly
+=======
+2025-10-16 01:37:25,916 INFO Set uid to user 0 succeeded
+2025-10-16 01:37:25,924 INFO supervisord started with pid 1
+2025-10-16 01:37:26,936 INFO spawned: 'apache' with pid 7
+2025-10-16 01:37:26,941 INFO spawned: 'socketio' with pid 8
+2025-10-16 01:37:26,949 INFO spawned: 'tailwind' with pid 9
+2025-10-16 01:37:28,609 INFO success: apache entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-16 01:37:28,610 INFO success: socketio entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-16 01:37:28,610 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-16 11:55:35,664 INFO Set uid to user 0 succeeded
+2025-10-16 11:55:35,672 INFO supervisord started with pid 1
+2025-10-16 11:55:36,679 INFO spawned: 'apache' with pid 7
+2025-10-16 11:55:36,688 INFO spawned: 'socketio' with pid 8
+2025-10-16 11:55:36,696 INFO spawned: 'tailwind' with pid 9
+2025-10-16 11:55:38,380 INFO success: apache entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-16 11:55:38,380 INFO success: socketio entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-16 11:55:38,381 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+>>>>>>> Stashed changes

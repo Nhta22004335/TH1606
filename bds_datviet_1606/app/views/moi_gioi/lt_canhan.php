@@ -10,7 +10,7 @@ $pdo = ketnoicsdl();
 
 // Lấy ID người môi giới đang đăng nhập từ session
 // Thay 'user_UUID_placeholder' bằng một UUID hợp lệ để test nếu session chưa có
-$id_moigioi = $_SESSION['id_nguoi_dung'] ?? 'user_UUID_placeholder'; 
+$id_moigioi = $_SESSION['id_nguoi_dung'] ?? ''; 
 
 // BƯỚC 2: XỬ LÝ ĐẦU VÀO (FILTER VÀ SEARCH)
 // =================================================
@@ -164,7 +164,7 @@ if (!empty(trim($search))) {
                 <p class="mt-2 text-sm text-slate-600">Tổng quan các công việc và cuộc hẹn sắp tới.</p>
             </div>
             <div class="mt-4 sm:mt-0">
-                <a href="them_lichtrinh.php" class="inline-flex items-center gap-2 px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <a href="../../models/them_lichtrinh.php" class="inline-flex items-center gap-2 px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                     <i class="fa-solid fa-plus"></i> Thêm lịch trình mới
                 </a>
             </div>
@@ -366,7 +366,7 @@ if (!empty(trim($search))) {
     function confirmDelete(id) {
         if (confirm('Bạn có chắc chắn muốn xóa lịch trình này không?')) {
             // Thay đổi action của form hoặc chuyển hướng để xử lý xóa
-            window.location.href = 'xoa_lichtrinh.php?id=' + id;
+            window.location.href = '../../models/xoa_lichtrinh_mg.php?id=' + id;
         }
     }
     </script>
