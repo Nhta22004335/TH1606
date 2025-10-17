@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="vi" class="bg-gray-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đăng ký tài khoản</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1505691723518-36a5ac3be353?auto=format&fit=crop&w=1350&q=80');">
+
+<div class="bg-white shadow-lg rounded-2xl w-full max-w-md">
+
+    <div id="registrationFormContainer" class="px-6 py-6 sm:px-8 sm:py-8">
+        <div class="flex justify-center">
+            <img src="../../../public/images/datviet.png" alt="Logo" class="w-16 h-16 sm:w-20 sm:h-20 object-contain">
+        </div>
+        <h1 class="text-xl sm:text-2xl font-bold text-center text-blue-600 mt-4 mb-6">Tạo tài khoản mới</h1>
+
+        <form id="registrationForm" class="space-y-4">
+            <div>
+                <label for="hoten" class="block text-sm font-medium text-gray-700 mb-1">Họ và tên</label>
+                <input type="text" id="hoten" name="hoten" class="w-full px-4 py-2 border rounded-lg outline-none focus:ring-1 focus:border-blue-400" placeholder="Nguyễn Văn An" required>
+            </div>
+            <div>
+                <label for="tendangnhap" class="block text-sm font-medium text-gray-700 mb-1">Tên đăng nhập (tự sinh)</label>
+                <input type="text" id="tendangnhap" name="tendangnhap" readonly class="w-full px-4 py-2 outline-none border rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed">
+            </div>
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input type="email" id="email" name="email" class="w-full px-4 py-2 border rounded-lg outline-none focus:ring-1 focus:border-blue-400" placeholder="example@email.com" required>
+            </div>
+            <div>
+                <label for="sodienthoai" class="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
+                <input type="tel" id="sodienthoai" name="sodienthoai" class="w-full px-4 py-2 border outline-none rounded-lg focus:ring-1 focus:border-blue-400" placeholder="09xxxxxxxx">
+            </div>
+            <div>
+                <label for="matkhau" class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu</label>
+                <input type="password" id="matkhau" name="matkhau" class="w-full px-4 py-2 border outline-none rounded-lg focus:ring-1 focus:border-blue-400" required>
+            </div>
+            <div>
+                <label for="matkhaunhaplai" class="block text-sm font-medium text-gray-700 mb-1">Nhập lại mật khẩu</label>
+                <input type="password" id="matkhaunhaplai" name="matkhaunhaplai" class="w-full px-4 py-2 outline-none border rounded-lg focus:ring-1 focus:border-blue-400" required>
+            </div>
+            
+            <button id="btnDangKy" type="submit" class="w-full py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-400">
+                Lấy mã OTP
+            </button>
+            <div id="thongbaoDangKy" class="mt-2 text-center text-sm"></div>
+        </form>
+        <p class="text-center text-sm text-gray-600 mt-4">
+            Đã có tài khoản? <a href="dangnhap.html" class="text-blue-600 hover:text-blue-800 font-medium">Đăng nhập ngay</a>
+        </p>
+    </div>
+
+    <div id="otpFormContainer" class="px-6 py-8 sm:px-8 sm:py-10 hidden">
+        <h1 class="text-xl sm:text-2xl font-bold text-center text-blue-600 mb-4">Xác thực tài khoản</h1>
+        <p class="text-center text-sm text-gray-600 mb-6">
+            Mã OTP đã được gửi đến email <strong id="otpEmailDisplay"></strong>. Vui lòng nhập mã để hoàn tất.
+        </p>
+        <form id="otpForm">
+            <input type="hidden" id="otpEmail" name="email">
+            <div class="mb-4">
+                <label for="otp" class="block text-sm font-medium text-gray-700 mb-1">Mã OTP</label>
+                <input type="text" id="otp" name="otp" class="w-full text-center outline-none tracking-[0.8em] text-2xl font-bold px-4 py-2 border rounded-lg focus:ring focus:border-blue-400" maxlength="6" inputmode="numeric" required>
+            </div>
+            <button id="btnXacNhan" type="submit" class="w-full py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:bg-gray-400">
+                Xác nhận & Tạo tài khoản
+            </button>
+            <div id="thongbaoOTP" class="mt-2 text-center text-sm"></div>
+        </form>
+    </div>
+
+</div>
+
+<script>
+    // --- Lấy các phần tử DOM ---
+    const registrationFormContainer = document.getElementById('registrationFormContainer');
+    const otpFormContainer = document.getElementById('otpFormContainer');
+    const registrationForm = document.getElementById('registrationForm');
+    const otpForm = document.getElementById('otpForm');
+    const btnDangKy = document.getElementById('btnDangKy');
+    const btnXacNhan = document.getElementById('btnXacNhan');
+    const thongbaoDangKy = document.getElementById('thongbaoDangKy');
+    const thongbaoOTP = document.getElementById('thongbaoOTP');
+    const inputHoTen = document.getElementById('hoten');
+    const inputTenDangNhap = document.getElementById('tendangnhap');
+
+    // --- CÁC HÀM TIỆN ÍCH ---
+
+    /**
+     * Hiển thị thông báo lỗi hoặc thành công.
+     */
+    function hienThiThongBao(element, message, isSuccess = false) {
+        element.textContent = message;
+        element.className = isSuccess 
+            ? 'mt-2 text-center text-sm text-green-600' 
+            : 'mt-2 text-center text-sm text-red-600';
+    }
+
+    /**
+     * Chuẩn hóa chuỗi và loại bỏ dấu tiếng Việt.
+     */
+    function chuanHoaChuoi(str) {
+        return str
+            .trim()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/đ/g, 'd').replace(/Đ/g, 'D')
+            .toLowerCase();
+    }
+
+    /**
+     * Sinh tên đăng nhập từ họ tên.
+     */
+    function sinhTenDangNhap() {
+        const hoTenChuanHoa = chuanHoaChuoi(inputHoTen.value);
+        const parts = hoTenChuanHoa.split(/\s+/).filter(Boolean); // Tách bởi khoảng trắng và loại bỏ phần tử rỗng
+        
+        if (parts.length < 2) {
+            inputTenDangNhap.value = parts[0] || '';
+            return;
+        }
+
+        const ten = parts[parts.length - 1];
+        const ho = parts[0].charAt(0);
+        const lot = parts.slice(1, -1).map(p => p.charAt(0)).join('');
+        
+        inputTenDangNhap.value = ten + ho + lot;
+    }
+
+    inputHoTen.addEventListener("input", sinhTenDangNhap);
+
+    // --- XỬ LÝ SỰ KIỆN SUBMIT FORM ---
+
+    // SỬA 2: Xử lý form đăng ký ban đầu (Gửi OTP)
+    registrationForm.addEventListener('submit', function(e) {
+        e.preventDefault(); // Ngăn trình duyệt tự gửi form
+        
+        const matkhau = document.getElementById('matkhau').value;
+        const matkhaunhaplai = document.getElementById('matkhaunhaplai').value;
+
+        if (matkhau !== matkhaunhaplai) {
+            hienThiThongBao(thongbaoDangKy, 'Mật khẩu nhập lại không khớp!');
+            return;
+        }
+
+        // Vô hiệu hóa nút để tránh spam click
+        btnDangKy.disabled = true;
+        btnDangKy.textContent = 'Đang gửi...';
+        hienThiThongBao(thongbaoDangKy, '');
+
+        const formData = new FormData(this);
+
+        fetch('../../models/auth/xuly_dangky.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Chuyển đổi giao diện sang form OTP
+                registrationFormContainer.classList.add('hidden');
+                otpFormContainer.classList.remove('hidden');
+                
+                const email = formData.get('email');
+                document.getElementById('otpEmailDisplay').textContent = email;
+                document.getElementById('otpEmail').value = email;
+            } else {
+                hienThiThongBao(thongbaoDangKy, data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Lỗi:', error);
+            hienThiThongBao(thongbaoDangKy, 'Lỗi kết nối. Vui lòng thử lại.');
+        })
+        .finally(() => {
+            // Kích hoạt lại nút nếu có lỗi
+            btnDangKy.disabled = false;
+            btnDangKy.textContent = 'Lấy mã OTP';
+        });
+    });
+
+    // SỬA 3: Xử lý form xác nhận OTP
+    otpForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        btnXacNhan.disabled = true;
+        btnXacNhan.textContent = 'Đang xác nhận...';
+        hienThiThongBao(thongbaoOTP, '');
+
+        const formData = new FormData(this);
+
+        fetch('../../models/auth/xacnhan_otp_dk.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                hienThiThongBao(thongbaoOTP, data.message, true);
+                // Chuyển hướng về trang đăng nhập sau 2 giây
+                setTimeout(() => {
+                    window.location.href = 'dangnhap.html';
+                }, 2000);
+            } else {
+                hienThiThongBao(thongbaoOTP, data.message);
+                btnXacNhan.disabled = false; // Kích hoạt lại nút nếu OTP sai
+                btnXacNhan.textContent = 'Xác nhận & Tạo tài khoản';
+            }
+        })
+        .catch(error => {
+            console.error('Lỗi:', error);
+            hienThiThongBao(thongbaoOTP, 'Lỗi kết nối. Vui lòng thử lại.');
+            btnXacNhan.disabled = false;
+            btnXacNhan.textContent = 'Xác nhận & Tạo tài khoản';
+        });
+    });
+</script>
+</body>
+</html>

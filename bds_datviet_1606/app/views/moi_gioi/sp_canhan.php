@@ -178,10 +178,14 @@ function format_price_vietnamese(float $price): string {
 </td>
 <td class="px-4 py-3 text-center space-x-2">
     <!-- Nút Xem -->
-    <a href="trangchu.php?page=../moi_gioi/xem_san_pham&id=<?= e($product['id']) ?>" 
-       class="text-indigo-600 hover:text-indigo-800">
-        <i class="fas fa-eye"></i> Xem
-    </a>
+<a href="trangchu.php?page=../moi_gioi/chi_tiet_bds&id=<?= e($product['id']) ?>" 
+   class="text-indigo-600 hover:text-indigo-800">
+    <i class="fas fa-eye"></i> Xem
+</a>
+<!-- Nút giỏ hàng-->
+<a href="trangchu.php?page=../moi_gioi/them_giohang&id=<?= e($product['id']) ?>" class="text-green-600 hover:text-green-800">
+    <i class="fas fa-cart-plus"></i> Thêm vào giỏ
+</a>
 
     <!-- Nút Sửa -->
     <a href="trangchu.php?page=../moi_gioi/sua_san_pham&id=<?= e($product['id']) ?>" 
@@ -195,6 +199,7 @@ function format_price_vietnamese(float $price): string {
        onclick="return confirm('Bạn có chắc muốn xóa sản phẩm này?');">
         <i class="fas fa-trash"></i> Xóa
     </a>
+
 </td>
 
 </tr>
