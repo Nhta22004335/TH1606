@@ -73,10 +73,10 @@
             'icon' => 'fas fa-users',
             'roles' => ['quantri', 'moigioi'],
             'submenu' => [
-                'Danh sách người dùng' => ['link' => 'quanly_nguoidung_qt', 'roles' => ['quantri']],
-                'Phân quyền người dùng' => ['link' => 'quanly_phanquyen_qt', 'roles' => ['quantri']],
-                'Lịch sử xác thực' => ['link' => 'lichsu_xacthuc_qt', 'roles' => ['quantri']],
-                'Quản lý biểu mẫu' => ['link' => 'ql_bieumau', 'roles' => ['quantri']],
+                'Danh sách người dùng' => ['link' => 'quanly_nguoidung', 'roles' => ['quantri']],
+                'Phân quyền người dùng' => ['link' => 'quanly_phanquyen', 'roles' => ['quantri']],
+                'Lịch sử xác thực' => ['link' => 'quanly_lichsu_xacthuc', 'roles' => ['quantri']],
+                'Quản lý biểu mẫu' => ['link' => 'quanly_hoso_bieumau', 'roles' => ['quantri']],
                 'Quản lý hồ sơ (MG)' => ['link' => '../moi_gioi/ql_hoso', 'roles' => ['moigioi']],
                 'Tạo hồ sơ mới' => ['link' => '../moi_gioi/tao_hoso_moi', 'roles' => ['moigioi']],
             ]
@@ -86,7 +86,8 @@
             'icon' => 'fas fa-building',
             'roles' => ['quantri', 'moigioi'],
             'submenu' => [
-                'Danh sách BĐS' => ['link' => 'ds_sanpham_bds', 'roles' => ['quantri']],
+                'Danh sách bất động sản' => ['link' => 'quanly_sanpham_bds', 'roles' => ['quantri']],
+                'Danh mục bất động sản' => ['link' => 'quanly_danhmuc_bds', 'roles' => ['quantri']],
                 'QL Đánh giá' => ['link' => 'ql_danhgia', 'roles' => ['quantri']],
                 'Sản phẩm cá nhân' => ['link' => '../moi_gioi/sp_canhan', 'roles' => ['moigioi']],
                 'Đăng sản phẩm' => ['link' => '../moi_gioi/dang_sp', 'roles' => ['moigioi']],
@@ -350,7 +351,7 @@
             </div>
         </header>
 
-        <main class="flex-1 overflow-x-hidden overflow-y-auto p-4 md:p-6 min-h-0">
+        <main class="flex-1 overflow-x-hidden overflow-y-auto p-4 md:p-4 min-h-0">
             <?php
                 $page_to_include = str_replace('trangchu.php?page=', '', $current_page);
                 
