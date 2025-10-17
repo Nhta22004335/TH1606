@@ -269,6 +269,9 @@ CREATE TABLE IF NOT EXISTS danh_gia_mg (
     CONSTRAINT chk_kh_mg_khacnhau CHECK (id_khach_hang <> id_moi_gioi)
 );
 
+alter table danh_gia_mg add column trang_thai VARCHAR(20)
+select * from nguoi_dung
+
 CREATE TABLE bieu_mau (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),           
     tieu_de VARCHAR(255) NOT NULL,    
