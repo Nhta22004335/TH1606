@@ -111,49 +111,91 @@ CREATE TABLE IF NOT EXISTS lich_su_xac_thuc (
     CONSTRAINT chk_lich_su_xac_thuc_time_range CHECK (thoi_gian_ket_thuc IS NULL OR thoi_gian_ket_thuc >= thoi_gian_bat_dau)
 );
 
+
 -- 7. Bảng bat_dong_san (Lưu thống tin các sản phẩm bất động sản)
-CREATE TABLE IF NOT EXISTS bat_dong_san (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    id_nguoi_dung UUID, 
-    tieu_de VARCHAR(200) DEFAULT 'chuacapnhat',
-    mo_ta TEXT DEFAULT 'chuacapnhat',
-    gia NUMERIC(18,2) CHECK (gia >= 0) DEFAULT 0,
-    dien_tich NUMERIC(10,2) CHECK (dien_tich > 0),
-    dia_chi TEXT DEFAULT 'chuacapnhat',
-    loai VARCHAR(100) DEFAULT 'chuacapnhat',
-    khu_vuc VARCHAR(100) DEFAULT 'chuacapnhat',
-    trang_thai VARCHAR(50) DEFAULT 'chuacapnhat',
-    hinh_thuc VARCHAR(50) DEFAULT 'chuacapnhat',
-    ngay_dang TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_bds_nguoi_dung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE, 
-    CONSTRAINT chk_loai_bds CHECK (loai IN ('canho', 'nhapho', 'datnen', 'bietthu', 'chuacapnhat')),
-    CONSTRAINT chk_trang_thai_bds CHECK (trang_thai IN ('chuaduyet', 'daduyet', 'daban', 'dathue', 'chuacapnhat')),
-    CONSTRAINT chk_hinh_thuc_bds CHECK (hinh_thuc IN ('ban', 'chothue', 'chuacapnhat'))
+CREATE TABLE IF NOT EXISTS danh_muc (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), -- Dùng SERIAL cho bảng danh mục đơn giản hơn
+    ma_danh_muc VARCHAR(50) UNIQUE NOT NULL, -- Mã để dùng trong code, vd: 'canho'
+    ten_danh_muc VARCHAR(100) NOT NULL -- Tên hiển thị cho người dùng, vd: 'Căn hộ'
 );
 
-select * from bai_dang where id='0481aadb-9e87-4148-bc89-45b4542e0c35'
+CREATE TABLE IF NOT EXISTS bat_dong_san (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id_chu_so_huu UUID, 
+    id_danh_muc UUID, 
+	trang_thai VARCHAR(100) default 'chuaduyet' -- chuaduyet, daduyet, huy
+
+    -- THÔNG TIN VỊ TRÍ (Rất quan trọng để lọc và tìm kiếm)
+    dia_chi_day_du TEXT NOT NULL,
+    ma_tinh_thanh VARCHAR(10), -- Mã theo đơn vị hành chính
+    ma_quan_huyen VARCHAR(10),
+    ma_phuong_xa VARCHAR(10),
+    vi_do NUMERIC(10, 7), -- Latitude để hiển thị trên bản đồ
+    kinh_do NUMERIC(10, 7), -- Longitude
+
+    -- THÔNG TIN CƠ BẢN (Có thể NULL nếu không áp dụng)
+    dien_tich_dat NUMERIC(10, 2), -- Diện tích trên sổ
+    dien_tich_su_dung NUMERIC(10, 2), -- Diện tích sử dụng (nếu là nhà)
+    mat_tien NUMERIC(5, 2), -- Chiều rộng mặt tiền (m)
+    duong_vao NUMERIC(5, 2), -- Chiều rộng đường vào (m)
+    huong_nha VARCHAR(50), -- ví dụ: 'Đông Nam'
+    
+    -- THÔNG TIN CẤU TRÚC (Nếu là nhà/căn hộ)
+    so_tang INT DEFAULT 0,
+    so_phong_ngu INT DEFAULT 0,
+    so_phong_tam INT DEFAULT 0,
+
+    -- THÔNG TIN PHÁP LÝ
+    thong_tin_phap_ly TEXT, -- ví dụ: 'Sổ hồng chính chủ', 'Giấy tờ tay'
+
+    -- ✨ CỘT ĐẶC BIỆT: LƯU CÁC THÔNG TIN CHI TIẾT RIÊNG ✨
+    dac_diem_chi_tiet JSONB, 
+
+    -- Metadata
+    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ngay_cap_nhat TIMESTAMP,
+
+    CONSTRAINT fk_bds_chuso_huu FOREIGN KEY (id_chu_so_huu) REFERENCES nguoi_dung(id),
+    CONSTRAINT fk_bds_danhmuc FOREIGN KEY (id_danh_muc) REFERENCES danh_muc(id)
+);
+
+-- CREATE TABLE IF NOT EXISTS bat_dong_san (
+--     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+--     id_nguoi_dung UUID, 
+--     tieu_de VARCHAR(200) DEFAULT 'chuacapnhat',
+--     mo_ta TEXT DEFAULT 'chuacapnhat',
+--     gia NUMERIC(18,2) CHECK (gia >= 0) DEFAULT 0,
+--     dien_tich NUMERIC(10,2) CHECK (dien_tich > 0),
+--     dia_chi TEXT DEFAULT 'chuacapnhat',
+--     loai VARCHAR(100) DEFAULT 'chuacapnhat',
+--     khu_vuc VARCHAR(100) DEFAULT 'chuacapnhat',
+--     trang_thai VARCHAR(50) DEFAULT 'chuacapnhat',
+--     hinh_thuc VARCHAR(50) DEFAULT 'chuacapnhat',
+--     ngay_dang TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     CONSTRAINT fk_bds_nguoi_dung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE, 
+--     CONSTRAINT chk_loai_bds CHECK (loai IN ('canho', 'nhapho', 'datnen', 'bietthu', 'chuacapnhat')),
+--     CONSTRAINT chk_trang_thai_bds CHECK (trang_thai IN ('chuaduyet', 'daduyet', 'daban', 'dathue', 'chuacapnhat')),
+--     CONSTRAINT chk_hinh_thuc_bds CHECK (hinh_thuc IN ('ban', 'chothue', 'chuacapnhat'))
+-- );
+
 CREATE TABLE IF NOT EXISTS bai_dang (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    id_nguoi_dung UUID NOT NULL,     -- Người đăng bài tin này
-    id_bat_dong_san UUID NOT NULL,   -- << KHÓA NGOẠI: Bài đăng này nói về BĐS nào
-
-    -- Thông tin của lần đăng tin
+    id_nguoi_dung UUID, -- Người đăng bài
+    id_bat_dong_san UUID, -- Bài đăng này thuộc về BĐS nào
+    
     tieu_de VARCHAR(200) NOT NULL,
     mo_ta TEXT,
-    gia NUMERIC(18, 2) NOT NULL CHECK (gia >= 0),
-    hinh_thuc VARCHAR(50) NOT NULL,  -- 'ban' hoặc 'chothue'
+    gia NUMERIC(18, 2) CHECK (gia >= 0) DEFAULT 0,
+    don_vi_gia VARCHAR(20) DEFAULT 'VND', -- 'VND', 'USD', 'VND/m2'
+    hinh_thuc VARCHAR(50) NOT NULL, -- 'ban' hoặc 'chothue'
     trang_thai VARCHAR(50) DEFAULT 'chuaduyet',
     
     ngay_dang TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    ngay_het_han TIMESTAMP,          -- Tin đăng có thể có thời hạn
+    ngay_het_han TIMESTAMP,
+    luot_xem INT DEFAULT 0,
 
-    -- Ràng buộc khóa ngoại
-    CONSTRAINT fk_baidang_nguoidung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
-    CONSTRAINT fk_baidang_bds FOREIGN KEY (id_bat_dong_san) REFERENCES bat_dong_san(id) ON DELETE CASCADE,
-
-    -- Ràng buộc kiểm tra
-    CONSTRAINT chk_hinh_thuc_baidang CHECK (hinh_thuc IN ('ban', 'chothue')),
-    CONSTRAINT chk_trang_thai_baidang CHECK (trang_thai IN ('chuaduyet', 'daduyet', 'daban', 'dathue', 'an', 'hethan'))
+    CONSTRAINT fk_baidang_nguoidung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE SET NULL,
+    CONSTRAINT fk_baidang_bds FOREIGN KEY (id_bat_dong_san) REFERENCES bat_dong_san(id) ON DELETE CASCADE
 );
 
 -- 8. Bảng hin_anh_bds (Hình ảnh sản phẩm bất động sản)
