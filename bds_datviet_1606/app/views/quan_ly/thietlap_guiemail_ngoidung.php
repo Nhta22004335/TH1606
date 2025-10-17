@@ -80,7 +80,7 @@ $avatar_url = !empty($user['avt'])
             </div>
 
             <div class="mt-auto p-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
-                <a href="trangchu.php?page=quanly_nguoidung_qt" class="px-5 py-2 text-sm font-medium text-white bg-red-500 rounded-lg border border-gray-300 hover:bg-red-700 transition-colors">
+                <a href="trangchu.php?page=quanly_nguoidung" class="px-5 py-2 text-sm font-medium text-white bg-red-500 rounded-lg border border-gray-300 hover:bg-red-700 transition-colors">
                     <i class="fas fa-times mr-2"></i>Hủy
                 </a>
                 <div class="flex items-center space-x-4">
