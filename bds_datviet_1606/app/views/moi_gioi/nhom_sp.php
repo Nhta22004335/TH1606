@@ -1,30 +1,33 @@
 <?php
-require_once "config/database.php"; // Kết nối PDO PostgreSQL
+require_once "../../../config/database.php"; 
+$pdo = ketnoicsdl();
 
-$loai = $_GET['loai'] ?? 'canho';
-
-// Lấy danh sách BĐS theo loại
-$stmt = $pdo->prepare("
-    SELECT b.*, u.ten_dang_nhap, i.ho_ten
+// Lấy nhóm sản phẩm BĐS với 1 hình ảnh đại diện
+$stmt = $pdo->query("
+    SELECT b.loai, MIN(h.url) AS hinh_dai_dien, COUNT(*) AS so_luong
     FROM bat_dong_san b
-    LEFT JOIN nguoi_dung u ON b.id_nguoi_dung = u.id
-    LEFT JOIN info_nguoi_dung i ON i.id_nguoi_dung = u.id
-    WHERE b.loai = :loai AND b.trang_thai = 'daduyet'
-    ORDER BY b.ngay_dang DESC
+    JOIN bai_dang bd ON bd.id_bat_dong_san = b.id
+    LEFT JOIN hinh_anh_bds h ON h.id_bds = b.id
+    WHERE bd.trang_thai = 'daduyet'
+    GROUP BY b.loai
+    ORDER BY so_luong DESC
 ");
-$stmt->execute(['loai' => $loai]);
-$batdongsan = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$nhom_sp = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<h2>Danh sách BĐS loại: <?= htmlspecialchars($loai) ?></h2>
-<div class="grid grid-cols-3 gap-4">
-<?php foreach($batdongsan as $bds): ?>
-    <div class="border p-4 rounded shadow">
-        <h3><?= htmlspecialchars($bds['tieu_de']) ?></h3>
-        <p>Người đăng: <?= htmlspecialchars($bds['ho_ten'] ?? $bds['ten_dang_nhap']) ?></p>
-        <p>Giá: <?= number_format($bds['gia'], 0, ',', '.') ?> VND</p>
-        <p>Địa chỉ: <?= htmlspecialchars($bds['dia_chi']) ?></p>
-        <a href="chitiet_bds.php?id=<?= $bds['id'] ?>">Xem chi tiết</a>
-    </div>
+<h2 class="text-2xl font-bold mb-6">Nhóm sản phẩm BĐS</h2>
+<div class="grid grid-cols-4 gap-6">
+<?php foreach($nhom_sp as $nsp): ?>
+    <a href="trangchu.php?page=../moi_gioi/nhom_sp.php?loai=<?= urlencode($nsp['loai']) ?>" class="block border rounded-lg shadow hover:shadow-lg transition p-4">
+        <div class="w-full h-40 bg-gray-200 rounded-lg overflow-hidden mb-3">
+            <?php if($nsp['hinh_dai_dien']): ?>
+                <img src="<?= htmlspecialchars($nsp['hinh_dai_dien']) ?>" alt="<?= htmlspecialchars($nsp['loai']) ?>" class="w-full h-full object-cover">
+            <?php else: ?>
+                <div class="flex items-center justify-center h-full text-gray-400">Chưa có ảnh</div>
+            <?php endif; ?>
+        </div>
+        <div class="text-lg font-semibold text-center"><?= htmlspecialchars(ucfirst($nsp['loai'])) ?></div>
+        <div class="text-gray-500 text-center"><?= $nsp['so_luong'] ?> BĐS</div>
+    </a>
 <?php endforeach; ?>
 </div>
