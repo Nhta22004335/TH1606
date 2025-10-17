@@ -27,10 +27,18 @@ CREATE TABLE IF NOT EXISTS nguoi_dung (
 	trang_thai VARCHAR(50) DEFAULT 'chuakichhoat',
     hoat_dong VARCHAR(50) DEFAULT 'offline', 
     ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT chk_nguoi_dung_trang_thai CHECK (trang_thai IN ('danghoatdong','chuakichhoat','khoa')),
+    CONSTRAINT chk_nguoi_dung_trang_thai CHECK (trang_thai IN ('danghoatdong','chuakichhoat','khoa','tamngung')),
     CONSTRAINT chk_nguoi_dung_hoat_dong CHECK (hoat_dong IN ('online','offline')),
     CONSTRAINT chk_nguoi_dung_so_dt CHECK (so_dt ~ '^[0-9]{1,11}$' OR so_dt = 'chuacapnhat')
 );
+
+ALTER TABLE nguoi_dung
+DROP CONSTRAINT chk_nguoi_dung_trang_thai;
+
+ALTER TABLE nguoi_dung
+ADD CONSTRAINT chk_nguoi_dung_trang_thai
+CHECK (trang_thai IN ('danghoatdong','chuakichhoat','khoa','tamngung'));
+
 
 -- 1. Bảng phan_quyen (Chứa các quyền tương ứng người dùng)
 CREATE TABLE IF NOT EXISTS phan_quyen (
@@ -123,6 +131,7 @@ CREATE TABLE IF NOT EXISTS bat_dong_san (
     CONSTRAINT chk_hinh_thuc_bds CHECK (hinh_thuc IN ('ban', 'chothue', 'chuacapnhat'))
 );
 
+select * from bai_dang where id='0481aadb-9e87-4148-bc89-45b4542e0c35'
 CREATE TABLE IF NOT EXISTS bai_dang (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     id_nguoi_dung UUID NOT NULL,     -- Người đăng bài tin này
@@ -260,6 +269,9 @@ CREATE TABLE IF NOT EXISTS danh_gia_mg (
     CONSTRAINT chk_kh_mg_khacnhau CHECK (id_khach_hang <> id_moi_gioi)
 );
 
+alter table danh_gia_mg add column trang_thai VARCHAR(20)
+select * from nguoi_dung
+
 CREATE TABLE bieu_mau (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),           
     tieu_de VARCHAR(255) NOT NULL,    
@@ -306,6 +318,10 @@ CREATE TABLE IF NOT EXISTS lich_trinh (
     CONSTRAINT chk_lichtrinh_trangthai CHECK (trang_thai IN ('choxacnhan', 'daxacnhan', 'dahuy'))
 );
 
+alter table lich_trinh add column dia_diem VARCHAR(255)
+select * from lich_trinh
+update lich_trinh set tieu_de='hè lô ì vé rì quan'
+
 -- 1. Bảng tin đăng
 CREATE TABLE tin_tuc (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),       
@@ -313,17 +329,18 @@ CREATE TABLE tin_tuc (
     tieu_de VARCHAR(200) NOT NULL DEFAULT 'chuacapnhat',
     mo_ta TEXT DEFAULT 'chuacapnhat',
     chuyen_muc VARCHAR(100) DEFAULT 'chuacapnhat',                  
-    trang_thai VARCHAR(50) DEFAULT 'choduyet',  -- 'choduyet','dangban','daban','dathue', 
+    trang_thai VARCHAR(50) DEFAULT 'choduyet',  
 	anh_tin TEXT DEFAULT 'chuacapnhat.png',
     luot_xem INT,
     ngay_dang TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_tin_khachhang FOREIGN KEY (id_khach_hang) REFERENCES nguoi_dung(id) ON DELETE CASCADE
 );
 
--- select nd.id from nguoi_dung nd
--- left join phan_quyen pq on pq.id_nguoi_dung=nd.id
--- left join quyen q on q.id=pq.id_quyen
--- where q.vai_tro='moigioi'
+select nd.id, i.ho_ten from nguoi_dung nd
+left join info_nguoi_dung i on i.id_nguoi_dung = nd.id
+left join phan_quyen pq on pq.id_nguoi_dung=nd.id
+left join quyen q on q.id=pq.id_quyen
+where q.vai_tro='khachhang'
 
 CREATE TABLE hop_thoai (
 	id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), 

@@ -139,9 +139,9 @@ $status_map = [
                                     <a href="../../views/quan_ly/trangchu.php?page=../moi_gioi/ct_tiendo_gd&id=<?= $gd['id'] ?>" class="text-gray-400 hover:text-indigo-600 transition" title="Xem tiến độ">
                                         <i class="fas fa-tasks"></i>
                                     </a>
-                                    <button onclick="xoaGiaoDich('<?= $gd['id'] ?>')" class="text-gray-400 hover:text-red-600 transition" title="Xóa giao dịch">
+                                    <!-- <button onclick="xoaGiaoDich('<?= $gd['id'] ?>')" class="text-gray-400 hover:text-red-600 transition" title="Xóa giao dịch">
                                         <i class="fas fa-trash-alt"></i>
-                                    </button>
+                                    </button> -->
                                 </div>
                             </td>
                         </tr>

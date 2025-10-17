@@ -82,11 +82,7 @@
 <body>
 
     <div class="space-y-6">
-        <header>
-            <h1 class="text-2xl font-bold text-gray-900">Lịch Sử Xác Thực</h1>
-            <p class="mt-1 text-sm text-gray-600">Ghi nhận các hoạt động truy cập và bảo mật của người dùng.</p>
-        </header>
-
+        
         <div class="bg-white p-4 rounded-lg border border-gray-200">
             <div class="flex flex-col md:flex-row items-center gap-3 flex-wrap">
                 <form id="search-form" method="GET" class="flex-grow w-full md:w-auto">
@@ -134,7 +130,8 @@
                         <th class="p-3 text-left text-xs font-medium text-gray-500 uppercase">Thời gian</th>
                         <th class="p-3 text-left text-xs font-medium text-gray-500 uppercase">Địa chỉ IP</th>
                         <th class="p-3 text-left text-xs font-medium text-gray-500 uppercase hidden xl:table-cell">User Agent</th>
-                        <th class="p-3 text-center text-xs font-medium text-gray-500 uppercase"></th>
+                        <th class="p-3 text-left text-xs font-medium text-gray-500 uppercase">Ghi chú</th>
+                        <th class="p-3 text-center text-xs font-medium text-gray-500 uppercase">Hành động</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
@@ -156,11 +153,17 @@
                             </td>
                             <td class="p-3 text-gray-600 whitespace-nowrap"><?= htmlspecialchars($log['thoi_gian_bat_dau']) ?></td>
                             <td class="p-3 text-gray-600"><?= htmlspecialchars($log['dia_chi_ip']) ?></td>
-                            <td class="p-3 text-gray-600 max-w-sm truncate hidden xl:table-cell" title="<?= htmlspecialchars($log['user_agent']) ?>">
+
+                            <td class="p-3 text-gray-600 max-w-[200px] overflow-hidden text-ellipsis whitespace-nowrap hidden xl:table-cell">
                                 <?= htmlspecialchars($log['user_agent']) ?>
                             </td>
+
+                            <td class="p-3 text-gray-600 max-w-[150px] overflow-hidden text-ellipsis whitespace-nowrap">
+                                <?= htmlspecialchars($log['ghi_chu']) ?>
+                            </td>
+
                             <td class="p-3 text-center">
-                                <button type="button" class="text-gray-500 hover:text-red-600 delete-log-btn" 
+                                <button type="button" class="text-red-500 hover:text-red-600 delete-log-btn" 
                                         data-id="<?= $log['id'] ?>" title="Xóa">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>

@@ -1,6 +1,7 @@
 <?php
-    require_once "../../../config/database.php";
     session_start();
+    require_once "../../../config/database.php";
+
     $pdo = ketnoicsdl();
 
     $id = $_SESSION['id_nguoi_dung'] ?? null;
@@ -72,8 +73,9 @@
             'icon' => 'fas fa-users',
             'roles' => ['quantri', 'moigioi'],
             'submenu' => [
-                'Danh sách người dùng' => ['link' => 'ds_nguoidung', 'roles' => ['quantri']],
-                'Lịch sử xác thực' => ['link' => 'ls_xacthuc', 'roles' => ['quantri']],
+                'Danh sách người dùng' => ['link' => 'quanly_nguoidung_qt', 'roles' => ['quantri']],
+                'Phân quyền người dùng' => ['link' => 'quanly_phanquyen_qt', 'roles' => ['quantri']],
+                'Lịch sử xác thực' => ['link' => 'lichsu_xacthuc_qt', 'roles' => ['quantri']],
                 'Quản lý biểu mẫu' => ['link' => 'ql_bieumau', 'roles' => ['quantri']],
                 'Quản lý hồ sơ (MG)' => ['link' => '../moi_gioi/ql_hoso', 'roles' => ['moigioi']],
                 'Tạo hồ sơ mới' => ['link' => '../moi_gioi/tao_hoso_moi', 'roles' => ['moigioi']],
@@ -88,6 +90,7 @@
                 'QL Đánh giá' => ['link' => 'ql_danhgia', 'roles' => ['quantri']],
                 'Sản phẩm cá nhân' => ['link' => '../moi_gioi/sp_canhan', 'roles' => ['moigioi']],
                 'Đăng sản phẩm' => ['link' => '../moi_gioi/dang_sp', 'roles' => ['moigioi']],
+                'Quản lý giỏ hàng' => ['link' => '../moi_gioi/ql_gio_hang', 'roles' => ['moigioi']],
             ]
         ],
         [
@@ -126,6 +129,7 @@
                 'Quản lý tin tức (Admin)' => ['link' => 'ql_tintuc', 'roles' => ['quantri']],
                 'Quản lý bài đăng (Admin)' => ['link' => 'ql_baidang', 'roles' => ['quantri']],
                 'Quản lý tin tức (MG)' => ['link' => '../moi_gioi/ql_tintuc_mg', 'roles' => ['moigioi']],
+                'Quản lý bài đăng (MG)' => ['link' => '../moi_gioi/ql_baidang_mg', 'roles' => ['moigioi']],
             ]
         ],
         [
@@ -137,7 +141,8 @@
                 'Quản lý hộp thoại chat' => ['link' => 'ql_hopthoai', 'roles' => ['quantri']],
                 'Gửi thông báo khách (MG)' => ['link' => '../moi_gioi/g_thongbao_kh', 'roles' => ['moigioi']],
                 'Quản lý thông báo (MG)' => ['link' => '../moi_gioi/ql_thongbao', 'roles' => ['moigioi']],
-                'Quản lý thông báo' => ['link' => 'ql_thongbao', 'roles' => ['quantri']]
+                'Quản lý thông báo' => ['link' => 'ql_thongbao', 'roles' => ['quantri']],
+                'Chat trực tuyến' => ['link' => '../moi_gioi/chat_tt', 'roles' => ['moigioi']]
             ]
         ],
         [

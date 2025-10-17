@@ -152,19 +152,20 @@ if (!empty(trim($search))) {
                                     <i class="fa-solid fa-eye"></i> Xem
                                 </button>
 
-                                <!-- Nút Xóa -->
+                               <!-- Nút Sửa -->
                                 <?php
-                                $canDelete = in_array($bm["trang_thai"], ["choduyet","huy"]);
-                                $deleteClasses = $canDelete 
-                                    ? "bg-red-600 hover:bg-red-700 text-white" 
+                                $canEdit = in_array($bm["trang_thai"], ["choduyet", "huy"]);
+                                $editClasses = $canEdit 
+                                    ? "bg-yellow-500 hover:bg-yellow-600 text-white" 
                                     : "bg-gray-400 text-gray-200 cursor-not-allowed";
                                 ?>
-                                <button 
-                                    data-delete-id="<?= $bm['id'] ?>" 
-                                    class="<?= $deleteClasses ?> text-xs font-medium px-4 py-2 rounded-lg flex items-center justify-center gap-1.5 shadow-md transition transform <?= $canDelete ? "hover:scale-105" : "" ?>" 
-                                    <?= $canDelete ? "" : "disabled" ?>>
-                                    <i class="fa-solid fa-trash"></i> Xóa
-                                </button>
+                                <a 
+                                    href="<?= $canEdit ? 'trangchu.php?page=../../models/sua_bm&id=' . $bm['id'] : '#' ?>" 
+                                    class="<?= $editClasses ?> text-xs font-medium px-4 py-2 rounded-lg flex items-center justify-center gap-1.5 shadow-md transition transform <?= $canEdit ? "hover:scale-105" : "" ?>" 
+                                    <?= $canEdit ? "" : "onclick='return false;'" ?>>
+                                    <i class="fa-solid fa-pen-to-square"></i> Sửa
+                                </a>
+
                             </td>
 
 
@@ -305,7 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
             // Gửi yêu cầu AJAX
-            fetch("../../models/upload_bm.php", {
+            fetch("../../models/load_bm.php", {
                 method: "POST",
                 body: formData // Không cần đặt header Content-Type khi dùng FormData
                
