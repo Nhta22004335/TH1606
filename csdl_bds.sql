@@ -27,10 +27,18 @@ CREATE TABLE IF NOT EXISTS nguoi_dung (
 	trang_thai VARCHAR(50) DEFAULT 'chuakichhoat',
     hoat_dong VARCHAR(50) DEFAULT 'offline', 
     ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT chk_nguoi_dung_trang_thai CHECK (trang_thai IN ('danghoatdong','chuakichhoat','khoa')),
+    CONSTRAINT chk_nguoi_dung_trang_thai CHECK (trang_thai IN ('danghoatdong','chuakichhoat','khoa','tamngung')),
     CONSTRAINT chk_nguoi_dung_hoat_dong CHECK (hoat_dong IN ('online','offline')),
     CONSTRAINT chk_nguoi_dung_so_dt CHECK (so_dt ~ '^[0-9]{1,11}$' OR so_dt = 'chuacapnhat')
 );
+
+ALTER TABLE nguoi_dung
+DROP CONSTRAINT chk_nguoi_dung_trang_thai;
+
+ALTER TABLE nguoi_dung
+ADD CONSTRAINT chk_nguoi_dung_trang_thai
+CHECK (trang_thai IN ('danghoatdong','chuakichhoat','khoa','tamngung'));
+
 
 -- 1. Bảng phan_quyen (Chứa các quyền tương ứng người dùng)
 CREATE TABLE IF NOT EXISTS phan_quyen (

@@ -73,7 +73,7 @@
             'icon' => 'fas fa-users',
             'roles' => ['quantri', 'moigioi'],
             'submenu' => [
-                'Danh sách người dùng' => ['link' => 'ds_nguoidung', 'roles' => ['quantri']],
+                'Danh sách người dùng' => ['link' => 'quanly_nguoidung_qt', 'roles' => ['quantri']],
                 'Lịch sử xác thực' => ['link' => 'ls_xacthuc', 'roles' => ['quantri']],
                 'Quản lý biểu mẫu' => ['link' => 'ql_bieumau', 'roles' => ['quantri']],
                 'Quản lý hồ sơ (MG)' => ['link' => '../moi_gioi/ql_hoso', 'roles' => ['moigioi']],

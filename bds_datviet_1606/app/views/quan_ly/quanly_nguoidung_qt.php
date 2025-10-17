@@ -56,10 +56,13 @@
         'quantri' => 'Quản trị', 'moigioi' => 'Môi giới', 'khachhang' => 'Khách hàng'
     ];
     $labeltrangthai = [
-        'danghoatdong' => 'Hoạt động', 'chuakichhoat' => 'Chờ kích hoạt', 'khoa' => 'Đã khóa'
+        'danghoatdong' => 'Hoạt động', 'chuakichhoat' => 'Chờ kích hoạt', 'khoa' => 'Đã khóa', 'tamngung' => 'Tạm ngưng'
     ];
     $statusColors = [
-        'danghoatdong' => 'bg-green-100 text-green-700 border-green-300', 'chuakichhoat' => 'bg-yellow-100 text-yellow-700 border-yellow-300', 'khoa' => 'bg-red-100 text-red-700 border-red-300'
+        'danghoatdong' => 'bg-green-100 text-green-700 border-green-300', 
+        'chuakichhoat' => 'bg-gray-100 text-gray-700 border-gray-300', 
+        'khoa' => 'bg-red-100 text-red-700 border-red-300',
+        'tamngung' => 'bg-yellow-100 text-yellow-700 border-yellow-300'
     ];
 
 ?>
@@ -157,17 +160,20 @@
                                     <a href="javascript:void(0);" 
                                     class="text-red-600 hover:text-red-900 ml-4 toggle-status-btn"
                                     data-id="<?= $u['id'] ?>"
-                                    data-status="khoa">
-                                        <i class="fas fa-lock text-sm"></i>
+                                    data-status="tamngung"
+                                    data-name="<?= htmlspecialchars($u['ho_ten']) ?>"> <i class="fas fa-lock text-sm"></i>
                                     </a>
                                 <?php else: ?>
                                     <a href="javascript:void(0);"
                                     class="text-green-600 hover:text-green-900 ml-4 toggle-status-btn"
                                     data-id="<?= $u['id'] ?>"
-                                    data-status="danghoatdong">
-                                        <i class="fas fa-check-circle text-sm"></i>
+                                    data-status="danghoatdong"
+                                    data-name="<?= htmlspecialchars($u['ho_ten']) ?>"> <i class="fas fa-check-circle text-sm"></i>
                                     </a>
                                 <?php endif; ?>
+                                <a href="trangchu.php?page=thietlap_guiemail_ngoidung&email=<?= urlencode($u['email']) ?>" class="ml-4 text-yellow-400 hover:text-yellow-500">
+                                    <i class="fas fa-envelope text-sm"></i>
+                                </a>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -188,8 +194,8 @@
 
             const encodedSearchValue = encodeURIComponent(searchValue.trim());
 
-            const newUrl = `trangchu.php?page=ds_nguoidung&search=${encodedSearchValue}`;
-            const trove = `trangchu.php?page=ds_nguoidung`;
+            const newUrl = `trangchu.php?page=quanly_nguoidung_qt&search=${encodedSearchValue}`;
+            const trove = `trangchu.php?page=quanly_nguoidung_qt`;
             if (searchValue) {
                 window.location.href = newUrl;          
             } else {
@@ -208,78 +214,83 @@
             submitSearch(); // thực hiện tìm kiếm khi rời khỏi ô input
         });
 
+        
         document.addEventListener('DOMContentLoaded', function() {
-            const statusButtons = document.querySelectorAll('.toggle-status-btn');
+        const statusButtons = document.querySelectorAll('.toggle-status-btn');
 
-            statusButtons.forEach(button => {
-                button.addEventListener('click', async function(e) {
-                    if (!confirm('Bạn có chắc chắn muốn thực hiện thao tác này?')) {
-                        return;
+        statusButtons.forEach(button => {
+            button.addEventListener('click', async function(e) {
+                e.preventDefault();
+
+                // --- PHẦN CẬP NHẬT --- ✨
+                const userId = this.dataset.id;
+                const newStatus = this.dataset.status;
+                const userName = this.dataset.name; // Lấy tên người dùng
+
+                // Xác định chuỗi hành động dựa trên trạng thái mới
+                const actionText = newStatus === 'tamngung' ? 'tạm ngưng' : 'kích hoạt';
+                
+                // Tạo thông báo xác nhận động
+                const confirmMessage = `Bạn có chắc chắn muốn ${actionText} tài khoản "${userName}"?`;
+
+                if (!confirm(confirmMessage)) {
+                    return; // Người dùng nhấn "Cancel"
+                }
+                // --- KẾT THÚC PHẦN CẬP NHẬT ---
+
+                const formData = new FormData();
+                formData.append('id', userId);
+                formData.append('new_status', newStatus);
+
+                try {
+                    const response = await fetch('../../models/cn_trangthai_nguoidung.php', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Lỗi HTTP! Trạng thái: ${response.status}`);
                     }
-                    e.preventDefault();
 
-                    const userId = this.dataset.id;
-                    const newStatus = this.dataset.status;
+                    const result = await response.json();
 
-                    const formData = new FormData();
-                    formData.append('id', userId);
-                    formData.append('new_status', newStatus);
-
-                    try {
-                        const response = await fetch('../../models/cn_trangthai_nd.php', {
-                            method: 'POST',
-                            body: formData
-                        });
-
-                        if (!response.ok) {
-                            throw new Error(`Lỗi HTTP! Trạng thái: ${response.status}`);
-                        }
-
-                        const result = await response.json();
-
-                        if (result.status === 'success') {
-                            // ----- PHẦN 1: CẬP NHẬT ICON VÀ NÚT BẤM (như cũ) -----
-                            const icon = this.querySelector('i');
-                            if (result.newState === 'danghoatdong') {
-                                this.classList.remove('text-green-600', 'hover:text-green-900');
-                                this.classList.add('text-red-600', 'hover:text-red-900');
-                                icon.classList.remove('fa-check-circle');
-                                icon.classList.add('fa-lock');
-                                this.dataset.status = 'khoa';
-                            } else {
-                                this.classList.remove('text-red-600', 'hover:text-red-900');
-                                this.classList.add('text-green-600', 'hover:text-green-900');
-                                icon.classList.remove('fa-lock');
-                                icon.classList.add('fa-check-circle');
-                                this.dataset.status = 'danghoatdong';
-                            }
-
-                            // ----- PHẦN 2: CẬP NHẬT SPAN TRẠNG THÁI (phần mới) ----- ✨
-                            // Tìm span trạng thái tương ứng dựa trên data-userid
-                            const statusSpan = document.querySelector(`.status-badge[data-userid="${userId}"]`);
-
-                            if (statusSpan) {
-                                // 1. Cập nhật nội dung text
-                                statusSpan.textContent = result.newLabel;
-                                
-                                // 2. Cập nhật class màu sắc
-                                // Định nghĩa các class cơ bản không đổi
-                                const baseClasses = 'status-badge px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border';
-                                // Gán lại toàn bộ class = class cơ bản + class màu mới từ server
-                                statusSpan.className = `${baseClasses} ${result.newClasses}`;
-                            }
-
+                    if (result.status === 'success') {
+                        // Cập nhật giao diện như cũ
+                        const icon = this.querySelector('i');
+                        if (result.newState === 'danghoatdong') {
+                            this.classList.remove('text-green-600', 'hover:text-green-900');
+                            this.classList.add('text-red-600', 'hover:text-red-900');
+                            icon.classList.remove('fa-check-circle');
+                            icon.classList.add('fa-lock');
+                            this.dataset.status = 'tamngung'; // Cập nhật trạng thái cho lần bấm sau
                         } else {
-                            alert('Lỗi: ' + result.message);
+                            this.classList.remove('text-red-600', 'hover:text-red-900');
+                            this.classList.add('text-green-600', 'hover:text-green-900');
+                            icon.classList.remove('fa-lock');
+                            icon.classList.add('fa-check-circle');
+                            this.dataset.status = 'danghoatdong'; // Cập nhật trạng thái cho lần bấm sau
                         }
 
-                    } catch (error) {
-                        console.error('Không thể thực hiện yêu cầu:', error);
-                        alert('Đã xảy ra lỗi kết nối. Vui lòng thử lại.');
+                        const statusSpan = document.querySelector(`.status-badge[data-userid="${userId}"]`);
+                        if (statusSpan) {
+                            statusSpan.textContent = result.newLabel;
+                            const baseClasses = 'status-badge px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border';
+                            statusSpan.className = `${baseClasses} ${result.newClasses}`;
+                        }
+
+                    } else {
+                        // --- CẬP NHẬT THÔNG BÁO LỖI --- ✨
+                        alert(`Lỗi khi ${actionText} tài khoản "${userName}": ${result.message}`);
                     }
-                });
+
+                } catch (error) {
+                    console.error('Không thể thực hiện yêu cầu:', error);
+                    // --- CẬP NHẬT THÔNG BÁO LỖI KẾT NỐI --- ✨
+                    alert(`Đã xảy ra lỗi kết nối khi cố gắng ${actionText} tài khoản "${userName}". Vui lòng thử lại.`);
+                }
             });
         });
+    });
     </script>
 </body>
 </html>
