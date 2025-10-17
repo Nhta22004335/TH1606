@@ -74,7 +74,8 @@
             'roles' => ['quantri', 'moigioi'],
             'submenu' => [
                 'Danh sách người dùng' => ['link' => 'quanly_nguoidung_qt', 'roles' => ['quantri']],
-                'Lịch sử xác thực' => ['link' => 'ls_xacthuc', 'roles' => ['quantri']],
+                'Phân quyền người dùng' => ['link' => 'quanly_phanquyen_qt', 'roles' => ['quantri']],
+                'Lịch sử xác thực' => ['link' => 'lichsu_xacthuc_qt', 'roles' => ['quantri']],
                 'Quản lý biểu mẫu' => ['link' => 'ql_bieumau', 'roles' => ['quantri']],
                 'Quản lý hồ sơ (MG)' => ['link' => '../moi_gioi/ql_hoso', 'roles' => ['moigioi']],
                 'Tạo hồ sơ mới' => ['link' => '../moi_gioi/tao_hoso_moi', 'roles' => ['moigioi']],

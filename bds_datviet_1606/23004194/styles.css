@@ -1,0 +1,133 @@
+*{
+    font-family: sans-serif;
+    padding:0;
+    margin:0;
+    box-sizing: border-box;
+}
+body{
+    padding:5px;
+
+    background-image: url("images/Pearl8.jpg");
+    background-repeat: no-repeat;
+    background-size: cover; 
+    min-height: 100vh;
+}
+
+#wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 10px); 
+}
+
+#header{
+    width: auto;
+    background-color: rgba(10, 10, 10, 0.7);
+    border:2px solid #FBFFDE;
+    border-radius:10px 10px 0 0;
+    display: flex;
+    align-items: center; 
+}
+
+#container{
+    border:1px solid #FBFFDE;
+    border-top:0;
+    border-bottom: 0;
+    padding: 3px 0;
+    display: flex;
+    flex-grow: 1;
+}
+
+#footer{
+    background-color: rgba(10, 10, 10, 0.7);
+    border:1px solid #FBFFDE;
+    border-radius:0 0 10px 10px;
+}
+#footer p{
+    padding:12px 20px;
+    color:#FBFFDE;
+    font-size: 14px;
+}
+
+/*Viết code CSS định kiểu theo yêu cầu ở đây*/
+
+#logo {
+    width: 90px;
+    height: 90px;
+    margin: 5px 0px 5px 30px; 
+}
+
+#header h1 {
+    color: #FBFFDE;
+    margin-top: 25px;
+    margin-left: 50px;
+    font-size: 2.5em;
+}
+
+#menu-bar {
+    width: 120px;
+}
+#menu-bar ul {
+    list-style-type: none;
+    padding-top: 20px;
+}
+#menu-bar ul li a {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 60px; 
+    height: 60px; 
+    margin: 15px auto; 
+    padding: 10px;
+    border-radius: 50%; 
+    
+    background-color: #FBFFDE;
+    color: #6E4B35;
+    font-weight: bold;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+#content {
+    flex-grow: 1;
+    background-color: rgba(31, 31, 31, 0.598); 
+    margin: 0 3px;
+    border: 1px inset rgb(255, 255, 255);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border-radius: 10px; 
+}
+
+
+.info-wrapper {
+    flex-basis: 55%;
+}
+
+#tieude {
+    background-color: #FBFFDE;
+    color: #6E4B35;
+    border-top-left-radius: 10px;
+    padding: 7px 10px 6px 10px; 
+    font-weight: bold;
+    display: inline-block;
+}
+
+#mota {
+    text-align: justify;
+    color: #FBFFDE;
+    background-color: #6E4B35;
+    border: 2px solid #FBFFDE;
+    border-bottom-right-radius: 10px;
+    padding: 15px;
+}
+
+#imgPearl {
+    width: 300px; 
+    height: 300px;
+    border-radius: 50%; 
+    border: 1px groove #6E4B35;
+    object-fit: cover;
+}
+
+

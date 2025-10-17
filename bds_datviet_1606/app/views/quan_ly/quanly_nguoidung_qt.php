@@ -23,14 +23,32 @@
 
     $baseSql = "
         SELECT 
-            i.ho_ten, i.gioi_tinh, i.dia_chi, nd.avt, i.ngay_sinh, nd.id,
-            nd.ten_dang_nhap, nd.email, nd.so_dt, nd.trang_thai, nd.hoat_dong, nd.ngay_tao,
-            ARRAY_AGG(DISTINCT q.vai_tro) AS danh_sach_quyen
-        FROM info_nguoi_dung i
-        JOIN nguoi_dung nd ON i.id_nguoi_dung = nd.id
-        LEFT JOIN giao_dich gd ON nd.id = gd.id_nguoi_dung AND gd.trang_thai = 'hoantat'
-        LEFT JOIN phan_quyen pq ON nd.id = pq.id_nguoi_dung
-        LEFT JOIN quyen q ON pq.id_quyen = q.id
+        i.ho_ten,
+        i.gioi_tinh,
+        i.dia_chi,
+        nd.avt,
+        i.ngay_sinh,
+        nd.id,
+        nd.ten_dang_nhap,
+        nd.email,
+        nd.so_dt,
+        nd.trang_thai,
+        nd.hoat_dong,
+        nd.ngay_tao,
+        ARRAY_AGG(DISTINCT q.vai_tro) AS danh_sach_quyen,
+        COUNT(DISTINCT dg.id) AS so_luong_danh_gia 
+    FROM info_nguoi_dung i
+    JOIN nguoi_dung nd ON i.id_nguoi_dung = nd.id
+    LEFT JOIN giao_dich gd 
+        ON nd.id = gd.id_nguoi_dung 
+        AND gd.trang_thai = 'hoantat'
+    LEFT JOIN phan_quyen pq 
+        ON nd.id = pq.id_nguoi_dung
+    LEFT JOIN quyen q 
+        ON pq.id_quyen = q.id
+    LEFT JOIN danh_gia_mg dg 
+        ON dg.id_moi_gioi = nd.id  
+
     ";
 
     if (!empty($where)) {
@@ -39,7 +57,9 @@
     
     $baseSql .= "
         GROUP BY 
-            nd.id, i.ho_ten, i.gioi_tinh, i.dia_chi, i.ngay_sinh
+    i.ho_ten, i.gioi_tinh, i.dia_chi, i.ngay_sinh,
+    nd.avt, nd.id, nd.ten_dang_nhap, nd.email, nd.so_dt,
+    nd.trang_thai, nd.hoat_dong, nd.ngay_tao
         
     ";
 
@@ -64,7 +84,6 @@
         'khoa' => 'bg-red-100 text-red-700 border-red-300',
         'tamngung' => 'bg-yellow-100 text-yellow-700 border-yellow-300'
     ];
-
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -75,12 +94,6 @@
     <style> @media (max-width: 768px) { .hide-on-mobile { display: none; } }</style>
 </head>
 <body>
-
-    <div class="mb-6 border-b pb-4">
-        <h1 class="text-2xl font-bold text-gray-800">Danh sách Người dùng</h1>
-        <p class="text-sm mt-2 text-gray-500">Quản lý, tìm kiếm và thực hiện các thao tác trên tài khoản người dùng.</p>
-    </div>
-
     <form id="search-form" method="GET" class="flex items-center mb-4">
         <div class="relative w-72"> 
             <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -96,7 +109,7 @@
         </button>
     </form>
 
-    <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-x-auto">
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
@@ -133,11 +146,20 @@
                                     $chuoiQuyen = $u['danh_sach_quyen'] ?? '{}';
                                     $dsQuyenArray = ($chuoiQuyen === '{NULL}') ? [] : explode(',', trim($chuoiQuyen, '{}'));
                                 ?>
-                                <div class="flex flex-wrap gap-1">
+                                <div class="flex flex-col items-start gap-2">
                                     <?php foreach ($dsQuyenArray as $vai_tro): if(empty($vai_tro)) continue; ?>
-                                        <span class="px-2 py-1 rounded-full text-xs font-semibold <?= $roleColors[$vai_tro] ?? 'bg-gray-100 text-gray-700' ?>">
-                                            <?= htmlspecialchars($labelvaitro[$vai_tro] ?? $vai_tro) ?>
-                                        </span>
+                                        <div class="flex items-center">
+                                            <span class="px-2 py-1 rounded-full text-xs font-semibold <?= $roleColors[$vai_tro] ?? 'bg-gray-100 text-gray-700' ?>">
+                                                <?= htmlspecialchars($labelvaitro[$vai_tro] ?? $vai_tro) ?>
+                                            </span>
+
+                                            <?php if ($vai_tro === 'moigioi' && $u['so_luong_danh_gia'] > 0): ?>
+                                                <a href="trangchu.php?page=ds_danhgia_mg&id_moigioi=<?= $u['id'] ?>" class="ml-2 flex items-center text-xs text-gray-500 hover:text-indigo-600 font-medium">
+                                                    <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                                    <span><?= $u['so_luong_danh_gia'] ?> đánh giá</span>
+                                                </a>
+                                            <?php endif; ?>
+                                        </div>
                                     <?php endforeach; ?>
                                 </div>
                             </td>
@@ -152,8 +174,9 @@
                                 <span class="block"><?= htmlspecialchars($u['so_dt']) ?></span>
                                 <span class="block text-xs text-gray-400">Tạo: <?= date("d/m/Y", strtotime($u['ngay_tao'])) ?></span>
                             </td>
+                            
                             <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                                <a href="trangchu.php?page=ct_nguoidung&id=<?= $u['id'] ?>" class="text-indigo-600 hover:text-indigo-900">
+                                <a href="trangchu.php?page=chitiet_nguoidung_qt&id=<?= $u['id'] ?>" class="text-indigo-600 hover:text-indigo-900">
                                     <i class="fas fa-eye text-sm"></i>
                                 </a>
                                 <?php if ($u['trang_thai'] === 'danghoatdong'): ?>
@@ -211,10 +234,9 @@
 
         // 4. Gán sự kiện bỏ focus cho ô tìm kiếm
         searchInput.addEventListener('blur', function() {
-            submitSearch(); // thực hiện tìm kiếm khi rời khỏi ô input
+            submitSearch();
         });
 
-        
         document.addEventListener('DOMContentLoaded', function() {
         const statusButtons = document.querySelectorAll('.toggle-status-btn');
 
@@ -222,10 +244,9 @@
             button.addEventListener('click', async function(e) {
                 e.preventDefault();
 
-                // --- PHẦN CẬP NHẬT --- ✨
                 const userId = this.dataset.id;
                 const newStatus = this.dataset.status;
-                const userName = this.dataset.name; // Lấy tên người dùng
+                const userName = this.dataset.name; 
 
                 // Xác định chuỗi hành động dựa trên trạng thái mới
                 const actionText = newStatus === 'tamngung' ? 'tạm ngưng' : 'kích hoạt';
@@ -234,9 +255,8 @@
                 const confirmMessage = `Bạn có chắc chắn muốn ${actionText} tài khoản "${userName}"?`;
 
                 if (!confirm(confirmMessage)) {
-                    return; // Người dùng nhấn "Cancel"
+                    return; 
                 }
-                // --- KẾT THÚC PHẦN CẬP NHẬT ---
 
                 const formData = new FormData();
                 formData.append('id', userId);
@@ -279,13 +299,10 @@
                         }
 
                     } else {
-                        // --- CẬP NHẬT THÔNG BÁO LỖI --- ✨
                         alert(`Lỗi khi ${actionText} tài khoản "${userName}": ${result.message}`);
                     }
 
                 } catch (error) {
-                    console.error('Không thể thực hiện yêu cầu:', error);
-                    // --- CẬP NHẬT THÔNG BÁO LỖI KẾT NỐI --- ✨
                     alert(`Đã xảy ra lỗi kết nối khi cố gắng ${actionText} tài khoản "${userName}". Vui lòng thử lại.`);
                 }
             });
