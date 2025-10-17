@@ -32,14 +32,6 @@ CREATE TABLE IF NOT EXISTS nguoi_dung (
     CONSTRAINT chk_nguoi_dung_so_dt CHECK (so_dt ~ '^[0-9]{1,11}$' OR so_dt = 'chuacapnhat')
 );
 
-ALTER TABLE nguoi_dung
-DROP CONSTRAINT chk_nguoi_dung_trang_thai;
-
-ALTER TABLE nguoi_dung
-ADD CONSTRAINT chk_nguoi_dung_trang_thai
-CHECK (trang_thai IN ('danghoatdong','chuakichhoat','khoa','tamngung'));
-
-
 -- 1. Bảng phan_quyen (Chứa các quyền tương ứng người dùng)
 CREATE TABLE IF NOT EXISTS phan_quyen (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -111,7 +103,6 @@ CREATE TABLE IF NOT EXISTS lich_su_xac_thuc (
     CONSTRAINT chk_lich_su_xac_thuc_time_range CHECK (thoi_gian_ket_thuc IS NULL OR thoi_gian_ket_thuc >= thoi_gian_bat_dau)
 );
 
-
 -- 7. Bảng bat_dong_san (Lưu thống tin các sản phẩm bất động sản)
 CREATE TABLE IF NOT EXISTS danh_muc (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), -- Dùng SERIAL cho bảng danh mục đơn giản hơn
@@ -159,45 +150,6 @@ CREATE TABLE IF NOT EXISTS bat_dong_san (
     CONSTRAINT fk_bds_danhmuc FOREIGN KEY (id_danh_muc) REFERENCES danh_muc(id)
 );
 
--- CREATE TABLE IF NOT EXISTS bat_dong_san (
---     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
---     id_nguoi_dung UUID, 
---     tieu_de VARCHAR(200) DEFAULT 'chuacapnhat',
---     mo_ta TEXT DEFAULT 'chuacapnhat',
---     gia NUMERIC(18,2) CHECK (gia >= 0) DEFAULT 0,
---     dien_tich NUMERIC(10,2) CHECK (dien_tich > 0),
---     dia_chi TEXT DEFAULT 'chuacapnhat',
---     loai VARCHAR(100) DEFAULT 'chuacapnhat',
---     khu_vuc VARCHAR(100) DEFAULT 'chuacapnhat',
---     trang_thai VARCHAR(50) DEFAULT 'chuacapnhat',
---     hinh_thuc VARCHAR(50) DEFAULT 'chuacapnhat',
---     ngay_dang TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
---     CONSTRAINT fk_bds_nguoi_dung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE, 
---     CONSTRAINT chk_loai_bds CHECK (loai IN ('canho', 'nhapho', 'datnen', 'bietthu', 'chuacapnhat')),
---     CONSTRAINT chk_trang_thai_bds CHECK (trang_thai IN ('chuaduyet', 'daduyet', 'daban', 'dathue', 'chuacapnhat')),
---     CONSTRAINT chk_hinh_thuc_bds CHECK (hinh_thuc IN ('ban', 'chothue', 'chuacapnhat'))
--- );
-
-CREATE TABLE IF NOT EXISTS bai_dang (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    id_nguoi_dung UUID, -- Người đăng bài
-    id_bat_dong_san UUID, -- Bài đăng này thuộc về BĐS nào
-    
-    tieu_de VARCHAR(200) NOT NULL,
-    mo_ta TEXT,
-    gia NUMERIC(18, 2) CHECK (gia >= 0) DEFAULT 0,
-    don_vi_gia VARCHAR(20) DEFAULT 'VND', -- 'VND', 'USD', 'VND/m2'
-    hinh_thuc VARCHAR(50) NOT NULL, -- 'ban' hoặc 'chothue'
-    trang_thai VARCHAR(50) DEFAULT 'chuaduyet',
-    
-    ngay_dang TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    ngay_het_han TIMESTAMP,
-    luot_xem INT DEFAULT 0,
-
-    CONSTRAINT fk_baidang_nguoidung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE SET NULL,
-    CONSTRAINT fk_baidang_bds FOREIGN KEY (id_bat_dong_san) REFERENCES bat_dong_san(id) ON DELETE CASCADE
-);
-
 -- 8. Bảng hin_anh_bds (Hình ảnh sản phẩm bất động sản)
 CREATE TABLE IF NOT EXISTS hinh_anh_bds (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -224,14 +176,43 @@ CREATE TABLE IF NOT EXISTS danh_gia_bds (
     CONSTRAINT fk_danh_gia_bds_bds FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS hinh_anh_danh_gia_bds (
+CREATE TABLE IF NOT EXISTS bai_dang (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    id_dg_bds UUID NOT NULL,
-    url VARCHAR(300) NOT NULL,                     -- không cho phép null
-    mo_ta VARCHAR(200) DEFAULT 'Chưa mô tả',       -- mặc định nếu không có mô tả
-    kich_thuoc NUMERIC(10,2) DEFAULT 0,  -- thêm cột kích thước ảnh
-    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- thời gian tạo ảnh
-    CONSTRAINT fk_hinh_dg FOREIGN KEY (id_dg_bds) REFERENCES danh_gia_bds(id) ON DELETE CASCADE
+    id_nguoi_dung UUID, -- Người đăng bài
+    id_bat_dong_san UUID, -- Bài đăng này thuộc về BĐS nào
+    
+    tieu_de VARCHAR(200) NOT NULL,
+    mo_ta TEXT,
+	dia_chi_lien_he VARCHAR(200),
+
+    hinh_thuc VARCHAR(50) NOT NULL, -- 'ban' hoặc 'chothue'
+    trang_thai VARCHAR(50) DEFAULT 'chuaduyet', -- chuaduyet, daduyet, hethan, dahuy
+    
+    ngay_dang TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ngay_het_han TIMESTAMP,
+    luot_xem INT DEFAULT 0,
+
+    CONSTRAINT fk_baidang_nguoidung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE SET NULL,
+    CONSTRAINT fk_baidang_bds FOREIGN KEY (id_bat_dong_san) REFERENCES bat_dong_san(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS binh_luan (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+
+    id_bai_dang UUID NOT NULL,   -- Bình luận thuộc bài đăng nào
+    id_nguoi_dung UUID NOT NULL, -- Người viết bình luận
+    id_cha UUID,                 -- Bình luận cha (nếu là trả lời một bình luận khác)
+
+    noi_dung TEXT NOT NULL,      -- Nội dung bình luận
+    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ngay_sua TIMESTAMP,
+
+    trang_thai VARCHAR(20) DEFAULT 'hienthi' 
+        CHECK (trang_thai IN ('hienthi', 'an', 'xoa')),  -- kiểm soát hiển thị
+
+    CONSTRAINT fk_binhluan_baidang FOREIGN KEY (id_bai_dang) REFERENCES bai_dang(id) ON DELETE CASCADE,
+    CONSTRAINT fk_binhluan_nguoidung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
+    CONSTRAINT fk_binhluan_cha FOREIGN KEY (id_cha) REFERENCES binh_luan(id) ON DELETE CASCADE
 );
 
 -- 11. Bảng giao_dich (ghi nhận giao dịch mua/bán/thue)
@@ -333,6 +314,7 @@ CREATE TABLE IF NOT EXISTS yeu_cau (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), 
     
     id_nguoi_dung UUID NOT NULL,
+	id_moi_gioi UUID NOT NULL,
     loai VARCHAR(100) NOT NULL,               
     id_bds UUID,                             
     trang_thai VARCHAR(50) DEFAULT 'choxuly',
@@ -359,10 +341,6 @@ CREATE TABLE IF NOT EXISTS lich_trinh (
     CONSTRAINT chk_thoigian_hople CHECK (thoi_gian_ket_thuc > thoi_gian_bat_dau),
     CONSTRAINT chk_lichtrinh_trangthai CHECK (trang_thai IN ('choxacnhan', 'daxacnhan', 'dahuy'))
 );
-
-alter table lich_trinh add column dia_diem VARCHAR(255)
-select * from lich_trinh
-update lich_trinh set tieu_de='hè lô ì vé rì quan'
 
 -- 1. Bảng tin đăng
 CREATE TABLE tin_tuc (

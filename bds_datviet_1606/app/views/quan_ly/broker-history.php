@@ -131,7 +131,7 @@ function getStatusBadge(string $status): string
                         <p class="text-md text-slate-600 font-semibold"><?= htmlspecialchars($historyData['broker']['ho_ten']) ?></p>
                     </div>
                 </div>
-                <a href="trangchu.php?page=ds_datlich&search=<?= $selectedDate ?>" class="text-sm font-medium text-indigo-600 hover:text-indigo-800">
+                <a href="trangchu.php?page=quanly_lichtrinh&search=<?= $selectedDate ?>" class="text-sm font-medium text-indigo-600 hover:text-indigo-800">
                     <i class="fa-solid fa-arrow-left mr-1"></i> Quay lại trang Tổng quan
                 </a>
             </div>

@@ -88,7 +88,7 @@
             'submenu' => [
                 'Danh sách bất động sản' => ['link' => 'quanly_sanpham_bds', 'roles' => ['quantri']],
                 'Danh mục bất động sản' => ['link' => 'quanly_danhmuc_bds', 'roles' => ['quantri']],
-                'QL Đánh giá' => ['link' => 'ql_danhgia', 'roles' => ['quantri']],
+                'Danh sách đánh giá bds' => ['link' => 'quanly_danhgia_bds', 'roles' => ['quantri']],
                 'Sản phẩm cá nhân' => ['link' => '../moi_gioi/sp_canhan', 'roles' => ['moigioi']],
                 'Đăng sản phẩm' => ['link' => '../moi_gioi/dang_sp', 'roles' => ['moigioi']],
                 'Quản lý giỏ hàng' => ['link' => '../moi_gioi/ql_gio_hang', 'roles' => ['moigioi']],
@@ -99,8 +99,8 @@
             'icon' => 'fas fa-file-invoice-dollar',
             'roles' => ['quantri', 'moigioi'],
             'submenu' => [
-                'Theo dõi Y/C Mua/Bán/Thuê' => ['link' => 'td_yeucau_mbt', 'roles' => ['quantri']],
-                'Quản lý thanh toán' => ['link' => 'ql_thanhtoan', 'roles' => ['quantri']],
+                'Theo dõi yêu cầu MBT' => ['link' => 'quanly_yeucau_mbt', 'roles' => ['quantri']],
+                'Quản lý thanh toán' => ['link' => 'quanly_thanhtoan', 'roles' => ['quantri']],
                 'Giao dịch cá nhân' => ['link' => '../moi_gioi/gd_canhan', 'roles' => ['moigioi']],
             ]
         ],
@@ -118,7 +118,7 @@
             'icon' => 'fas fa-calendar-alt',
             'roles' => ['quantri', 'moigioi'],
             'submenu' => [
-                'Danh sách lịch đặt' => ['link' => 'ds_datlich', 'roles' => ['quantri']],
+                'Danh sách lịch đặt' => ['link' => 'quanly_lichtrinh', 'roles' => ['quantri']],
                 'Lịch trình cá nhân' => ['link' => '../moi_gioi/lt_canhan', 'roles' => ['moigioi']],
             ]
         ],
@@ -127,8 +127,8 @@
             'icon' => 'fas fa-newspaper',
             'roles' => ['quantri', 'moigioi'],
             'submenu' => [
-                'Quản lý tin tức (Admin)' => ['link' => 'ql_tintuc', 'roles' => ['quantri']],
-                'Quản lý bài đăng (Admin)' => ['link' => 'ql_baidang', 'roles' => ['quantri']],
+                'Quản lý tin tức (Admin)' => ['link' => 'quanly_tintuc', 'roles' => ['quantri']],
+                'Quản lý bài đăng (Admin)' => ['link' => 'quanly_baidang', 'roles' => ['quantri']],
                 'Quản lý tin tức (MG)' => ['link' => '../moi_gioi/ql_tintuc_mg', 'roles' => ['moigioi']],
                 'Quản lý bài đăng (MG)' => ['link' => '../moi_gioi/ql_baidang_mg', 'roles' => ['moigioi']],
             ]

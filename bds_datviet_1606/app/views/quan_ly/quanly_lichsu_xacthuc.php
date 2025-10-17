@@ -92,7 +92,7 @@
 <div class="max-w-5xl mx-auto" x-data="{ isModalOpen: false }">
     <header class="mb-4 border-b pb-2">
         <h1 class="text-2xl font-bold text-gray-500">Lịch Sử Hoạt Động</h1>
-        <p class="mt-2 text-sm text-slate-600">Theo dõi tất cả các hoạt động xác thực của người dùng trên hệ thống.</p>
+        <p class="mt-1 text-sm text-slate-600">Theo dõi tất cả các hoạt động xác thực của người dùng trên hệ thống.</p>
     </header>   
     <div class="flex flex-col md:flex-row items-center justify-between gap-2 mb-4">
         <form id="search-form" method="GET" class="flex-grow md:flex-grow-0 w-full md:w-[320px]">

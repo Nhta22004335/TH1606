@@ -1,39 +1,49 @@
 <?php
-    require_once "../../../config/database.php";
+if (session_status() == PHP_SESSION_NONE) { session_start(); }
+require_once "../../../config/database.php";
+$pdo = ketnoicsdl();
 
-    $pdo = ketnoicsdl();
-    $search = $_GET['search'] ?? '';
+$status_map = [
+    'choxuly' => ['text' => 'Chờ xử lý', 'class' => 'bg-yellow-100 text-yellow-800 border-yellow-200'],
+    'dangxuly' => ['text' => 'Đang xử lý', 'class' => 'bg-blue-100 text-blue-800 border-blue-200'],
+    'hoantat' => ['text' => 'Hoàn tất', 'class' => 'bg-green-100 text-green-800 border-green-200'],
+    'dahuy' => ['text' => 'Đã hủy', 'class' => 'bg-red-100 text-red-800 border-red-200']
+];
 
-    $status_map = [
-        'choxuly' => ['text' => 'Chờ xử lý', 'class' => 'bg-yellow-100 text-yellow-800 border-yellow-200'],
-        'dangxuly' => ['text' => 'Đang xử lý', 'class' => 'bg-blue-100 text-blue-800 border-blue-200'],
-        'hoantat' => ['text' => 'Hoàn tất', 'class' => 'bg-green-100 text-green-800 border-green-200'],
-        'dahuy' => ['text' => 'Đã hủy', 'class' => 'bg-red-100 text-red-800 border-red-200']
-    ];
+// ==========================================================
+// == THAY ĐỔI SQL ĐỂ ĐỒNG BỘ VỚI BẢNG bat_dong_san MỚI ==
+// ==========================================================
+$search = $_GET['search'] ?? '';
+$sql = "
+    SELECT 
+        gd.id, 
+        nd.ten_dang_nhap, 
+        bds.dia_chi_day_du, -- Lấy dia_chi_day_du thay vì tieu_de
+        gd.loai, 
+        gd.ngay_giao_dich, 
+        gd.trang_thai
+    FROM giao_dich gd
+    LEFT JOIN nguoi_dung nd ON gd.id_nguoi_dung = nd.id
+    LEFT JOIN bat_dong_san bds ON gd.id_bds = bds.id -- Join bảng bat_dong_san
+";
+$params = [];
+$where = [];
 
-    $sql = "
-        SELECT gd.id, nd.ten_dang_nhap, bds.tieu_de, gd.loai, gd.ngay_giao_dich, gd.trang_thai
-        FROM giao_dich gd
-        LEFT JOIN nguoi_dung nd ON gd.id_nguoi_dung = nd.id
-        LEFT JOIN bat_dong_san bds ON gd.id_bds = bds.id
-    ";
-    $params = [];
-    $where = [];
+if (!empty($search)) {
+    // Cập nhật cột tìm kiếm
+    $searchable_columns = "nd.ten_dang_nhap || ' ' || bds.dia_chi_day_du"; 
+    $where[] = "REPLACE(unaccent({$searchable_columns}), ' ', '') ILIKE REPLACE(unaccent(:search), ' ', '')";
+    $params[':search'] = "%$search%";
+}
 
-    if (!empty($search)) {
-        $searchable_columns = "nd.ten_dang_nhap || ' ' || bds.tieu_de";
-        $where[] = "REPLACE(unaccent({$searchable_columns}), ' ', '') ILIKE REPLACE(unaccent(:search), ' ', '')";
-        $params[':search'] = "%$search%";
-    }
+if ($where) {
+    $sql .= " WHERE " . implode(" AND ", $where);
+}
+$sql .= " ORDER BY gd.ngay_giao_dich DESC";
 
-    if ($where) {
-        $sql .= " WHERE " . implode(" AND ", $where);
-    }
-    $sql .= " ORDER BY gd.ngay_giao_dich DESC";
-    
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
-    $giaodich = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
+$giaodich = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -42,10 +52,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý Giao dịch</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        .overflow-visible {
-            overflow: visible;
-        }
+        .overflow-visible { overflow: visible; }
     </style>
 </head>
 <body>
@@ -59,19 +70,42 @@
 
     <header class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
         <div>
-            <h1 class="text-2xl font-bold text-slate-800">Quản lý Giao dịch</h1>
+            <h1 class="text-2xl font-bold text-gray-500">Quản lý Giao dịch</h1>
             <p class="mt-1 text-sm text-slate-600">Theo dõi và quản lý tất cả các giao dịch trên hệ thống.</p>
         </div>
         <form id="search-form" method="GET" class="w-full sm:w-72">
-            <input type="hidden" name="page" value="ql_thanhtoan">
             <div class="relative">
                 <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                <input type="text" name="search" placeholder="Tìm người dùng, bất động sản..." 
+                <input type="text" id="search-input" name="search" placeholder="Tìm người dùng, địa chỉ BĐS..." 
                        value="<?= htmlspecialchars($search) ?>"
-                       class="w-full pl-10 pr-4 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
+                       class="w-full pl-10 pr-4 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:ring-1 focus:ring-indigo-500 focus:outline-none transition">
             </div>
         </form>
     </header>
+    <script>
+        const searchForm = document.getElementById('search-form');
+        const searchInput = document.getElementById('search-input');
+
+        // 2. Hàm để thực hiện submit
+        function submitSearch() {
+            const searchValue = searchInput.value;
+
+            const encodedSearchValue = encodeURIComponent(searchValue.trim());
+
+            const newUrl = `trangchu.php?page=quanly_thanhtoan&search=${encodedSearchValue}`;
+            const trove = `trangchu.php?page=quanly_thanhtoan`;
+            if (searchValue) {
+                window.location.href = newUrl;          
+            } else {
+                window.location.href = trove;
+            }
+        }
+
+        // 4. Gán sự kiện bỏ focus cho ô tìm kiếm
+        searchInput.addEventListener('blur', function() {
+            submitSearch();
+        });
+    </script>
 
     <main id="main-card" class="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
         <div id="table-container" class="overflow-x-auto">
@@ -79,7 +113,7 @@
                 <thead class="bg-slate-50">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Khách hàng</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Bất động sản</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Bất động sản (Địa chỉ)</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Ngày Giao Dịch</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Trạng thái</th>
                         <th class="px-6 py-3 text-center text-xs font-semibold text-slate-600 uppercase"></th>
@@ -101,7 +135,9 @@
                                 <p class="font-medium text-slate-900"><?= htmlspecialchars($gd['ten_dang_nhap'] ?? 'N/A') ?></p>
                             </td>
                             <td class="px-6 py-4">
-                                <p class="font-medium text-slate-800 max-w-xs truncate" title="<?= htmlspecialchars($gd['tieu_de'] ?? 'N/A') ?>"><?= htmlspecialchars($gd['tieu_de'] ?? 'N/A') ?></p>
+                                <p class="font-medium text-slate-800 max-w-xs truncate">
+                                    <?= htmlspecialchars($gd['dia_chi_day_du'] ?? 'Chưa cập nhật') ?>
+                                </p>
                                 <?php $loai_map = ['mua' => 'Mua', 'ban' => 'Bán', 'thue' => 'Thuê']; ?>
                                 <p class="text-xs text-slate-500 capitalize"><?= htmlspecialchars($loai_map[$gd['loai']] ?? 'Không xác định') ?></p>
                             </td>
@@ -118,12 +154,12 @@
                                             <?php if ($gd['trang_thai'] === 'choxuly'): ?>
                                                 <button type="button" class="action-btn w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" data-id="<?= $gd['id'] ?>" data-action="dangxuly">Bắt đầu xử lý</button>
                                                 <button type="button" class="action-btn w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" data-id="<?= $gd['id'] ?>" data-action="dahuy">Hủy giao dịch</button>
-                                            <?php elseif ($gd['trang_thai'] === 'dangxuly'): ?>
+                                            <?php elseif ($gd['trang_thai'] === 'dangxuly'): ?>                                                
                                                 <button type="button" class="action-btn w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" data-id="<?= $gd['id'] ?>" data-action="dahuy">Hủy giao dịch</button>
                                             <?php endif; ?>
-                                            <a href="trangchu.php?page=ct_giaodich&id=<?= $gd['id'] ?>" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">Xem chi tiết</a>
+                                            <a href="trangchu.php?page=quanly_chitiet_thanhtoan&id=<?= $gd['id'] ?>" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">Xem chi tiết</a>
                                             <div class="border-t my-1 border-slate-100"></div>
-                                            <button type="button" class="action-btn w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700" data-id="<?= $gd['id'] ?>" data-action="xoa">Xóa</button>
+                                            <button type="button" class="action-btn w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700" data-id="<?= $gd['id'] ?>" data-action="xoa">Xóa</d>
                                         </div>
                                     </div>
                                 </div>
@@ -138,8 +174,8 @@
 </div>
 
 <script>
+
 document.addEventListener("DOMContentLoaded", function() {
-    // --- PHẦN SỬA LỖI MENU (Giữ nguyên) ---
     const mainCard = document.getElementById('main-card');
     const tableContainer = document.getElementById('table-container');
 
@@ -164,9 +200,8 @@ document.addEventListener("DOMContentLoaded", function() {
         if (mainCard) mainCard.classList.remove('overflow-visible');
     });
 
-    // --- LOGIC XỬ LÝ HÀNH ĐỘNG VỚI FETCH ---
     const tableBody = document.getElementById('transactions-table-body');
-    const apiUrl = '../../models/cn_trangthai_gd.php'; // Đảm bảo đường dẫn này chính xác
+    const apiUrl = '../../models/cn_trangthai_giaodich_qt.php'; 
 
     if(tableBody) {
         tableBody.addEventListener('click', async function(event) {
@@ -190,10 +225,7 @@ document.addEventListener("DOMContentLoaded", function() {
             formData.append('action', action);
 
             try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    body: formData
-                });
+                const response = await fetch(apiUrl, { method: 'POST', body: formData });
                 if (!response.ok) throw new Error('Yêu cầu mạng thất bại.');
                 
                 const result = await response.json();
@@ -205,6 +237,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         row.style.opacity = '0';
                         setTimeout(() => row.remove(), 300);
                     } else {
+                        // Cập nhật "live"
                         row.querySelector('.status-cell').innerHTML = result.newStatusHtml;
                         row.querySelector('.actions-cell .py-1').innerHTML = result.newActionsHtml;
                     }
@@ -217,33 +250,8 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
     }
-
-    // --- CÁC LOGIC KHÁC (TÌM KIẾM, ALERT) ---
-    let searchTimeout;
-    const searchForm = document.getElementById('search-form');
-    if (searchForm) {
-        const searchInput = searchForm.querySelector('input[name="search"]');
-        searchInput.addEventListener('blur', () => {
-            clearTimeout(searchTimeout);
-            searchForm.submit();
-        });
-    }
-
-    const alertBox = document.getElementById("alertBox");
-    if (alertBox) {
-        setTimeout(() => {
-            alertBox.style.transition = 'opacity 0.5s ease';
-            alertBox.style.opacity = '0';
-            setTimeout(() => {
-                alertBox.remove();
-                const url = new URL(window.location.href);
-                url.searchParams.delete('message');
-                url.searchParams.delete('msg_type');
-                history.replaceState(null, '', url.toString());
-            }, 500);
-        }, 3000);
-    }
 });
+
 </script>
 </body>
 </html>
