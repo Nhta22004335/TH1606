@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS nguoi_dung (
     CONSTRAINT chk_nguoi_dung_hoat_dong CHECK (hoat_dong IN ('online','offline')),
     CONSTRAINT chk_nguoi_dung_so_dt CHECK (so_dt ~ '^[0-9]{1,11}$' OR so_dt = 'chuacapnhat')
 );
+select * from nguoi_dung
 
 -- 1. Bảng phan_quyen (Chứa các quyền tương ứng người dùng)
 CREATE TABLE IF NOT EXISTS phan_quyen (
@@ -88,11 +89,15 @@ CREATE TABLE IF NOT EXISTS yeu_cau_otp (
     ),
     CONSTRAINT chk_yeu_cau_otp_time_range CHECK (het_han > bat_dau)
 );
+select * from yeu_cau_otp
+-- Thêm cột để đếm số lần xác thực OTP sai
+ALTER TABLE yeu_cau_otp
+ADD COLUMN so_lan_thu_sai INT DEFAULT 0;
 
 -- 6. Bảng lich_su_xac_thuc (Lưu lại vết đăng nhập, đăng ký hay đổi mật khẩu từ người dùng)
 CREATE TABLE IF NOT EXISTS lich_su_xac_thuc (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    id_nguoi_dung UUID NOT NULL,
+    id_nguoi_dung UUID,
     loai_su_kien VARCHAR(30) NOT NULL,
     thoi_gian_bat_dau TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     thoi_gian_ket_thuc TIMESTAMP,
