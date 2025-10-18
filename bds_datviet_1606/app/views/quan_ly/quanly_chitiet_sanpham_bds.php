@@ -42,7 +42,7 @@
     $dac_diem_chi_tiet = $bds['dac_diem_chi_tiet'] ? json_decode($bds['dac_diem_chi_tiet'], true) : [];
     $images = json_decode($bds['hinh_anh'], true); 
 
-    $sql_listings = "SELECT id, tieu_de, gia, trang_thai FROM bai_dang WHERE id_bat_dong_san = :id_bds ORDER BY ngay_dang DESC";
+    $sql_listings = "SELECT * FROM bai_dang WHERE id_bat_dong_san = :id_bds ORDER BY ngay_dang DESC";
     $stmt_listings = $pdo->prepare($sql_listings);
     $stmt_listings->execute([':id_bds' => $bds_id]);
     $listings = $stmt_listings->fetchAll(PDO::FETCH_ASSOC);
@@ -185,10 +185,6 @@
                             <?php else: foreach($listings as $listing): ?>
                                 <a href="trangchu.php?page=chitiet_baidang&id=<?= $listing['id'] ?>" class="block p-2.5 bg-slate-50 rounded-lg hover:bg-slate-100 transition"> 
                                     <p class="font-semibold text-sm text-indigo-700 truncate"><?= htmlspecialchars($listing['tieu_de']) ?></p>
-                                    <div class="flex justify-between items-center mt-1">
-                                        <span class="font-bold text-red-600 text-sm"><?= formatPrice($listing['gia']) ?></span> 
-                                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800"><?= htmlspecialchars($listing['trang_thai']) ?></span>
-                                    </div>
                                 </a>
                             <?php endforeach; endif; ?>
                         </div>

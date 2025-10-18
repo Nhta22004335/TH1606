@@ -215,7 +215,7 @@ function renderAppointmentCard(array $appointment, array $conflict_ids): void {
                              <p class="text-sm text-slate-500">Lịch trình ngày: <strong class="text-indigo-600"><?= $formattedDate ?></strong></p>
                          </div>
                     </div>
-                    <a href="trangchu.php?page=ds_datlich&search=<?= $selectedDate ?>" class="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition-colors bg-indigo-100 hover:bg-indigo-200 px-3 py-1.5 rounded-md">
+                    <a href="trangchu.php?page=quanly_lichtrinh&search=<?= $selectedDate ?>" class="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition-colors bg-indigo-100 hover:bg-indigo-200 px-3 py-1.5 rounded-md">
                         <i class="fa-solid fa-chevron-left"></i> Quay lại
                     </a>
                 </div>

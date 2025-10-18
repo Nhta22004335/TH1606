@@ -43,13 +43,13 @@ $formattedDate = (new DateTime($selectedDate))->format('d/m/Y');
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>[x-cloak] { display: none !important; }</style>
 </head>
-<body class="h-full p-4 md:p-6 lg:p-8">
+<body>
 
 <div class="max-w-screen-xl mx-auto">
-    <header class="pb-5 border-b border-slate-200 mb-6">
+    <header class="pb-4 border-b border-slate-200 mb-6">
         <div class="sm:flex sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-2xl font-bold text-slate-800">Tổng quan Lịch trình Môi giới</h1>
+                <h1 class="text-2xl font-bold text-gray-500">Tổng quan Lịch trình Môi giới</h1>
                 <p class="mt-1 text-sm text-slate-600">
                     Báo cáo số lượng lịch hẹn của từng môi giới theo ngày.
                 </p>
@@ -76,7 +76,7 @@ $formattedDate = (new DateTime($selectedDate))->format('d/m/Y');
             dateInput.addEventListener('change', function() {
                 const searchValue = dateInput.value;
                 const encodedSearchValue = encodeURIComponent(searchValue.trim());
-                const newUrl = `trangchu.php?page=ds_datlich&search=${encodedSearchValue}`;
+                const newUrl = `trangchu.php?page=quanly_lichtrinh&search=${encodedSearchValue}`;
                 window.location.href = newUrl;
             });
         });
