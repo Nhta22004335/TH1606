@@ -103,7 +103,7 @@
                                 </td>
                                 <td class="p-4">
                                     <div class="flex justify-center items-center gap-4 text-sm">
-                                        <a href="trangchu.php?page=chitiet_sanpham_bds&id=<?= $prop['id'] ?>" class="font-medium text-blue-600 hover:text-blue-800" title="Xem chi tiết"><i class="fa-solid fa-eye"></i></a>
+                                        <a href="trangchu.php?page=quanly_chitiet_sanpham_bds&id=<?= $prop['id'] ?>" class="font-medium text-blue-600 hover:text-blue-800" title="Xem chi tiết"><i class="fa-solid fa-eye"></i></a>
                                         <button type="button" class="delete-btn font-medium text-red-600 hover:text-red-800" data-id="<?= $prop['id'] ?>" title="Xóa"><i class="fa-solid fa-trash-can"></i></button>
                                     </div>
                                 </td>

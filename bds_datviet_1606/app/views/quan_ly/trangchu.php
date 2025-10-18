@@ -138,11 +138,11 @@
             'icon' => 'fas fa-bell',
             'roles' => ['quantri', 'moigioi'],
             'submenu' => [
-                'Gửi thông báo (Admin)' => ['link' => 'g_thongbao', 'roles' => ['quantri']],
-                'Quản lý hộp thoại chat' => ['link' => 'ql_hopthoai', 'roles' => ['quantri']],
+                'Gửi thông báo (Admin)' => ['link' => 'gui_thongbao', 'roles' => ['quantri']],
+                'Quản lý hộp thoại chat' => ['link' => 'quanly_hopthoai_chat', 'roles' => ['quantri']],
                 'Gửi thông báo khách (MG)' => ['link' => '../moi_gioi/g_thongbao_kh', 'roles' => ['moigioi']],
                 'Quản lý thông báo (MG)' => ['link' => '../moi_gioi/ql_thongbao', 'roles' => ['moigioi']],
-                'Quản lý thông báo' => ['link' => 'ql_thongbao', 'roles' => ['quantri']],
+                'Quản lý thông báo' => ['link' => 'quanly_thongbao', 'roles' => ['quantri']],
                 'Chat trực tuyến' => ['link' => '../moi_gioi/chat_tt', 'roles' => ['moigioi']]
             ]
         ],

@@ -89,7 +89,7 @@
     </style>
 </head>
 <body>
-<div class="max-w-5xl mx-auto" x-data="{ isModalOpen: false }">
+<div class="max-w-6xl mx-auto" x-data="{ isModalOpen: false }">
     <header class="mb-4 border-b pb-2">
         <h1 class="text-2xl font-bold text-gray-500">Lịch Sử Hoạt Động</h1>
         <p class="mt-1 text-sm text-slate-600">Theo dõi tất cả các hoạt động xác thực của người dùng trên hệ thống.</p>

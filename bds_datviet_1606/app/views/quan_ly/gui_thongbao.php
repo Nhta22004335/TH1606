@@ -21,7 +21,7 @@
 </head>
 <body class="bg-gray-100 min-h-screen">
 
-<div class="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+<div class="max-w-6xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
 
     <header class="flex items-center gap-4 bg-white shadow p-4 border-b-2 border-gray-100">
         <img src="../../../public/images/notification.gif" alt="Notification" class="w-12 h-12 rounded-full border p-1">
@@ -217,8 +217,8 @@ document.getElementById("sendBtn").addEventListener("click", () => {
 
     // 3. Xác định URL backend tương ứng
     const apiUrl = (sendMethod === 'email') 
-        ? '../../models/g_thongbaoemail.php' 
-        : '../../models/g_thongbaoht.php'; // Giả định thư mục models chứa file xử lý
+        ? '../../models/gui_thongbao_email_qt.php' 
+        : '../../models/gui_thongbao_hethong_qt.php'; // Giả định thư mục models chứa file xử lý
 
     // 4. Gửi yêu cầu Fetch API
     sendBtn.disabled = true;

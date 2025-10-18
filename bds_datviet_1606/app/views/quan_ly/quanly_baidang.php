@@ -103,8 +103,8 @@ $stats = [
     <header>
         <div class="sm:flex sm:items-center sm:justify-between mb-6 pb-4 border-b">
             <div>
-                <h1 class="text-2xl font-bold text-slate-800">Quản lý Bài đăng</h1>
-                <p class="mt-2 text-sm text-slate-600">Tổng quan và kiểm duyệt tất cả bài đăng của môi giới.</p>
+                <h1 class="text-2xl font-bold text-gray-500">Quản lý Bài đăng</h1>
+                <p class="mt-1 text-sm text-slate-600">Tổng quan và kiểm duyệt tất cả bài đăng của môi giới.</p>
             </div>
         </div>
 
@@ -189,7 +189,7 @@ $stats = [
                                                     <button class="action-btn w-full text-left block px-4 py-2 text-sm text-blue-700 hover:bg-slate-100" data-id="<?= htmlspecialchars($post['id']) ?>" data-action="chuaduyet" role="menuitem"><i class="fa-solid fa-rotate-left mr-2"></i>Đăng lại (Chờ duyệt)</button>
                                                 <?php endif; ?>
 
-                                                <a href="trangchu.php?page=chitiet_baidang&id=<?= htmlspecialchars($post['id']) ?>" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" role="menuitem"><i class="fa-solid fa-circle-info mr-2"></i>Xem chi tiết</a>
+                                                <a href="trangchu.php?page=quanly_chitiet_baidang&id=<?= htmlspecialchars($post['id']) ?>" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" role="menuitem"><i class="fa-solid fa-circle-info mr-2"></i>Xem chi tiết</a>
                                             </div>
                                         </div>
                                     </details>
