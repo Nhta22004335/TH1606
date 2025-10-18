@@ -176,7 +176,7 @@
                             </td>
                             
                             <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                                <a href="trangchu.php?page=chitiet_nguoidung&id=<?= $u['id'] ?>" class="text-indigo-600 hover:text-indigo-900">
+                                <a href="trangchu.php?page=quanly_chitiet_nguoidung&id=<?= $u['id'] ?>" class="text-indigo-600 hover:text-indigo-900">
                                     <i class="fas fa-eye text-sm"></i>
                                 </a>
                                 <?php if ($u['trang_thai'] === 'danghoatdong'): ?>
@@ -217,8 +217,8 @@
 
             const encodedSearchValue = encodeURIComponent(searchValue.trim());
 
-            const newUrl = `trangchu.php?page=quanly_nguoidung_qt&search=${encodedSearchValue}`;
-            const trove = `trangchu.php?page=quanly_nguoidung_qt`;
+            const newUrl = `trangchu.php?page=quanly_nguoidungt&search=${encodedSearchValue}`;
+            const trove = `trangchu.php?page=quanly_nguoidung`;
             if (searchValue) {
                 window.location.href = newUrl;          
             } else {
