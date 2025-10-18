@@ -76,7 +76,7 @@ $formattedDate = (new DateTime($selectedDate))->format('d/m/Y');
             dateInput.addEventListener('change', function() {
                 const searchValue = dateInput.value;
                 const encodedSearchValue = encodeURIComponent(searchValue.trim());
-                const newUrl = `trangchu.php?page=ds_datlich&search=${encodedSearchValue}`;
+                const newUrl = `trangchu.php?page=quanly_lichtrinh&search=${encodedSearchValue}`;
                 window.location.href = newUrl;
             });
         });
