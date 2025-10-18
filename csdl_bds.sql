@@ -380,6 +380,7 @@ CREATE TABLE IF NOT EXISTS hop_thoai (
 select * from tin_nhan
 select * from hop_thoai
 select * from nguoi_dung
+
 CREATE TABLE IF NOT EXISTS tin_nhan (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     id_hop_thoai UUID NOT NULL,

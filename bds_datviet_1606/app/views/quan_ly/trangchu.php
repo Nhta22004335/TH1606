@@ -149,7 +149,7 @@
         [
             'title' => 'Quản lý lịch sử',
             'icon' => 'fas fa-history',
-            'link' => 'trangchu.php?page=ql_lichsu',
+            'link' => 'trangchu.php?page=quanly_lichsu_hethong',
             'roles' => ['quantri'],
         ],
     ];
