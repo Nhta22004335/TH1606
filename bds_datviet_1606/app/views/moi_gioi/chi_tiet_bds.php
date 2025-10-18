@@ -1,39 +1,62 @@
 <?php
+// ===================================================================
+// PHẦN 1: XỬ LÝ LOGIC & DỮ LIỆU (BACKEND)
+// ===================================================================
+
 require_once "../../../config/database.php";
 $pdo = ketnoicsdl();
 
 if (session_status() === PHP_SESSION_NONE) session_start();
 
-// --- Lấy ID sản phẩm (UUID) ---
-$id_bds = $_GET['id'] ?? '';
+// --- 1. XÁC THỰC NGƯỜI DÙNG VÀ QUYỀN TRUY CẬP (MỚI) ---
+$id_nguoi_dung_session = $_SESSION['id_nguoi_dung'] ?? null;
 
-// Kiểm tra định dạng UUID
-if (!preg_match('/^[0-9a-fA-F-]{36}$/', $id_bds)) {
-    echo "<p class='text-center text-red-600 mt-10 font-semibold'>❌ ID sản phẩm không hợp lệ!</p>";
+if (!$id_nguoi_dung_session) {
+    // Nếu chưa đăng nhập, chuyển hướng hoặc báo lỗi
+    header("Location: ../auth/dangnhap.html");
     exit;
 }
 
-// --- Truy vấn thông tin sản phẩm ---
+// --- Lấy ID sản phẩm (UUID của BAI_DANG) ---
+$id_tin_dang = $_GET['id'] ?? '';
+
+// Kiểm tra định dạng UUID
+if (!preg_match('/^[0-9a-fA-F-]{36}$/', $id_tin_dang)) {
+    echo "<p class='text-center text-red-600 mt-10 font-semibold'>❌ ID Tin đăng không hợp lệ!</p>";
+    exit;
+}
+
+// --- 2. TRUY VẤN THÔNG TIN TIN ĐĂNG VÀ KIỂM TRA CHỦ SỞ HỮU (SỬA LỚN) ---
+// Lấy dữ liệu từ BAI_DANG (bd) và JOIN với BAT_DONG_SAN (bds)
 $stmt = $pdo->prepare("
     SELECT 
-        b.id, b.tieu_de, b.mo_ta, b.gia, b.dien_tich, b.khu_vuc, b.dia_chi, 
-        b.loai, b.trang_thai, b.ngay_dang, b.id_nguoi_dung,
+        bd.id AS id_tin_dang, bd.tieu_de, bd.mo_ta, bd.gia, bd.trang_thai, bd.ngay_dang, bd.id_nguoi_dung, -- Từ BAI_DANG
+        bds.id AS id_bds_goc, bds.dien_tich_dat AS dien_tich, bds.dia_chi_day_du AS dia_chi_day_du, -- Từ BAT_DONG_SAN
+        dm.ten_danh_muc AS loai, -- Từ DANH_MUC
         COALESCE(ha.url, 'chuacapnhat.jpg') AS anh_dai_dien
-    FROM bat_dong_san b
+    FROM bai_dang bd
+    JOIN bat_dong_san bds ON bd.id_bat_dong_san = bds.id
+    LEFT JOIN danh_muc dm ON bds.id_danh_muc = dm.id
     LEFT JOIN LATERAL (
-        SELECT url FROM hinh_anh_bds WHERE id_bds = b.id ORDER BY ngay_tao DESC LIMIT 1
+        SELECT url FROM hinh_anh_bds WHERE id_bds = bds.id ORDER BY ngay_tao DESC LIMIT 1
     ) ha ON TRUE
-    WHERE b.id = :id
+    WHERE bd.id = :id_tin_dang 
+    AND bd.id_nguoi_dung = :id_session_check -- <<< KIỂM TRA CHỦ SỞ HỮU CHÍNH XÁC
 ");
-$stmt->execute(['id' => $id_bds]);
+
+$stmt->execute([
+    ':id_tin_dang' => $id_tin_dang,
+    ':id_session_check' => $id_nguoi_dung_session
+]);
 $sp = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$sp) {
-    echo "<p class='text-center text-red-600 mt-10 font-semibold'>❌ Sản phẩm không tồn tại hoặc đã bị xóa.</p>";
+    // Nếu không tìm thấy hoặc ID người dùng không khớp, báo lỗi
+    echo "<p class='text-center text-red-600 mt-10 font-semibold'>❌ Tin đăng không tồn tại HOẶC bạn không có quyền xem tin đăng này.</p>";
     exit;
 }
 
-// --- Định dạng giá ---
+// --- Định dạng giá và các hàm helper ---
 function format_price_vn($price) {
     if ($price >= 1000000000) return rtrim(rtrim(number_format($price / 1000000000, 2, ',', ''), '0'), ',') . ' tỷ';
     elseif ($price >= 1000000) return number_format($price / 1000000, 0, ',', '.') . ' triệu';
@@ -44,15 +67,16 @@ function format_price_vn($price) {
 function e($str) { return htmlspecialchars($str, ENT_QUOTES, 'UTF-8'); }
 
 // --- Lấy danh sách đánh giá ---
+// Dùng id_bds_goc để lấy đánh giá, vì đánh giá là cho BĐS gốc, không phải tin đăng
 $stmt = $pdo->prepare("
     SELECT dg.diem, dg.binh_luan, dg.ngay_tao, i.ho_ten, ha.url AS hinh
     FROM danh_gia_bds dg
     LEFT JOIN info_nguoi_dung i ON i.id_nguoi_dung = dg.id_nguoi_dung
     LEFT JOIN hinh_anh_danh_gia_bds ha ON ha.id_dg_bds = dg.id
-    WHERE dg.id_bds = :id_bds AND dg.trang_thai='hien'
+    WHERE dg.id_bds = :id_bds_goc AND dg.trang_thai='hien'
     ORDER BY dg.ngay_tao DESC
 ");
-$stmt->execute(['id_bds' => $id_bds]);
+$stmt->execute(['id_bds_goc' => $sp['id_bds_goc']]);
 $ds_danh_gia = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
@@ -68,21 +92,19 @@ $ds_danh_gia = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <div class="max-w-6xl mx-auto mt-8 bg-white rounded-xl shadow-md overflow-hidden">
     <div class="flex flex-col md:flex-row">
-        <!-- Ảnh đại diện -->
         <div class="md:w-1/2">
             <img src="../../../storage/pictures/bds/<?= e($sp['anh_dai_dien']) ?>?t=<?= time() ?>" 
-                 alt="Ảnh bất động sản" 
-                 class="w-full h-96 object-cover">
+                onerror="this.onerror=null;this.src='../../../storage/pictures/bds/chuacapnhat.jpg';"
+                alt="Ảnh bất động sản" 
+                class="w-full h-96 object-cover">
         </div>
 
-        <!-- Thông tin sản phẩm -->
         <div class="md:w-1/2 p-6">
             <h1 class="text-2xl font-bold text-gray-800 mb-4"><?= e($sp['tieu_de']) ?></h1>
 
             <div class="space-y-2 text-gray-700 text-sm">
                 <p><i class="fas fa-tag text-green-500"></i> <strong>Loại:</strong> <?= e($sp['loai']) ?></p>
-                <p><i class="fas fa-map-marker-alt text-red-500"></i> <strong>Khu vực:</strong> <?= e($sp['khu_vuc']) ?></p>
-                <p><i class="fas fa-home text-blue-500"></i> <strong>Địa chỉ:</strong> <?= e($sp['dia_chi']) ?></p>
+                <p><i class="fas fa-map-marker-alt text-red-500"></i> <strong>Địa chỉ đầy đủ:</strong> <?= e($sp['dia_chi_day_du']) ?></p> 
                 <p><i class="fas fa-ruler-combined text-indigo-500"></i> <strong>Diện tích:</strong> <?= e($sp['dien_tich']) ?> m²</p>
                 <p><i class="fas fa-dollar-sign text-yellow-500"></i> <strong>Giá:</strong> <?= format_price_vn((float)$sp['gia']) ?></p>
                 <p><i class="fas fa-info-circle text-gray-500"></i> <strong>Trạng thái:</strong> <?= e($sp['trang_thai']) ?></p>
@@ -91,32 +113,28 @@ $ds_danh_gia = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </div>
 
-    <!-- Mô tả -->
     <div class="p-6 border-t">
         <h2 class="text-xl font-semibold text-gray-800 mb-3">Mô tả chi tiết</h2>
         <p class="text-gray-700 whitespace-pre-line leading-relaxed"><?= nl2br(e($sp['mo_ta'])) ?></p>
     </div>
 
-    <!-- Nút hành động -->
     <div class="flex justify-center gap-4 p-6 border-t">
         <a href="trangchu.php?page=../moi_gioi/sp_canhan" 
            class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-5 py-2 rounded-lg font-medium">
             ⬅ Quay lại danh sách
         </a>
-        <a href="trangchu.php?page=../moi_gioi/sua_san_pham&id=<?= e($sp['id']) ?>" 
+        <a href="trangchu.php?page=../moi_gioi/sua_san_pham&id=<?= e($sp['id_tin_dang']) ?>" 
            class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium">
-            ✏️ Sửa sản phẩm
+            ✏️ Sửa tin đăng
         </a>
     </div>
 </div>
 
-<!-- Form đánh giá -->
 <div class="max-w-6xl mx-auto mt-6 bg-white p-6 rounded-xl shadow-md">
     <h3 class="text-xl font-semibold mb-4">Đánh giá BĐS này</h3>
+    <p class="text-red-500 mb-4">⚠️ Lưu ý: Đây là trang quản lý. Bạn không nên tự đánh giá tin đăng của mình.</p>
     <form action="trangchu.php?page=../../../models/xu_ly_danh_gia" method="POST" enctype="multipart/form-data" class="space-y-4">
-        <input type="hidden" name="id_bds" value="<?= e($id_bds) ?>">
-
-        <div>
+        <input type="hidden" name="id_bds" value="<?= e($sp['id_bds_goc']) ?>"> <div>
             <label for="diem" class="block font-medium">Điểm (1-5):</label>
             <select name="diem" id="diem" required class="border rounded px-2 py-1">
                 <?php for($i=1;$i<=5;$i++): ?>
@@ -142,7 +160,6 @@ $ds_danh_gia = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </form>
 </div>
 
-<!-- Hiển thị danh sách đánh giá -->
 <div class="max-w-6xl mx-auto mt-6 bg-white p-6 rounded-xl shadow-md">
     <h3 class="text-xl font-semibold mb-4">Danh sách đánh giá</h3>
     <?php if($ds_danh_gia): ?>
@@ -151,7 +168,8 @@ $ds_danh_gia = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <p class="font-medium"><?= e($dg['ho_ten'] ?? 'Khách') ?> đánh giá <?= e($dg['diem']) ?> ⭐</p>
                 <p class="text-gray-700"><?= nl2br(e($dg['binh_luan'])) ?></p>
                 <?php if($dg['hinh']): ?>
-                    <img src="<?= e($dg['hinh']) ?>" alt="Ảnh đánh giá" class="w-32 mt-2">
+                    <img src="../../../storage/pictures/danh_gia/<?= e($dg['hinh']) ?>" 
+                         alt="Ảnh đánh giá" class="w-32 h-32 object-cover mt-2 rounded">
                 <?php endif; ?>
                 <p class="text-xs text-gray-500 mt-1"><?= date("d/m/Y H:i", strtotime($dg['ngay_tao'])) ?></p>
             </div>

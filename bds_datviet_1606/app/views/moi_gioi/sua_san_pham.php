@@ -1,5 +1,7 @@
 <?php
-// Bắt đầu phiên
+// sua_san_pham.php
+
+// 1. KIỂM TRA VÀ KHỞI TẠO SESSION: TUYỆT ĐỐI PHẢI ĐẶT Ở ĐẦU
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -7,25 +9,63 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once "../../../config/database.php";
 $pdo = ketnoicsdl();
 
-// --- BẢO MẬT: Lấy ID người dùng và ID sản phẩm ---
+// --- Lấy ID người dùng và ID sản phẩm ---
 $id_nguoi_dung = $_SESSION['id_nguoi_dung'] ?? null;
 $id_bds = $_GET['id'] ?? null;
 
-if (!$id_nguoi_dung) exit("Bạn cần đăng nhập để thực hiện chức năng này.");
-if (!$id_bds) exit("Không tìm thấy ID sản phẩm.");
+// Khởi tạo biến trạng thái lỗi
+$error_message = null;
+$product = null;
 
-// Truy vấn sản phẩm
-$sql = "SELECT * FROM bat_dong_san WHERE id = :id_bds AND id_nguoi_dung = :id_nguoi_dung";
-$stmt = $pdo->prepare($sql);
-$stmt->execute([':id_bds' => $id_bds, ':id_nguoi_dung' => $id_nguoi_dung]);
-$product = $stmt->fetch(PDO::FETCH_ASSOC);
+// 2. LOGIC KIỂM TRA LỖI VÀ QUYỀN TRUY CẬP
+if (!$id_nguoi_dung) {
+    // Lỗi xảy ra ở đây nếu session bị mất hoặc chưa đăng nhập
+    $error_message = "Bạn cần đăng nhập để thực hiện chức năng này. Vui lòng kiểm tra lại trạng thái đăng nhập.";
+} elseif (!preg_match('/^[0-9a-fA-F-]{36}$/', $id_bds)) {
+    $error_message = "❌ ID sản phẩm không hợp lệ.";
+} else {
+   // sua_san_pham.php (Khoảng dòng 27)
 
-if (!$product) exit("Sản phẩm không tồn tại hoặc bạn không có quyền chỉnh sửa sản phẩm này.");
+$// sua_san_pham.php (Khoảng dòng 27)
+
+$sql = "
+    SELECT 
+        bds.*,
+        bd.hinh_thuc, bd.tieu_de, bd.mo_ta, bd.gia 
+    FROM bat_dong_san bds
+    LEFT JOIN bai_dang bd ON bds.id = bd.id_bat_dong_san 
+    -- SỬA TÊN BẢNG ĐÚNG TẠI ĐÂY: Thay bd.id_nguoi_dung bằng bds.id_nguoi_dung
+    WHERE bds.id = :id_bds AND bds.id_nguoi_dung = :id_nguoi_dung 
+    LIMIT 1
+";
+    try {
+        $stmt = $pdo->prepare($sql);
+            // Đảm bảo dòng này CHÍNH XÁC như sau:
+        // SUA_SAN_PHAM.PHP (Khoảng dòng 38)
+            $stmt->execute([
+                ':id_bds' => $id_bds,
+                ':id_nguoi_dung' => $id_nguoi_dung // Tham số thứ 2 phải có ở đây
+            ]);
+                    $product = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$product) {
+            $error_message = "Sản phẩm không tồn tại hoặc bạn không có quyền chỉnh sửa tin đăng này.";
+        }
+    } catch (PDOException $e) {
+        // Ghi log lỗi (tốt)
+        error_log("Database Error in sua_san_pham.php: " . $e->getMessage()); 
+        
+        // --- CHỈ DÙNG TẠM THỜI ĐỂ DEBUG ---
+        $error_message = "LỖI CSDL CHI TIẾT: " . $e->getMessage(); 
+        // ------------------------------------
+    }
+}
 
 function e(?string $string): string {
     return htmlspecialchars($string ?? '', ENT_QUOTES, 'UTF-8');
 }
 
+// Map trạng thái (chỉ định nghĩa nếu không có lỗi và có product)
 $status_map = [
     'chuaduyet' => ['label' => 'Chờ duyệt', 'class' => 'bg-yellow-100 text-yellow-800'],
     'daduyet'   => ['label' => 'Đã duyệt',  'class' => 'bg-green-100 text-green-800'],
@@ -33,7 +73,11 @@ $status_map = [
     'dathue'    => ['label' => 'Đã thuê',   'class' => 'bg-blue-100 text-blue-800'],
     'default'   => ['label' => 'Không rõ',  'class' => 'bg-gray-100 text-gray-700']
 ];
-$current_status = $status_map[$product['trang_thai']] ?? $status_map['default'];
+$current_status = $product ? ($status_map[$product['trang_thai']] ?? $status_map['default']) : $status_map['default'];
+
+// Danh sách hướng nhà và loại BĐS
+$huong_options = ["Đông", "Tây", "Nam", "Bắc", "Đông Bắc", "Đông Nam", "Tây Bắc", "Tây Nam", "Không xác định"];
+$loai_options = ["CanHo", "NhaPho", "DatNen", "BietThu", "Khac"]; 
 ?>
 
 <!DOCTYPE html>
@@ -41,7 +85,7 @@ $current_status = $status_map[$product['trang_thai']] ?? $status_map['default'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chỉnh sửa: <?= e($product['tieu_de']) ?></title>
+    <title>Chỉnh sửa: <?= $product ? e($product['tieu_de']) : 'Lỗi Truy Cập' ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
@@ -51,15 +95,20 @@ $current_status = $status_map[$product['trang_thai']] ?? $status_map['default'];
     <div class="max-w-7xl mx-auto mb-8">
         <a href="trangchu.php?page=../moi_gioi/sp_canhan" class="text-sm text-slate-600 hover:text-sky-600 flex items-center gap-2 mb-4">
             <i class="fas fa-arrow-left"></i>
-             Quay lại danh sách
+            Quay lại danh sách
         </a>
         <h1 class="text-3xl font-bold text-slate-900">Chỉnh sửa Bất động sản</h1>
         <p class="text-slate-500 mt-1">Cập nhật thông tin chi tiết cho sản phẩm của bạn.</p>
     </div>
 
+    <?php if ($error_message): ?>
+        <div class="max-w-7xl mx-auto bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+            <strong class="font-bold">Lỗi: </strong>
+            <span class="block sm:inline"><?= e($error_message) ?></span>
+        </div>
+    <?php else: ?>
     <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        <!-- FORM CHÍNH -->
         <div class="lg:col-span-2">
             <form id="main-form" action="../../models/xuly_capnhat_spcn.php" method="POST" class="space-y-6">
                 <input type="hidden" name="id" value="<?= e($product['id']) ?>">
@@ -83,13 +132,42 @@ $current_status = $status_map[$product['trang_thai']] ?? $status_map['default'];
                             </select>
                         </div>
                         <div>
-                            <label for="loai" class="block text-sm font-medium text-slate-700">Loại Bất động sản</label>
+                            <label for="loai" class="block text-sm font-medium text-slate-700">Loại Bất động sản (Danh mục)</label>
                             <select name="loai" id="loai" class="mt-1 block w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
                                 <?php
-                                $loai_options = ["canho", "nhapho", "datnen", "bietthu"];
-                                foreach ($loai_options as $opt) {
-                                    $sel = ($product['loai'] == $opt) ? 'selected' : '';
-                                    echo "<option value='$opt' $sel>$opt</option>";
+                                foreach ($loai_options as $opt) { 
+                                    $sel = ($product['id_danh_muc'] == $opt) ? 'selected' : ''; 
+                                    echo "<option value='".e($opt)."' $sel>".e($opt)."</option>";
+                                }
+                                ?>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                    <h2 class="text-lg font-semibold text-slate-800 flex items-center gap-3 mb-4">
+                        <i class="fas fa-home text-blue-500"></i>
+                        Đặc điểm chi tiết
+                    </h2>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-6">
+                        <div>
+                            <label for="so_phong_ngu" class="block text-sm font-medium text-slate-700">P. Ngủ</label>
+                            <input type="number" name="so_phong_ngu" id="so_phong_ngu" value="<?= e($product['so_phong_ngu']) ?>" min="0" 
+                            class="mt-1 block w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
+                        </div>
+                        <div>
+                            <label for="so_phong_tam" class="block text-sm font-medium text-slate-700">P. Tắm</label>
+                            <input type="number" name="so_phong_tam" id="so_phong_tam" value="<?= e($product['so_phong_tam']) ?>" min="0" 
+                            class="mt-1 block w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
+                        </div>
+                        <div class="col-span-2">
+                            <label for="huong_nha" class="block text-sm font-medium text-slate-700">Hướng nhà</label>
+                            <select name="huong_nha" id="huong_nha" class="mt-1 block w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
+                                <?php
+                                foreach ($huong_options as $opt) {
+                                    $sel = ($product['huong_nha'] == $opt) ? 'selected' : '';
+                                    echo "<option value='".e($opt)."' $sel>".e($opt)."</option>";
                                 }
                                 ?>
                             </select>
@@ -104,7 +182,7 @@ $current_status = $status_map[$product['trang_thai']] ?? $status_map['default'];
                     </h2>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div>
-                            <label for="gia" class="block text-sm font-medium text-slate-700">Mức giá</label>
+                            <label for="gia" class="block text-sm font-medium text-slate-700">Mức giá (trong Tin đăng)</label>
                             <div class="relative">
                                 <input type="number" name="gia" id="gia" value="<?= e($product['gia']) ?>" required min="0" 
                                 class="mt-1 block w-full px-4 py-2.5 pr-12 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
@@ -112,9 +190,9 @@ $current_status = $status_map[$product['trang_thai']] ?? $status_map['default'];
                             </div>
                         </div>
                         <div>
-                            <label for="dien_tich" class="block text-sm font-medium text-slate-700">Diện tích</label>
+                            <label for="dien_tich_dat" class="block text-sm font-medium text-slate-700">Diện tích (BĐS gốc)</label>
                             <div class="relative">
-                                <input type="number" name="dien_tich" id="dien_tich" value="<?= e($product['dien_tich']) ?>" required min="1" step="0.1" 
+                                <input type="number" name="dien_tich_dat" id="dien_tich_dat" value="<?= e($product['dien_tich_dat']) ?>" required min="1" step="0.1" 
                                 class="mt-1 block w-full px-4 py-2.5 pr-10 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
                                 <span class="absolute inset-y-0 right-4 flex items-center text-slate-500 text-sm">m²</span>
                             </div>
@@ -128,37 +206,32 @@ $current_status = $status_map[$product['trang_thai']] ?? $status_map['default'];
                         Vị trí & Mô tả
                     </h2>
                     <div class="space-y-6">
-                        <!-- <div>
-                            <label for="khu_vuc" class="block text-sm font-medium text-slate-700">Tỉnh / Thành phố</label>
-                            <input type="text" name="khu_vuc" id="khu_vuc" value="<?= e($product['khu_vuc']) ?>" 
-                            class="mt-1 block w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
-                        </div> -->
                         <div>
-                        <label for="khu_vuc" class="block text-sm font-medium text-slate-700">
-                            Tỉnh / Thành phố
-                        </label>
-                        <select name="khu_vuc" id="khu_vuc"
-                            class="mt-1 block w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
-                            <?php 
-                            $provinces = [
-                                "Hà Nội","Huế","Lai Châu","Điện Biên","Sơn La","Lạng Sơn","Quảng Ninh","Thanh Hóa",
-                                "Nghệ An","Hà Tĩnh","Cao Bằng","Tuyên Quang","Lào Cai","Thái Nguyên","Phú Thọ",
-                                "Bắc Ninh","Hưng Yên","Hải Phòng","Ninh Bình","Quảng Trị","Đà Nẵng","Quảng Ngãi",
-                                "Gia Lai","Khánh Hòa","Lâm Đồng","Đắk Lắk","TP. Hồ Chí Minh","Đồng Nai","Tây Ninh",
-                                "Cần Thơ","Vĩnh Long","Đồng Tháp","Cà Mau"
-                            ];
-
-                            foreach ($provinces as $p) {
-                                $selected = ($product['khu_vuc'] === $p) ? 'selected' : '';
-                                echo "<option value='$p' $selected>$p</option>";
-                            }
-                            ?>
-                        </select>
+                            <label for="khu_vuc" class="block text-sm font-medium text-slate-700">
+                                Tỉnh / Thành phố
+                            </label>
+                            <select name="khu_vuc" id="khu_vuc"
+                                class="mt-1 block w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
+                                <?php 
+                                $provinces = [
+                                    "Hà Nội","TP. Hồ Chí Minh","Huế","Lai Châu","Điện Biên","Sơn La","Lạng Sơn","Quảng Ninh","Thanh Hóa",
+                                    "Nghệ An","Hà Tĩnh","Cao Bằng","Tuyên Quang","Lào Cai","Thái Nguyên","Phú Thọ",
+                                    "Bắc Ninh","Hưng Yên","Hải Phòng","Ninh Bình","Quảng Trị","Đà Nẵng","Quảng Ngãi",
+                                    "Gia Lai","Khánh Hòa","Lâm Đồng","Đắk Lắk","Đồng Nai","Tây Ninh",
+                                    "Cần Thơ","Vĩnh Long","Đồng Tháp","Cà Mau"
+                                ];
+                                sort($provinces); // Sắp xếp tỉnh/thành phố theo thứ tự ABC
+                                foreach ($provinces as $p) {
+                                    $selected = ($product['khu_vuc'] === $p) ? 'selected' : '';
+                                    echo "<option value='".e($p)."' $selected>".e($p)."</option>";
+                                }
+                                ?>
+                            </select>
                         </div>
 
                         <div>
-                            <label for="dia_chi" class="block text-sm font-medium text-slate-700">Địa chỉ chi tiết</label>
-                            <textarea name="dia_chi" id="dia_chi" rows="2" class="mt-1 block w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500"><?= e($product['dia_chi']) ?></textarea>
+                            <label for="dia_chi_day_du" class="block text-sm font-medium text-slate-700">Địa chỉ chi tiết (Đường, số nhà...)</label>
+                            <textarea name="dia_chi_day_du" id="dia_chi_day_du" rows="2" class="mt-1 block w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500"><?= e($product['dia_chi_day_du']) ?></textarea>
                         </div>
                         <div>
                             <label for="mo_ta" class="block text-sm font-medium text-slate-700">Mô tả chi tiết</label>
@@ -169,24 +242,23 @@ $current_status = $status_map[$product['trang_thai']] ?? $status_map['default'];
             </form>
         </div>
 
-        <!-- CỘT PHẢI -->
         <div class="lg:col-span-1">
             <div class="sticky top-8 space-y-6">
                 <div class="bg-white p-6 rounded-xl shadow-md">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-semibold text-slate-800">Trạng thái</h3>
+                        <h3 class="font-semibold text-slate-800">Trạng thái BĐS</h3>
                         <span class="px-2.5 py-1 rounded-full text-xs font-semibold <?= $current_status['class'] ?>">
                             <?= e($current_status['label']) ?>
                         </span>
                     </div>
 
-                    <!-- Upload ảnh -->
                     <div class="pt-4 border-t border-slate-200">
                         <h2 class="text-lg font-semibold text-slate-800 flex items-center gap-3 mb-4">
                             <i class="fa-solid fa-image text-indigo-500"></i> Hình ảnh bất động sản
                         </h2>
                         <div class="flex flex-col items-center justify-center space-y-4">
                             <?php
+                            // Lấy ảnh đại diện (ảnh mới nhất)
                             $stmtImg = $pdo->prepare("SELECT url FROM hinh_anh_bds WHERE id_bds = :id_bds ORDER BY ngay_tao DESC LIMIT 1");
                             $stmtImg->execute([':id_bds' => $id_bds]);
                             $img = $stmtImg->fetch(PDO::FETCH_ASSOC);
@@ -210,6 +282,7 @@ $current_status = $status_map[$product['trang_thai']] ?? $status_map['default'];
                                     <i class="fa-solid fa-upload"></i> Tải ảnh lên
                                 </button>
                             </form>
+                            <p class="text-xs text-slate-500 italic">Ảnh mới nhất sẽ là ảnh đại diện.</p>
                         </div>
                     </div>
 
@@ -236,9 +309,12 @@ $current_status = $status_map[$product['trang_thai']] ?? $status_map['default'];
             </div>
         </div>
     </div>
+    <?php endif; ?>
 </div>
 
 <script>
+// Logic JS/AJAX chỉ cần chạy khi không có lỗi (product tồn tại)
+<?php if (!$error_message): ?>
 function uploadAnh() {
     const fileInput = document.getElementById('fileInput');
     const file = fileInput.files[0];
@@ -246,15 +322,20 @@ function uploadAnh() {
 
     const formData = new FormData();
     formData.append('file_anh', file);
-    // Tên biến phải là 'id_bds' để khớp với logic xử lý trong file xuly_capnhat_spcn.php
     formData.append('id_bds', document.querySelector('input[name="id"]').value); 
+    formData.append('action', 'upload_image'); 
 
     // Gọi đến file xử lý duy nhất
     fetch("../../models/xuly_capnhat_spcn.php", { 
         method: "POST",
         body: formData
     })
-    .then(res => res.json())
+    .then(res => {
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+    })
     .then(data => {
         if (data.status === "success") {
             const preview = document.getElementById('preview-container');
@@ -269,20 +350,45 @@ function uploadAnh() {
                 previewImg.alt = 'Ảnh BĐS';
                 preview.appendChild(previewImg);
             }
-            previewImg.src = `../../../storage/pictures/bds/${data.filename}?t=` + new Date().getTime();
+            previewImg.src = `../../../storage/pictures/bds/${data.filename}?t=` + new Date().getTime(); 
 
-            
+            alert("✅ Cập nhật ảnh đại diện thành công!");
             fileInput.value = ""; 
-            // window.location.href = 'trangchu.php?page=../moi_gioi/sp_canhan';
         } else {
             alert("❌ " + data.message);
         }
     })
     .catch(err => {
-        console.error(err);
-        alert("Lỗi upload, vui lòng thử lại!");
+        console.error("Lỗi Fetch:", err);
+        alert("Lỗi upload, vui lòng thử lại! Chi tiết lỗi: " + err.message);
     });
 }
+
+// Xử lý sự kiện submit form chính
+document.getElementById('main-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    formData.append('action', 'update_data'); 
+
+    fetch(this.action, {
+        method: "POST",
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "success") {
+            alert("✅ Cập nhật thông tin sản phẩm thành công!");
+        } else {
+            alert("❌ Lỗi cập nhật: " + data.message);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Lỗi kết nối, không thể lưu thay đổi!");
+    });
+});
+<?php endif; ?>
 </script>
 </body>
 </html>
