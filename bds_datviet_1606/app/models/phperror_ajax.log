@@ -1,0 +1,5 @@
+[18-Oct-2025 23:05:40 UTC] PHP Warning:  require_once(../../../config/database.php): Failed to open stream: No such file or directory in /var/www/html/app/models/xuly_capnhat_spcn.php on line 43
+[18-Oct-2025 23:05:40 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '../../../config/database.php' (include_path='.:/usr/local/lib/php') in /var/www/html/app/models/xuly_capnhat_spcn.php:43
+Stack trace:
+#0 {main}
+  thrown in /var/www/html/app/models/xuly_capnhat_spcn.php on line 43

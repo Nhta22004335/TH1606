@@ -1,83 +1,91 @@
 <?php
 // sua_san_pham.php
 
-// 1. KIỂM TRA VÀ KHỞI TẠO SESSION: TUYỆT ĐỐI PHẢI ĐẶT Ở ĐẦU
-if (session_status() === PHP_SESSION_NONE) {
+// 1. CẤU HÌNH BAN ĐẦU (SESSION, KẾT NỐI CSDL)
+// TUYỆT ĐỐI PHẢI ĐẶT session_start() Ở ĐẦU
+if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
-
+// Đường dẫn kết nối CSDL phải chính xác
 require_once "../../../config/database.php";
-$pdo = ketnoicsdl();
 
 // --- Lấy ID người dùng và ID sản phẩm ---
 $id_nguoi_dung = $_SESSION['id_nguoi_dung'] ?? null;
-$id_bds = $_GET['id'] ?? null;
+// Lấy ID TIN ĐĂNG từ URL
+$id_tin_dang = $_GET['id'] ?? null;
 
 // Khởi tạo biến trạng thái lỗi
 $error_message = null;
 $product = null;
+$danh_muc_options = [];
 
-// 2. LOGIC KIỂM TRA LỖI VÀ QUYỀN TRUY CẬP
-if (!$id_nguoi_dung) {
-    // Lỗi xảy ra ở đây nếu session bị mất hoặc chưa đăng nhập
-    $error_message = "Bạn cần đăng nhập để thực hiện chức năng này. Vui lòng kiểm tra lại trạng thái đăng nhập.";
-} elseif (!preg_match('/^[0-9a-fA-F-]{36}$/', $id_bds)) {
-    $error_message = "❌ ID sản phẩm không hợp lệ.";
-} else {
-   // sua_san_pham.php (Khoảng dòng 27)
-
-$// sua_san_pham.php (Khoảng dòng 27)
-
-$sql = "
-    SELECT 
-        bds.*,
-        bd.hinh_thuc, bd.tieu_de, bd.mo_ta, bd.gia 
-    FROM bat_dong_san bds
-    LEFT JOIN bai_dang bd ON bds.id = bd.id_bat_dong_san 
-    -- SỬA TÊN BẢNG ĐÚNG TẠI ĐÂY: Thay bd.id_nguoi_dung bằng bds.id_nguoi_dung
-    WHERE bds.id = :id_bds AND bds.id_nguoi_dung = :id_nguoi_dung 
-    LIMIT 1
-";
-    try {
-        $stmt = $pdo->prepare($sql);
-            // Đảm bảo dòng này CHÍNH XÁC như sau:
-        // SUA_SAN_PHAM.PHP (Khoảng dòng 38)
-            $stmt->execute([
-                ':id_bds' => $id_bds,
-                ':id_nguoi_dung' => $id_nguoi_dung // Tham số thứ 2 phải có ở đây
-            ]);
-                    $product = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if (!$product) {
-            $error_message = "Sản phẩm không tồn tại hoặc bạn không có quyền chỉnh sửa tin đăng này.";
-        }
-    } catch (PDOException $e) {
-        // Ghi log lỗi (tốt)
-        error_log("Database Error in sua_san_pham.php: " . $e->getMessage()); 
-        
-        // --- CHỈ DÙNG TẠM THỜI ĐỂ DEBUG ---
-        $error_message = "LỖI CSDL CHI TIẾT: " . $e->getMessage(); 
-        // ------------------------------------
-    }
-}
-
+// Hàm lọc dữ liệu
 function e(?string $string): string {
     return htmlspecialchars($string ?? '', ENT_QUOTES, 'UTF-8');
 }
 
-// Map trạng thái (chỉ định nghĩa nếu không có lỗi và có product)
+// 2. KẾT NỐI CSDL & LOGIC KIỂM TRA LỖI/QUYỀN TRUY CẬP
+try {
+    $pdo = ketnoicsdl();
+    
+    if (!$id_nguoi_dung) {
+        $error_message = "Bạn cần đăng nhập để thực hiện chức năng này. Vui lòng kiểm tra lại trạng thái đăng nhập.";
+    } elseif (!preg_match('/^[0-9a-fA-F-]{36}$/', $id_tin_dang)) {
+        $error_message = "❌ ID tin đăng không hợp lệ.";
+    } else {
+        // 2a. Lấy danh mục để điền vào dropdown
+        $stmtDm = $pdo->query("SELECT id, ten_danh_muc FROM danh_muc ORDER BY ten_danh_muc");
+        $danh_muc_options = $stmtDm->fetchAll(PDO::FETCH_ASSOC);
+
+        // 2b. Truy vấn lấy chi tiết tin đăng VÀ kiểm tra quyền sở hữu
+        $sql = "
+            SELECT 
+                bds.*,
+                bd.id AS id_tin_dang, -- ID của bảng bai_dang
+                bd.hinh_thuc, bd.tieu_de, bd.mo_ta, bd.gia, bd.trang_thai
+            FROM bat_dong_san bds
+            INNER JOIN bai_dang bd ON bds.id = bd.id_bat_dong_san 
+            WHERE 
+                bd.id = :id_tin_dang -- TÌM KIẾM THEO ID TIN ĐĂNG (bd.id)
+                AND bd.id_nguoi_dung = :id_nguoi_dung -- KIỂM TRA QUYỀN CHỦ SỞ HỮU
+            LIMIT 1
+        ";
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            ':id_tin_dang' => $id_tin_dang, 
+            ':id_nguoi_dung' => $id_nguoi_dung 
+        ]);
+        
+        $product = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$product) {
+            $error_message = "Sản phẩm không tồn tại hoặc bạn không có quyền chỉnh sửa tin đăng này.";
+        }
+    }
+} catch (PDOException $e) {
+    error_log("Database Error in sua_san_pham.php: " . $e->getMessage()); 
+    $error_message = "LỖI KẾT NỐI DỮ LIỆU. Vui lòng thử lại."; 
+}
+
+// 3. MAP DỮ LIỆU CỐ ĐỊNH CHO GIAO DIỆN
 $status_map = [
     'chuaduyet' => ['label' => 'Chờ duyệt', 'class' => 'bg-yellow-100 text-yellow-800'],
     'daduyet'   => ['label' => 'Đã duyệt',  'class' => 'bg-green-100 text-green-800'],
-    'daban'     => ['label' => 'Đã bán',    'class' => 'bg-red-100 text-red-800'],
-    'dathue'    => ['label' => 'Đã thuê',   'class' => 'bg-blue-100 text-blue-800'],
+    'huy'       => ['label' => 'Đã hủy',    'class' => 'bg-red-100 text-red-800'],
     'default'   => ['label' => 'Không rõ',  'class' => 'bg-gray-100 text-gray-700']
 ];
 $current_status = $product ? ($status_map[$product['trang_thai']] ?? $status_map['default']) : $status_map['default'];
 
-// Danh sách hướng nhà và loại BĐS
 $huong_options = ["Đông", "Tây", "Nam", "Bắc", "Đông Bắc", "Đông Nam", "Tây Bắc", "Tây Nam", "Không xác định"];
-$loai_options = ["CanHo", "NhaPho", "DatNen", "BietThu", "Khac"]; 
+$provinces = [
+    "Hà Nội","TP. Hồ Chí Minh","Huế","Lai Châu","Điện Biên","Sơn La","Lạng Sơn","Quảng Ninh","Thanh Hóa",
+    "Nghệ An","Hà Tĩnh","Cao Bằng","Tuyên Quang","Lào Cai","Thái Nguyên","Phú Thọ",
+    "Bắc Ninh","Hưng Yên","Hải Phòng","Ninh Bình","Quảng Trị","Đà Nẵng","Quảng Ngãi",
+    "Gia Lai","Khánh Hòa","Lâm Đồng","Đắk Lắk","Đồng Nai","Tây Ninh",
+    "Cần Thơ","Vĩnh Long","Đồng Tháp","Cà Mau"
+];
+sort($provinces);
 ?>
 
 <!DOCTYPE html>
@@ -111,7 +119,7 @@ $loai_options = ["CanHo", "NhaPho", "DatNen", "BietThu", "Khac"];
         
         <div class="lg:col-span-2">
             <form id="main-form" action="../../models/xuly_capnhat_spcn.php" method="POST" class="space-y-6">
-                <input type="hidden" name="id" value="<?= e($product['id']) ?>">
+                <input type="hidden" name="id_bds" value="<?= e($product['id']) ?>"> 
                 
                 <div class="bg-white p-6 rounded-xl shadow-md">
                     <h2 class="text-lg font-semibold text-slate-800 flex items-center gap-3 mb-4">
@@ -127,17 +135,17 @@ $loai_options = ["CanHo", "NhaPho", "DatNen", "BietThu", "Khac"];
                         <div>
                             <label for="hinh_thuc" class="block text-sm font-medium text-slate-700">Hình thức</label>
                             <select name="hinh_thuc" id="hinh_thuc" class="mt-1 block w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
-                                <option value="Bán" <?= ($product['hinh_thuc'] == 'Bán') ? 'selected' : '' ?>>Bán</option>
-                                <option value="Cho thuê" <?= ($product['hinh_thuc'] == 'Cho thuê') ? 'selected' : '' ?>>Cho thuê</option>
+                                <option value="ban" <?= (strtolower($product['hinh_thuc']) == 'ban') ? 'selected' : '' ?>>Bán</option>
+                                <option value="cho_thue" <?= (strtolower($product['hinh_thuc']) == 'cho_thue') ? 'selected' : '' ?>>Cho thuê</option>
                             </select>
                         </div>
                         <div>
-                            <label for="loai" class="block text-sm font-medium text-slate-700">Loại Bất động sản (Danh mục)</label>
-                            <select name="loai" id="loai" class="mt-1 block w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
+                            <label for="id_danh_muc" class="block text-sm font-medium text-slate-700">Loại Bất động sản (Danh mục)</label>
+                            <select name="id_danh_muc" id="id_danh_muc" class="mt-1 block w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
                                 <?php
-                                foreach ($loai_options as $opt) { 
-                                    $sel = ($product['id_danh_muc'] == $opt) ? 'selected' : ''; 
-                                    echo "<option value='".e($opt)."' $sel>".e($opt)."</option>";
+                                foreach ($danh_muc_options as $dm) { 
+                                    $sel = ($product['id_danh_muc'] == $dm['id']) ? 'selected' : ''; 
+                                    echo "<option value='".e($dm['id'])."' $sel>".e($dm['ten_danh_muc'])."</option>";
                                 }
                                 ?>
                             </select>
@@ -207,22 +215,15 @@ $loai_options = ["CanHo", "NhaPho", "DatNen", "BietThu", "Khac"];
                     </h2>
                     <div class="space-y-6">
                         <div>
-                            <label for="khu_vuc" class="block text-sm font-medium text-slate-700">
+                            <label for="ma_tinh_thanh" class="block text-sm font-medium text-slate-700">
                                 Tỉnh / Thành phố
                             </label>
-                            <select name="khu_vuc" id="khu_vuc"
+                            <select name="ma_tinh_thanh" id="ma_tinh_thanh"
                                 class="mt-1 block w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
+                                <option value="">--- Chọn Tỉnh/Thành phố ---</option>
                                 <?php 
-                                $provinces = [
-                                    "Hà Nội","TP. Hồ Chí Minh","Huế","Lai Châu","Điện Biên","Sơn La","Lạng Sơn","Quảng Ninh","Thanh Hóa",
-                                    "Nghệ An","Hà Tĩnh","Cao Bằng","Tuyên Quang","Lào Cai","Thái Nguyên","Phú Thọ",
-                                    "Bắc Ninh","Hưng Yên","Hải Phòng","Ninh Bình","Quảng Trị","Đà Nẵng","Quảng Ngãi",
-                                    "Gia Lai","Khánh Hòa","Lâm Đồng","Đắk Lắk","Đồng Nai","Tây Ninh",
-                                    "Cần Thơ","Vĩnh Long","Đồng Tháp","Cà Mau"
-                                ];
-                                sort($provinces); // Sắp xếp tỉnh/thành phố theo thứ tự ABC
                                 foreach ($provinces as $p) {
-                                    $selected = ($product['khu_vuc'] === $p) ? 'selected' : '';
+                                    $selected = ($product['ma_tinh_thanh'] === $p) ? 'selected' : '';
                                     echo "<option value='".e($p)."' $selected>".e($p)."</option>";
                                 }
                                 ?>
@@ -258,10 +259,19 @@ $loai_options = ["CanHo", "NhaPho", "DatNen", "BietThu", "Khac"];
                         </h2>
                         <div class="flex flex-col items-center justify-center space-y-4">
                             <?php
-                            // Lấy ảnh đại diện (ảnh mới nhất)
-                            $stmtImg = $pdo->prepare("SELECT url FROM hinh_anh_bds WHERE id_bds = :id_bds ORDER BY ngay_tao DESC LIMIT 1");
-                            $stmtImg->execute([':id_bds' => $id_bds]);
-                            $img = $stmtImg->fetch(PDO::FETCH_ASSOC);
+                            // Truy vấn ảnh đại diện. Dùng $product['id'] vì nó là bds.id
+                            // Chỉ chạy khi $product tồn tại (nghĩa là không có $error_message)
+                            if ($product) {
+                                try {
+                                    $stmtImg = $pdo->prepare("SELECT url FROM hinh_anh_bds WHERE id_bds = :id_bds ORDER BY ngay_tao DESC LIMIT 1");
+                                    $stmtImg->execute([':id_bds' => $product['id']]); // $product['id'] là ID của BĐS
+                                    $img = $stmtImg->fetch(PDO::FETCH_ASSOC);
+                                } catch (PDOException $e) {
+                                    $img = null;
+                                }
+                            } else {
+                                $img = null;
+                            }
                             ?>
 
                             <div id="preview-container" class="relative w-48 h-48 border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center bg-gray-50 overflow-hidden">
@@ -276,7 +286,7 @@ $loai_options = ["CanHo", "NhaPho", "DatNen", "BietThu", "Khac"];
                             </div>
 
                             <form id="uploadForm" enctype="multipart/form-data">
-                                <input type="hidden" name="id_bds" value="<?= e($id_bds) ?>">
+                                <input type="hidden" name="id_bds" value="<?= e($product['id']) ?>"> 
                                 <input type="file" name="file_anh" accept="image/*" id="fileInput" class="hidden" onchange="uploadAnh()">
                                 <button type="button" onclick="document.getElementById('fileInput').click()" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg shadow transition">
                                     <i class="fa-solid fa-upload"></i> Tải ảnh lên
@@ -321,18 +331,20 @@ function uploadAnh() {
     if (!file) return alert("Vui lòng chọn ảnh.");
 
     const formData = new FormData();
+    // Lấy ID BĐS từ input hidden (đã sửa tên thành id_bds)
     formData.append('file_anh', file);
-    formData.append('id_bds', document.querySelector('input[name="id"]').value); 
+    formData.append('id_bds', document.querySelector('input[name="id_bds"]').value); 
     formData.append('action', 'upload_image'); 
 
-    // Gọi đến file xử lý duy nhất
     fetch("../../models/xuly_capnhat_spcn.php", { 
         method: "POST",
         body: formData
     })
     .then(res => {
+        // Kiểm tra lỗi HTTP trước khi cố gắng parse JSON
         if (!res.ok) {
-            throw new Error(`HTTP error! status: ${res.status}`);
+            // Nếu có lỗi, cố gắng đọc text để xem có phải lỗi PHP phá vỡ JSON không
+            return res.text().then(text => { throw new Error(`HTTP ${res.status}: ${text.substring(0, 100)}...`); });
         }
         return res.json();
     })
@@ -350,16 +362,17 @@ function uploadAnh() {
                 previewImg.alt = 'Ảnh BĐS';
                 preview.appendChild(previewImg);
             }
+            // Thêm timestamp (t=) để trình duyệt không dùng cache ảnh cũ
             previewImg.src = `../../../storage/pictures/bds/${data.filename}?t=` + new Date().getTime(); 
 
             alert("✅ Cập nhật ảnh đại diện thành công!");
-            fileInput.value = ""; 
+            fileInput.value = ""; // Reset input file để có thể upload lại cùng file
         } else {
             alert("❌ " + data.message);
         }
     })
     .catch(err => {
-        console.error("Lỗi Fetch:", err);
+        console.error("Lỗi Upload:", err);
         alert("Lỗi upload, vui lòng thử lại! Chi tiết lỗi: " + err.message);
     });
 }
@@ -375,17 +388,24 @@ document.getElementById('main-form').addEventListener('submit', function(e) {
         method: "POST",
         body: formData
     })
-    .then(res => res.json())
+    .then(res => {
+        // Kiểm tra lỗi HTTP trước khi parse JSON
+        if (!res.ok) {
+            return res.text().then(text => { throw new Error(`HTTP ${res.status}: ${text.substring(0, 100)}...`); });
+        }
+        return res.json();
+    })
     .then(data => {
         if (data.status === "success") {
-            alert("✅ Cập nhật thông tin sản phẩm thành công!");
+            alert("✅ " + data.message);
+            // Có thể reload hoặc cập nhật trạng thái nếu cần
         } else {
             alert("❌ Lỗi cập nhật: " + data.message);
         }
     })
     .catch(err => {
-        console.error(err);
-        alert("Lỗi kết nối, không thể lưu thay đổi!");
+        console.error("Lỗi Submit Form:", err);
+        alert("Lỗi kết nối, không thể lưu thay đổi! Vui lòng kiểm tra console log.");
     });
 });
 <?php endif; ?>

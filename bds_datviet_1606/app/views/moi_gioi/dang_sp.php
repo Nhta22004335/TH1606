@@ -89,15 +89,14 @@
                                 <option value="bietthu">Biệt thự</option>
                             </select>
                         </div>
-                        <div>
-                             <label for="hinh_thuc" class="block text-sm font-medium text-slate-900">Hình thức <span class="text-red-500">*</span></label>
-                            <select id="hinh_thuc" name="hinh_thuc" required class="mt-2 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
-                                <option value="" disabled selected>-- Chọn hình thức --</option>
-                                <option value="ban">Bán</option>
-                                <option value="thue">Cho thuê</option>
-                            </select>
-                        </div>
-                        <div>
+                       <div>
+                        <label for="hinh_thuc" class="block text-sm font-medium text-slate-700">Hình thức</label>
+                        <select name="hinh_thuc" id="hinh_thuc" class="mt-1 block w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
+                            <option value="ban" <?= (strtolower($product['hinh_thuc']) == 'ban') ? 'selected' : '' ?>>Bán</option>
+                            <option value="cho_thue" <?= (strtolower($product['hinh_thuc']) == 'cho_thue') ? 'selected' : '' ?>>Cho thuê</option>
+                        </select>
+                    </div>
+                                            <div>
                             <label for="gia" class="block text-sm font-medium text-slate-900">Giá (VNĐ) <span class="text-red-500">*</span></label>
                             <input type="number" id="gia" name="gia" required placeholder="VD: 2500000000" class="mt-2 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"/>
                         </div>
