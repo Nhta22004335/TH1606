@@ -180,7 +180,12 @@ CREATE TABLE IF NOT EXISTS danh_gia_bds (
     CONSTRAINT fk_danh_gia_bds_nd FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE SET NULL,
     CONSTRAINT fk_danh_gia_bds_bds FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE CASCADE
 );
+select * from nguoi_dung where ten_dang_nhap = 'quynhln'
+select * from bat_dong_san where id_chu_so_huu ='30f7a140-9e0f-4763-8c73-d0ba585e0584'
+select * from bai_dang
 
+alter table bai_dang add column loai VARCHAR(50)
+	select * from danh_muc
 CREATE TABLE IF NOT EXISTS bai_dang (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     id_nguoi_dung UUID, -- Người đăng bài
