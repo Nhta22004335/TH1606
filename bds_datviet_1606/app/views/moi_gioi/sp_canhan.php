@@ -24,9 +24,6 @@ if (!$id_moigioi) {
     exit("<p class='p-4 text-red-500 font-bold text-center'>⚠️ Vui lòng đăng nhập để xem sản phẩm cá nhân.</p>");
 }
 
-// BỔ SUNG BƯỚC KIỂM TRA QUYỀN VÀ SỰ TỒN TẠI CỦA TIN ĐĂNG
-
-// 1. Kiểm tra Vai trò (đã có ở phiên trước)
 try {
     $stmt_role = $pdo->prepare("
         SELECT 1 
@@ -45,10 +42,11 @@ try {
     exit("Lỗi hệ thống: Không thể xác thực vai trò.");
 }
 
-// 2. BỔ SUNG: Kiểm tra xem ID người dùng này đã từng đăng tin nào chưa.
+// 2. BỔ SUNG: Kiểm tra xem ID người dùng này đã sở hữu BĐS nào chưa.
 $total_products = 0;
 try {
-    $stmt_count = $pdo->prepare("SELECT COUNT(id) FROM bai_dang WHERE id_nguoi_dung = ?");
+    // [SỬA ĐỔI] Đếm bat_dong_san thay vì bai_dang
+    $stmt_count = $pdo->prepare("SELECT COUNT(id) FROM bat_dong_san WHERE id_chu_so_huu = ?");
     $stmt_count->execute([$id_moigioi]);
     $total_products = $stmt_count->fetchColumn();
 } catch (PDOException $e) {
@@ -60,7 +58,8 @@ $has_products = ($total_products > 0);
 
 // --- Lấy và chuẩn hóa tham số tìm kiếm & lọc ---
 $search_term = trim($_GET['search'] ?? '');
-$valid_statuses_for_query = ['chuaduyet', 'daduyet', 'daban', 'dathue', 'an', 'hethan']; 
+// [SỬA ĐỔI] Cập nhật các trạng thái hợp lệ cho bat_dong_san
+$valid_statuses_for_query = ['chuaduyet', 'daduyet', 'huy']; 
 $filter_status = trim($_GET['trang_thai'] ?? 'tat_ca');
 
 if (!in_array($filter_status, $valid_statuses_for_query) && $filter_status !== 'tat_ca') {
@@ -82,49 +81,51 @@ $products = [];
 if ($has_products) {
     $params = [':id_moigioi' => $id_moigioi];
 
+    // [SỬA ĐỔI] Truy vấn bắt đầu từ bat_dong_san (bds) và loại bỏ bai_dang (bd)
     $sql = "
     SELECT 
-        bd.id AS id_tin_dang,           
-        bd.tieu_de,                     
-        bd.gia,                         
-        bd.ngay_dang,                   
-        bd.trang_thai,                  
-        
-        bds.id AS id_bds,               
+        bds.id AS id_bds,            -- ID chính là của BĐS
+       
+        bds.ngay_tao,             -- Thay thế cho ngay_dang
+        bds.trang_thai,           -- Sử dụng trạng thái của BĐS
         bds.dien_tich_dat AS dien_tich, 
-        bds.dia_chi_day_du AS khu_vuc_dia_chi, 
+        bds.dia_chi_day_du, -- Sử dụng làm tiêu đề
         
-        dm.ten_danh_muc AS loai,        
+        dm.ten_danh_muc AS loai, 
         
         (SELECT COALESCE(AVG(diem), 0) 
          FROM danh_gia_bds 
          WHERE id_bds = bds.id) AS rating, 
-          
-        COALESCE(ha.url, 'chuacapnhat.jpg') AS anh_dai_dien 
-    FROM public.bai_dang bd
-    JOIN public.bat_dong_san bds ON bd.id_bat_dong_san = bds.id 
-    LEFT JOIN public.danh_muc dm ON bds.id_danh_muc = dm.id 
-    LEFT JOIN LATERAL (
-        SELECT url 
-        FROM hinh_anh_bds 
-        WHERE id_bds = bds.id 
-        ORDER BY ngay_tao DESC
-        LIMIT 1
-    ) ha ON TRUE
-    WHERE bd.id_nguoi_dung = :id_moigioi
+        
+        -- [SỬA ĐỔI] Thay thế LATERAL JOIN bằng Correlated Subquery (MySQL)
+        COALESCE(
+            (SELECT ha.url 
+             FROM hinh_anh_bds ha
+             WHERE ha.id_bds = bds.id 
+             ORDER BY ha.ngay_tao DESC 
+             LIMIT 1),
+            'chuacapnhat.jpg'
+        ) AS anh_dai_dien 
+    FROM bat_dong_san bds -- Bắt đầu từ bat_dong_san
+    LEFT JOIN danh_muc dm ON bds.id_danh_muc = dm.id -- Bỏ 'public.'
+    -- Đã xóa JOIN với bai_dang và LEFT JOIN LATERAL
+    WHERE bds.id_chu_so_huu = :id_moigioi -- [SỬA ĐỔI] Điều kiện chính
     ";
 
     if ($search_term !== '') {
-        $sql .= " AND (bd.tieu_de ILIKE :search OR bds.dia_chi_day_du ILIKE :search)";
+        // [SỬA ĐỔI] Chỉ tìm theo địa chỉ và thay ILIKE bằng LIKE
+        $sql .= " AND (bds.dia_chi_day_du LIKE :search)";
         $params[':search'] = "%$search_term%";
     }
 
     if ($filter_status !== 'tat_ca') {
-        $sql .= " AND bd.trang_thai = :trang_thai";
+        // [SỬA ĐỔI] Lọc theo trạng thái của bds
+        $sql .= " AND bds.trang_thai = :trang_thai";
         $params[':trang_thai'] = $filter_status;
     }
 
-    $sql .= " ORDER BY bd.ngay_dang DESC";
+    // [SỬA ĐỔI] Sắp xếp theo ngày tạo BĐS
+    $sql .= " ORDER BY bds.ngay_tao DESC";
 
     try {
         $stmt = $pdo->prepare($sql);
@@ -137,14 +138,12 @@ if ($has_products) {
 }
 
 // --- Data Mapping & Helper Functions ---
-$display_statuses = ['chuaduyet', 'daduyet', 'daban', 'dathue', 'an', 'hethan'];
+// [SỬA ĐỔI] Cập nhật map trạng thái cho bat_dong_san
+$display_statuses = ['chuaduyet', 'daduyet', 'huy'];
 $status_map = [
     'chuaduyet' => ['label' => 'Chờ duyệt', 'class' => 'bg-yellow-100 text-yellow-800'],
     'daduyet' => ['label' => 'Đã duyệt', 'class' => 'bg-green-100 text-green-800'],
-    'daban' => ['label' => 'Đã bán', 'class' => 'bg-red-100 text-red-800'],
-    'dathue' => ['label' => 'Đã thuê', 'class' => 'bg-blue-100 text-blue-800'],
-    'an' => ['label' => 'Đã ẩn', 'class' => 'bg-gray-400 text-gray-800'],
-    'hethan' => ['label' => 'Hết hạn', 'class' => 'bg-purple-100 text-purple-800'],
+    'huy' => ['label' => 'Đã hủy', 'class' => 'bg-red-100 text-red-800'],
     'chuacapnhat' => ['label' => 'Chưa cập nhật', 'class' => 'bg-gray-100 text-gray-700']
 ];
 
@@ -166,15 +165,14 @@ function format_price_vietnamese(float $price): string {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sản phẩm cá nhân</title>
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50">
 
 <div class="container mx-auto p-6"> 
 <header class="mb-6 border-b pb-4">
-<h1 class="text-2xl font-bold text-gray-800">Quản lý Sản phẩm cá nhân (Tin Đăng)</h1>
-<p class="text-sm mt-2 text-gray-500">Xem, tìm kiếm và quản lý các tin đăng bất động sản bạn đã tạo.</p>
+<h1 class="text-2xl font-bold text-gray-800">Quản lý Tài sản cá nhân</h1>
+<p class="text-sm mt-2 text-gray-500">Xem, tìm kiếm và quản lý các bất động sản bạn sở hữu.</p>
 </header>
 
 <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
@@ -182,11 +180,12 @@ function format_price_vietnamese(float $price): string {
 <input type="hidden" name="page" value="<?= e($_GET['page'] ?? 'sp_canhan') ?>">
 <div class="relative flex-grow">
 <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
-<input type="text" name="search" placeholder="Tìm tiêu đề, địa chỉ..." value="<?= e($search_term) ?>" class="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150">
+<input type="text" name="search" placeholder="Tìm địa chỉ..." value="<?= e($search_term) ?>" class="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150">
 </div>
 <select name="trang_thai" class="w-full sm:w-48 text-sm border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150">
 <option value="tat_ca" <?= $filter_status=='tat_ca'?'selected':'' ?>>Tất cả trạng thái</option>
 <?php 
+// [SỬA ĐỔI] Dùng $display_statuses (đã cập nhật)
 foreach($display_statuses as $status): 
 ?>
 <option value="<?= e($status) ?>" <?= $filter_status==$status?'selected':'' ?>><?= e($status_map[$status]['label'] ?? $status) ?></option>
@@ -213,13 +212,13 @@ foreach($display_statuses as $status):
 </thead>
 <tbody class="divide-y divide-gray-100">
 <?php 
-// Hiển thị thông báo nếu người dùng chưa có tin đăng nào được tạo
+// Hiển thị thông báo nếu người dùng chưa có BĐS nào
 if (!$has_products): 
 ?>
 <tr><td colspan="7" class="text-center text-gray-500 py-8">
     <i class="fas fa-exclamation-circle fa-2x mb-2 text-indigo-500"></i><br>
-    <p class="font-bold text-gray-700">Bạn chưa có bất kỳ tin đăng bất động sản nào.</p>
-    <p class="text-sm mt-1">Vui lòng tạo tin đăng mới để bắt đầu quản lý.</p>
+    <p class="font-bold text-gray-700">Bạn chưa sở hữu bất động sản nào.</p>
+    <p class="text-sm mt-1">Vui lòng tạo bất động sản mới để bắt đầu quản lý.</p>
 </td></tr>
 <?php 
 // Hiển thị thông báo khi không tìm thấy kết quả sau khi lọc/tìm kiếm
@@ -227,7 +226,7 @@ elseif(empty($products)):
 ?>
 <tr><td colspan="7" class="text-center text-gray-500 py-8">
     <i class="fas fa-box-open fa-2x mb-2"></i><br>
-    Không tìm thấy tin đăng nào phù hợp với điều kiện tìm kiếm/lọc.
+    Không tìm thấy bất động sản nào phù hợp với điều kiện tìm kiếm/lọc.
 </td></tr>
 <?php 
 // Hiển thị danh sách sản phẩm
@@ -237,26 +236,23 @@ else:
 <tr class="hover:bg-gray-50 transition">
 <td class="px-4 py-3">
     <img src="../../../storage/pictures/bds/<?= e($product['anh_dai_dien']) ?>?t=<?= time() ?>" 
-          onerror="this.onerror=null;this.src='../../../storage/pictures/bds/chuacapnhat.jpg';"
-          alt="Ảnh <?= e($product['tieu_de']) ?>" class="w-16 h-16 object-cover rounded-lg border shadow-md">
+         onerror="this.onerror=null;this.src='../../../storage/pictures/bds/chuacapnhat.jpg';"
+         alt="Ảnh <?= e($product['dia_chi_day_du']) ?>" class="w-16 h-16 object-cover rounded-lg border shadow-md">
 </td>
 <td class="px-4 py-3 text-sm font-semibold text-gray-800">
-    <a href="trangchu.php?page=../moi_gioi/chi_tiet_bds&id=<?= e($product['id_tin_dang']) ?>" class="text-indigo-600 hover:text-indigo-800 hover:underline">
-        <?= e($product['tieu_de']) ?>
+    <a href="trangchu.php?page=../moi_gioi/chi_tiet_bds&id=<?= e($product['id_bds']) ?>" class="text-indigo-600 hover:text-indigo-800 hover:underline">
+        <?= e($product['dia_chi_day_du']) ?>
     </a>
-    <p class="text-xs text-gray-500 mt-1 font-normal">
-        <i class="fas fa-map-marker-alt fa-fw mr-1"></i> Địa chỉ: **<?= e($product['khu_vuc_dia_chi']) ?>**
-    </p>
     <p class="text-xs text-gray-500 mt-1 font-normal">
         <i class="fas fa-home fa-fw mr-1"></i> Loại: <?= e($product['loai']) ?>
         <span class="ml-3"><i class="fas fa-th-large fa-fw mr-1"></i> DT: <?= number_format((float)$product['dien_tich'], 0, '.', ',') ?> m²</span>
     </p>
     <p class="text-xs text-gray-500 mt-1 font-normal">
-        <i class="fas fa-calendar-alt fa-fw"></i> Đăng ngày: <?= date("d/m/Y", strtotime($product['ngay_dang'])) ?>
+        <i class="fas fa-calendar-alt fa-fw"></i> Tạo ngày: <?= date("d/m/Y", strtotime($product['ngay_tao'])) ?>
     </p>
 </td>
 <td class="px-4 py-3 text-sm text-green-600 font-bold">
-    <?= format_price_vietnamese($product['gia']) ?>
+    <?= format_price_vietnamese($product['gia'] ?? 0) ?>
 </td>
 <td class="px-4 py-3">
     <span class="px-2 py-1 rounded-full text-xs font-semibold <?= e($status_map[$product['trang_thai']]['class'] ?? 'bg-gray-100 text-gray-700') ?>">
@@ -267,18 +263,18 @@ else:
     <?= number_format((float)$product['rating'],1) ?> ⭐
 </td>
 <td class="px-4 py-3 text-center space-x-2 flex flex-col sm:flex-row items-center justify-center gap-1">
-    <a href="trangchu.php?page=../moi_gioi/chi_tiet_bds&id=<?= e($product['id_tin_dang']) ?>" 
-        class="text-indigo-600 hover:text-indigo-800 px-2 py-1 text-sm bg-indigo-50 hover:bg-indigo-100 rounded-md transition w-full sm:w-auto">
+    <a href="trangchu.php?page=../moi_gioi/chi_tiet_bds&id=<?= e($product['id_bds']) ?>" 
+       class="text-indigo-600 hover:text-indigo-800 px-2 py-1 text-sm bg-indigo-50 hover:bg-indigo-100 rounded-md transition w-full sm:w-auto">
         <i class="fas fa-eye mr-1"></i> Xem
     </a>
     
-    <a href="trangchu.php?page=../moi_gioi/sua_san_pham&id=<?= e($product['id_tin_dang']) ?>" 
-        class="text-blue-600 hover:text-blue-800 px-2 py-1 text-sm bg-blue-50 hover:bg-blue-100 rounded-md transition w-full sm:w-auto">
+    <a href="trangchu.php?page=../moi_gioi/sua_san_pham&id=<?= e($product['id_bds']) ?>" 
+       class="text-blue-600 hover:text-blue-800 px-2 py-1 text-sm bg-blue-50 hover:bg-blue-100 rounded-md transition w-full sm:w-auto">
         <i class="fas fa-edit mr-1"></i> Sửa
     </a>
-    <a href="xoa_san_pham.php?id=<?= e($product['id_tin_dang']) ?>" 
-        class="text-red-600 hover:text-red-800 px-2 py-1 text-sm bg-red-50 hover:bg-red-100 rounded-md transition w-full sm:w-auto"
-        onclick="return confirm('Bạn có chắc muốn xóa tin đăng này (ID: <?= e($product['id_tin_dang']) ?>)?');">
+    <a href="../../models/xoa_san_pham.php?id=<?= e($product['id_bds']) ?>" 
+       class="text-red-600 hover:text-red-800 px-2 py-1 text-sm bg-red-50 hover:bg-red-100 rounded-md transition w-full sm:w-auto"
+       onclick="return confirm('Bạn có chắc muốn xóa BẤT ĐỘNG SẢN này (ID: <?= e($product['id_bds']) ?>)?');">
         <i class="fas fa-trash-alt mr-1"></i> Xóa
     </a>
 </td>

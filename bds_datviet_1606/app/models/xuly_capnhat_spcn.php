@@ -13,13 +13,8 @@ try {
     $pdo = ketnoicsdl();
     $id_nguoi_dung = $_SESSION['id_nguoi_dung'] ?? null;
     $action = $_POST['action'] ?? '';
-    $csrf_token = $_POST['csrf_token'] ?? '';
 
-    if (!isset($_SESSION['csrf_token']) || $csrf_token !== $_SESSION['csrf_token']) {
-        $response = ['status' => 'error', 'message' => 'CSRF token không hợp lệ. Vui lòng làm mới trang.'];
-    } elseif (!$id_nguoi_dung) {
-        $response = ['status' => 'error', 'message' => 'Bạn cần đăng nhập để thực hiện hành động này'];
-    } elseif ($action === 'update_data') {
+    if ($action === 'update_data') {
         $id_bds = $_POST['id_bds'] ?? null;
         $tieu_de = trim($_POST['tieu_de'] ?? '');
         $mo_ta = trim($_POST['mo_ta'] ?? '');
@@ -38,15 +33,8 @@ try {
         } else {
             $pdo->beginTransaction();
 
-            $stmt_check = $pdo->prepare("SELECT id FROM bai_dang WHERE id_bat_dong_san = :id_bds AND id_nguoi_dung = :id_nguoi_dung LIMIT 1");
-            $stmt_check->execute([':id_bds' => $id_bds, ':id_nguoi_dung' => $id_nguoi_dung]);
-            $tin_dang = $stmt_check->fetch(PDO::FETCH_ASSOC);
-
-            if (!$tin_dang) {
-                $pdo->rollBack();
-                $response = ['status' => 'error', 'message' => 'Bạn không có quyền chỉnh sửa tin đăng này'];
-            } else {
-                $id_tin_dang = $tin_dang['id'];
+            
+            
 
                 $sql_bds = "UPDATE bat_dong_san SET 
                             id_danh_muc = :id_danh_muc,
@@ -55,8 +43,7 @@ try {
                             so_phong_tam = :so_phong_tam,
                             huong_nha = :huong_nha,
                             ma_tinh_thanh = :ma_tinh_thanh,
-                            dia_chi_day_du = :dia_chi_day_du,
-                            -- ngay_cap_nhat = CURRENT_TIMESTAMP
+                            dia_chi_day_du = :dia_chi_day_du
                           WHERE id = :id_bds";
                 $stmt_bds = $pdo->prepare($sql_bds);
                 $stmt_bds->execute([
@@ -70,28 +57,10 @@ try {
                     ':id_bds' => $id_bds
                 ]);
 
-                $sql_bd = "UPDATE bai_dang SET 
-                            tieu_de = :tieu_de,
-                            mo_ta = :mo_ta,
-                            gia = :gia,
-                            hinh_thuc = :hinh_thuc,
-                            -- ngay_cap_nhat = CURRENT_TIMESTAMP,
-                            trang_thai = 'chuaduyet'
-                         WHERE id = :id_tin_dang AND id_nguoi_dung = :id_nguoi_dung";
-                $stmt_bd = $pdo->prepare($sql_bd);
-                $stmt_bd->execute([
-                    ':tieu_de' => $tieu_de,
-                    ':mo_ta' => $mo_ta,
-                    ':gia' => $gia,
-                    ':hinh_thuc' => $hinh_thuc,
-                    ':id_tin_dang' => $id_tin_dang,
-                    ':id_nguoi_dung' => $id_nguoi_dung
-                ]);
-
                 $pdo->commit();
-                $response = ['status' => 'success', 'message' => 'Cập nhật tin đăng thành công'];
+                $response = ['status' => 'success', 'message' => $id_bds];
             }
-        }
+        
     } elseif ($action === 'upload_image') {
         if (!isset($_FILES['file_anh']) || $_FILES['file_anh']['error'] !== UPLOAD_ERR_OK) {
             $response = ['status' => 'error', 'message' => 'Không có file ảnh hoặc lỗi khi tải lên: ' . ($_FILES['file_anh']['error'] ?? 'Không xác định')];
@@ -113,10 +82,9 @@ try {
                         $response = ['status' => 'error', 'message' => 'File ảnh quá lớn. Giới hạn tối đa 5MB'];
                     } else {
                         $filename = uniqid() . '_' . preg_replace("/[^A-Za-z0-9.-]/", '', basename($file['name']));
-                        $upload_dir = 'D:/TMDT_DEMO/TH1606/bds_datviet_1606/storage/bds/';
+                        $upload_dir = '../../storage/pictures/bds/';
                         $upload_path = $upload_dir . $filename;
 
-                        error_log("Kiểm tra thư mục: " . $upload_dir . " - Tồn tại: " . (is_dir($upload_dir) ? 'Có' : 'Không') . " - Có quyền ghi: " . (is_writable($upload_dir) ? 'Có' : 'Không'));
                         if (!is_dir($upload_dir)) {
                             mkdir($upload_dir, 0775, true);
                             error_log("Tạo thư mục thành công: " . $upload_dir);

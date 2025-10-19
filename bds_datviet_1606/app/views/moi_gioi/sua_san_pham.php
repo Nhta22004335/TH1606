@@ -13,7 +13,7 @@ $pdo = ketnoicsdl();
 // --- Lấy ID người dùng và ID sản phẩm ---
 $id_nguoi_dung = $_SESSION['id_nguoi_dung'] ?? null;
 // Lấy ID TIN ĐĂNG từ URL
-$id_tin_dang = $_GET['id'] ?? null;
+$id_bds = $_GET['id'] ?? null;
 
 // Khởi tạo biến trạng thái lỗi
 $error_message = null;
@@ -31,7 +31,7 @@ try {
     
     if (!$id_nguoi_dung) {
         $error_message = "Bạn cần đăng nhập để thực hiện chức năng này. Vui lòng kiểm tra lại trạng thái đăng nhập.";
-    } elseif (!preg_match('/^[0-9a-fA-F-]{36}$/', $id_tin_dang)) {
+    } elseif (!preg_match('/^[0-9a-fA-F-]{36}$/', $id_bds)) {
         $error_message = "❌ ID tin đăng không hợp lệ.";
     } else {
         // 2a. Lấy danh mục để điền vào dropdown
@@ -47,14 +47,14 @@ try {
             FROM bat_dong_san bds
             INNER JOIN bai_dang bd ON bds.id = bd.id_bat_dong_san 
             WHERE 
-                bd.id = :id_tin_dang -- TÌM KIẾM THEO ID TIN ĐĂNG (bd.id)
-                AND bd.id_nguoi_dung = :id_nguoi_dung -- KIỂM TRA QUYỀN CHỦ SỞ HỮU
+                bd.id = :id_tin_dang 
+                AND bd.id_nguoi_dung = :id_nguoi_dung 
             LIMIT 1
         ";
         
         $stmt = $pdo->prepare($sql);
         $stmt->execute([
-            ':id_tin_dang' => $id_tin_dang, 
+            ':id_tin_dang' => $id_bds, 
             ':id_nguoi_dung' => $id_nguoi_dung 
         ]);
         
@@ -120,8 +120,7 @@ sort($provinces);
         
         <div class="lg:col-span-2">
             <form id="main-form" action="../../models/xuly_capnhat_spcn.php" method="POST" class="space-y-6">
-                <input type="hidden" name="id_bds" value="<?= e($product['id']) ?>"> 
-                <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token']) ?>">
+                <input type="hidden" name="id_bds" value="<?= $id_bds ?>"> 
                 
                 <div class="bg-white p-6 rounded-xl shadow-md">
                     <h2 class="text-lg font-semibold text-slate-800 flex items-center gap-3 mb-4">
@@ -278,7 +277,7 @@ sort($provinces);
 
                             <div id="preview-container" class="relative w-48 h-48 border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center bg-gray-50 overflow-hidden">
                                 <?php if ($img): ?>
-                                <img id="preview-image" src="../../../storage/bds/<?= e($img['url']) ?>?t=<?= time() ?>" class="object-cover w-full h-full" alt="Ảnh BĐS">
+                                <img id="preview-image" src="../../../storage/pictures/bds/<?= e($img['url']) ?>?t=<?= time() ?>" class="object-cover w-full h-full" alt="Ảnh BĐS">
                                 <?php else: ?>
                                     <div id="no-image" class="text-gray-400 text-sm flex flex-col items-center justify-center">
                                         <i class="fa-solid fa-image-slash text-3xl mb-2"></i>
@@ -289,7 +288,6 @@ sort($provinces);
 
                             <form id="uploadForm" enctype="multipart/form-data">
                                 <input type="hidden" name="id_bds" value="<?= e($product['id']) ?>"> 
-                                <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token']) ?>">
                                 <input type="file" name="file_anh" accept="image/*" id="fileInput" class="hidden" onchange="uploadAnh()">
                                 <button type="button" onclick="document.getElementById('fileInput').click()" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg shadow transition">
                                     <i class="fa-solid fa-upload"></i> Tải ảnh lên
@@ -337,8 +335,6 @@ function uploadAnh() {
     formData.append('file_anh', file);
     formData.append('id_bds', document.querySelector('input[name="id_bds"]').value);
     formData.append('action', 'upload_image');
-    formData.append('csrf_token', '<?= e($_SESSION['csrf_token']) ?>');
-    console.log('Gửi ảnh với action:', 'upload_image', 'CSRF Token:', formData.get('csrf_token')); // Debug
 
     fetch("../../models/xuly_capnhat_spcn.php", {
         method: "POST",
@@ -363,7 +359,7 @@ function uploadAnh() {
                 previewImg.alt = 'Ảnh BĐS';
                 preview.appendChild(previewImg);
             }
-           previewImg.src = `../../../storage/bds/${data.filename}?t=${new Date().getTime()}`;
+           previewImg.src = `../../../storage/pictures/bds/${data.filename}?t=${new Date().getTime()}`;
             alert("✅ Cập nhật ảnh đại diện thành công!");
             fileInput.value = "";
         } else {
@@ -382,8 +378,6 @@ document.getElementById('main-form').addEventListener('submit', function(e) {
     
     const formData = new FormData(this);
     formData.append('action', 'update_data');
-    formData.append('csrf_token', '<?= e($_SESSION['csrf_token']) ?>');
-    console.log('Gửi form với action:', 'update_data', 'CSRF Token:', formData.get('csrf_token')); // Debug
 
     fetch(this.action, {
         method: "POST",

@@ -4,18 +4,10 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// 1. 🛡️ KIỂM TRA BẢO MẬT CƠ BẢN
-// ===================================
-
-// Chỉ cho phép truy cập bằng phương thức POST
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405); // Method Not Allowed
-    exit('Lỗi: Phương thức không được phép.');
-}
 
 // Kiểm tra người dùng đã đăng nhập chưa
-$id_nguoi_dung = $_SESSION['id_nguoi_dung'] ?? null;
-if (!$id_nguoi_dung) {
+$id_chu_so_huu = $_SESSION['id_nguoi_dung'] ?? null;
+if (!$id_chu_so_huu) {
     exit('Lỗi: Bạn cần đăng nhập để thực hiện hành động này.');
 }
 
@@ -25,25 +17,19 @@ require_once "../../config/database.php"; // Điều chỉnh đường dẫn n�
 $pdo = ketnoicsdl();
 
 // Lấy ID sản phẩm từ form
-$id_bds = $_POST['id_bds'] ?? null;
-
-if (empty($id_bds)) {
-    // Chuyển hướng với thông báo lỗi nếu không có ID
-    header('Location: ../views/quan_ly/trangchu.php?page=../moi_gioi/sp_canhan&delete_status=error_no_id');
-    exit();
-}
+$id_bds = $_GET['id'] ?? null;
 
 try {
     // Chuẩn bị câu lệnh DELETE
     // CỰC KỲ QUAN TRỌNG: Thêm `id_nguoi_dung` vào mệnh đề WHERE
     // để đảm bảo người dùng chỉ có thể xóa sản phẩm của chính họ.
-    $sql = "DELETE FROM bat_dong_san WHERE id = :id_bds AND id_nguoi_dung = :id_nguoi_dung";
+    $sql = "DELETE FROM bat_dong_san WHERE id = :id_bds AND id_chu_so_huu = :id_chu_so_huu";
     
     $stmt = $pdo->prepare($sql);
     
     $params = [
         ':id_bds' => $id_bds,
-        ':id_nguoi_dung' => $id_nguoi_dung
+        ':id_chu_so_huu' => $id_chu_so_huu
     ];
     
     // Thực thi câu lệnh
