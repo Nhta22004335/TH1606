@@ -6,8 +6,9 @@
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
-// Đường dẫn kết nối CSDL phải chính xác
+
 require_once "../../../config/database.php";
+$pdo = ketnoicsdl();
 
 // --- Lấy ID người dùng và ID sản phẩm ---
 $id_nguoi_dung = $_SESSION['id_nguoi_dung'] ?? null;
@@ -120,6 +121,7 @@ sort($provinces);
         <div class="lg:col-span-2">
             <form id="main-form" action="../../models/xuly_capnhat_spcn.php" method="POST" class="space-y-6">
                 <input type="hidden" name="id_bds" value="<?= e($product['id']) ?>"> 
+                <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token']) ?>">
                 
                 <div class="bg-white p-6 rounded-xl shadow-md">
                     <h2 class="text-lg font-semibold text-slate-800 flex items-center gap-3 mb-4">
@@ -276,7 +278,7 @@ sort($provinces);
 
                             <div id="preview-container" class="relative w-48 h-48 border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center bg-gray-50 overflow-hidden">
                                 <?php if ($img): ?>
-                                    <img id="preview-image" src="../../../storage/pictures/bds/<?= e($img['url']) ?>" class="object-cover w-full h-full" alt="Ảnh BĐS">
+                                <img id="preview-image" src="../../../storage/bds/<?= e($img['url']) ?>?t=<?= time() ?>" class="object-cover w-full h-full" alt="Ảnh BĐS">
                                 <?php else: ?>
                                     <div id="no-image" class="text-gray-400 text-sm flex flex-col items-center justify-center">
                                         <i class="fa-solid fa-image-slash text-3xl mb-2"></i>
@@ -287,6 +289,7 @@ sort($provinces);
 
                             <form id="uploadForm" enctype="multipart/form-data">
                                 <input type="hidden" name="id_bds" value="<?= e($product['id']) ?>"> 
+                                <input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token']) ?>">
                                 <input type="file" name="file_anh" accept="image/*" id="fileInput" class="hidden" onchange="uploadAnh()">
                                 <button type="button" onclick="document.getElementById('fileInput').click()" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg shadow transition">
                                     <i class="fa-solid fa-upload"></i> Tải ảnh lên
@@ -331,28 +334,26 @@ function uploadAnh() {
     if (!file) return alert("Vui lòng chọn ảnh.");
 
     const formData = new FormData();
-    // Lấy ID BĐS từ input hidden (đã sửa tên thành id_bds)
     formData.append('file_anh', file);
-    formData.append('id_bds', document.querySelector('input[name="id_bds"]').value); 
-    formData.append('action', 'upload_image'); 
+    formData.append('id_bds', document.querySelector('input[name="id_bds"]').value);
+    formData.append('action', 'upload_image');
+    formData.append('csrf_token', '<?= e($_SESSION['csrf_token']) ?>');
+    console.log('Gửi ảnh với action:', 'upload_image', 'CSRF Token:', formData.get('csrf_token')); // Debug
 
-    fetch("../../models/xuly_capnhat_spcn.php", { 
+    fetch("../../models/xuly_capnhat_spcn.php", {
         method: "POST",
         body: formData
     })
     .then(res => {
-        // Kiểm tra lỗi HTTP trước khi cố gắng parse JSON
-        if (!res.ok) {
-            // Nếu có lỗi, cố gắng đọc text để xem có phải lỗi PHP phá vỡ JSON không
-            return res.text().then(text => { throw new Error(`HTTP ${res.status}: ${text.substring(0, 100)}...`); });
-        }
+        if (!res.ok) return res.text().then(text => { throw new Error(`HTTP ${res.status}: ${text.substring(0, 100)}...`); });
         return res.json();
     })
     .then(data => {
+        console.log('Phản hồi tải ảnh:', data);
         if (data.status === "success") {
             const preview = document.getElementById('preview-container');
             const noImageDiv = document.getElementById('no-image');
-            if (noImageDiv) noImageDiv.remove(); 
+            if (noImageDiv) noImageDiv.remove();
             
             let previewImg = document.getElementById('preview-image');
             if (!previewImg) {
@@ -362,11 +363,9 @@ function uploadAnh() {
                 previewImg.alt = 'Ảnh BĐS';
                 preview.appendChild(previewImg);
             }
-            // Thêm timestamp (t=) để trình duyệt không dùng cache ảnh cũ
-            previewImg.src = `../../../storage/pictures/bds/${data.filename}?t=` + new Date().getTime(); 
-
+           previewImg.src = `../../../storage/bds/${data.filename}?t=${new Date().getTime()}`;
             alert("✅ Cập nhật ảnh đại diện thành công!");
-            fileInput.value = ""; // Reset input file để có thể upload lại cùng file
+            fileInput.value = "";
         } else {
             alert("❌ " + data.message);
         }
@@ -382,23 +381,22 @@ document.getElementById('main-form').addEventListener('submit', function(e) {
     e.preventDefault();
     
     const formData = new FormData(this);
-    formData.append('action', 'update_data'); 
+    formData.append('action', 'update_data');
+    formData.append('csrf_token', '<?= e($_SESSION['csrf_token']) ?>');
+    console.log('Gửi form với action:', 'update_data', 'CSRF Token:', formData.get('csrf_token')); // Debug
 
     fetch(this.action, {
         method: "POST",
         body: formData
     })
     .then(res => {
-        // Kiểm tra lỗi HTTP trước khi parse JSON
-        if (!res.ok) {
-            return res.text().then(text => { throw new Error(`HTTP ${res.status}: ${text.substring(0, 100)}...`); });
-        }
+        if (!res.ok) return res.text().then(text => { throw new Error(`HTTP ${res.status}: ${text.substring(0, 100)}...`); });
         return res.json();
     })
     .then(data => {
         if (data.status === "success") {
             alert("✅ " + data.message);
-            // Có thể reload hoặc cập nhật trạng thái nếu cần
+            window.location.href = "trangchu.php?page=../moi_gioi/sp_canhan";
         } else {
             alert("❌ Lỗi cập nhật: " + data.message);
         }
