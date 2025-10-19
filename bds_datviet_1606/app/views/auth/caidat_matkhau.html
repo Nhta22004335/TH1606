@@ -1,52 +1,41 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cài đặt mật khẩu</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quên/Cài đặt mật khẩu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1505691723518-36a5ac3be353?auto=format&fit=crop&w=1350&q=80');">
 
 <div class="bg-white shadow-lg rounded-2xl w-11/12 max-w-md mx-auto px-5 py-5 sm:px-6 sm:py-6">
-    <!-- Logo -->
     <div class="flex justify-center">
         <img src="../../../public/images/datviet.png" alt="Logo hệ thống" class="w-16 h-16 sm:w-20 sm:h-20 object-contain">
     </div>
 
-    <!-- Slogan -->
-    <p class="text-center text-gray-500 italic text-sm sm:text-base mb-4">Không gian sống lý tưởng cho bạn</p>
+    <p class="text-center text-gray-500 italic text-sm sm:text-base mb-2">Không gian sống lý tưởng cho bạn</p>
 
-    <h2 class="text-lg font-semibold text-center text-gray-800 mb-3">Cài đặt mật khẩu</h2>
+    <h2 class="text-2xl font-bold text-center text-blue-800 mb-3">Quên/Cài đặt mật khẩu</h2>
 
-    <!-- Form -->
-    <form id="formMatKhau" class="space-y-3">
-        <input type="text" id="tendangnhap" placeholder="Tên đăng nhập" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-0 focus:border-blue-400">
+    <form id="formMatKhau" method="POST" action="../../models/auth/xuly_quen_matkhau.php" class="space-y-3">
+        <input type="text" id="tendangnhap" name="tendangnhap" placeholder="Tên đăng nhập" autocomplete="off" required
+               class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-0 focus:border-blue-400">
 
-        <input type="email" id="email" placeholder="Email" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-0 focus:border-blue-400">
+        <input type="email" id="email" name="email" placeholder="Email" autocomplete="off" required
+               class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-0 focus:border-blue-400">
 
-        <!-- Nút -->
-        <button type="button" id="btnThucHien" class="w-full bg-blue-500 text-white text-sm font-medium py-2 rounded-lg hover:bg-blue-600 transition">Thực hiện</button>
+        <button type="submit" id="btnThucHien" class="w-full bg-blue-500 text-white text-sm font-medium py-2 rounded-lg hover:bg-blue-600 transition">Thực hiện</button>
 
-        <!-- Link đăng ký -->
         <p class="text-center text-sm text-gray-600 mt-4">
             Quay trở lại?
             <a href="dangnhap.html" class="text-blue-600 hover:text-blue-800 font-medium">Đăng nhập ngay</a>
         </p>
 
-        <!-- Footer -->
-        <p class="text-center text-xs text-gray-400 mt-6"></p>
+        <p class="text-center text-xs text-gray-400 mt-6">
+            © 2025 Đất Việt BDS. Quản trị BĐS: Minh bạch, Hiệu quả, Tăng trưởng.
+        </p>
     </form>
 </div>
 
-<script>
-    document.getElementById('btnThucHien').addEventListener('click', function() {
-        const tendangnhap = document.getElementById('tendangnhap').value.trim();
-        const email = document.getElementById('email').value.trim();
-
-        window.location.href = '../../models/auth/xuly_quen_matkhau.php?tendangnhap=' + tendangnhap + '&email=' + email;
-
-    });
-</script>
 </body>
 </html>

@@ -326,7 +326,7 @@
                         <div @click="open = !open" class="flex items-center space-x-3 cursor-pointer p-1 rounded-lg hover:bg-gray-100 transition-colors duration-200 ease-in-out">
                             <img src="../../../storage/pictures/avt/<?= htmlspecialchars($nd['avt']) ?>" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-gray-200">
                             <div class="hidden lg:block">
-                                <span class="text-sm font-medium text-gray-700"><?= htmlspecialchars($ind['ho_ten']) ?></span>
+                                <span class="text-base font-semibold text-gray-600"><?= htmlspecialchars($ind['ho_ten']) ?></span>
                             </div>
                             <i class="fas fa-chevron-down text-gray-500 text-xs hidden lg:block transition-transform duration-300" :class="{ 'rotate-180': open }"></i>
                         </div>
@@ -342,8 +342,8 @@
                             <a href="trangchu.php?page=../moi_gioi/ql_hoso_canhan" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition">
                                 <i class="fas fa-user-circle w-5 mr-2"></i> Trang cá nhân
                             </a>
-                            <a href="../../models/auth/xuly_quen_matkhau.php?email=<?= urlencode($nd['email']) ?>" class="block w-full text-left px-4 py-2 text-sm text-yellow-600 hover:bg-yellow-50 transition">
-                                <i class="fas fa-key w-5 mr-2"></i> Quên mật khẩu
+                            <a href="../auth/doimatkhau.php" class="block w-full text-left px-4 py-2 text-sm text-yellow-600 hover:bg-yellow-50 transition">
+                                <i class="fas fa-key w-5 mr-2"></i> Đổi mật khẩu
                             </a>
                         </div>
                     </div>
