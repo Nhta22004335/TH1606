@@ -201,7 +201,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     const tableBody = document.getElementById('transactions-table-body');
-    const apiUrl = '../../models/cn_trangthai_giaodich_qt.php'; 
+    const apiUrl = '../../models/quanly_thanhtoan_qt/cn_trangthai_giaodich_qt.php'; 
 
     if(tableBody) {
         tableBody.addEventListener('click', async function(event) {

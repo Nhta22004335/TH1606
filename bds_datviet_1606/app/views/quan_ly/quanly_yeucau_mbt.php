@@ -213,7 +213,7 @@ $stats = [
 
         // --- XỬ LÝ HÀNH ĐỘNG (FETCH) ---
         const tableBody = document.getElementById('requests-table-body');
-        const apiUrl = '../../models/cn_trangthai_yeucau_qt.php'; // Đảm bảo đường dẫn này đúng
+        const apiUrl = '../../models/quanly_yeucau_mbt_qt/cn_trangthai_yeucau_qt.php'; // Đảm bảo đường dẫn này đúng
 
         tableBody.addEventListener('click', async (event) => {
             const targetButton = event.target.closest('.action-btn');

@@ -235,7 +235,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    const apiUrl = '../../models/xoa_ls_xacthuc.php'; 
+    const apiUrl = '../../models/quanly_lichsu_xacthuc_qt/xoa_ls_xacthuc.php'; 
 
     // Hàm chung để xóa
     async function deleteLog(formData, confirmationMessage) {

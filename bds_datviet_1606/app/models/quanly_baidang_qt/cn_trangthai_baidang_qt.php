@@ -1,6 +1,6 @@
 <?php
 // File: ../../models/cn_trangthai_bd.php
-require_once "../../config/database.php";
+require_once "../../../config/database.php";
 
 // --- SAO CHÉP HÀM HELPER NÀY VÀO FILE API ---
 function getStatusBadge($status) {

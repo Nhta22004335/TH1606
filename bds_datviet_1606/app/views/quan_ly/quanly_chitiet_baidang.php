@@ -411,7 +411,7 @@ $comment_tree = buildCommentTree($flat_comments);
         if (!confirm(messages[newStatus] || 'Bạn có chắc chắn?')) return;
 
         try {
-            const response = await fetch('../../models/cn_trangthai_baidang_qt.php', {
+            const response = await fetch('../../models/quanly_baidang_qt/cn_trangthai_baidang_qt.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id: postId, status: newStatus }) // Gửi status
@@ -513,7 +513,7 @@ $comment_tree = buildCommentTree($flat_comments);
                     return;
                 }
                 try {
-                    const response = await fetch('../../models/ph_binhluan_baidang_qt.php', { method: 'POST', body: formData });
+                    const response = await fetch('../../models/quanly_baidang_qt/ph_binhluan_baidang_qt.php', { method: 'POST', body: formData });
                     const result = await response.json();
                     if (result.success) {
                         dispatchToast(result.message || 'Bình luận thành công!', 'success');

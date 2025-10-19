@@ -3,10 +3,10 @@
 header('Content-Type: application/json');
 
 // Đường dẫn tương đối đến database.php
-require_once "../../config/database.php"; 
+require_once "../../../config/database.php"; 
 
 // 1. Tích hợp thư viện email của bạn
-require_once '../../config/email.php';
+require_once '../../../config/email.php';
 
 $pdo = ketnoicsdl();
 // Lấy dữ liệu JSON từ request body

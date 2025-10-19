@@ -1,7 +1,7 @@
 <?php
 // File: ../../models/them_binh_luan.php
 if (session_status() == PHP_SESSION_NONE) { session_start(); }
-require_once "../../config/database.php";
+require_once "../../../config/database.php";
 
 header('Content-Type: application/json');
 $response = ['success' => false, 'message' => 'Yêu cầu không hợp lệ.'];

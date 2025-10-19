@@ -244,7 +244,7 @@
             const formData = new FormData();
             formData.append('id', bdsId);
             formData.append('trang_thai', newStatus);
-            const response = await fetch('../../models/capnhat_trangthai_bds_qt.php', { method: 'POST', body: formData });
+            const response = await fetch('../../models/quanly_sanpham_bds/capnhat_trangthai_bds_qt.php', { method: 'POST', body: formData });
             const result = await response.json();
             if (result.success) {
                 renderStatusBadge(newStatus);

@@ -1,7 +1,7 @@
 <?php
 // File: ../../models/cn_danhgia.php
 
-require_once "../../config/database.php"; 
+require_once "../../../config/database.php"; 
 
 header('Content-Type: application/json');
 $response = ['success' => false, 'message' => 'Yêu cầu không hợp lệ.'];

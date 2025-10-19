@@ -1,6 +1,6 @@
 <?php
 header('Content-Type: application/json');
-require_once "../../config/database.php"; // Đảm bảo đường dẫn này chính xác
+require_once "../../../config/database.php"; // Đảm bảo đường dẫn này chính xác
 
 /**
  * Hàm helper để tạo lại các nút hành động tương ứng với trạng thái mới.

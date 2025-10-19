@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
-require_once "../../config/database.php"; // Đảm bảo đường dẫn này đúng
+require_once "../../../config/database.php"; // Đảm bảo đường dẫn này đúng
 
 try {
     $pdo = ketnoicsdl();

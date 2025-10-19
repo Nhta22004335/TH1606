@@ -59,7 +59,7 @@
               const form = document.getElementById('add-category-form');
               const formData = new FormData(form);
               // !!! THAY THẾ BẰNG ĐƯỜNG DẪN TUYỆT ĐỐI CHÍNH XÁC !!!
-              const apiUrl = '../../models/them_danhmuc_bds_qt.php'; 
+              const apiUrl = '../../models/quanly_danhmuc_bds/them_danhmuc_bds_qt.php'; 
               
               try {
                   const response = await fetch(apiUrl, { method: 'POST', body: formData });
@@ -82,7 +82,7 @@
               const form = document.getElementById('edit-category-form');
               const formData = new FormData(form);
               // !!! THAY THẾ BẰNG ĐƯỜNG DẪN TUYỆT ĐỐI CHÍNH XÁC !!!
-              const apiUrl = '../../models/sua_danhmuc_bds_qt.php'; 
+              const apiUrl = '../../models/quanly_danhmuc_bds/sua_danhmuc_bds_qt.php'; 
 
               try {
                   const response = await fetch(apiUrl, { method: 'POST', body: formData });
@@ -111,7 +111,7 @@
               const formData = new FormData();
               formData.append('id', categoryId);
               // !!! THAY THẾ BẰNG ĐƯỜNG DẪN TUYỆT ĐỐI CHÍNH XÁC !!!
-              const apiUrl = '../../models/xoa_danhmuc_bds_qt.php'; 
+              const apiUrl = '../../models/quanly_danhmuc_bds/xoa_danhmuc_bds_qt.php'; 
 
               try {
                   const response = await fetch(apiUrl, { method: 'POST', body: formData });

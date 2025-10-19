@@ -182,7 +182,7 @@ $roleToggleColors = [
                 }
                 this.isSaving = true;
                 try {
-                    const response = await fetch('../../models/xuly_phanquyen_qt.php', {
+                    const response = await fetch('../../models/quanly_phanquyen_qt/xuly_phanquyen_qt.php', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ user_id: this.userId, role_ids: this.selectedRoles })

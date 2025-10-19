@@ -1,7 +1,7 @@
 <?php
 // Bắt đầu session và kết nối CSDL
 session_start();
-require_once "../../config/database.php"; // Đảm bảo đường dẫn này đúng
+require_once "../../../config/database.php"; // Đảm bảo đường dẫn này đúng
 $pdo = ketnoicsdl();
 
 // Lấy ID admin (để kiểm tra quyền nếu cần)

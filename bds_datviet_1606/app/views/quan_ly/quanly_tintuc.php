@@ -138,8 +138,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const encodedSearchValue = encodeURIComponent(searchValue.trim());
 
-        const newUrl = `trangchu.php?page=ql_tintuc&search=${encodedSearchValue}`;
-        const trove = `trangchu.php?page=ql_tintuc`;
+        const newUrl = `trangchu.php?page=quanly_tintuc&search=${encodedSearchValue}`;
+        const trove = `trangchu.php?page=quanly_tintuc`;
         if (searchValue) {
             window.location.href = newUrl;          
         } else {
@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Xử lý các hành động (Duyệt, Hoàn tác, Xóa) bằng fetch
     const newsListContainer = document.getElementById('news-list-container');
-    const apiUrl = '../../models/cn_trangthai_tintuc.php'; // Đảm bảo đường dẫn này chính xác
+    const apiUrl = '../../models/quanly_tintuc_qt/cn_trangthai_tintuc.php'; // Đảm bảo đường dẫn này chính xác
 
     if (newsListContainer) {
         newsListContainer.addEventListener('click', async function(event) {

@@ -241,7 +241,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // --- PHẦN 2: LOGIC XỬ LÝ HÀNH ĐỘNG VỚI FETCH ---
-    const apiUrl = '../../models/cn_trangthai_baidang_qt.php'; // Đảm bảo đường dẫn này đúng
+    const apiUrl = '../../models/quanly_baidang_qt/cn_trangthai_baidang_qt.php'; // Đảm bảo đường dẫn này đúng
     const tableBody = document.getElementById('post-table-body');
 
     tableBody.addEventListener('click', async function(event) {

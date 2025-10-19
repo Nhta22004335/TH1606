@@ -8,7 +8,7 @@ if (session_status() == PHP_SESSION_NONE) {
 }
 
 // Đường dẫn tương đối đến database.php
-require_once "../../config/database.php"; 
+require_once "../../../config/database.php"; 
 
 $pdo = ketnoicsdl();
 // Lấy dữ liệu JSON từ request body

@@ -263,7 +263,7 @@
                 formData.append('new_status', newStatus);
 
                 try {
-                    const response = await fetch('../../models/cn_trangthai_nguoidung.php', {
+                    const response = await fetch('../../models/quanly_nguoidung_qt/cn_trangthai_nguoidung.php', {
                         method: 'POST',
                         body: formData
                     });

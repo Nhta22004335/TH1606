@@ -165,7 +165,7 @@
         const formData = new FormData();
         formData.append('id', id);
         formData.append('action', action);
-        const apiUrl = '../../models/cn_trangthai_danhgia_bds_qt.php'; // Đảm bảo đường dẫn đúng
+        const apiUrl = '../../models/quanly_danhgia_qt/cn_trangthai_danhgia_bds_qt.php'; // Đảm bảo đường dẫn đúng
 
         try {
             const response = await fetch(apiUrl, { method: 'POST', body: formData });

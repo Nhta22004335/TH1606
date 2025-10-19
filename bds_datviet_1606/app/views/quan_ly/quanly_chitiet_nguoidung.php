@@ -209,7 +209,7 @@
             if (!confirm(confirmMessage)) return;
 
             try {
-                const response = await fetch('../../models/cn_trangthai_danhgia_nd_qt.php', {
+                const response = await fetch('../../models/quanly_nguoidung_qt/cn_trangthai_danhgia_nd_qt.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ review_id: reviewId, action: action })

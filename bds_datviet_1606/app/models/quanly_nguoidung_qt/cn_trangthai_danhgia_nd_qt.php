@@ -3,7 +3,7 @@
 header('Content-Type: application/json');
 
 // 2. Nhúng file cấu hình và kết nối CSDL
-require_once "../../config/database.php";
+require_once "../../../config/database.php";
 
 // 3. Khởi tạo mảng phản hồi mặc định
 $response = [

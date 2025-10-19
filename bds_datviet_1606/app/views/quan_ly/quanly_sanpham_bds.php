@@ -135,7 +135,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const tableBody = document.getElementById('property-table-body');
-        const apiUrl = '../../models/xoa_sanpham_bds_qt.php'; // <<<=== Đảm bảo đường dẫn này chính xác
+        const apiUrl = '../../models/quanly_sanpham_bds/xoa_sanpham_bds_qt.php'; // <<<=== Đảm bảo đường dẫn này chính xác
 
         if (tableBody) {
             tableBody.addEventListener('click', async function(event) {

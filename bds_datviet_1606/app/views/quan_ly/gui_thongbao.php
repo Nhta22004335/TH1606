@@ -217,8 +217,8 @@ document.getElementById("sendBtn").addEventListener("click", () => {
 
     // 3. Xác định URL backend tương ứng
     const apiUrl = (sendMethod === 'email') 
-        ? '../../models/gui_thongbao_email_qt.php' 
-        : '../../models/gui_thongbao_hethong_qt.php'; // Giả định thư mục models chứa file xử lý
+        ? '../../models/gui_thongbao_qt/gui_thongbao_email_qt.php' 
+        : '../../models/gui_thongbao_qt/gui_thongbao_hethong_qt.php'; // Giả định thư mục models chứa file xử lý
 
     // 4. Gửi yêu cầu Fetch API
     sendBtn.disabled = true;
