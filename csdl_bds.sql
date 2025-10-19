@@ -200,7 +200,7 @@ CREATE TABLE IF NOT EXISTS bai_dang (
     CONSTRAINT fk_baidang_nguoidung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE SET NULL,
     CONSTRAINT fk_baidang_bds FOREIGN KEY (id_bat_dong_san) REFERENCES bat_dong_san(id) ON DELETE CASCADE
 );
-
+select * from tin_tuc
 CREATE TABLE IF NOT EXISTS binh_luan (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
 

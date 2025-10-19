@@ -65,7 +65,7 @@
         [
             'title' => 'Dashboard',
             'icon' => 'fas fa-tachometer-alt',
-            'link' => 'trangchu.php',
+            'link' => 'dashboard',
             'roles' => ['quantri', 'moigioi'],
         ],
         [
@@ -328,7 +328,7 @@
                             <div class="hidden lg:block">
                                 <span class="text-base font-semibold text-gray-600"><?= htmlspecialchars($ind['ho_ten']) ?></span>
                             </div>
-                            <i class="fas fa-chevron-down text-gray-500 text-xs hidden lg:block transition-transform duration-300" :class="{ 'rotate-180': open }"></i>
+                            <i class="fas fa-chevron-down text-gray-500 text-xs transition-transform duration-300" :class="{ 'rotate-180': open }"></i>
                         </div>
                         
                         <div x-show="open" x-cloak @click.outside="open = false" x-transition 
