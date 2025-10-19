@@ -1,16 +1,29 @@
 <?php
-// Giả sử session đã được khởi tạo
-// if(!isset($_SESSION['id_nguoi_dung'])) {
-//     header("Location: ../auth/dangnhap.html");
-//     exit;
-// }
+// BẢO ĐẢM TỆP database.php CÓ HÀM ketnoicsdl() TRẢ VỀ ĐỐI TƯỢNG PDO
+require_once "../../../config/database.php"; 
+
+// 1. Kết nối CSDL
+try {
+    $pdo = ketnoicsdl();
+    
+    // 2. Truy vấn danh mục
+    $stmt = $pdo->prepare("SELECT id, ten_danh_muc FROM danh_muc ORDER BY ten_danh_muc");
+    $stmt->execute();
+    $danh_muc_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+} catch (PDOException $e) {
+    // Xử lý lỗi kết nối hoặc truy vấn
+    // Trong môi trường production, bạn nên ghi log lỗi thay vì hiển thị trực tiếp.
+    $error_message = "Lỗi kết nối CSDL hoặc truy vấn danh mục: " . $e->getMessage();
+    $danh_muc_list = []; // Đảm bảo biến vẫn là mảng trống nếu có lỗi
+}
 ?>
 <!DOCTYPE html>
 <html lang="vi" class="h-full bg-slate-50">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng tin Bất động sản Mới</title>
+    <title>Tạo sản phẩm Bất động sản Mới</title>
     <style>
         /* Tùy chỉnh mũi tên cho select box */
         select {
@@ -30,9 +43,16 @@
 <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
     
     <header class="mb-10">
-        <h1 class="text-3xl font-bold tracking-tight text-slate-900">Tạo tin đăng mới</h1>
+        <h1 class="text-3xl font-bold tracking-tight text-slate-900">Tạo sản phẩm mới</h1>
         <p class="mt-2 text-base text-slate-600">Cung cấp thông tin chi tiết để thu hút khách hàng tiềm năng.</p>
     </header>
+
+    <?php if (isset($error_message)): ?>
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <strong class="font-bold">Lỗi:</strong>
+            <span class="block sm:inline"><?php echo htmlspecialchars($error_message); ?></span>
+        </div>
+    <?php endif; ?>
 
     <form method="POST" action="trangchu.php?page=../../models/xl_dang_sp" enctype="multipart/form-data">
         <div class="lg:grid lg:grid-cols-3 lg:gap-12">
@@ -41,11 +61,11 @@
                 <nav class="space-y-4">
                     <a href="#section-basic-info" class="flex items-center gap-3 px-4 py-2 text-base font-semibold text-indigo-600 bg-indigo-50 rounded-lg">
                         <i class="fa-solid fa-file-lines w-5 text-center"></i>
-                        <span>Thông tin cơ bản</span>
+                        <span>Thông tin cơ bản (Tin đăng)</span>
                     </a>
                     <a href="#section-details" class="flex items-center gap-3 px-4 py-2 text-base font-medium text-slate-700 hover:bg-slate-100 rounded-lg">
                         <i class="fa-solid fa-map-location-dot w-5 text-center"></i>
-                        <span>Thông số & Vị trí</span>
+                        <span>Thông số & Vị trí (Tài sản)</span>
                     </a>
                     <a href="#section-media" class="flex items-center gap-3 px-4 py-2 text-base font-medium text-slate-700 hover:bg-slate-100 rounded-lg">
                         <i class="fa-solid fa-photo-film w-5 text-center"></i>
@@ -57,7 +77,7 @@
             <div class="lg:col-span-2 space-y-10">
 
                 <section id="section-basic-info" class="bg-white p-6 shadow-lg rounded-lg">
-                    <h2 class="text-xl font-bold text-slate-800 border-b pb-4 mb-6">Thông tin cơ bản</h2>
+                    <h2 class="text-xl font-bold text-slate-800 border-b pb-4 mb-6">Thông tin cơ bản (Tin đăng)</h2>
                     <div class="space-y-6">
                         <div>
                             <label for="tieu_de" class="block text-sm font-medium text-slate-900">Tiêu đề tin <span class="text-red-500">*</span></label>
@@ -68,92 +88,81 @@
                         </div>
                         <div>
                             <label for="mo_ta" class="block text-sm font-medium text-slate-900">Mô tả chi tiết <span class="text-red-500">*</span></label>
-                            <p class="text-sm text-slate-500 mt-1">Mô tả về tiện ích, nội thất, tình trạng pháp lý, và các điểm nổi bật khác.</p>
+                            <p class="text-sm text-slate-500 mt-1">Mô tả về tiện ích, nội thất, và các điểm nổi bật khác.</p>
                             <textarea id="mo_ta" name="mo_ta" rows="6" required
                                 placeholder="Nội dung mô tả..."
                                 class="mt-2 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"></textarea>
                         </div>
+                        
                     </div>
                 </section>
 
                 <section id="section-details" class="bg-white p-6 shadow-lg rounded-lg">
-                    <h2 class="text-xl font-bold text-slate-800 border-b pb-4 mb-6">Thông số & Vị trí</h2>
+                    <h2 class="text-xl font-bold text-slate-800 border-b pb-4 mb-6">Thông số & Vị trí (Tài sản)</h2>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        
                         <div>
-                            <label for="loai" class="block text-sm font-medium text-slate-900">Loại bất động sản <span class="text-red-500">*</span></label>
-                            <select id="loai" name="loai" required class="mt-2 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                            <label for="id_danh_muc" class="block text-sm font-medium text-slate-900">Loại bất động sản <span class="text-red-500">*</span></label>
+                            <select id="id_danh_muc" name="id_danh_muc" required class="mt-2 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
                                 <option value="" disabled selected>-- Chọn loại --</option>
-                                <option value="canho">Căn hộ</option>
-                                <option value="nhapho">Nhà phố</option>
-                                <option value="datnen">Đất nền</option>
-                                <option value="bietthu">Biệt thự</option>
+                                <?php foreach ($danh_muc_list as $dm): ?>
+                                    <option value="<?php echo htmlspecialchars($dm['id']); ?>">
+                                        <?php echo htmlspecialchars($dm['ten_danh_muc']); ?>
+                                    </option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
-                       <div>
-                        <label for="hinh_thuc" class="block text-sm font-medium text-slate-700">Hình thức</label>
-                        <select name="hinh_thuc" id="hinh_thuc" class="mt-1 block w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
-                            <option value="ban" <?= (strtolower($product['hinh_thuc']) == 'ban') ? 'selected' : '' ?>>Bán</option>
-                            <option value="cho_thue" <?= (strtolower($product['hinh_thuc']) == 'cho_thue') ? 'selected' : '' ?>>Cho thuê</option>
-                        </select>
-                    </div>
-                                            <div>
-                            <label for="gia" class="block text-sm font-medium text-slate-900">Giá (VNĐ) <span class="text-red-500">*</span></label>
-                            <input type="number" id="gia" name="gia" required placeholder="VD: 2500000000" class="mt-2 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"/>
-                        </div>
-                         <div>
-                            <label for="dien_tich" class="block text-sm font-medium text-slate-900">Diện tích (m²) <span class="text-red-500">*</span></label>
-                            <input type="number" id="dien_tich" name="dien_tich" step="0.1" required placeholder="VD: 80" class="mt-2 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"/>
-                        </div>
-                        <!-- <div>
-                            <label for="khu_vuc" class="block text-sm font-medium text-slate-900">Khu vực (Tỉnh/Thành) <span class="text-red-500">*</span></label>
-                            <input type="text" id="khu_vuc" name="khu_vuc" required placeholder="VD: TP. Hồ Chí Minh" class="mt-2 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"/>
-                        </div> -->
                         <div>
-                            <label for="khu_vuc" class="block text-sm font-medium text-slate-900">
-                                Khu vực (Tỉnh/Thành) <span class="text-red-500">*</span>
-                            </label>
-                            <select id="khu_vuc" name="khu_vuc" required
-                                class="mt-2 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
-                                <option value="">-- Chọn tỉnh/thành --</option>
-                                <option value="Hà Nội">Hà Nội</option>
-                                <option value="Huế">Huế</option>
-                                <option value="Lai Châu">Lai Châu</option>
-                                <option value="Điện Biên">Điện Biên</option>
-                                <option value="Sơn La">Sơn La</option>
-                                <option value="Lạng Sơn">Lạng Sơn</option>
-                                <option value="Quảng Ninh">Quảng Ninh</option>
-                                <option value="Thanh Hóa">Thanh Hóa</option>
-                                <option value="Nghệ An">Nghệ An</option>
-                                <option value="Hà Tĩnh">Hà Tĩnh</option>
-                                <option value="Cao Bằng">Cao Bằng</option>
-                                <option value="Tuyên Quang">Tuyên Quang</option>
-                                <option value="Lào Cai">Lào Cai</option>
-                                <option value="Thái Nguyên">Thái Nguyên</option>
-                                <option value="Phú Thọ">Phú Thọ</option>
-                                <option value="Bắc Ninh">Bắc Ninh</option>
-                                <option value="Hưng Yên">Hưng Yên</option>
-                                <option value="Hải Phòng">Hải Phòng</option>
-                                <option value="Ninh Bình">Ninh Bình</option>
-                                <option value="Quảng Trị">Quảng Trị</option>
-                                <option value="Đà Nẵng">Đà Nẵng</option>
-                                <option value="Quảng Ngãi">Quảng Ngãi</option>
-                                <option value="Gia Lai">Gia Lai</option>
-                                <option value="Khánh Hòa">Khánh Hòa</option>
-                                <option value="Lâm Đồng">Lâm Đồng</option>
-                                <option value="Đắk Lắk">Đắk Lắk</option>
-                                <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
-                                <option value="Đồng Nai">Đồng Nai</option>
-                                <option value="Tây Ninh">Tây Ninh</option>
-                                <option value="Cần Thơ">Cần Thơ</option>
-                                <option value="Vĩnh Long">Vĩnh Long</option>
-                                <option value="Đồng Tháp">Đồng Tháp</option>
-                                <option value="Cà Mau">Cà Mau</option>
-                            </select>
+                            <label for="dien_tich_dat" class="block text-sm font-medium text-slate-900">Diện tích đất (m²) <span class="text-red-500">*</span></label>
+                            <input type="number" id="dien_tich_dat" name="dien_tich_dat" step="0.1" required placeholder="VD: 80" class="mt-2 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"/>
                         </div>
 
                         <div>
-                            <label for="dia_chi" class="block text-sm font-medium text-slate-900">Địa chỉ chi tiết <span class="text-red-500">*</span></label>
-                            <input type="text" id="dia_chi" name="dia_chi" required placeholder="Số nhà, đường, phường/xã, quận/huyện" class="mt-2 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"/>
+                            <label for="so_phong_ngu" class="block text-sm font-medium text-slate-900">Số phòng ngủ</label>
+                            <input type="number" id="so_phong_ngu" name="so_phong_ngu" value="0" class="mt-2 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"/>
+                        </div>
+                        <div>
+                            <label for="so_phong_tam" class="block text-sm font-medium text-slate-900">Số phòng tắm</label>
+                            <input type="number" id="so_phong_tam" name="so_phong_tam" value="0" class="mt-2 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"/>
+                        </div>
+                        <div>
+                            <label for="huong_nha" class="block text-sm font-medium text-slate-900">Hướng nhà</label>
+                            <select id="huong_nha" name="huong_nha" class="mt-2 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                                <option value="">-- Không xác định --</option>
+                                <option value="Đông">Đông</option>
+                                <option value="Tây">Tây</option>
+                                <option value="Nam">Nam</option>
+                                <option value="Bắc">Bắc</option>
+                                <option value="Đông Bắc">Đông Bắc</option>
+                                <option value="Đông Nam">Đông Nam</option>
+                                <option value="Tây Bắc">Tây Bắc</option>
+                                <option value="Tây Nam">Tây Nam</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="thong_tin_phap_ly" class="block text-sm font-medium text-slate-900">Thông tin pháp lý</label>
+                            <input type="text" id="thong_tin_phap_ly" name="thong_tin_phap_ly" placeholder="VD: Sổ hồng chính chủ" class="mt-2 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"/>
+                        </div>
+                        <div>
+                            <label for="ma_tinh_thanh" class="block text-sm font-medium text-slate-900">
+                                Khu vực (Tỉnh/Thành) <span class="text-red-500">*</span>
+                            </label>
+                            <select id="ma_tinh_thanh" name="ma_tinh_thanh" required
+                                class="mt-2 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                                <option value="">-- Chọn tỉnh/thành --</option>
+                                <option value="01">Hà Nội</option>
+                                <option value="48">Đà Nẵng</option>
+                                <option value="79">TP. Hồ Chí Minh</option>
+                                <option value="92">Cần Thơ</option>
+                                <option value="86">Vĩnh Long</option>
+                                <option value="02">Hà Giang</option>
+                                <option value="10">Lào Cai</option>
+                                </select>
+                        </div>
+
+                        <div>
+                            <label for="dia_chi_day_du" class="block text-sm font-medium text-slate-900">Địa chỉ chi tiết <span class="text-red-500">*</span></label>
+                            <input type="text" id="dia_chi_day_du" name="dia_chi_day_du" required placeholder="Số nhà, đường, phường/xã, quận/huyện" class="mt-2 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"/>
                         </div>
                     </div>
                 </section>
@@ -174,11 +183,7 @@
                                 </template>
                             </div>
                         </div>
-                        <div>
-                            <label for="video" class="block text-sm font-medium text-slate-900">Video (tùy chọn)</label>
-                            <p class="text-sm text-slate-500 mt-1">Tải lên một video ngắn giới thiệu về bất động sản.</p>
-                            <input type="file" id="video" name="video" accept="video/*" class="mt-2 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-slate-50 file:text-slate-700 hover:file:bg-slate-100 transition"/>
-                        </div>
+                        
                     </div>
                 </section>
 
@@ -195,7 +200,6 @@
 </div>
 
 <script>
-    // JavaScript cho Image Preview
     function imagePreview() {
         return {
             previews: [],
@@ -212,7 +216,6 @@
             },
             removePreview(id) {
                 this.previews = this.previews.filter(p => p.id !== id);
-                // Cần thêm logic để xóa file khỏi input nếu cần
             }
         }
     }
