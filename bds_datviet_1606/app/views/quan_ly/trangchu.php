@@ -65,7 +65,7 @@
         [
             'title' => 'Dashboard',
             'icon' => 'fas fa-tachometer-alt',
-            'link' => 'trangchu.php',
+            'link' => 'dashboard',
             'roles' => ['quantri', 'moigioi'],
         ],
         [
@@ -101,6 +101,7 @@
                 'Theo dõi yêu cầu MBT' => ['link' => 'quanly_yeucau_mbt', 'roles' => ['quantri']],
                 'Quản lý thanh toán' => ['link' => 'quanly_thanhtoan', 'roles' => ['quantri']],
                 'Giao dịch cá nhân' => ['link' => '../moi_gioi/gd_canhan', 'roles' => ['moigioi']],
+                'Quản lý yêu cầu khách hàng' => ['link' => '../moi_gioi/ql_yeucau_khachhang', 'roles' => ['moigioi']]
             ]
         ],
         [
@@ -142,7 +143,7 @@
                 'Gửi thông báo khách (MG)' => ['link' => '../moi_gioi/g_thongbao_kh', 'roles' => ['moigioi']],
                 'Quản lý thông báo (MG)' => ['link' => '../moi_gioi/ql_thongbao', 'roles' => ['moigioi']],
                 'Quản lý thông báo' => ['link' => 'quanly_thongbao', 'roles' => ['quantri']],
-                'Chat trực tuyến' => ['link' => '../moi_gioi/chat_tt', 'roles' => ['moigioi']]
+                'Chat trực tuyến' => ['link' => '../moi_gioi/chat_bds', 'roles' => ['moigioi']]
             ]
         ],
         [
@@ -327,7 +328,7 @@
                             <div class="hidden lg:block">
                                 <span class="text-base font-semibold text-gray-600"><?= htmlspecialchars($ind['ho_ten']) ?></span>
                             </div>
-                            <i class="fas fa-chevron-down text-gray-500 text-xs hidden lg:block transition-transform duration-300" :class="{ 'rotate-180': open }"></i>
+                            <i class="fas fa-chevron-down text-gray-500 text-xs transition-transform duration-300" :class="{ 'rotate-180': open }"></i>
                         </div>
                         
                         <div x-show="open" x-cloak @click.outside="open = false" x-transition 
