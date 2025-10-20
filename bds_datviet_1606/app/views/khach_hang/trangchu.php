@@ -78,15 +78,16 @@
         </div>
 
         <div class="hidden lg:flex flex-1 mx-8 max-w-lg">
-            <div class="flex w-full">
-                <input id="searchInput" type="text" placeholder="Tìm kiếm bất động sản, dự án..." 
-                    class="flex-1 h-10 border border-gray-300 px-4 text-sm rounded-l-lg focus:ring-1 focus:ring-blue-400 focus:border-blue-400 outline-none transition"
-                >
-                <button id="btnSearch" class="h-10 px-4 bg-blue-600 text-white rounded-r-lg border border-blue-600 flex items-center justify-center hover:bg-blue-700 transition duration-200">
-                    <i class="fas fa-search"></i>
-                </button>
-            </div>
+        <div class="flex w-full">
+            <input id="searchInput" type="text" placeholder="Nhập địa chỉ, khu vực hoặc tiêu đề..."
+            class="flex-1 h-10 border border-gray-300 px-4 text-sm rounded-l-lg focus:ring-1 focus:ring-blue-400 focus:border-blue-400 outline-none">
+            <button id="btnSearch" class="h-10 px-4 bg-blue-600 text-white rounded-r-lg border border-blue-600 flex items-center justify-center hover:bg-blue-700 transition">
+            <i class="fas fa-search"></i>
+            </button>
         </div>
+        </div>
+
+
 
         <div class="flex items-center space-x-4">
             <nav class="hidden xl:flex space-x-6 font-medium text-base">
@@ -139,10 +140,12 @@
     <div x-show="mobileMenuOpen" x-cloak x-transition.origin.top class="lg:hidden bg-white border-t border-gray-100">
         <div class="p-4">
             <div class="flex w-full">
-                <input type="text" placeholder="Tìm kiếm nhanh..." class="flex-1 h-10 border border-gray-300 px-3 text-sm rounded-l-md focus:ring-1 focus:ring-blue-400 focus:border-blue-400 outline-none">
-                <button class="h-10 px-4 bg-blue-600 text-white rounded-r-md flex items-center justify-center hover:bg-blue-700 transition">
-                    <i class="fas fa-search"></i>
-                </button>
+            <input id="searchInputMobile" type="text" placeholder="Tìm kiếm nhanh..."
+                class="flex-1 h-10 border border-gray-300 px-3 text-sm rounded-l-md focus:ring-1 focus:ring-blue-400 focus:border-blue-400 outline-none">
+            <button id="btnSearchMobile"
+                class="h-10 px-4 bg-blue-600 text-white rounded-r-md flex items-center justify-center hover:bg-blue-700 transition">
+                <i class="fas fa-search"></i>
+            </button>
             </div>
         </div>
         
@@ -428,6 +431,48 @@
         // Khởi tạo trạng thái đầu tiên
         showSlide(current);
     </script>
+    <script>
+    (function(){
+    const pageMap = { nhao:'nhao.php', datnen:'datnen.php', bietthu:'bietthu.php' };
+
+    function normalize(s){
+        return (s||'').toLowerCase()
+        .replace(/đ/g,'d').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    }
+    const reBietthu = /\b(biet\s*thu|bietthu|villa)\b/;
+    const reDatnen  = /\b(dat\s*nen|nen\s*du\s*an|lo\s*dat|dat\s+du\s+an|dat\b)\b/;
+    const reNhao    = /\b(nha(?!n)|can\s*ho|chung\s*cu|nha\s*pho|apartment|condo)\b/;
+
+    function pickCategory(q){
+        const n = normalize(q);
+        if (reBietthu.test(n)) return 'bietthu';
+        if (reDatnen.test(n))  return 'datnen';
+        if (reNhao.test(n))    return 'nhao';
+        return 'nhao';
+    }
+    function go(inputId){
+        const el = document.getElementById(inputId);
+        if(!el) return;
+        const q = el.value.trim();
+        const cat = pickCategory(q);
+        const url = q ? `${pageMap[cat]}?search=${encodeURIComponent(q)}` : pageMap[cat];
+        window.location.href = url;
+    }
+    // desktop
+    document.getElementById('btnSearch')?.addEventListener('click', ()=>go('searchInput'));
+    document.getElementById('searchInput')?.addEventListener('keydown', e=>{
+        if(e.key==='Enter'){ e.preventDefault(); go('searchInput'); }
+    });
+    // mobile
+    document.getElementById('btnSearchMobile')?.addEventListener('click', ()=>go('searchInputMobile'));
+    document.getElementById('searchInputMobile')?.addEventListener('keydown', e=>{
+        if(e.key==='Enter'){ e.preventDefault(); go('searchInputMobile'); }
+    });
+    })();
+    </script>
+
+
+
 
 </body>
 </html>
