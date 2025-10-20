@@ -166,6 +166,10 @@ CREATE TABLE IF NOT EXISTS hinh_anh_bds (
     ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_hinh_anh_bds_bds FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE CASCADE
 );
+select * from bai_dang
+select * from danh_muc
+select * from bat_dong_san
+
 
 -- 19. Bảng danh_gia_bds (khách hàng đánh giá các sản phẩm BĐS mà môi giới rao bán)
 CREATE TABLE IF NOT EXISTS danh_gia_bds (
@@ -186,6 +190,7 @@ select * from bai_dang
 
 alter table bai_dang add column loai VARCHAR(50)
 	select * from danh_muc
+	
 CREATE TABLE IF NOT EXISTS bai_dang (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     id_nguoi_dung UUID, -- Người đăng bài
@@ -205,6 +210,16 @@ CREATE TABLE IF NOT EXISTS bai_dang (
     CONSTRAINT fk_baidang_nguoidung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE SET NULL,
     CONSTRAINT fk_baidang_bds FOREIGN KEY (id_bat_dong_san) REFERENCES bat_dong_san(id) ON DELETE CASCADE
 );
+select * from yeu_cau
+
+update bat_dong_san set trang_thai='daduyet'
+
+UPDATE bai_dang
+SET gia = round((random() * 9000000 + 1000000)::numeric, 2);
+
+
+ALTER TABLE bai_dang
+ADD COLUMN gia NUMERIC(18,2);
 
 CREATE TABLE IF NOT EXISTS binh_luan (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -335,6 +350,8 @@ CREATE TABLE IF NOT EXISTS yeu_cau (
 	CONSTRAINT chk_yeucau_loai CHECK (loai IN ('mua', 'ban', 'thue'))
 );
 
+select * from yeu_cau
+
 CREATE TABLE IF NOT EXISTS lich_trinh (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     id_khach_hang UUID NOT NULL,
@@ -368,6 +385,12 @@ CREATE TABLE tin_tuc (
 -- left join quyen q on q.id=pq.id_quyen
 -- where q.vai_tro='moigioi' or q.vai_tro='khachhang'
 
+select * from tin_nhan
+select * from hop_thoai
+select * from nguoi_dung where id='7765d2a9-2e1c-41bd-86ad-c63e3f4cd079'
+
+delete from tin_nhan
+
 CREATE TABLE IF NOT EXISTS hop_thoai (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     id_nguoi_1 UUID NOT NULL,
@@ -386,10 +409,6 @@ CREATE TABLE IF NOT EXISTS hop_thoai (
     -- Đảm bảo hai người khác nhau
     CONSTRAINT chk_khacnguoi CHECK (id_nguoi_1 <> id_nguoi_2)
 );
-
-select * from tin_nhan
-select * from hop_thoai
-select * from nguoi_dung
 
 CREATE TABLE IF NOT EXISTS tin_nhan (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

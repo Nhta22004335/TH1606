@@ -583,7 +583,7 @@ DELIMITER ;
 -- ===================================================================
 -- PHẦN 4: CHÈN DỮ LIỆU MẪU (INSERT DATA)
 -- ===================================================================
-
+INSERT INTO `phan_quyen`(`id_nguoi_dung`, `id_quyen`) VALUES ('20251019115300801752_685e6eed','20251019115700259347_1_b844ed2cace2')
 -- Chèn dữ liệu cho bảng 'quyen'
 INSERT INTO `quyen` (`id`, `vai_tro`) VALUES
 ('bd8fc7f4-7941-4bae-80c4-ede4e907a904', 'quantri'),
