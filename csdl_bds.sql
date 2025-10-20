@@ -350,6 +350,8 @@ CREATE TABLE IF NOT EXISTS yeu_cau (
 	CONSTRAINT chk_yeucau_loai CHECK (loai IN ('mua', 'ban', 'thue'))
 );
 
+select * from yeu_cau
+
 CREATE TABLE IF NOT EXISTS lich_trinh (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     id_khach_hang UUID NOT NULL,

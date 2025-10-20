@@ -42,7 +42,7 @@ h1{text-align:center;color:#222;margin-bottom:30px}
   <div class="container">
     <?php foreach ($dsMoigioi as $mg): ?>
       <div class="card">
-        <img src="../../../public/uploads/<?= htmlspecialchars($mg['avt']) ?>" alt="Ảnh đại diện">
+        <img src="../../../storage/pictures/avt/<?= htmlspecialchars($mg['avt']) ?>" alt="Ảnh đại diện">
         <div class="info">
           <h3><?= htmlspecialchars($mg['ho_ten']) ?></h3>
           <p><strong>Email:</strong> <?= htmlspecialchars($mg['email']) ?></p>

@@ -1,4 +1,7 @@
 <?php
+// BƯỚC 1: BẮT ĐẦU SESSION
+session_start(); 
+
 require_once __DIR__ . '/../../../config/database.php';
 $pdo = ketnoicsdl();
 
@@ -7,6 +10,57 @@ function e($s){
     return htmlspecialchars($s ?? '', ENT_QUOTES, 'UTF-8'); 
 }
 
+// BƯỚC 2: XỬ LÝ KHI NGƯỜI DÙNG GỬI YÊU CẦU (ĐÃ CẬP NHẬT)
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['gui_yeu_cau'])) {
+    
+    $id_nguoi_gui = $_SESSION['id_nguoi_dung'] ?? null;
+    $id_moi_gioi = $_POST['id_moi_gioi'] ?? null;
+    $id_bds = $_POST['id_bds'] ?? null;
+    $hinh_thuc_bds = $_POST['hinh_thuc_bds'] ?? null;
+    
+    // THAY ĐỔI 1: Lấy thêm tiêu đề BĐS từ form
+    $tieu_de_bds = $_POST['tieu_de_bds'] ?? 'Không rõ tiêu đề';
+
+    if (!$id_nguoi_gui) {
+        $_SESSION['request_message'] = ['type' => 'error', 'text' => 'Vui lòng đăng nhập để gửi yêu cầu!'];
+    } elseif ($id_nguoi_gui == $id_moi_gioi) {
+        $_SESSION['request_message'] = ['type' => 'error', 'text' => 'Bạn không thể gửi yêu cầu cho chính mình.'];
+    } else {
+        try {
+            // Xác định loại yêu cầu
+            $loai_yeu_cau = ($hinh_thuc_bds == 'ban') ? 'mua' : 'thue';
+
+            // Tạo mô tả chi tiết tự động
+            $mo_ta_chi_tiet = "Khách hàng quan tâm đến bất động sản: '" . $tieu_de_bds . "'. (ID BĐS: " . $id_bds . ")";
+
+            // Kiểm tra xem yêu cầu đã tồn tại chưa
+            $sqlCheck = "SELECT COUNT(*) FROM yeu_cau 
+                         WHERE id_nguoi_dung = ? AND id_moi_gioi = ? AND id_bds = ? AND loai = ? AND trang_thai = 'choxuly'";
+            $stmtCheck = $pdo->prepare($sqlCheck);
+            $stmtCheck->execute([$id_nguoi_gui, $id_moi_gioi, $id_bds, $loai_yeu_cau]);
+            
+            if ($stmtCheck->fetchColumn() > 0) {
+                $_SESSION['request_message'] = ['type' => 'info', 'text' => 'Bạn đã gửi yêu cầu cho BĐS này rồi.'];
+            } else {
+                // THAY ĐỔI 1.2: Cập nhật câu INSERT
+                $sqlInsert = "INSERT INTO yeu_cau (id_nguoi_dung, id_moi_gioi, id_bds, loai, mo_ta_chi_tiet) 
+                              VALUES (?, ?, ?, ?, ?)";
+                $stmtInsert = $pdo->prepare($sqlInsert);
+                // Thêm $mo_ta_chi_tiet vào mảng execute
+                $stmtInsert->execute([$id_nguoi_gui, $id_moi_gioi, $id_bds, $loai_yeu_cau, $mo_ta_chi_tiet]);
+                
+                $_SESSION['request_message'] = ['type' => 'success', 'text' => 'Gửi yêu cầu thành công! Môi giới sẽ liên hệ với bạn.'];
+            }
+        } catch (PDOException $e) {
+            $_SESSION['request_message'] = ['type' => 'error', 'text' => 'Lỗi: ' . $e->getMessage()];
+        }
+    }
+    
+    header("Location: " . $_SERVER['REQUEST_URI']);
+    exit;
+}
+
+
 // 1. LẤY THAM SỐ TỪ URL
 $search  = trim($_GET['search'] ?? '');
 $page_no = max(1, (int)($_GET['page_no'] ?? 1));
@@ -14,7 +68,6 @@ $perPage = 12;
 $offset = ($page_no - 1) * $perPage;
 
 // 2. XÂY DỰNG CÂU TRUY VẤN
-// Phần JOIN cơ bản giữa các bảng
 $baseJoins = "
     FROM bai_dang p
     JOIN bat_dong_san b ON p.id_bat_dong_san = b.id
@@ -23,23 +76,16 @@ $baseJoins = "
 
 // Phần ĐIỀU KIỆN LỌC (WHERE)
 $whereConditions = [];
-$params = []; // Mảng chứa các giá trị cho prepared statement
-
-// Điều kiện bắt buộc: Lọc "biệt thự" và bài đã duyệt
+$params = []; 
 $whereConditions[] = "dm.ma_danh_muc IN ('nhapho', 'canho')";
 $whereConditions[] = "p.trang_thai = 'daduyet'";
-
-// Điều kiện tìm kiếm (nếu có)
 if ($search !== '') {
-    // Tìm kiếm trong tiêu đề bài đăng HOẶC địa chỉ bất động sản
     $whereConditions[] = "(p.tieu_de ILIKE :search OR b.dia_chi_day_du ILIKE :search)";
     $params[':search'] = "%$search%";
 }
-
-// Ghép các điều kiện lại thành mệnh đề WHERE
 $whereSql = ' WHERE ' . implode(' AND ', $whereConditions);
 
-// 3. TRUY VẤN ĐẾM TỔNG SỐ KẾT QUẢ (ĐỂ PHÂN TRANG)
+// 3. TRUY VẤN ĐẾM TỔNG SỐ KẾT QUẢ
 $sqlCount = "SELECT COUNT(p.id) $baseJoins $whereSql";
 $stmtC = $pdo->prepare($sqlCount);
 $stmtC->execute($params);
@@ -53,27 +99,23 @@ $sqlData = "
         p.gia,
         p.ngay_dang,
         
+        p.hinh_thuc,
+        p.id_nguoi_dung AS id_moi_gioi,
+        
         b.id AS id_bds,
         b.dia_chi_day_du AS khu_vuc, 
         COALESCE(b.dien_tich_su_dung, b.dien_tich_dat) AS dien_tich,
         
-        -- SỬA LỖI: Lấy ho_ten từ bảng info_nguoi_dung (bí danh info)
         COALESCE(info.ho_ten, 'N/A') AS ten_dang_nhap,
         u.so_dt,
         u.avt,
         
-        -- Lấy ảnh đầu tiên của BĐS
         COALESCE(ha.url, 'chuacapnhat.jpg') AS anh_dai_dien
         
     $baseJoins
     
-    -- JOIN để lấy thông tin người dùng (người đăng)
     LEFT JOIN nguoi_dung u ON u.id = p.id_nguoi_dung
-    
-    -- SỬA LỖI: THÊM JOIN ĐỂ LẤY THÔNG TIN CÁ NHÂN
     LEFT JOIN info_nguoi_dung info ON info.id_nguoi_dung = u.id
-    
-    -- JOIN để lấy hình ảnh đại diện (dùng LATERAL)
     LEFT JOIN LATERAL (
         SELECT url 
         FROM hinh_anh_bds 
@@ -88,25 +130,22 @@ $sqlData = "
     LIMIT :limit OFFSET :offset
 ";
 
-// Thêm tham số phân trang vào mảng $params
 $params[':limit'] = $perPage;
 $params[':offset'] = $offset;
 
 // 5. THỰC THI TRUY VẤN VÀ LẤY KẾT QUẢ
 $stmt = $pdo->prepare($sqlData);
-
-// Bind các tham số
 foreach ($params as $key => &$val) {
-    // Xác định kiểu dữ liệu để bind chính xác
     if ($key == ':limit' || $key == ':offset') {
         $stmt->bindParam($key, $val, PDO::PARAM_INT);
     } else {
         $stmt->bindParam($key, $val, PDO::PARAM_STR);
     }
 }
-
 $stmt->execute();
 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$current_user_id = $_SESSION['id_nguoi_dung'] ?? null;
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -129,8 +168,23 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     <div class="mb-8">
         <h1 class="text-4xl font-extrabold text-gray-900 mb-3">Nhà ở - căn hộ</h1>
-        <p class="text-lg text-gray-600">Khám phá những căn biệt thự sang trọng và đẳng cấp.</p>
+        <p class="text-lg text-gray-600">Khám phá những căn nhà phố và căn hộ tiện nghi.</p>
     </div>
+
+    <?php if (isset($_SESSION['request_message'])): 
+        $message = $_SESSION['request_message'];
+        $type_class = 'bg-blue-100 border-blue-500 text-blue-700';
+        if ($message['type'] == 'success') {
+            $type_class = 'bg-green-100 border-green-500 text-green-700';
+        } elseif ($message['type'] == 'error') {
+            $type_class = 'bg-red-100 border-red-500 text-red-700';
+        }
+    ?>
+    <div class="border-l-4 p-4 <?= $type_class ?> mb-6" role="alert">
+        <p><?= e($message['text']) ?></p>
+    </div>
+    <?php unset($_SESSION['request_message']); ?>
+    <?php endif; ?>
 
     <form method="GET" class="mb-8 p-4 bg-white rounded-lg shadow">
         <div class="relative">
@@ -155,32 +209,51 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <?php else: ?>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <?php foreach($rows as $p): ?>
-          
+            
             <div class="bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 flex flex-col">
-                <a href="#" class="group block overflow-hidden">
+                <a href="chitietbaidang.php?id=<?= e($p['id']) ?>" class="group block overflow-hidden">
                     <img src="../../../storage/pictures/bds/<?=$p['anh_dai_dien'] ?>" alt="<?= e($p['tieu_de']) ?>" class="w-full h-52 object-cover transition-all duration-300 group-hover:scale-105">
                 </a>
                 <div class="p-5 flex flex-col flex-1">
                     <h3 class="text-xl font-bold text-gray-900 mb-2 truncate">
-                        <a href="chitiet_bds.php?id=<?= e($p['id']) ?>" class="hover:text-blue-700"><?= e($p['tieu_de']) ?></a>
+                        <a href="chitietbaidang.php?id=<?= e($p['id']) ?>" class="hover:text-blue-700"><?= e($p['tieu_de']) ?></a>
                     </h3>
                     
                     <div class="flex items-center text-sm text-gray-600 mb-3">
                         <svg class="w-4 h-4 mr-1.5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                          <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 10a7 7 0 10-14 0c0 2.493 1.698 4.988 3.355 6.59C7.18 17.43 8.72 18.292 9.69 18.933zM10 11.75a1.75 1.75 0 100-3.5 1.75 1.75 0 000 3.5z" clip-rule="evenodd" />
+                           <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 10a7 7 0 10-14 0c0 2.493 1.698 4.988 3.355 6.59C7.18 17.43 8.72 18.292 9.69 18.933zM10 11.75a1.75 1.75 0 100-3.5 1.75 1.75 0 000 3.5z" clip-rule="evenodd" />
                         </svg>
                         <span class="truncate"><?= e($p['khu_vuc']) ?></span>
                     </div>
 
                     <div class="flex items-center text-sm text-gray-600 mb-4">
                         <svg class="w-4 h-4 mr-1.5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                          <path fill-rule="evenodd" d="M11.49 3.17c.125-.125.125-.328 0-.452s-.328-.125-.452 0l-6.5 6.5c-.125.125-.125.328 0 .452l6.5 6.5c.125.125.328.125.452 0s.125-.328 0-.452L5.702 10l5.788-6.83zM14.49 3.17c.125-.125.125-.328 0-.452s-.328-.125-.452 0l-6.5 6.5c-.125.125-.125.328 0 .452l6.5 6.5c.125.125.328.125.452 0s.125-.328 0-.452L8.702 10l5.788-6.83z" clip-rule="evenodd" />
+                           <path fill-rule="evenodd" d="M11.49 3.17c.125-.125.125-.328 0-.452s-.328-.125-.452 0l-6.5 6.5c-.125.125-.125.328 0 .452l6.5 6.5c.125.125.328.125.452 0s.125-.328 0-.452L5.702 10l5.788-6.83zM14.49 3.17c.125-.125.125-.328 0-.452s-.328-.125-.452 0l-6.5 6.5c-.125.125-.125.328 0 .452l6.5 6.5c.125.125.328.125.452 0s.125-.328 0-.452L8.702 10l5.788-6.83z" clip-rule="evenodd" />
                         </svg>
                         <span><?= e($p['dien_tich']) ?> m²</span>
                     </div>
                     
                     <div class="mt-auto">
                         <p class="text-2xl font-extrabold text-blue-700 mb-4"><?= e(number_format((float)$p['gia'],0,',','.')) ?> VNĐ</p>
+                        
+                        <?php if ($current_user_id && $current_user_id != $p['id_moi_gioi']): ?>
+                        
+                        <form method="POST" action="" class="mb-3">
+                            <input type="hidden" name="id_moi_gioi" value="<?= e($p['id_moi_gioi']) ?>">
+                            <input type="hidden" name="id_bds" value="<?= e($p['id_bds']) ?>">
+                            <input type="hidden" name="hinh_thuc_bds" value="<?= e($p['hinh_thuc']) ?>">
+                            <input type="hidden" name="tieu_de_bds" value="<?= e($p['tieu_de']) ?>">
+                            
+                            <button type="submit" name="gui_yeu_cau" class="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                                Gửi yêu cầu quan tâm
+                            </button>
+                        </form>
+                        
+                        <?php elseif (!$current_user_id): ?>
+                        <a href="/login.php" class="block w-full text-white bg-gray-400 hover:bg-gray-500 font-medium rounded-lg text-sm px-5 py-2.5 text-center mb-3">
+                            Đăng nhập để gửi yêu cầu
+                        </a>
+                        <?php endif; ?>
                         
                         <div class="pt-3 border-t border-gray-100 flex items-center justify-between text-sm text-gray-500">
                             <span><?= e($p['ten_dang_nhap']) ?></span>
@@ -198,7 +271,7 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <?php for($i=1;$i<=$pages;$i++): ?>
                 <li>
                     <a href="?<?= http_build_query(['search'=>$search,'page_no'=>$i]) ?>" 
-                       class="flex items-center justify-center px-4 h-10 leading-tight <?= $i===$page_no?'text-white bg-blue-700 border-blue-700 hover:bg-blue-800':'text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700' ?> <?= $i==1?'rounded-l-lg':'' ?> <?= $i==$pages?'rounded-r-lg':'' ?>">
+                       class="flex items-center justify-center px-4 h-10 leading-tight <?= $i===$page_no?'text-white bg-blue-700 border-blue-700 hover:bg-blue-800':'text-gray-500 bg-white border-gray-300 hover:bg-gray-100 hover:text-gray-700' ?> <?= $i==1?'rounded-l-lg':'' ?> <?= $i==$pages?'rounded-r-lg':'' ?>">
                        <?= $i ?>
                     </a>
                 </li>
