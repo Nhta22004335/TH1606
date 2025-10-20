@@ -593,3 +593,28 @@
 2025-10-19 18:12:00,061 INFO success: memcached entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
 2025-10-19 18:12:00,062 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
 >>>>>>> d6cb329d83fa66615a1d167597a38c94a06042b1
+2025-10-20 05:50:13,789 INFO Set uid to user 0 succeeded
+2025-10-20 05:50:13,798 INFO supervisord started with pid 1
+2025-10-20 05:50:14,803 INFO spawned: 'apache' with pid 7
+2025-10-20 05:50:14,811 INFO spawned: 'socketio' with pid 8
+2025-10-20 05:50:14,819 INFO spawned: 'tailwind' with pid 10
+2025-10-20 05:50:15,082 WARN exited: socketio (exit status 1; not expected)
+2025-10-20 05:50:16,201 INFO success: apache entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-20 05:50:16,203 INFO spawned: 'socketio' with pid 47
+2025-10-20 05:50:16,204 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-20 05:50:16,238 WARN exited: tailwind (exit status 127; not expected)
+2025-10-20 05:50:16,254 INFO spawned: 'tailwind' with pid 54
+2025-10-20 05:50:16,258 WARN exited: socketio (exit status 1; not expected)
+2025-10-20 05:50:16,797 WARN exited: tailwind (exit status 127; not expected)
+2025-10-20 05:50:17,801 INFO spawned: 'tailwind' with pid 79
+2025-10-20 05:50:18,373 INFO spawned: 'socketio' with pid 104
+2025-10-20 05:50:18,403 WARN exited: tailwind (exit status 127; not expected)
+2025-10-20 05:50:18,429 WARN exited: socketio (exit status 1; not expected)
+2025-10-20 05:50:20,435 INFO spawned: 'tailwind' with pid 111
+2025-10-20 05:50:20,952 WARN exited: tailwind (exit status 127; not expected)
+2025-10-20 05:50:21,956 INFO spawned: 'socketio' with pid 136
+2025-10-20 05:50:22,007 WARN exited: socketio (exit status 1; not expected)
+2025-10-20 05:50:23,009 INFO gave up: socketio entered FATAL state, too many start retries too quickly
+2025-10-20 05:50:24,013 INFO spawned: 'tailwind' with pid 143
+2025-10-20 05:50:24,869 WARN exited: tailwind (exit status 127; not expected)
+2025-10-20 05:50:25,870 INFO gave up: tailwind entered FATAL state, too many start retries too quickly
