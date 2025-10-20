@@ -2,7 +2,6 @@
 // sua_san_pham.php
 
 // 1. CẤU HÌNH BAN ĐẦU (SESSION, KẾT NỐI CSDL)
-// TUYỆT ĐỐI PHẢI ĐẶT session_start() Ở ĐẦU
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
@@ -12,8 +11,8 @@ $pdo = ketnoicsdl();
 
 // --- Lấy ID người dùng và ID sản phẩm ---
 $id_nguoi_dung = $_SESSION['id_nguoi_dung'] ?? null;
-// Lấy ID TIN ĐĂNG từ URL
-$id_bds = $_GET['id'] ?? null;
+// Lấy ID BẤT ĐỘNG SẢN (id_bds) từ URL
+$id_bds = $_GET['id'] ?? null; 
 
 // Khởi tạo biến trạng thái lỗi
 $error_message = null;
@@ -27,41 +26,40 @@ function e(?string $string): string {
 
 // 2. KẾT NỐI CSDL & LOGIC KIỂM TRA LỖI/QUYỀN TRUY CẬP
 try {
-    $pdo = ketnoicsdl();
-    
     if (!$id_nguoi_dung) {
         $error_message = "Bạn cần đăng nhập để thực hiện chức năng này. Vui lòng kiểm tra lại trạng thái đăng nhập.";
     } elseif (!preg_match('/^[0-9a-fA-F-]{36}$/', $id_bds)) {
-        $error_message = "❌ ID tin đăng không hợp lệ.";
+        $error_message = "❌ ID Bất động sản không hợp lệ.";
     } else {
         // 2a. Lấy danh mục để điền vào dropdown
         $stmtDm = $pdo->query("SELECT id, ten_danh_muc FROM danh_muc ORDER BY ten_danh_muc");
         $danh_muc_options = $stmtDm->fetchAll(PDO::FETCH_ASSOC);
 
-        // 2b. Truy vấn lấy chi tiết tin đăng VÀ kiểm tra quyền sở hữu
+        // 2b. Truy vấn chi tiết BĐS
+        // CHỈ LẤY CÁC CỘT TỪ bat_dong_san
         $sql = "
             SELECT 
-                bds.*,
-                bd.id AS id_tin_dang, -- ID của bảng bai_dang
-                bd.hinh_thuc, bd.tieu_de, bd.mo_ta, bd.gia, bd.trang_thai
+                bds.*
             FROM bat_dong_san bds
-            INNER JOIN bai_dang bd ON bds.id = bd.id_bat_dong_san 
             WHERE 
-                bd.id = :id_tin_dang 
-                AND bd.id_nguoi_dung = :id_nguoi_dung 
+                bds.id = :id_bds 
+                AND bds.id_chu_so_huu = :id_nguoi_dung 
             LIMIT 1
         ";
         
         $stmt = $pdo->prepare($sql);
         $stmt->execute([
-            ':id_tin_dang' => $id_bds, 
-            ':id_nguoi_dung' => $id_nguoi_dung 
+            ':id_bds' => $id_bds, 
+            ':id_nguoi_dung' => $id_nguoi_dung // Kiểm tra id_chu_so_huu
         ]);
         
         $product = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        // Cần đảm bảo cột 'trang_thai' tồn tại và có giá trị mặc định
+        $product['trang_thai'] = $product['trang_thai'] ?? 'chuaduyet'; 
 
         if (!$product) {
-            $error_message = "Sản phẩm không tồn tại hoặc bạn không có quyền chỉnh sửa tin đăng này.";
+            $error_message = "Bất động sản không tồn tại hoặc bạn không có quyền chỉnh sửa mục này.";
         }
     }
 } catch (PDOException $e) {
@@ -69,7 +67,7 @@ try {
     $error_message = "LỖI KẾT NỐI DỮ LIỆU. Vui lòng thử lại."; 
 }
 
-// 3. MAP DỮ LIỆU CỐ ĐỊNH CHO GIAO DIỆN
+// 3. MAP DỮ LIỆU CỐ ĐỊNH CHO GIAO DIỆN (Giữ nguyên)
 $status_map = [
     'chuaduyet' => ['label' => 'Chờ duyệt', 'class' => 'bg-yellow-100 text-yellow-800'],
     'daduyet'   => ['label' => 'Đã duyệt',  'class' => 'bg-green-100 text-green-800'],
@@ -79,6 +77,7 @@ $status_map = [
 $current_status = $product ? ($status_map[$product['trang_thai']] ?? $status_map['default']) : $status_map['default'];
 
 $huong_options = ["Đông", "Tây", "Nam", "Bắc", "Đông Bắc", "Đông Nam", "Tây Bắc", "Tây Nam", "Không xác định"];
+// Giả định bạn có một danh sách Tỉnh/Thành phố đầy đủ
 $provinces = [
     "Hà Nội","TP. Hồ Chí Minh","Huế","Lai Châu","Điện Biên","Sơn La","Lạng Sơn","Quảng Ninh","Thanh Hóa",
     "Nghệ An","Hà Tĩnh","Cao Bằng","Tuyên Quang","Lào Cai","Thái Nguyên","Phú Thọ",
@@ -88,13 +87,12 @@ $provinces = [
 ];
 sort($provinces);
 ?>
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chỉnh sửa: <?= $product ? e($product['tieu_de']) : 'Lỗi Truy Cập' ?></title>
+    <title>Chỉnh sửa BĐS: <?= $product ? e($product['dia_chi_day_du']) : 'Lỗi Truy Cập' ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
@@ -106,8 +104,8 @@ sort($provinces);
             <i class="fas fa-arrow-left"></i>
             Quay lại danh sách
         </a>
-        <h1 class="text-3xl font-bold text-slate-900">Chỉnh sửa Bất động sản</h1>
-        <p class="text-slate-500 mt-1">Cập nhật thông tin chi tiết cho sản phẩm của bạn.</p>
+        <h1 class="text-3xl font-bold text-slate-900">Chỉnh sửa Bất động sản Gốc</h1>
+        <p class="text-slate-500 mt-1">Cập nhật tất cả các thuộc tính vật lý và pháp lý của BĐS.</p>
     </div>
 
     <?php if ($error_message): ?>
@@ -120,29 +118,17 @@ sort($provinces);
         
         <div class="lg:col-span-2">
             <form id="main-form" action="../../models/xuly_capnhat_spcn.php" method="POST" class="space-y-6">
-                <input type="hidden" name="id_bds" value="<?= $id_bds ?>"> 
+                <input type="hidden" name="id_bds" value="<?= e($id_bds) ?>"> 
                 
                 <div class="bg-white p-6 rounded-xl shadow-md">
                     <h2 class="text-lg font-semibold text-slate-800 flex items-center gap-3 mb-4">
                         <i class="fas fa-info-circle text-sky-500"></i>
-                        Thông tin cơ bản
+                        Vị trí & Danh mục
                     </h2>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div class="sm:col-span-2">
-                            <label for="tieu_de" class="block text-sm font-medium text-slate-700">Tiêu đề tin đăng</label>
-                            <input type="text" name="tieu_de" id="tieu_de" value="<?= e($product['tieu_de']) ?>" required 
-                            class="mt-1 block w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg shadow-sm placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition">
-                        </div>
-                        <div>
-                            <label for="hinh_thuc" class="block text-sm font-medium text-slate-700">Hình thức</label>
-                            <select name="hinh_thuc" id="hinh_thuc" class="mt-1 block w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
-                                <option value="ban" <?= (strtolower($product['hinh_thuc']) == 'ban') ? 'selected' : '' ?>>Bán</option>
-                                <option value="cho_thue" <?= (strtolower($product['hinh_thuc']) == 'cho_thue') ? 'selected' : '' ?>>Cho thuê</option>
-                            </select>
-                        </div>
-                        <div>
                             <label for="id_danh_muc" class="block text-sm font-medium text-slate-700">Loại Bất động sản (Danh mục)</label>
-                            <select name="id_danh_muc" id="id_danh_muc" class="mt-1 block w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
+                            <select name="id_danh_muc" id="id_danh_muc" required class="mt-1 block w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
                                 <?php
                                 foreach ($danh_muc_options as $dm) { 
                                     $sel = ($product['id_danh_muc'] == $dm['id']) ? 'selected' : ''; 
@@ -151,26 +137,24 @@ sort($provinces);
                                 ?>
                             </select>
                         </div>
-                    </div>
-                </div>
-
-                <div class="bg-white p-6 rounded-xl shadow-md">
-                    <h2 class="text-lg font-semibold text-slate-800 flex items-center gap-3 mb-4">
-                        <i class="fas fa-home text-blue-500"></i>
-                        Đặc điểm chi tiết
-                    </h2>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-6">
+                        
                         <div>
-                            <label for="so_phong_ngu" class="block text-sm font-medium text-slate-700">P. Ngủ</label>
-                            <input type="number" name="so_phong_ngu" id="so_phong_ngu" value="<?= e($product['so_phong_ngu']) ?>" min="0" 
-                            class="mt-1 block w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
+                            <label for="ma_tinh_thanh" class="block text-sm font-medium text-slate-700">
+                                Tỉnh / Thành phố
+                            </label>
+                            <select name="ma_tinh_thanh" id="ma_tinh_thanh" required
+                                class="mt-1 block w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
+                                <option value="">--- Chọn Tỉnh/Thành phố ---</option>
+                                <?php 
+                                foreach ($provinces as $p) {
+                                    $selected = ($product['ma_tinh_thanh'] === $p) ? 'selected' : '';
+                                    echo "<option value='".e($p)."' $selected>".e($p)."</option>";
+                                }
+                                ?>
+                            </select>
                         </div>
-                        <div>
-                            <label for="so_phong_tam" class="block text-sm font-medium text-slate-700">P. Tắm</label>
-                            <input type="number" name="so_phong_tam" id="so_phong_tam" value="<?= e($product['so_phong_tam']) ?>" min="0" 
-                            class="mt-1 block w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
-                        </div>
-                        <div class="col-span-2">
+                        
+                         <div class="col-span-1">
                             <label for="huong_nha" class="block text-sm font-medium text-slate-700">Hướng nhà</label>
                             <select name="huong_nha" id="huong_nha" class="mt-1 block w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
                                 <?php
@@ -183,65 +167,74 @@ sort($provinces);
                         </div>
                     </div>
                 </div>
-
+                
                 <div class="bg-white p-6 rounded-xl shadow-md">
                     <h2 class="text-lg font-semibold text-slate-800 flex items-center gap-3 mb-4">
-                        <i class="fas fa-dollar-sign text-emerald-500"></i>
-                        Giá & Diện tích
+                        <i class="fas fa-ruler text-teal-500"></i>
+                        Thông số Kỹ thuật & Cấu trúc
                     </h2>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-6">
                         <div>
-                            <label for="gia" class="block text-sm font-medium text-slate-700">Mức giá (trong Tin đăng)</label>
-                            <div class="relative">
-                                <input type="number" name="gia" id="gia" value="<?= e($product['gia']) ?>" required min="0" 
-                                class="mt-1 block w-full px-4 py-2.5 pr-12 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
-                                <span class="absolute inset-y-0 right-4 flex items-center text-slate-500 text-sm">VNĐ</span>
-                            </div>
+                            <label for="dien_tich_dat" class="block text-sm font-medium text-slate-700">DT Đất (m²)</label>
+                            <input type="number" name="dien_tich_dat" id="dien_tich_dat" value="<?= e($product['dien_tich_dat']) ?>" min="1" step="0.01"
+                            class="mt-1 block w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
                         </div>
                         <div>
-                            <label for="dien_tich_dat" class="block text-sm font-medium text-slate-700">Diện tích (BĐS gốc)</label>
-                            <div class="relative">
-                                <input type="number" name="dien_tich_dat" id="dien_tich_dat" value="<?= e($product['dien_tich_dat']) ?>" required min="1" step="0.1" 
-                                class="mt-1 block w-full px-4 py-2.5 pr-10 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
-                                <span class="absolute inset-y-0 right-4 flex items-center text-slate-500 text-sm">m²</span>
-                            </div>
+                            <label for="dien_tich_su_dung" class="block text-sm font-medium text-slate-700">DT Sử dụng (m²)</label>
+                            <input type="number" name="dien_tich_su_dung" id="dien_tich_su_dung" value="<?= e($product['dien_tich_su_dung']) ?>" min="0" step="0.01"
+                            class="mt-1 block w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
                         </div>
-                    </div>
+
+                        <div>
+                            <label for="mat_tien" class="block text-sm font-medium text-slate-700">Mặt tiền (m)</label>
+                            <input type="number" name="mat_tien" id="mat_tien" value="<?= e($product['mat_tien']) ?>" min="0" step="0.01"
+                            class="mt-1 block w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
+                        </div>
+                        <div>
+                            <label for="duong_vao" class="block text-sm font-medium text-slate-700">Đường vào (m)</label>
+                            <input type="number" name="duong_vao" id="duong_vao" value="<?= e($product['duong_vao']) ?>" min="0" step="0.01"
+                            class="mt-1 block w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
+                        </div>
+
+                        <div>
+                            <label for="so_tang" class="block text-sm font-medium text-slate-700">Số Tầng</label>
+                            <input type="number" name="so_tang" id="so_tang" value="<?= e($product['so_tang']) ?>" min="0" 
+                            class="mt-1 block w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
+                        </div>
+                        <div>
+                            <label for="so_phong_ngu" class="block text-sm font-medium text-slate-700">P. Ngủ</label>
+                            <input type="number" name="so_phong_ngu" id="so_phong_ngu" value="<?= e($product['so_phong_ngu']) ?>" min="0" 
+                            class="mt-1 block w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
+                        </div>
+                        <div>
+                            <label for="so_phong_tam" class="block text-sm font-medium text-slate-700">P. Tắm</label>
+                            <input type="number" name="so_phong_tam" id="so_phong_tam" value="<?= e($product['so_phong_tam']) ?>" min="0" 
+                            class="mt-1 block w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
+                        </div>
+                        </div>
                 </div>
 
                 <div class="bg-white p-6 rounded-xl shadow-md">
                     <h2 class="text-lg font-semibold text-slate-800 flex items-center gap-3 mb-4">
-                        <i class="fas fa-map-marker-alt text-red-500"></i>
-                        Vị trí & Mô tả
+                        <i class="fas fa-map-marked-alt text-red-500"></i>
+                        Địa chỉ chi tiết & Pháp lý
                     </h2>
                     <div class="space-y-6">
-                        <div>
-                            <label for="ma_tinh_thanh" class="block text-sm font-medium text-slate-700">
-                                Tỉnh / Thành phố
-                            </label>
-                            <select name="ma_tinh_thanh" id="ma_tinh_thanh"
-                                class="mt-1 block w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
-                                <option value="">--- Chọn Tỉnh/Thành phố ---</option>
-                                <?php 
-                                foreach ($provinces as $p) {
-                                    $selected = ($product['ma_tinh_thanh'] === $p) ? 'selected' : '';
-                                    echo "<option value='".e($p)."' $selected>".e($p)."</option>";
-                                }
-                                ?>
-                            </select>
+                        <div class="sm:col-span-2">
+                            <label for="dia_chi_day_du" class="block text-sm font-medium text-slate-700">Địa chỉ đầy đủ (Rất quan trọng)</label>
+                            <textarea name="dia_chi_day_du" id="dia_chi_day_du" rows="2" required 
+                            class="mt-1 block w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500"><?= e($product['dia_chi_day_du']) ?></textarea>
                         </div>
-
-                        <div>
-                            <label for="dia_chi_day_du" class="block text-sm font-medium text-slate-700">Địa chỉ chi tiết (Đường, số nhà...)</label>
-                            <textarea name="dia_chi_day_du" id="dia_chi_day_du" rows="2" class="mt-1 block w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500"><?= e($product['dia_chi_day_du']) ?></textarea>
-                        </div>
-                        <div>
-                            <label for="mo_ta" class="block text-sm font-medium text-slate-700">Mô tả chi tiết</label>
-                            <textarea name="mo_ta" id="mo_ta" rows="5" class="mt-1 block w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500"><?= e($product['mo_ta']) ?></textarea>
+                        
+                        <div class="sm:col-span-2">
+                            <label for="thong_tin_phap_ly" class="block text-sm font-medium text-slate-700">Thông tin Pháp lý</label>
+                            <textarea name="thong_tin_phap_ly" id="thong_tin_phap_ly" rows="5" placeholder="Ví dụ: Sổ hồng chính chủ, Giấy tờ viết tay, Đã có GCNQSDĐ..."
+                            class="mt-1 block w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500"><?= e($product['thong_tin_phap_ly']) ?></textarea>
                         </div>
                     </div>
                 </div>
-            </form>
+                
+                </form>
         </div>
 
         <div class="lg:col-span-1">
@@ -256,16 +249,16 @@ sort($provinces);
 
                     <div class="pt-4 border-t border-slate-200">
                         <h2 class="text-lg font-semibold text-slate-800 flex items-center gap-3 mb-4">
-                            <i class="fa-solid fa-image text-indigo-500"></i> Hình ảnh bất động sản
+                            <i class="fa-solid fa-image text-indigo-500"></i> Hình ảnh
                         </h2>
                         <div class="flex flex-col items-center justify-center space-y-4">
                             <?php
-                            // Truy vấn ảnh đại diện. Dùng $product['id'] vì nó là bds.id
-                            // Chỉ chạy khi $product tồn tại (nghĩa là không có $error_message)
-                            if ($product) {
+                            $id_bds_hinh_anh = $product['id'] ?? null; 
+
+                            if ($id_bds_hinh_anh) {
                                 try {
                                     $stmtImg = $pdo->prepare("SELECT url FROM hinh_anh_bds WHERE id_bds = :id_bds ORDER BY ngay_tao DESC LIMIT 1");
-                                    $stmtImg->execute([':id_bds' => $product['id']]); // $product['id'] là ID của BĐS
+                                    $stmtImg->execute([':id_bds' => $id_bds_hinh_anh]); 
                                     $img = $stmtImg->fetch(PDO::FETCH_ASSOC);
                                 } catch (PDOException $e) {
                                     $img = null;
@@ -287,13 +280,29 @@ sort($provinces);
                             </div>
 
                             <form id="uploadForm" enctype="multipart/form-data">
-                                <input type="hidden" name="id_bds" value="<?= e($product['id']) ?>"> 
+                                <input type="hidden" name="id_bds" value="<?= e($id_bds_hinh_anh) ?>"> 
                                 <input type="file" name="file_anh" accept="image/*" id="fileInput" class="hidden" onchange="uploadAnh()">
                                 <button type="button" onclick="document.getElementById('fileInput').click()" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg shadow transition">
                                     <i class="fa-solid fa-upload"></i> Tải ảnh lên
                                 </button>
                             </form>
                             <p class="text-xs text-slate-500 italic">Ảnh mới nhất sẽ là ảnh đại diện.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="pt-4 border-t border-slate-200 mt-4">
+                        <h2 class="text-lg font-semibold text-slate-800 flex items-center gap-3 mb-4">
+                            <i class="fas fa-location-arrow text-gray-500"></i> Tọa độ GPS
+                        </h2>
+                        <div>
+                            <label for="vi_do" class="block text-sm font-medium text-slate-700">Vĩ độ (Latitude)</label>
+                            <input type="text" name="vi_do" id="vi_do" value="<?= e($product['vi_do']) ?>" step="0.0000001" placeholder="Vĩ độ (VD: 21.028511)"
+                            class="mt-1 block w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
+                        </div>
+                        <div class="mt-3">
+                            <label for="kinh_do" class="block text-sm font-medium text-slate-700">Kinh độ (Longitude)</label>
+                            <input type="text" name="kinh_do" id="kinh_do" value="<?= e($product['kinh_do']) ?>" step="0.0000001" placeholder="Kinh độ (VD: 105.854122)"
+                            class="mt-1 block w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-sky-500 focus:border-sky-500">
                         </div>
                     </div>
 
@@ -312,9 +321,9 @@ sort($provinces);
                         <i class="fas fa-lightbulb text-yellow-500"></i> Gợi ý
                     </h3>
                     <ul class="text-sm text-slate-600 space-y-2 list-disc list-inside">
-                        <li><b>Tiêu đề hấp dẫn</b> sẽ thu hút nhiều người xem hơn.</li>
-                        <li><b>Mô tả chi tiết</b> và trung thực giúp tăng độ tin cậy.</li>
-                        <li>Đừng quên cập nhật <b>hình ảnh mới nhất</b> cho sản phẩm.</li>
+                        <li>**Địa chỉ đầy đủ** và **Tọa độ** giúp khách hàng tìm kiếm dễ dàng hơn.</li>
+                        <li>**Thông số kỹ thuật** cần chính xác theo sổ đỏ/giấy tờ.</li>
+                        <li>Đừng quên cập nhật **hình ảnh mới nhất** cho sản phẩm.</li>
                     </ul>
                 </div>
             </div>
@@ -334,7 +343,7 @@ function uploadAnh() {
     const formData = new FormData();
     formData.append('file_anh', file);
     formData.append('id_bds', document.querySelector('input[name="id_bds"]').value);
-    formData.append('action', 'upload_image');
+    formData.append('action', 'upload_image'); 
 
     fetch("../../models/xuly_capnhat_spcn.php", {
         method: "POST",
@@ -360,8 +369,8 @@ function uploadAnh() {
                 preview.appendChild(previewImg);
             }
            previewImg.src = `../../../storage/pictures/bds/${data.filename}?t=${new Date().getTime()}`;
-            alert("✅ Cập nhật ảnh đại diện thành công!");
-            fileInput.value = "";
+           alert("✅ Cập nhật ảnh đại diện thành công!");
+           fileInput.value = "";
         } else {
             alert("❌ " + data.message);
         }
@@ -377,7 +386,7 @@ document.getElementById('main-form').addEventListener('submit', function(e) {
     e.preventDefault();
     
     const formData = new FormData(this);
-    formData.append('action', 'update_data');
+    formData.append('action', 'update_data'); // Giả định xuly_capnhat_spcn.php xử lý action này
 
     fetch(this.action, {
         method: "POST",
@@ -390,7 +399,7 @@ document.getElementById('main-form').addEventListener('submit', function(e) {
     .then(data => {
         if (data.status === "success") {
             alert("✅ " + data.message);
-            window.location.href = "trangchu.php?page=../moi_gioi/sp_canhan";
+            window.location.reload(); 
         } else {
             alert("❌ Lỗi cập nhật: " + data.message);
         }

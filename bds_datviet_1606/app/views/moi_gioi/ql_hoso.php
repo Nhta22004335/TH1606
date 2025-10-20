@@ -305,6 +305,10 @@ document.addEventListener('DOMContentLoaded', () => {
             resultDiv.className = 'upload-result text-sm mt-1 text-yellow-600';
 
 
+
+
+
+
             // Gửi yêu cầu AJAX
             fetch("../../models/load_bm.php", {
                 method: "POST",

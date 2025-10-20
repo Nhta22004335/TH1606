@@ -210,7 +210,7 @@ CREATE TABLE IF NOT EXISTS bai_dang (
     CONSTRAINT fk_baidang_nguoidung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE SET NULL,
     CONSTRAINT fk_baidang_bds FOREIGN KEY (id_bat_dong_san) REFERENCES bat_dong_san(id) ON DELETE CASCADE
 );
-select * from danh_muc
+select * from yeu_cau
 
 update bat_dong_san set trang_thai='daduyet'
 
@@ -385,6 +385,12 @@ CREATE TABLE tin_tuc (
 -- left join quyen q on q.id=pq.id_quyen
 -- where q.vai_tro='moigioi' or q.vai_tro='khachhang'
 
+select * from tin_nhan
+select * from hop_thoai
+select * from nguoi_dung where id='7765d2a9-2e1c-41bd-86ad-c63e3f4cd079'
+
+delete from tin_nhan
+
 CREATE TABLE IF NOT EXISTS hop_thoai (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     id_nguoi_1 UUID NOT NULL,
@@ -403,10 +409,6 @@ CREATE TABLE IF NOT EXISTS hop_thoai (
     -- Đảm bảo hai người khác nhau
     CONSTRAINT chk_khacnguoi CHECK (id_nguoi_1 <> id_nguoi_2)
 );
-
-select * from tin_nhan
-select * from hop_thoai
-select * from nguoi_dung
 
 CREATE TABLE IF NOT EXISTS tin_nhan (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

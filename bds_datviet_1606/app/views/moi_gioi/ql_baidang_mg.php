@@ -1,6 +1,6 @@
 <?php
 // =================================================================
-// PHẦN 1 & 2: KẾT NỐI CSDL & TRUY VẤN DỮ LIỆU (GIỮ NGUYÊN)
+// PHẦN 1 & 2: KẾT NỐI CSDL & TRUY VẤN DỮ LIỆU
 // =================================================================
 // Bắt buộc phải khởi động session để sử dụng $_SESSION
 if (session_status() == PHP_SESSION_NONE) {
@@ -10,18 +10,33 @@ require_once "../../../config/database.php";
 try {
     $pdo = ketnoicsdl();
 } catch (PDOException $e) {
+    // Luôn dùng exit/die để dừng chương trình khi lỗi nghiêm trọng
     die("Không thể kết nối đến cơ sở dữ liệu: " . $e->getMessage());
 }
 $current_user_id = $_SESSION['id_nguoi_dung'] ?? null;
 if (!$current_user_id) {
-    die("Lỗi: Vui lòng đăng nhập để xem các bài đăng của bạn.");
+    // Chuyển hướng nếu không đăng nhập
+    header("Location: ../auth/dangnhap.html");
+    exit; 
 }
+
+// Hàm lọc HTML
+function e(?string $string): string {
+    return htmlspecialchars($string ?? '', ENT_QUOTES, 'UTF-8');
+}
+
 $search = $_GET['search'] ?? '';
 $search = trim($search);
+
+// 1. CÂU TRUY VẤN LẤY DỮ LIỆU (Đã đồng bộ với cột bd.gia)
 $sql = "
     SELECT 
-        bd.id, bd.tieu_de, bd.gia, bd.ngay_dang, bd.luot_xem, bd.trang_thai, bd.hinh_thuc,
-        bds.dien_tich, bds.khu_vuc AS dia_chi,
+        bd.id, bd.tieu_de, bd.mo_ta, bd.hinh_thuc, bd.trang_thai, bd.ngay_dang, bd.luot_xem, 
+        bd.gia, -- LẤY CỘT GIÁ TỪ BẢNG BAI_DANG
+        bds.id AS id_bds,
+        bds.dien_tich_dat, 
+        bds.dia_chi_day_du AS dia_chi, 
+        
         info.ho_ten AS ten_moigioi,
         nd.avt AS avatar_moigioi,
         anhbia.url AS anh_bia
@@ -33,24 +48,29 @@ $sql = "
         SELECT url FROM hinh_anh_bds 
         WHERE id_bds = bds.id ORDER BY ngay_tao ASC LIMIT 1
     ) AS anhbia ON TRUE
+    -- Kiểm tra quyền sở hữu bài đăng
     WHERE bd.id_nguoi_dung = :user_id 
 ";
+
+$params = [':user_id' => $current_user_id];
+
 if (!empty($search)) {
-    $sql .= " AND (LOWER(bd.tieu_de) LIKE LOWER(:search) OR LOWER(bds.khu_vuc) LIKE LOWER(:search)) ";
+    // Tìm kiếm trên tiêu đề bài đăng (bd.tieu_de) và địa chỉ đầy đủ (bds.dia_chi_day_du)
+    $sql .= " AND (LOWER(bd.tieu_de) LIKE LOWER(:search) OR LOWER(bds.dia_chi_day_du) LIKE LOWER(:search)) ";
+    $params[':search'] = "%$search%";
 }
+
 $sql .= " ORDER BY bd.ngay_dang DESC;";
 $stmt = $pdo->prepare($sql);
-$stmt->bindValue(':user_id', $current_user_id, PDO::PARAM_STR);
-if (!empty($search)) {
-    $stmt->bindValue(':search', "%$search%", PDO::PARAM_STR);
-}
-$stmt->execute();
+$stmt->execute($params);
 $baidang = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // =================================================================
-// PHẦN 3: XỬ LÝ DỮ LIỆU & HÀM HỖ TRỢ (TINH CHỈNH LẠI HÀM BADGE)
+// PHẦN 3: XỬ LÝ DỮ LIỆU & HÀM HỖ TRỢ
 // =================================================================
 foreach ($baidang as $key => $post) {
+    // LOẠI BỎ logic gán $baidang[$key]['gia'] vì đã lấy trực tiếp từ CSDL
+    
     if (empty($post['anh_bia'])) {
         $baidang[$key]['anh_bia'] = 'https://picsum.photos/400/300?random=' . $key;
     } else {
@@ -58,26 +78,25 @@ foreach ($baidang as $key => $post) {
     }
 }
 
-// Hàm getStatusBadge được cập nhật class để phù hợp với giao diện mới
+// Hàm getStatusBadge được cập nhật class để phù hợp với trạng thái bảng bai_dang
 function getStatusBadge($status)
 {
-$map = [
-    'chuaduyet' => ['text' => 'Chờ duyệt', 'class' => 'bg-amber-100 text-amber-800 border border-amber-200'],
-    'daduyet'   => ['text' => 'Đang hiển thị', 'class' => 'bg-green-100 text-green-800 border border-green-200'],
-    'hienthi'   => ['text' => 'Đang hiển thị', 'class' => 'bg-green-100 text-green-800 border border-green-200'], // <-- Đã thêm
-    'hethan'    => ['text' => 'Hết hạn', 'class' => 'bg-red-100 text-red-800 border border-red-200'],
-    'daban'     => ['text' => 'Đã bán', 'class' => 'bg-blue-100 text-blue-800 border border-blue-200'],
-    'dathue'    => ['text' => 'Đã cho thuê', 'class' => 'bg-indigo-100 text-indigo-800 border border-indigo-200'],
-    'an'        => ['text' => 'Đã ẩn', 'class' => 'bg-gray-100 text-gray-800 border border-gray-200'],
-];
+    $map = [
+        'chuaduyet' => ['text' => 'Chờ duyệt', 'class' => 'bg-amber-100 text-amber-800 border border-amber-200'],
+        'daduyet'   => ['text' => 'Đang hiển thị', 'class' => 'bg-green-100 text-green-800 border border-green-200'],
+        'hethan'    => ['text' => 'Hết hạn', 'class' => 'bg-red-100 text-red-800 border border-red-200'],
+        'dahuy'     => ['text' => 'Đã hủy', 'class' => 'bg-gray-100 text-gray-800 border border-gray-200'],
+        'an'        => ['text' => 'Đã ẩn', 'class' => 'bg-gray-100 text-gray-800 border border-gray-200'], 
+    ];
     $info = $map[$status] ?? ['text' => ucfirst($status), 'class' => 'bg-gray-100 text-gray-800'];
     return "<span class='absolute top-3 left-3 text-xs font-semibold px-2.5 py-1 rounded-full {$info['class']}'>{$info['text']}</span>";
 }
 
-$stats = [
+// Tính toán thống kê cơ bản
+$stats_count = [
     'pending' => count(array_filter($baidang, fn ($p) => $p['trang_thai'] === 'chuaduyet')),
     'active'  => count(array_filter($baidang, fn ($p) => $p['trang_thai'] === 'daduyet')),
-    'expired' => count(array_filter($baidang, fn ($p) => in_array($p['trang_thai'], ['hethan', 'daban', 'dathue', 'an']))),
+    'expired' => count(array_filter($baidang, fn ($p) => in_array($p['trang_thai'], ['hethan', 'dahuy', 'an']))), 
     'total'   => count($baidang),
 ];
 ?>
@@ -118,60 +137,28 @@ $stats = [
             </div>
 
             <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                <div class="bg-white overflow-hidden shadow-sm rounded-xl border border-gray-200"><div class="p-5"><dl><dt class="text-sm font-medium text-gray-500 truncate flex items-center"><i class="fa-solid fa-hourglass-half mr-2 text-amber-500"></i>Chờ duyệt</dt><dd class="mt-1 text-3xl font-semibold text-gray-900 tracking-tight"><?= $stats['pending'] ?></dd></dl></div></div>
-                <div class="bg-white overflow-hidden shadow-sm rounded-xl border border-gray-200"><div class="p-5"><dl><dt class="text-sm font-medium text-gray-500 truncate flex items-center"><i class="fa-solid fa-circle-check mr-2 text-green-500"></i>Đang hiển thị</dt><dd class="mt-1 text-3xl font-semibold text-gray-900 tracking-tight"><?= $stats['active'] ?></dd></dl></div></div>
-                <div class="bg-white overflow-hidden shadow-sm rounded-xl border border-gray-200"><div class="p-5"><dl><dt class="text-sm font-medium text-gray-500 truncate flex items-center"><i class="fa-solid fa-box-archive mr-2 text-red-500"></i>Lưu trữ</dt><dd class="mt-1 text-3xl font-semibold text-gray-900 tracking-tight"><?= $stats['expired'] ?></dd></dl></div></div>
-                <div class="bg-white overflow-hidden shadow-sm rounded-xl border border-gray-200"><div class="p-5"><dl><dt class="text-sm font-medium text-gray-500 truncate flex items-center"><i class="fa-solid fa-layer-group mr-2 text-gray-500"></i>Tổng số bài</dt><dd class="mt-1 text-3xl font-semibold text-gray-900 tracking-tight"><?= $stats['total'] ?></dd></dl></div></div>
+                <div class="bg-white overflow-hidden shadow-sm rounded-xl border border-gray-200"><div class="p-5"><dl><dt class="text-sm font-medium text-gray-500 truncate flex items-center"><i class="fa-solid fa-hourglass-half mr-2 text-amber-500"></i>Chờ duyệt</dt><dd class="mt-1 text-3xl font-semibold text-gray-900 tracking-tight"><?= $stats_count['pending'] ?></dd></dl></div></div>
+                <div class="bg-white overflow-hidden shadow-sm rounded-xl border border-gray-200"><div class="p-5"><dl><dt class="text-sm font-medium text-gray-500 truncate flex items-center"><i class="fa-solid fa-circle-check mr-2 text-green-500"></i>Đang hiển thị</dt><dd class="mt-1 text-3xl font-semibold text-gray-900 tracking-tight"><?= $stats_count['active'] ?></dd></dl></div></div>
+                <div class="bg-white overflow-hidden shadow-sm rounded-xl border border-gray-200"><div class="p-5"><dl><dt class="text-sm font-medium text-gray-500 truncate flex items-center"><i class="fa-solid fa-box-archive mr-2 text-red-500"></i>Lưu trữ</dt><dd class="mt-1 text-3xl font-semibold text-gray-900 tracking-tight"><?= $stats_count['expired'] ?></dd></dl></div></div>
+                <div class="bg-white overflow-hidden shadow-sm rounded-xl border border-gray-200"><div class="p-5"><dl><dt class="text-sm font-medium text-gray-500 truncate flex items-center"><i class="fa-solid fa-layer-group mr-2 text-gray-500"></i>Tổng số bài</dt><dd class="mt-1 text-3xl font-semibold text-gray-900 tracking-tight"><?= $stats_count['total'] ?></dd></dl></div></div>
             </div>
         </header>
 
         <main>
             <div class="mb-6">
-                <form action="" id="search-form" method="GET" class="flex items-center gap-4">
+                <form action="trangchu.php" id="search-form" method="GET" class="flex items-center gap-4">
+                    <input type="hidden" name="page" value="<?= e($_GET['page'] ?? '../moi_gioi/ql_baidang_mg') ?>">
                     <div class="relative flex-grow">
                         <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                             <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
                         </div>
-                        <input type="text" id="search-input" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Tìm theo tiêu đề, địa chỉ..." class="block w-full rounded-lg outline-none border border-gray-300 bg-white py-2.5 pl-10 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 transition">
+                        <input type="text" id="search-input" name="search" value="<?= e($search) ?>" placeholder="Tìm theo tiêu đề, địa chỉ..." class="block w-full rounded-lg outline-none border border-gray-300 bg-white py-2.5 pl-10 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 transition">
                     </div>
                     <button type="submit" id="search-button" class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition">
                         Tìm kiếm
                     </button>
                 </form>
             </div>
-
-            <script>
-                // 1. Lấy các phần tử HTML cần thiết qua ID
-        const searchForm = document.getElementById('search-form');
-        const searchInput = document.getElementById('search-input');
-        const searchButton = document.getElementById('search-button');
-
-        // 2. Hàm để thực hiện submit
-        function submitSearch() {
-            const searchValue = searchInput.value;
-
-            const encodedSearchValue = encodeURIComponent(searchValue.trim());
-
-            const newUrl = `trangchu.php?page=../moi_gioi/ql_baidang_mg&search=${encodedSearchValue}`;
-            const trove = `trangchu.php?page=../moi_gioi/ql_baidang_mg`;
-            if (searchValue) {
-                window.location.href = newUrl;          
-            } else {
-                window.location.href = trove;
-            }
-        }
-
-        // 3. Gán sự kiện nhấn cho nút bấm
-        searchButton.addEventListener('click', function(event) {
-            event.preventDefault(); 
-            submitSearch();
-        });
-
-        // 4. Gán sự kiện bỏ focus cho ô tìm kiếm
-        searchInput.addEventListener('blur', function() {
-            submitSearch(); // thực hiện tìm kiếm khi rời khỏi ô input
-        });
-            </script>
 
             <?php if (empty($baidang)) : ?>
                 <div class="text-center bg-white border border-gray-200 rounded-lg py-12 px-6">
@@ -190,7 +177,7 @@ $stats = [
                     <?php foreach ($baidang as $post) : ?>
                         <div class="group relative flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm hover:shadow-lg transition-shadow duration-300">
                             <div class="relative aspect-[4/3] overflow-hidden">
-                                <img src="<?= htmlspecialchars($post['anh_bia']) ?>" alt="<?= htmlspecialchars($post['tieu_de']) ?>" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105">
+                                <img src="<?= e($post['anh_bia']) ?>" alt="<?= e($post['tieu_de']) ?>" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105">
                                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                                 <?= getStatusBadge($post['trang_thai']) ?>
                                 <span class="absolute top-3 right-3 text-xs font-semibold px-2.5 py-1 rounded-full text-white bg-black/50 backdrop-blur-sm">
@@ -200,22 +187,22 @@ $stats = [
 
                             <div class="flex flex-1 flex-col p-4">
                                 <h3 class="text-base font-bold text-gray-900 hover:text-indigo-600 transition-colors">
-                                    <a href="#" title="<?= htmlspecialchars($post['tieu_de']) ?>">
-                                        <?= htmlspecialchars(mb_strimwidth($post['tieu_de'], 0, 50, "...")) ?>
+                                    <a href="trangchu.php?page=../moi_gioi/chitiet_baidang_mg&id=<?= e($post['id']) ?>" title="<?= e($post['tieu_de']) ?>">
+                                        <?= e(mb_strimwidth($post['tieu_de'], 0, 50, "...")) ?>
                                     </a>
                                 </h3>
                                 <p class="mt-1 text-lg font-semibold text-indigo-600">
-                                    <?= number_format($post['gia'], 0, ',', '.') ?> VNĐ
+                                    <?= number_format((float)$post['gia'], 0, ',', '.') ?> VNĐ
                                 </p>
 
                                 <div class="mt-3 space-y-2 text-sm text-gray-500">
                                     <p class="flex items-center">
                                         <i class="fa-solid fa-ruler-combined w-4 mr-2 text-gray-400"></i>
-                                        <span>Diện tích: <strong><?= htmlspecialchars($post['dien_tich']) ?> m²</strong></span>
+                                        <span>DT Đất: <strong><?= e($post['dien_tich_dat']) ?> m²</strong></span>
                                     </p>
                                     <p class="flex items-start">
                                         <i class="fa-solid fa-location-dot w-4 mr-2 mt-0.5 text-gray-400"></i>
-                                        <span class="flex-1" title="<?= htmlspecialchars($post['dia_chi']) ?>"><?= htmlspecialchars(mb_strimwidth($post['dia_chi'], 0, 45, "...")) ?></span>
+                                        <span class="flex-1" title="<?= e($post['dia_chi']) ?>"><?= e(mb_strimwidth($post['dia_chi'], 0, 45, "...")) ?></span>
                                     </p>
                                 </div>
                             </div>
@@ -223,7 +210,7 @@ $stats = [
                             <div class="mt-auto border-t border-gray-200 bg-gray-50 px-4 py-3 flex items-center justify-between text-xs text-gray-500">
                                 <div class="flex items-center gap-4">
                                     <span title="Ngày đăng"><i class="fa-regular fa-calendar mr-1.5"></i><?= date('d/m/Y', strtotime($post['ngay_dang'])) ?></span>
-                                    <span title="Lượt xem"><i class="fa-regular fa-eye mr-1.5"></i><?= number_format($post['luot_xem']) ?></span>
+                                    <span title="Lượt xem"><i class="fa-regular fa-eye mr-1.5"></i><?= ($post['luot_xem']) ?></span>
                                 </div>
                                 
                                 <details class="relative">
@@ -232,22 +219,22 @@ $stats = [
                                     </summary>
                                     <div class="absolute right-0 bottom-full mb-2 w-48 origin-bottom-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 z-10">
                                         <div class="py-1" role="menu">
-                                            <a href="trangchu.php?page=../moi_gioi/chitiet_baidang_mg&id=<?= htmlspecialchars($post['id']) ?>" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+                                            <a href="trangchu.php?page=../moi_gioi/chitiet_baidang_mg&id=<?= e($post['id']) ?>" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
                                                 <i class="fa-solid fa-circle-info w-5 mr-2"></i>Xem chi tiết
                                             </a>
-                                            <?php if ($post['trang_thai'] !== 'chuaduyet') : ?>
-                                                <a href="" class="btn-action flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-id="<?= htmlspecialchars($post['id']) ?>" data-action="edit" role="menuitem">
-                                                    <i class="fa-solid fa-pen-to-square w-5 mr-2"></i>Chỉnh sửa
+                                            
+                                            <a href="trangchu.php?page=../moi_gioi/sua_san_pham&id=<?= e($post['id_bds']) ?>" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-id="<?= e($post['id']) ?>" data-action="edit" role="menuitem">
+                                                <i class="fa-solid fa-pen-to-square w-5 mr-2"></i>Chỉnh sửa BĐS
+                                            </a>
+                                            
+                                            <?php if ($post['trang_thai'] !== 'an' && $post['trang_thai'] !== 'dahuy' && $post['trang_thai'] !== 'hethan') : ?>
+                                                <a href="#" class="btn-action flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50" data-id="<?= e($post['id']) ?>" data-action="an" role="menuitem">
+                                                    <i class="fa-solid fa-eye-slash w-5 mr-2"></i>Gỡ/Ẩn bài
                                                 </a>
-                                                <?php if ($post['trang_thai'] !== 'an') : ?>
-                                                    <a href="#" class="btn-action flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50" data-id="<?= htmlspecialchars($post['id']) ?>" data-action="unpublish" role="menuitem">
-                                                        <i class="fa-solid fa-eye-slash w-5 mr-2"></i>Gỡ/Ẩn bài
-                                                    </a>
-                                                <?php else: ?>
-                                                    <a href="#" class="btn-action flex items-center px-4 py-2 text-sm text-green-600 hover:bg-green-50" data-id="<?= htmlspecialchars($post['id']) ?>" data-action="hienthi" role="menuitem">
-                                                        <i class="fa-solid fa-eye-slash w-5 mr-2"></i>Hiển thị
-                                                    </a>
-                                                <?php endif; ?>
+                                            <?php else: ?>
+                                                <a href="#" class="btn-action flex items-center px-4 py-2 text-sm text-green-600 hover:bg-green-50" data-id="<?= e($post['id']) ?>" data-action="daduyet" role="menuitem">
+                                                    <i class="fa-solid fa-eye w-5 mr-2"></i>Hiển thị lại
+                                                </a>
                                             <?php endif; ?>
                                         </div>
                                     </div>
@@ -272,87 +259,62 @@ $stats = [
             });
         });
 
-        // Xử lý hành động
+        // Xử lý hành động AJAX
         document.body.addEventListener('click', function(event) {
             const actionButton = event.target.closest('.btn-action');
             if (actionButton) {
                 event.preventDefault();
                 const postId = actionButton.dataset.id;
-                const action = actionButton.dataset.action;
+                const action = actionButton.dataset.action; // 'an' hoặc 'daduyet'
 
-                if (action === 'edit') {
-                    // Chuyển hướng đến trang chỉnh sửa
-                    window.location.href = `trangchu.php?page=../moi_gioi/chinhsua_baidang&id=${postId}`;
-                } 
-                if (action === 'unpublish') {
-                    if (confirm('Bạn có chắc chắn muốn GỠ bài đăng này không? Bài đăng sẽ được chuyển vào mục lưu trữ.')) {
-                        
-                        // ===== PHẦN MỚI THAY THẾ CHO ALERT =====
-                        fetch('../../models/cn_tt_baidang_mg.php', { // <-- **QUAN TRỌNG**: Thay đổi đường dẫn này cho đúng!
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                post_id: postId,
-                                action: 'an'
-                            })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                alert(data.message); // Thông báo thành công
-                                location.reload();   // Tải lại trang để cập nhật giao diện
-                            } else {
-                                // Hiển thị lỗi từ server
-                                alert('Lỗi: ' + data.message);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Đã xảy ra lỗi kết nối. Vui lòng thử lại.');
-                        });
-                        // =======================================
+                const confirmMessage = (action === 'an') 
+                    ? 'Bạn có chắc chắn muốn GỠ/ẨN bài đăng này không? Bài đăng sẽ được chuyển vào mục lưu trữ.'
+                    : 'Bạn có muốn HIỂN THỊ lại bài đăng này không? Bài đăng sẽ cần chờ duyệt nếu nó hết hạn.';
 
-                    }
-                } 
-                if (action === 'hienthi') {
-                     
-                    if (confirm('Bạn có muốn hiển thị lại bài đăng này không?')) {
-                        
-                        // ===== PHẦN MỚI THAY THẾ CHO ALERT =====
-                        fetch('../../models/cn_tt_baidang_mg.php', { // <-- **QUAN TRỌNG**: Thay đổi đường dẫn này cho đúng!
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                post_id: postId,
-                                action: 'hienthi'
-                            })
+                if (confirm(confirmMessage)) {
+                    // Gửi AJAX
+                    fetch('../../models/cn_tt_baidang_mg.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            post_id: postId,
+                            action: action // Gửi action mới ('an' hoặc 'daduyet')
                         })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                alert(data.message); // Thông báo thành công
-                                location.reload();   // Tải lại trang để cập nhật giao diện
-                            } else {
-                                // Hiển thị lỗi từ server
-                                alert('Lỗi: ' + data.message);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Đã xảy ra lỗi kết nối. Vui lòng thử lại.');
-                        });
-                        // =======================================
-
-                    
-                }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            // Xử lý lỗi HTTP
+                            return response.text().then(text => { throw new Error(text); });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            alert(data.message); 
+                            location.reload(); // Tải lại trang để cập nhật giao diện
+                        } else {
+                            alert('Lỗi: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Đã xảy ra lỗi kết nối hoặc xử lý server. Vui lòng thử lại.');
+                    });
                 }
             }
         });
+        
+        // SỬA: Loại bỏ sự kiện blur gây chuyển hướng liên tục và lỗi
+        const searchInput = document.getElementById('search-input');
+        searchInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Ngăn form bị gửi đi 2 lần
+                document.getElementById('search-form').submit(); 
+            }
+        });
     });
-</script>
+    </script>
 </body>
 </html>
