@@ -91,7 +91,6 @@
                 'Danh sách đánh giá bds' => ['link' => 'quanly_danhgia_bds', 'roles' => ['quantri']],
                 'Sản phẩm cá nhân' => ['link' => '../moi_gioi/sp_canhan', 'roles' => ['moigioi']],
                 'Đăng sản phẩm' => ['link' => '../moi_gioi/dang_sp', 'roles' => ['moigioi']],
-                'Quản lý giỏ hàng' => ['link' => '../moi_gioi/ql_gio_hang', 'roles' => ['moigioi']],
             ]
         ],
         [
