@@ -102,6 +102,7 @@
                 'Theo dõi yêu cầu MBT' => ['link' => 'quanly_yeucau_mbt', 'roles' => ['quantri']],
                 'Quản lý thanh toán' => ['link' => 'quanly_thanhtoan', 'roles' => ['quantri']],
                 'Giao dịch cá nhân' => ['link' => '../moi_gioi/gd_canhan', 'roles' => ['moigioi']],
+                'Quản lý yêu cầu khách hàng' => ['link' => '../moi_gioi/ql_yeucau_khachhang', 'roles' => ['moigioi']]
             ]
         ],
         [
@@ -143,7 +144,7 @@
                 'Gửi thông báo khách (MG)' => ['link' => '../moi_gioi/g_thongbao_kh', 'roles' => ['moigioi']],
                 'Quản lý thông báo (MG)' => ['link' => '../moi_gioi/ql_thongbao', 'roles' => ['moigioi']],
                 'Quản lý thông báo' => ['link' => 'quanly_thongbao', 'roles' => ['quantri']],
-                'Chat trực tuyến' => ['link' => '../moi_gioi/chat_tt', 'roles' => ['moigioi']]
+                'Chat trực tuyến' => ['link' => '../moi_gioi/chat_bds', 'roles' => ['moigioi']]
             ]
         ],
         [
