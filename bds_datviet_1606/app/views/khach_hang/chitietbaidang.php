@@ -381,7 +381,7 @@ $pageTitle = e($post['tieu_de']);
                     <?= e(number_format((float)$post['gia'], 0, ',', '.')) ?> VNĐ
                 </p>
                 <?php if (!empty($_SESSION['id_nguoi_dung'])): ?>
-                <a href="/app/views/khach_hang/thanhtoan.php?type=bds_buy&id=<?= (int)$post['id'] ?>&create=1">Mua ngay</a>
+                <a href="/app/views/khach_hang/thanhtoan.php?type=bds_buy&id=<?= $post['id'] ?>&create=1">Mua ngay</a>
                 <?php else: ?>
                 <a href="/login.php"
                     class="w-full block text-center px-4 py-3 rounded-lg font-semibold bg-gray-400 text-white">
