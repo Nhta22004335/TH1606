@@ -92,7 +92,7 @@
         <div class="flex items-center space-x-4">
             <nav class="hidden xl:flex space-x-6 font-medium text-base">
                 <a href="#" class="text-gray-700 hover:text-blue-600 transition duration-200">Trang chủ</a>
-                <a href="duan.php" class="text-gray-700 hover:text-blue-600 transition duration-200">Dự án</a>
+                <a href="duan.php" class="text-gray-700 hover:text-blue-600 transition duration-200">Lịch sử</a>
                 <a href="tintuc.php" class="text-gray-700 hover:text-blue-600 transition duration-200">Tin tức</a>
                 <a href="#" class="text-gray-700 hover:text-blue-600 transition duration-200">Liên hệ</a>
             </nav>

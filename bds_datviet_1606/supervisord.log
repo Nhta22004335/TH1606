@@ -1,0 +1,12 @@
+2025-10-20 06:16:39,149 INFO Set uid to user 0 succeeded
+2025-10-20 06:16:39,158 INFO supervisord started with pid 1
+2025-10-20 06:16:40,165 INFO spawned: 'apache' with pid 7
+2025-10-20 06:16:40,170 INFO spawned: 'socketio' with pid 8
+2025-10-20 06:16:40,175 INFO spawned: 'redis' with pid 9
+2025-10-20 06:16:40,179 INFO spawned: 'memcached' with pid 10
+2025-10-20 06:16:40,190 INFO spawned: 'tailwind' with pid 12
+2025-10-20 06:16:41,924 INFO success: apache entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-20 06:16:41,925 INFO success: socketio entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-20 06:16:41,925 INFO success: redis entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-20 06:16:41,926 INFO success: memcached entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-20 06:16:41,926 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
