@@ -12,6 +12,10 @@ $giao_dich_hoan_tat = [];
 $error_msg = null;
 $stats = ['total_transactions' => 0, 'total_revenue' => 0];
 
+// Lấy giá trị bộ lọc SỚM để sử dụng trong form HTML
+$search_term = trim($_GET['search'] ?? '');
+$filter_date = trim($_GET['date'] ?? '');
+
 // --- HELPER FUNCTION: Định dạng giá tiền ---
 function format_price_vietnamese(float $price): string {
     if ($price >= 1000000000) {
@@ -22,39 +26,37 @@ function format_price_vietnamese(float $price): string {
     return number_format($price, 0, ',', '.') . ' VNĐ';
 }
 
+function e(?string $string): string {
+    return htmlspecialchars($string ?? '', ENT_QUOTES, 'UTF-8');
+}
+
 // --- LẤY DỮ LIỆU ---
 try {
     // 1. Lấy dữ liệu thống kê tổng quan (không bị ảnh hưởng bởi bộ lọc)
+    // Chú ý: Cột bds.gia phải tồn tại và là kiểu số
     $stat_sql = "SELECT COUNT(gd.id) AS total_transactions, SUM(bds.gia) AS total_revenue
-                 FROM giao_dich gd
-                 JOIN bat_dong_san bds ON gd.id_bds = bds.id
-                 WHERE gd.trang_thai = 'hoantat'";
+                  FROM giao_dich gd
+                  JOIN bat_dong_san bds ON gd.id_bds = bds.id
+                  WHERE gd.trang_thai = 'hoantat'";
     $stat_stmt = $pdo->query($stat_sql);
     $stats = $stat_stmt->fetch(PDO::FETCH_ASSOC);
 
-    // 2. Xử lý bộ lọc
-    $search_term = trim($_GET['search'] ?? '');
-    $filter_date = trim($_GET['date'] ?? '');
-    
     // =============================================
-    // === CHÈN LOGIC LƯU LỊCH SỬ TÌM KIẾM TẠI ĐÂY ===
+    // === LOGIC LƯU LỊCH SỬ TÌM KIẾM ===
     // =============================================
-    $id = $_SESSION['id_nguoi_dung'] ?? null; // Lấy ID người dùng từ session
+    $id_nguoi_dung_session = $_SESSION['id_nguoi_dung'] ?? null; 
 
-    if (!empty(trim($search_term)) && !empty($id)) {
+    if (!empty($search_term) && !empty($id_nguoi_dung_session)) {
         try {
             $sql_insert = "INSERT INTO lich_su_tim_kiem (id_nguoi_dung, tu_khoa_tim_kiem, thoi_gian_tim) VALUES (?, ?, NOW())";
             $stmt_insert = $pdo->prepare($sql_insert);
-            $stmt_insert->execute([$id, $search_term]);
+            $stmt_insert->execute([$id_nguoi_dung_session, $search_term]);
         } catch (PDOException $e) {
-            // Có thể ghi log lỗi vào file
             // error_log("Lỗi khi lưu lịch sử tìm kiếm: " . $e->getMessage());
         }
     }
     // =============================================
-    // === KẾT THÚC CHÈN ===
-    // =============================================
-
+    
     $where_conditions = ["gd.trang_thai = 'hoantat'"];
     $params = [];
 
@@ -97,17 +99,15 @@ try {
     $error_msg = "Lỗi truy vấn: " . $e->getMessage();
 }
 
-function e(?string $string): string {
-    return htmlspecialchars($string ?? '', ENT_QUOTES, 'UTF-8');
-}
 ?>
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Khách hàng đã mua</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 
 <body class="bg-gray-50">
@@ -153,6 +153,8 @@ function e(?string $string): string {
     <div class="bg-white rounded-xl shadow-sm border border-slate-200">
         <div class="p-4 border-b border-slate-200">
             <form id="search-form" method="GET" class="flex flex-col sm:flex-row items-center gap-3">
+                <input type="hidden" name="page" value="<?= e($_GET['page'] ?? '../moi_gioi/kh_damua') ?>">
+
                 <div class="relative w-full sm:flex-grow">
                     <i class="fa-solid fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
                     <input type="text" id="search-input" name="search" value="<?= e($search_term) ?>" placeholder="Tìm BĐS, người mua, người bán..." class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition">
@@ -162,46 +164,6 @@ function e(?string $string): string {
             </form>
         </div>
 
-        <script>
-            // 1. Lấy các phần tử HTML cần thiết qua ID
-            const searchForm = document.getElementById('search-form');
-            const searchInput = document.getElementById('search-input');
-            const searchButton = document.getElementById('search-button');
-
-            // 2. Hàm để thực hiện submit
-            function submitSearch() {
-                console.log('Đang chuẩn bị chuyển hướng bằng window.location...');
-
-                // 1. Lấy giá trị từ ô input
-                const searchValue = searchInput.value;
-
-                // 2. (Quan trọng) Mã hóa giá trị để đảm bảo URL hợp lệ
-                //    Ví dụ: "áo thun" -> "ao%20thun"
-                const encodedSearchValue = encodeURIComponent(searchValue.trim());
-
-                // 3. Xây dựng URL mới một cách thủ công
-                //    Hãy chắc chắn rằng đường dẫn cơ sở '/app/trangchu.php' là đúng với cấu trúc dự án của bạn
-                const newUrl = `trangchu.php?page=../moi_gioi/kh_damua&search=${encodedSearchValue}`;
-
-                // 4. Dùng window.location.href để chuyển hướng trình duyệt đến URL mới
-                window.location.href = newUrl;
-            }
-
-            // 3. Gán sự kiện cho nút bấm
-            searchButton.addEventListener('click', function(event) {
-                event.preventDefault(); // Ngăn hành vi mặc định của nút
-                submitSearch();
-            });
-
-            // 4. Gán sự kiện cho ô input (submit khi nhấn Enter)
-            searchInput.addEventListener('keydown', function(event) {
-                if (event.key === 'Enter') {
-                    event.preventDefault(); // Ngăn form bị gửi đi 2 lần
-                    submitSearch();
-                }
-            });
-        </script>
-        
         <div class="overflow-x-auto">
             <table class="min-w-full text-xs">
                 <thead class="bg-slate-50">
