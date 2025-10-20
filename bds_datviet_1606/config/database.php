@@ -7,8 +7,13 @@
         $port = "5432";
         $dbname = "csdl_bds";
         $user = "postgres";
+<<<<<<< Updated upstream:bds_datviet_1606/config/database.php
 
         $pass = "123456";
+=======
+        // $pass = "22004335";
+         $pass = "123456";
+>>>>>>> Stashed changes:php/config/database.php
 
         try {
             $dsn = "pgsql:host=$host;port=$port;dbname=$dbname";

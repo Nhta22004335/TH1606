@@ -1,4 +1,5 @@
 <?php
+<<<<<<< Updated upstream:bds_datviet_1606/app/views/khach_hang/nhao.php
 // BƯỚC 1: BẮT ĐẦU SESSION
 session_start(); 
 
@@ -295,5 +296,164 @@ $current_user_id = $_SESSION['id_nguoi_dung'] ?? null;
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+=======
+    session_start();
+    require_once "../../../config/database.php";
+    $pdo = ketnoicsdl();
+
+    $id = $_SESSION['id_nguoi_dung'];
+
+    $sql = "
+        SELECT q.vai_tro
+        FROM phan_quyen pq
+        JOIN quyen q ON pq.id_quyen = q.id
+        WHERE pq.id_nguoi_dung = :id_nguoi_dung
+    ";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':id_nguoi_dung', $id, PDO::PARAM_STR); 
+    $stmt->execute();
+    $dsQuyen = $stmt->fetchAll(PDO::FETCH_COLUMN); 
+
+    $sql = "SELECT * FROM info_nguoi_dung WHERE id_nguoi_dung = :id";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute(['id' => $id]);
+    $ind = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $sql = "SELECT * FROM nguoi_dung WHERE id = :id";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute(['id' => $id]);
+    $nd = $stmt->fetch(PDO::FETCH_ASSOC);
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+     <style>
+        /* Tùy chỉnh nhỏ để logo giữ tỷ lệ tốt hơn */
+        .logo-container .logo-img {
+            transform: scale(2.6) translate(-5%, 0%); /* Điều chỉnh vị trí sau khi scale */
+            transform-origin: center right;
+        }
+        /* Style cho nút tìm kiếm chính trên banner */
+        #main-search-button {
+            transition: all 0.3s ease;
+        }
+        #main-search-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <header class="sticky top-0 bg-white shadow-md border-b border-gray-100 z-50" 
+        x-data="{ mobileMenuOpen: false }">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex justify-between items-center h-20">
+        
+        <div class="flex items-center cursor-pointer min-w-[200px]">
+            <div class="flex items-center space-x-2">
+                <div class="relative h-12 w-12 flex items-center justify-center overflow-visible">
+                    <img 
+                        src="../../../public/assets/anhht/0/datviet.png" 
+                        alt="Logo Đất Việt BĐS" 
+                        class="h-10 transform scale-[2] translate-x-[-15%] object-contain"
+                    >
+                </div>
+                <div class="flex flex-col justify-center leading-snug pl-4">
+                    <span class="text-2xl font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-sky-500 to-cyan-400 font-[Poppins]">
+                        Đất Việt
+                    </span>
+                    <span class="text-[10px] sm:text-xs text-gray-500 italic">
+                        Không gian sống lý tưởng
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="hidden lg:flex flex-1 mx-8 max-w-lg">
+            <div class="flex w-full">
+                <input id="searchInput" type="text" placeholder="Tìm kiếm bất động sản, dự án..." 
+                    class="flex-1 h-10 border border-gray-300 px-4 text-sm rounded-l-lg focus:ring-1 focus:ring-blue-400 focus:border-blue-400 outline-none transition"
+                >
+                <button id="btnSearch" class="h-10 px-4 bg-blue-600 text-white rounded-r-lg border border-blue-600 flex items-center justify-center hover:bg-blue-700 transition duration-200">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-4">
+            <nav class="hidden xl:flex space-x-6 font-medium text-base">
+                <a href="#" class="text-gray-700 hover:text-blue-600 transition duration-200">Trang chủ</a>
+                <a href="#" class="text-gray-700 hover:text-blue-600 transition duration-200">Dự án</a>
+                <a href="tintuc.php" class="text-gray-700 hover:text-blue-600 transition duration-200">Tin tức</a>
+                <a href="#" class="text-gray-700 hover:text-blue-600 transition duration-200">Liên hệ</a>
+            </nav>
+
+            <div x-data="{ open: false }" class="relative">
+                <button @click="open = !open" 
+                    class="flex items-center space-x-2 p-2 rounded-full border border-gray-200 hover:bg-gray-50 transition">
+
+                    <!-- Avatar -->
+                    <img src="../../../storage/pictures/avt/<?= $nd['avt'] ?? 'avt.png' ?>" 
+                        alt="Avatar" 
+                        class="w-8 h-8 rounded-full border border-gray-300">
+
+                    <!-- Tên người dùng -->
+                    <span class="text-gray-700 font-medium"><?= htmlspecialchars($nd['ho_ten'] ?? 'Trương Quốc Đặng') ?></span>
+                </button>
+
+
+                <div x-show="open" x-cloak @click.outside="open = false" x-transition.origin.top-right class="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden" style="z-index: 20;">
+                     <div class="px-4 py-3 flex items-center space-x-3 border-b border-gray-100 bg-gray-50">
+                        <img src="../../../storage/pictures/avt/<?= $nd['avt'] ?? 'default-avatar.png' ?>" alt="Avatar" class="w-10 h-10 rounded-full border border-blue-300 p-0.5">
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800 truncate"><?= $ind['ho_ten'] ?? 'Khách hàng' ?></p>
+                            <p class="text-xs text-gray-500">Tài khoản cá nhân</p>
+                        </div>
+                    </div>
+                    <div class="py-1">
+                        <a href="trangchu.php?page=../moi_gioi/ql_hoso_canhan" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
+                            <i class="fas fa-user-circle mr-3 w-4"></i> Trang cá nhân
+                        </a>
+                        <a href="../../models/auth/xuly_dangxuat.php" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition">
+                            <i class="fas fa-sign-out-alt mr-3 w-4"></i> Đăng xuất
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 rounded hover:bg-gray-100 transition">
+                <i x-show="!mobileMenuOpen" class="fas fa-bars text-xl"></i>
+                <i x-show="mobileMenuOpen" x-cloak class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+    </div>
+
+    <div x-show="mobileMenuOpen" x-cloak x-transition.origin.top class="lg:hidden bg-white border-t border-gray-100">
+        <div class="p-4">
+            <div class="flex w-full">
+                <input type="text" placeholder="Tìm kiếm nhanh..." class="flex-1 h-10 border border-gray-300 px-3 text-sm rounded-l-md focus:ring-1 focus:ring-blue-400 focus:border-blue-400 outline-none">
+                <button class="h-10 px-4 bg-blue-600 text-white rounded-r-md flex items-center justify-center hover:bg-blue-700 transition">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+        
+        <nav class="flex flex-col p-4 space-y-1 border-t border-gray-100">
+            <a href="#" class="py-3 px-4 text-gray-800 hover:bg-blue-50 hover:text-blue-600 rounded-lg font-medium transition">Trang chủ</a>
+            <a href="#" class="py-3 px-4 text-gray-800 hover:bg-blue-50 hover:text-blue-600 rounded-lg font-medium transition">Dự án</a>
+            <a href="#" class="py-3 px-4 text-gray-800 hover:bg-blue-50 hover:text-blue-600 rounded-lg font-medium transition">Tin tức</a>
+            <a href="#" class="py-3 px-4 text-gray-800 hover:bg-blue-50 hover:text-blue-600 rounded-lg font-medium transition">Liên hệ</a>
+        </nav>
+    </div>
+</header>
+
+>>>>>>> Stashed changes:php/app/views/khachhang/nhao.php
 </body>
 </html>
