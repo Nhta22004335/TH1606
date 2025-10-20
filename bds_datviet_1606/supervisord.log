@@ -531,3 +531,34 @@
 2025-10-19 18:12:00,061 INFO success: redis entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
 2025-10-19 18:12:00,061 INFO success: memcached entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
 2025-10-19 18:12:00,062 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-20 01:59:07,815 INFO Set uid to user 0 succeeded
+2025-10-20 01:59:07,823 INFO supervisord started with pid 1
+2025-10-20 01:59:09,594 INFO spawned: 'apache' with pid 7
+2025-10-20 01:59:09,971 INFO spawned: 'socketio' with pid 8
+2025-10-20 01:59:09,976 INFO spawned: 'redis' with pid 9
+2025-10-20 01:59:09,982 INFO spawned: 'memcached' with pid 10
+2025-10-20 01:59:10,896 INFO spawned: 'tailwind' with pid 12
+2025-10-20 01:59:11,186 INFO success: apache entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-20 01:59:11,187 INFO success: socketio entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-20 01:59:11,188 INFO success: redis entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-20 01:59:11,188 INFO success: memcached entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-20 01:59:11,370 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-20 02:12:56,645 INFO Set uid to user 0 succeeded
+2025-10-20 02:12:56,655 INFO supervisord started with pid 1
+2025-10-20 02:12:57,672 INFO spawned: 'apache' with pid 7
+2025-10-20 02:12:57,688 INFO spawned: 'socketio' with pid 8
+2025-10-20 02:12:57,691 INFO spawned: 'redis' with pid 10
+2025-10-20 02:12:57,698 INFO spawned: 'memcached' with pid 11
+2025-10-20 02:12:57,706 INFO spawned: 'tailwind' with pid 13
+2025-10-20 02:12:58,014 WARN exited: apache (exit status 0; not expected)
+2025-10-20 02:12:59,388 INFO spawned: 'apache' with pid 57
+2025-10-20 02:12:59,389 INFO success: socketio entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-20 02:12:59,390 INFO success: redis entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-20 02:12:59,390 INFO success: memcached entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-20 02:12:59,391 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-20 02:12:59,442 WARN exited: apache (exit status 0; not expected)
+2025-10-20 02:13:01,451 INFO spawned: 'apache' with pid 72
+2025-10-20 02:13:01,505 WARN exited: apache (exit status 0; not expected)
+2025-10-20 02:13:04,511 INFO spawned: 'apache' with pid 79
+2025-10-20 02:13:04,564 WARN exited: apache (exit status 0; not expected)
+2025-10-20 02:13:05,566 INFO gave up: apache entered FATAL state, too many start retries too quickly
