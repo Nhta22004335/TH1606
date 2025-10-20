@@ -1,5 +1,4 @@
 <?php
-// PHẦN LOGIC PHP CỦA BẠN - GIỮ NGUYÊN HOÀN TOÀN
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
@@ -14,13 +13,11 @@ if (!$id_nguoi_dung_hien_tai) {
 $pdo = ketnoicsdl();
 
 $search = $_GET['search'] ?? '';
-$filters = [];
-if (isset($_GET['boloc'])) {
-    $filters = json_decode($_GET['boloc'], true) ?? [];
-}
+$boloc_json = $_GET['boloc'] ?? '{}'; // Lấy boloc
+$filters = json_decode($boloc_json, true) ?? []; // Gán filters từ boloc
 
 $sql = "
-    SELECT gd.id, nd.ten_dang_nhap, bds.tieu_de, gd.loai, gd.ngay_giao_dich, gd.trang_thai
+    SELECT gd.id, nd.ten_dang_nhap, bds.dia_chi_day_du as tieu_de, gd.loai, gd.ngay_giao_dich, gd.trang_thai
     FROM giao_dich gd
     LEFT JOIN nguoi_dung nd ON gd.id_nguoi_dung = nd.id
     LEFT JOIN bat_dong_san bds ON gd.id_bds = bds.id
@@ -34,6 +31,14 @@ if (!empty($search)) {
     $where[] = "(nd.ten_dang_nhap ILIKE :search OR bds.tieu_de ILIKE :search)";
     $params[':search'] = "%$search%";
 }
+
+// THAY ĐỔI: Chuyển bộ lọc trạng thái vào SQL cho hiệu quả
+if (isset($filters['trangthai']) && $filters['trangthai'] !== '') {
+    $where[] = "gd.trang_thai = :trangthai";
+    $params[':trangthai'] = $filters['trangthai'];
+}
+// KẾT THÚC THAY ĐỔI
+
 if ($where) {
     $sql .= " WHERE " . implode(" AND ", $where);
 }
@@ -46,21 +51,23 @@ try {
     error_log("Lỗi CSDL: " . $e->getMessage());
     $giaodich = [];
 }
+
 if (!empty(trim($search))) {
-        try {
-            $sql = "INSERT INTO lich_su_tim_kiem (id_nguoi_dung, tu_khoa_tim_kiem) VALUES (?, ?)";
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([$id, $search]);
-        } catch (PDOException $e) {
-            // error_log("Lỗi khi lưu lịch sử tìm kiếm: " . $e->getMessage());
-        }
+    try {
+        $sql_search = "INSERT INTO lich_su_tim_kiem (id_nguoi_dung, tu_khoa_tim_kiem) VALUES (?, ?)";
+        $stmt_search = $pdo->prepare($sql_search);
+        // THAY ĐỔI: $id không tồn tại, phải dùng $id_nguoi_dung_hien_tai
+        $stmt_search->execute([$id_nguoi_dung_hien_tai, $search]);
+    } catch (PDOException $e) {
+        // error_log("Lỗi khi lưu lịch sử tìm kiếm: " . $e->getMessage());
     }
-// THÊM MỚI: Mảng ánh xạ trạng thái để code gọn gàng và dễ bảo trì
+}
+
 $status_map = [
     'choxuly'  => ['text' => 'Chờ xử lý', 'class' => 'bg-yellow-100 text-yellow-800'],
-    'dangxuly' => ['text' => 'Đang xử lý', 'class' => 'bg-blue-100 text-blue-800'],
+    'pending' => ['text' => 'Đang xử lý', 'class' => 'bg-blue-100 text-blue-800'],
     'hoantat'  => ['text' => 'Hoàn tất',   'class' => 'bg-green-100 text-green-800'],
-    'dahuy'    => ['text' => 'Đã hủy',     'class' => 'bg-red-100 text-red-800']
+    'dahuy'    => ['text' => 'Đã hủy',    'class' => 'bg-red-100 text-red-800']
 ];
 ?>
 
@@ -115,14 +122,7 @@ $status_map = [
             <tbody class="divide-y divide-gray-200">
                 <?php if (count($giaodich) > 0): ?>
                     <?php foreach($giaodich as $gd): ?>
-                        <?php
-                            $match = true;
-                            if (isset($filters['trangthai']) && $filters['trangthai'] !== '' && $filters['trangthai'] !== $gd['trang_thai']) {
-                                $match = false;
-                            }
-                        ?>
-                        <?php if ($match): ?>
-                        <tr class="hover:bg-gray-50">
+                        <tr class="hover:bg-gray-50" id="row-<?= $gd['id'] ?>">
                             <td class="p-3 font-medium text-gray-900"><?= htmlspecialchars($gd['ten_dang_nhap'] ?? 'N/A') ?></td>
                             <td class="p-3 text-gray-600 max-w-xs truncate" title="<?= htmlspecialchars($gd['tieu_de'] ?? 'N/A') ?>">
                                 <?= htmlspecialchars($gd['tieu_de'] ?? 'N/A') ?>
@@ -130,22 +130,33 @@ $status_map = [
                             <td class="p-3 text-gray-600 whitespace-nowrap"><?= date("d/m/Y H:i", strtotime($gd['ngay_giao_dich'])) ?></td>
                             <td class="p-3">
                                 <?php $status_info = $status_map[$gd['trang_thai']] ?? ['text' => 'Không rõ', 'class' => 'bg-gray-100 text-gray-800']; ?>
-                                <span class="px-2.5 py-0.5 text-xs font-medium rounded-full <?= $status_info['class'] ?>">
+                                <span id="status-badge-<?= $gd['id'] ?>" class="px-2.5 py-0.5 text-xs font-medium rounded-full <?= $status_info['class'] ?>">
                                     <?= $status_info['text'] ?>
                                 </span>
                             </td>
                             <td class="p-3">
-                                <div class="flex justify-center items-center gap-4">
+                                <div class="flex items-center gap-2">
+                                    <?php 
+                                        $current_status = $gd['trang_thai'];
+                                        $is_disabled = in_array($current_status, ['hoantat', 'dahuy']);
+                                    ?>
+                                    <select id="select-status-<?= $gd['id'] ?>" class="px-2 py-1 border border-gray-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 transition" <?= $is_disabled ? 'disabled' : '' ?>>
+                                        <option value="choxuly" <?= $current_status == 'choxuly' ? 'selected' : '' ?>>Chờ xử lý</option>
+                                        <option value="dangxuly" <?= $current_status == 'dangxuly' ? 'selected' : '' ?>>Đang xử lý</option>
+                                        <option value="hoantat" <?= $current_status == 'hoantat' ? 'selected' : '' ?>>Hoàn tất</option>
+                                        <option value="dahuy" <?= $current_status == 'dahuy' ? 'selected' : '' ?>>Hủy</option>
+                                    </select>
+                                    <button onclick="capNhatTrangThai('<?= $gd['id'] ?>')" 
+                                            class="px-2 py-1 bg-indigo-600 text-white text-xs font-medium rounded-md hover:bg-indigo-700 transition <?= $is_disabled ? 'opacity-50 cursor-not-allowed' : '' ?>"
+                                            <?= $is_disabled ? 'disabled' : '' ?>>
+                                        Lưu
+                                    </button>
                                     <a href="../../views/quan_ly/trangchu.php?page=../moi_gioi/ct_tiendo_gd&id=<?= $gd['id'] ?>" class="text-gray-400 hover:text-indigo-600 transition" title="Xem tiến độ">
                                         <i class="fas fa-tasks"></i>
                                     </a>
-                                    <!-- <button onclick="xoaGiaoDich('<?= $gd['id'] ?>')" class="text-gray-400 hover:text-red-600 transition" title="Xóa giao dịch">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button> -->
                                 </div>
-                            </td>
+                                </td>
                         </tr>
-                        <?php endif; ?>
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
@@ -162,7 +173,7 @@ $status_map = [
 </div>
 
 <script>
-    // Giữ nguyên Javascript của bạn và thêm hàm xóa
+    // Hàm lọc (giữ nguyên)
     function apdungloc() {
         const statusEl = document.getElementById('trangthai');
         const filters = {};
@@ -171,7 +182,6 @@ $status_map = [
         }
         const boloc = encodeURIComponent(JSON.stringify(filters));
         
-        // Giữ lại tham số tìm kiếm
         const searchParams = new URLSearchParams(window.location.search);
         const search = searchParams.get('search') || '';
         
@@ -186,10 +196,71 @@ $status_map = [
     }
     document.getElementById("btnloc").addEventListener("click", apdungloc);
 
-    function xoaGiaoDich(id) {
-        if (confirm('Bạn có chắc chắn muốn xóa giao dịch này không?')) {
-            // Logic xóa của bạn có thể đặt ở đây (ví dụ: submit form ẩn hoặc fetch API)
-            console.log('Xóa giao dịch ID:', id);
-        }
+    // Mảng map trạng thái (dùng cho JS)
+    const statusMap = {
+        'choxuly': { text: 'Chờ xử lý', class: 'bg-yellow-100 text-yellow-800' },
+        'dangxuly': { text: 'Đang xử lý', class: 'bg-blue-100 text-blue-800' },
+        'hoantat': { text: 'Hoàn tất', class: 'bg-green-100 text-green-800' },
+        'dahuy': { text: 'Đã hủy', class: 'bg-red-100 text-red-800' }
+    };
+
+    // Hàm mới: Cập nhật trạng thái
+    function capNhatTrangThai(giaoDichId) {
+        const selectEl = document.getElementById('select-status-' + giaoDichId);
+        const newStatus = selectEl.value;
+        const buttonEl = selectEl.nextElementSibling; // Nút "Lưu"
+
+        if (!newStatus) return;
+
+        // Tạm khóa nút
+        buttonEl.disabled = true;
+        buttonEl.textContent = 'Đang...';
+
+        fetch('../api/cap_nhat_trang_thai.php', { // <-- ĐÂY LÀ TỆP API MỚI
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                id_giao_dich: giaoDichId,
+                trang_thai_moi: newStatus
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Cập nhật giao diện không cần tải lại trang
+                const badgeEl = document.getElementById('status-badge-' + giaoDichId);
+                const statusInfo = statusMap[newStatus];
+                
+                if (badgeEl && statusInfo) {
+                    badgeEl.textContent = statusInfo.text;
+                    badgeEl.className = 'px-2.5 py-0.5 text-xs font-medium rounded-full ' + statusInfo.class;
+                }
+                
+                // Khóa select và button nếu trạng thái là 'hoantat' hoặc 'dahuy'
+                if (newStatus === 'hoantat' || newStatus === 'dahuy') {
+                    selectEl.disabled = true;
+                    buttonEl.disabled = true;
+                    buttonEl.classList.add('opacity-50', 'cursor-not-allowed');
+                }
+                
+                alert('Cập nhật trạng thái thành công!');
+            } else {
+                alert('Lỗi: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Đã xảy ra lỗi kết nối.');
+        })
+        .finally(() => {
+            // Mở lại nút
+            if (newStatus !== 'hoantat' && newStatus !== 'dahuy') {
+                buttonEl.disabled = false;
+            }
+            buttonEl.textContent = 'Lưu';
+        });
     }
 </script>
