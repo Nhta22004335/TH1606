@@ -38,6 +38,10 @@ h1{text-align:center;color:#222;margin-bottom:30px}
 </style></head>
 <body>
 <h1>Dịch vụ Môi giới</h1>
+<a href="/app/views/khach_hang/trangchu.php"
+   style="display:inline-block;margin:10px 0 20px;padding:8px 12px;border:1px solid #ddd;border-radius:8px;color:#333;text-decoration:none;">
+  ← Về trang chủ
+</a>
 <?php if ($dsMoigioi): ?>
   <div class="container">
     <?php foreach ($dsMoigioi as $mg): ?>

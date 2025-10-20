@@ -126,10 +126,16 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <body class="bg-gray-100 text-gray-800">
 
 <div class="max-w-7xl mx-auto px-4 py-8">
-    
+    <div class="mb-4">
+    <a href="/app/views/khach_hang/trangchu.php"
+        class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">
+        ← Về trang chủ
+    </a>
+    </div>
+
     <div class="mb-8">
-        <h1 class="text-4xl font-extrabold text-gray-900 mb-3">Biệt thự</h1>
-        <p class="text-lg text-gray-600">Khám phá những căn biệt thự sang trọng và đẳng cấp.</p>
+        <h1 class="text-4xl font-extrabold text-gray-900 mb-3">Đât nền</h1>
+        <p class="text-lg text-gray-600">Khám phá những khu đất hấp dẫn.</p>
     </div>
 
     <form method="GET" class="mb-8 p-4 bg-white rounded-lg shadow">

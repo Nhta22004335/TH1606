@@ -1,104 +1,91 @@
 <?php
-session_start(); // Khởi tạo session để kiểm tra đăng nhập
+session_start();
+if (empty($_SESSION['id_nguoi_dung'])) { header('Location: /login.php'); exit; }
 
-// duan.php - Trang hiển thị danh sách dự án bất động sản
-include_once __DIR__ . '/../../../config/database.php'; // Sửa đường dẫn
+require_once __DIR__ . '/../../../config/database.php';
+$pdo = ketnoicsdl();
+function e($s){ return htmlspecialchars($s ?? '', ENT_QUOTES, 'UTF-8'); }
+function money_vn($n){ return number_format((int)$n,0,',','.'); }
 
-// Kết nối PDO
-try {
-    $pdo = ketnoicsdl(); // Hàm từ config/database.php
-    // Truy vấn JOIN để lấy thông tin dự án và hình ảnh, lấy hình ảnh đầu tiên nếu có nhiều
-    $stmt = $pdo->query("
-        SELECT bds.id, bds.tieu_de, bds.mo_ta, bds.gia, bds.dien_tich, bds.dia_chi, bds.loai, bds.ngay_dang, ha.url
-        FROM bat_dong_san bds
-        LEFT JOIN hinh_anh_bds ha ON bds.id = ha.id_bds
-        GROUP BY bds.id, bds.tieu_de, bds.mo_ta, bds.gia, bds.dien_tich, bds.dia_chi, bds.loai, bds.ngay_dang
-        ORDER BY bds.ngay_dang DESC
-        LIMIT 10
-    ");
-    $du_an = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// dọn rác: auto hết hạn
+$pdo->exec("UPDATE giao_dich SET trang_thai='failed'
+            WHERE trang_thai='pending' AND het_han_luc IS NOT NULL AND het_han_luc<NOW()");
 
-    // Debug: Kiểm tra dữ liệu trả về
-    // var_dump($du_an); // Bỏ comment để kiểm tra
-} catch (PDOException $e) {
-    $du_an = []; // Fallback nếu có lỗi
-    error_log("Lỗi truy vấn dự án: " . $e->getMessage());
-}
+$uid   = $_SESSION['id_nguoi_dung'];
+$state = $_GET['state'] ?? 'all';
+$allow = ['all','pending','paid','canceled','failed'];
+if(!in_array($state,$allow,true)) $state='all';
+
+$where = "gd.id_nguoi_dung=:u";
+$args  = [':u'=>$uid];
+if($state!=='all'){ $where .= " AND gd.trang_thai=:s"; $args[':s']=$state; }
+
+$sql = "SELECT gd.*, p.tieu_de
+        FROM giao_dich gd
+        LEFT JOIN bai_dang p ON p.id = gd.ref_id
+        WHERE $where
+        ORDER BY gd.id DESC";
+$st = $pdo->prepare($sql); $st->execute($args); $rows = $st->fetchAll(PDO::FETCH_ASSOC);
 ?>
+<!doctype html><html lang="vi"><head>
+<meta charset="utf-8"><title>Lịch sử giao dịch</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head><body class="bg-gray-100">
+<div class="max-w-5xl mx-auto mt-8 bg-white shadow rounded-lg p-6">
+  <h2 class="text-2xl font-bold mb-4">Lịch sử giao dịch</h2>
 
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dự Án Bất Động Sản - Đất Việt BDS</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="assets/css/style.css"> <!-- Giả sử có file CSS chung -->
-    <style>
-        .project-card { margin-bottom: 20px; }
-        .project-image { max-height: 200px; object-fit: cover; width: 100%; }
-        .project-title { color: #007bff; font-weight: bold; }
-        .project-price { color: #28a745; font-weight: bold; }
-        .user-info { margin-left: 10px; }
-    </style>
-</head>
-<body>
-    <!-- Header chung -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container">
-            <a class="navbar-brand" href="trangchu.php">
-                <img src="../../../public/images/datviet.png" alt="Đất Việt BDS" width="100" height="100"> Đất Việt BDS
-            </a>
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link" href="index.php">Trang Chủ</a></li>
-                <li class="nav-item"><a class="nav-link" href="danhsach_bds.php">Bất Động Sản</a></li>
-                <li class="nav-item"><a class="nav-link" href="tintuc.php">Tin Tức</a></li>
-                <li class="nav-item"><a class="nav-link active" href="duan.php">Dự Án</a></li>
-                <li class="nav-item"><a class="nav-link" href="lienhe.php">Liên Hệ</a></li>
-            </ul>
-            <div class="d-flex align-items-center">
-                <?php if (isset($_SESSION['user_id'])): ?>
-                    <span class="user-info">Chào <?php echo htmlspecialchars($_SESSION['ten_nguoi_dung'] ?? 'Người dùng'); ?>!</span>
-                    <a href="dang_xuat.php" class="btn btn-outline-danger ms-2">Đăng xuất</a>
-                <?php else: ?>
-                    <a href="login.php" class="btn btn-outline-primary me-2">Đăng Nhập</a>
-                    <a href="dangky.php" class="btn btn-primary">Đăng Ký</a>
-                <?php endif; ?>
-            </div>
-        </div>
-    </nav>
+  <div class="mb-4 space-x-2">
+    <?php
+      $chips=['all'=>'Tất cả','pending'=>'Chờ thanh toán','paid'=>'Đã thanh toán','canceled'=>'Đã hủy','failed'=>'Hết hạn/Lỗi'];
+      foreach($chips as $k=>$lbl){
+        $act = $state===$k ? 'bg-indigo-600 text-white' : 'border';
+        echo '<a class="px-3 py-1 rounded '.$act.'" href="duan.php?state='.$k.'">'.$lbl.'</a>';
+      }
+    ?>
+  </div>
 
-    <div class="container mt-4">
-        <h1 class="text-center mb-4">Danh Sách Dự Án Bất Động Sản</h1>
-        <p class="text-center text-muted">Khám phá các dự án bất động sản mới nhất từ Đất Việt BDS.</p>
-
-        <div class="row">
-            <?php foreach ($du_an as $index => $project): ?>
-            <div class="col-md-6 col-lg-4">
-                <div class="card project-card">
-                    <!-- Hiển thị hình ảnh từ CSDL với tiền tố đường dẫn -->
-                    <img src="<?php echo !empty($project['url']) ? htmlspecialchars('../../../public/' . ltrim($project['url'], '/')) : 'https://via.placeholder.com/680x200?text=Ảnh+Dự+Án+' . ($index + 1); ?>" class="card-img-top project-image" alt="<?php echo htmlspecialchars($project['tieu_de']); ?>">
-                    <div class="card-body">
-                        <h5 class="card-title project-title"><?php echo htmlspecialchars($project['tieu_de']); ?></h5>
-                        <p class="card-text"><?php echo htmlspecialchars($project['mo_ta']); ?></p>
-                        <p><strong>Giá:</strong> <?php echo number_format($project['gia'], 0, ',', '.') . ' VNĐ'; ?></p>
-                        <p><strong>Diện tích:</strong> <?php echo $project['dien_tich'] . ' m²'; ?></p>
-                        <p><strong>Địa chỉ:</strong> <?php echo htmlspecialchars($project['dia_chi']); ?></p>
-                        <p><strong>Loại:</strong> <?php echo htmlspecialchars($project['loai']); ?></p>
-                        <p><strong>Ngày đăng:</strong> <?php echo htmlspecialchars($project['ngay_dang']); ?></p>
-                        <a href="chi_tiet_du_an.php?id=<?php echo $project['id']; ?>" class="btn btn-primary">Xem chi tiết</a>
-                    </div>
-                </div>
-            </div>
-            <?php endforeach; ?>
-        </div>
-    </div>
-
-    <!-- Footer chung -->
-    <footer class="bg-dark text-white text-center py-4 mt-5">
-        <p>&copy; 2025 Đất Việt BDS. Tất cả quyền được bảo lưu.</p>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+  <?php if(!$rows): ?>
+    <div class="text-gray-600">Không có bản ghi.</div>
+  <?php else: ?>
+  <div class="overflow-auto">
+    <table class="min-w-full border">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="text-left p-2 border">BĐS</th>
+          <th class="text-left p-2 border">Mã</th>
+          <th class="text-left p-2 border">Số tiền</th>
+          <th class="text-left p-2 border">Trạng thái</th>
+          <th class="text-left p-2 border">Hết hạn</th>
+          <th class="text-left p-2 border">Hành động</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php foreach($rows as $r): ?>
+        <tr class="border-t">
+          <td class="p-2 border"><?= e($r['tieu_de']) ?: '—' ?></td>
+          <td class="p-2 border"><?= e($r['ma']) ?></td>
+          <td class="p-2 border"><?= money_vn($r['so_tien']) ?> đ</td>
+          <td class="p-2 border"><?= e($r['trang_thai']) ?></td>
+          <td class="p-2 border"><?= $r['het_han_luc'] ? date('d/m/Y H:i', strtotime($r['het_han_luc'])) : '—' ?></td>
+          <td class="p-2 border space-x-2">
+            <?php if ($r['trang_thai']==='pending'): ?>
+              <a class="px-3 py-1 bg-indigo-600 text-white rounded"
+                 href="thanhtoan.php?type=<?= e($r['loai']) ?>&id=<?= (int)$r['ref_id'] ?>">
+                Thanh toán
+              </a>
+              <form method="post" action="huy_gd.php" style="display:inline"
+                    onsubmit="return confirm('Hủy giao dịch này?');">
+                <input type="hidden" name="id" value="<?= (int)$r['id'] ?>">
+                <button class="px-3 py-1 border rounded" type="submit">Hủy</button>
+              </form>
+            <?php else: ?>—
+            <?php endif; ?>
+          </td>
+        </tr>
+        <?php endforeach; ?>
+      </tbody>
+    </table>
+  </div>
+  <?php endif; ?>
+</div>
+</body></html>

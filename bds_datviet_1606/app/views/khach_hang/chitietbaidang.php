@@ -380,6 +380,14 @@ $pageTitle = e($post['tieu_de']);
                 <p class="text-4xl font-extrabold text-blue-700 mb-2">
                     <?= e(number_format((float)$post['gia'], 0, ',', '.')) ?> VNĐ
                 </p>
+                <?php if (!empty($_SESSION['id_nguoi_dung'])): ?>
+                <a href="/app/views/khach_hang/thanhtoan.php?type=bds_buy&id=<?= (int)$post['id'] ?>&create=1">Mua ngay</a>
+                <?php else: ?>
+                <a href="/login.php"
+                    class="w-full block text-center px-4 py-3 rounded-lg font-semibold bg-gray-400 text-white">
+                    Đăng nhập để mua
+                </a>
+                <?php endif; ?>
                 <?php if ($don_gia_m2 > 0): ?>
                 <p class="text-lg text-gray-600 font-medium">
                     ~ <?= e(number_format($don_gia_m2 / 1000000, 2, ',', '.')) ?> triệu/m²
@@ -401,10 +409,16 @@ $pageTitle = e($post['tieu_de']);
                     <a href="tel:<?= e($post['so_dt']) ?>" class="flex items-center justify-center w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors">
                         <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M2 3.5A1.5 1.5 0 013.5 2h1.148a1.5 1.5 0 011.465 1.175l.716 3.223a1.5 1.5 0 01-1.052 1.767l-.933.267c-.41.117-.643.555-.48.95a11.542 11.542 0 006.254 6.254c.395.163.833-.07.95-.48l.267-.933a1.5 1.5 0 011.767-1.052l3.223.716A1.5 1.5 0 0118 15.352V16.5a1.5 1.5 0 01-1.5 1.5h-1.5A13.5 13.5 0 012 3.5z" clip-rule="evenodd" /></svg>
                         <span><?= e($post['so_dt']) ?></span>
+                    <a href="https://zalo.me/<?= e($post['so_dt']) ?>" target="_blank"
+                    class="flex items-center justify-center w-full px-4 py-3 bg-[#0068FF] text-white rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 active:scale-95">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2 animate-bounce"
+                        viewBox="0 0 48 48" fill="currentColor">
+                        <path d="M24,4C12.954,4,4,11.82,4,21.5c0,4.46,2.013,8.503,5.34,11.667L8,43.708l8.22-4.492C18.1,40.3,20.975,41,24,41
+                                c11.046,0,20-7.82,20-17.5S35.046,4,24,4z"/>
+                    </svg>
+                    Nhắn Zalo
                     </a>
-                    <button type="button" class="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors">
-                        Gửi tin nhắn
-                    </button>
+
                 </div>
             </div>
 
