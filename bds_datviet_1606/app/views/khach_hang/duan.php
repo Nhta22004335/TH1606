@@ -1,91 +1,163 @@
 <?php
 session_start();
-if (empty($_SESSION['id_nguoi_dung'])) { header('Location: /login.php'); exit; }
+if (empty($_SESSION['id_nguoi_dung'])) {
+    header('Location: /login.php');
+    exit;
+}
 
 require_once __DIR__ . '/../../../config/database.php';
 $pdo = ketnoicsdl();
-function e($s){ return htmlspecialchars($s ?? '', ENT_QUOTES, 'UTF-8'); }
-function money_vn($n){ return number_format((int)$n,0,',','.'); }
 
-// dọn rác: auto hết hạn
-$pdo->exec("UPDATE giao_dich SET trang_thai='failed'
-            WHERE trang_thai='pending' AND het_han_luc IS NOT NULL AND het_han_luc<NOW()");
+function e($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
+function vn_money($n){ return number_format((int)$n,0,',','.'); }
+function format_status($status) {
+    switch ($status) {
+        case 'pending':
+            return '<span class="text-yellow-600 font-semibold">Đang chờ</span>';
+        case 'completed':
+            return '<span class="text-green-600 font-semibold">Thành công</span>';
+        case 'failed':
+            return '<span class="text-red-600 font-semibold">Thất bại</span>';
+        case 'cancelled':
+            return '<span class="text-gray-600 font-semibold">Đã hủy</span>';
+        default:
+            return '<span class="text-gray-500 font-semibold">' . e($status) . '</span>';
+    }
+}
 
-$uid   = $_SESSION['id_nguoi_dung'];
-$state = $_GET['state'] ?? 'all';
-$allow = ['all','pending','paid','canceled','failed'];
-if(!in_array($state,$allow,true)) $state='all';
+$uid = (string)$_SESSION['id_nguoi_dung'];
+$state = (string)($_GET['state'] ?? 'all'); // 'all', 'pending', 'completed', ...
 
-$where = "gd.id_nguoi_dung=:u";
-$args  = [':u'=>$uid];
-if($state!=='all'){ $where .= " AND gd.trang_thai=:s"; $args[':s']=$state; }
+// ... (code từ đầu) ...
 
-$sql = "SELECT gd.*, p.tieu_de
-        FROM giao_dich gd
-        LEFT JOIN bai_dang p ON p.id = gd.ref_id
-        WHERE $where
-        ORDER BY gd.id DESC";
-$st = $pdo->prepare($sql); $st->execute($args); $rows = $st->fetchAll(PDO::FETCH_ASSOC);
+// Xây dựng câu truy vấn
+// Chúng ta JOIN 4 bảng để lấy tất cả thông tin
+$sql = "SELECT 
+            gd.id AS giao_dich_id, gd.ma, gd.so_tien, gd.trang_thai, gd.tao_luc,
+            bd.tieu_de,
+            bds.dia_chi_day_du,
+            nd.ten_dang_nhap, nd.email, nd.so_dt
+        FROM 
+            giao_dich AS gd
+        JOIN 
+            nguoi_dung AS nd ON gd.id_nguoi_dung = nd.id::uuid  -- <<< SỬA Ở ĐÂY
+        JOIN 
+            bai_dang AS bd ON gd.ref_id = bd.id
+        JOIN 
+            bat_dong_san AS bds ON bd.id_bat_dong_san = bds.id
+        WHERE 
+            gd.id_nguoi_dung = :uid";
+
+$params = [':uid' => $uid];
+
+// Thêm bộ lọc trạng thái nếu có
+if ($state !== 'all') {
+    $sql .= " AND gd.trang_thai = :state";
+    $params[':state'] = $state;
+}
+
+$sql .= " ORDER BY gd.tao_luc DESC";
+
+$st = $pdo->prepare($sql);
+$st->execute($params); // Dòng 60 sẽ hết báo lỗi
+$transactions = $st->fetchAll(PDO::FETCH_ASSOC);
+
+// ... (code phần HTML giữ nguyên) ...
+
+$pageTitle = "Lịch sử giao dịch";
+if ($state === 'pending') $pageTitle = "Giao dịch đang chờ";
+if ($state === 'completed') $pageTitle = "Giao dịch thành công";
+
 ?>
-<!doctype html><html lang="vi"><head>
-<meta charset="utf-8"><title>Lịch sử giao dịch</title>
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title><?= e($pageTitle) ?></title>
 <script src="https://cdn.tailwindcss.com"></script>
-</head><body class="bg-gray-100">
-<div class="max-w-5xl mx-auto mt-8 bg-white shadow rounded-lg p-6">
-  <h2 class="text-2xl font-bold mb-4">Lịch sử giao dịch</h2>
+</head>
+<body class="bg-gray-100">
 
-  <div class="mb-4 space-x-2">
-    <?php
-      $chips=['all'=>'Tất cả','pending'=>'Chờ thanh toán','paid'=>'Đã thanh toán','canceled'=>'Đã hủy','failed'=>'Hết hạn/Lỗi'];
-      foreach($chips as $k=>$lbl){
-        $act = $state===$k ? 'bg-indigo-600 text-white' : 'border';
-        echo '<a class="px-3 py-1 rounded '.$act.'" href="duan.php?state='.$k.'">'.$lbl.'</a>';
-      }
-    ?>
-  </div>
+<div class="max-w-4xl mx-auto p-4 mt-8">
+    <h2 class="text-3xl font-bold mb-6 text-center"><?= e($pageTitle) ?></h2>
 
-  <?php if(!$rows): ?>
-    <div class="text-gray-600">Không có bản ghi.</div>
-  <?php else: ?>
-  <div class="overflow-auto">
-    <table class="min-w-full border">
-      <thead class="bg-gray-50">
-        <tr>
-          <th class="text-left p-2 border">BĐS</th>
-          <th class="text-left p-2 border">Mã</th>
-          <th class="text-left p-2 border">Số tiền</th>
-          <th class="text-left p-2 border">Trạng thái</th>
-          <th class="text-left p-2 border">Hết hạn</th>
-          <th class="text-left p-2 border">Hành động</th>
-        </tr>
-      </thead>
-      <tbody>
-        <?php foreach($rows as $r): ?>
-        <tr class="border-t">
-          <td class="p-2 border"><?= e($r['tieu_de']) ?: '—' ?></td>
-          <td class="p-2 border"><?= e($r['ma']) ?></td>
-          <td class="p-2 border"><?= money_vn($r['so_tien']) ?> đ</td>
-          <td class="p-2 border"><?= e($r['trang_thai']) ?></td>
-          <td class="p-2 border"><?= $r['het_han_luc'] ? date('d/m/Y H:i', strtotime($r['het_han_luc'])) : '—' ?></td>
-          <td class="p-2 border space-x-2">
-            <?php if ($r['trang_thai']==='pending'): ?>
-              <a class="px-3 py-1 bg-indigo-600 text-white rounded"
-                 href="thanhtoan.php?type=<?= e($r['loai']) ?>&id=<?= (int)$r['ref_id'] ?>">
-                Thanh toán
-              </a>
-              <form method="post" action="huy_gd.php" style="display:inline"
-                    onsubmit="return confirm('Hủy giao dịch này?');">
-                <input type="hidden" name="id" value="<?= (int)$r['id'] ?>">
-                <button class="px-3 py-1 border rounded" type="submit">Hủy</button>
-              </form>
-            <?php else: ?>—
-            <?php endif; ?>
-          </td>
-        </tr>
-        <?php endforeach; ?>
-      </tbody>
-    </table>
-  </div>
-  <?php endif; ?>
+    <div class="flex justify-center space-x-2 mb-6">
+        <a href="duan.php" 
+           class="px-4 py-2 rounded-lg <?= $state === 'all' ? 'bg-indigo-600 text-white' : 'bg-white border' ?>">
+           Tất cả
+        </a>
+        <a href="duan.php?state=pending" 
+           class="px-4 py-2 rounded-lg <?= $state === 'pending' ? 'bg-indigo-600 text-white' : 'bg-white border' ?>">
+           Đang chờ
+        </a>
+        <a href="duan.php?state=completed" 
+           class="px-4 py-2 rounded-lg <?= $state === 'completed' ? 'bg-indigo-600 text-white' : 'bg-white border' ?>">
+           Thành công
+        </a>
+        <a href="duan.php?state=failed" 
+           class="px-4 py-2 rounded-lg <?= $state === 'failed' ? 'bg-indigo-600 text-white' : 'bg-white border' ?>">
+           Thất bại
+        </a>
+    </div>
+
+    <div class="space-y-6">
+        <?php if (empty($transactions)): ?>
+            <p class="text-center text-gray-600 text-lg">Không tìm thấy giao dịch nào.</p>
+        <?php else: ?>
+            <?php foreach ($transactions as $tx): ?>
+                <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                    <div class="p-5">
+                        <div class="flex justify-between items-center border-b pb-3 mb-4">
+                            <div>
+                                <div class="text-xs text-gray-500">Mã giao dịch</div>
+                                <div class="font-mono font-bold text-sm text-gray-800"><?= e($tx['ma']) ?></div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xs text-gray-500">Trạng thái</div>
+                                <div class="text-lg"><?= format_status($tx['trang_thai']) ?></div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-semibold text-gray-700 mb-2">Thông tin người mua</h4>
+                                <div class="text-sm space-y-1">
+                                    <p><b>Họ tên:</b> <?= e($tx['ten_dang_nhap']) ?></p>
+                                    <p><b>Email:</b> <?= e($tx['email']) ?></p>
+                                    <p><b>SĐT:</b> <?= e($tx['so_dt']) ?></p>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-semibold text-gray-700 mb-2">Chi tiết BĐS</h4>
+                                <div class="text-sm space-y-1">
+                                    <p><b>BĐS:</b> <?= e($tx['tieu_de']) ?></p>
+                                    <p><b>Địa chỉ:</b> <?= e($tx['dia_chi_day_du']) ?></p>
+                                    <p><b>Ngày tạo:</b> <?= e(date('d/m/Y H:i', strtotime($tx['tao_luc']))) ?></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border-t mt-4 pt-4 flex justify-between items-center">
+                            <div>
+                                <div class="text-sm text-gray-500">Tổng tiền</div>
+                                <div class="text-2xl font-bold text-red-600"><?= vn_money($tx['so_tien']) ?> đ</div>
+                            </div>
+                            
+                            <?php if ($tx['trang_thai'] === 'pending'): ?>
+                                <a href="chitiet_giaodich.php?id=<?= e($tx['giao_dich_id']) ?>" 
+                                   class="px-5 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700">
+                                   Thanh toán ngay
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </div>
 </div>
-</body></html>
+
+</body>
+</html>
