@@ -52,19 +52,6 @@ $so_dt         = trim($_POST['sodienthoai'] ?? '');
 $mat_khau      = $_POST['matkhau'] ?? '';
 $mat_khau_nhap_lai = $_POST['matkhaunhaplai'] ?? '';
 
-if (empty($ho_ten) || empty($ten_dang_nhap) || empty($email) || empty($mat_khau)) {
-    json_response(false, "Vui lòng điền đầy đủ các trường bắt buộc.");
-}
-if (!$email) {
-    json_response(false, "Định dạng email không hợp lệ.");
-}
-if ($mat_khau !== $mat_khau_nhap_lai) {
-    json_response(false, "Mật khẩu nhập lại không khớp.");
-}
-if (strlen($mat_khau) < 8) {
-    json_response(false, "Mật khẩu phải có ít nhất 8 ký tự.");
-}
-
 // BƯỚC 2: Kiểm tra sự tồn tại của tài khoản
 $stmt = $pdo->prepare("SELECT 1 FROM nguoi_dung WHERE email = :email OR ten_dang_nhap = :ten_dang_nhap LIMIT 1");
 $stmt->execute([':email' => $email, ':ten_dang_nhap' => $ten_dang_nhap]);

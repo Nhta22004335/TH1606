@@ -3,11 +3,9 @@
 
     try {
         $pdo = ketnoicsdl();
-    } catch (PDOException $e) {
-        die("Lỗi kết nối CSDL: " . $e->getMessage());
-    }
+    } catch (PDOException $e) { die("Lỗi kết nối CSDL: " . $e->getMessage()); }
 
-    // --- LOGIC LẤY DỮ LIỆU (Giữ nguyên) ---
+    // --- LOGIC LẤY DỮ LIỆU ---
     $search = $_GET['search'] ?? '';
     $params = [];
     $sql = "
@@ -40,22 +38,34 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style> body { font-family: 'Inter', sans-serif; } </style>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style> 
+        [x-cloak] { display: none !important; } 
+    </style>
 </head>
-<body class="p-4 md:p-6">
+<body class="p-4 md:p-6" 
+      x-data="{ show: false, message: '', type: 'success', 
+                 showToast(detail) { 
+                     this.message = detail.message; 
+                     this.type = detail.type || 'success'; 
+                     this.show = true; 
+                     setTimeout(() => this.show = false, 3000); 
+                 } 
+             }">
     <div class="max-w-7xl mx-auto">
-        <header class="mb-6 border-b pb-4">
+        <header class="mb-4 border-b pb-2">
             <h1 class="text-2xl font-bold text-gray-500">Quản lý Bất động sản</h1>
-            <p class="mt-2 text-sm text-slate-600">Xem, tìm kiếm và quản lý tất cả các tài sản trong hệ thống.</p>
+            <p class="mt-1 text-sm text-slate-600">Xem, tìm kiếm và quản lý tất cả các tài sản trong hệ thống.</p>
         </header>
 
-        <form id="search-form" method="GET" class="flex items-center mb-6">
-            <input type="hidden" name="page" value="ds_sanpham_bds"> <div class="relative w-full md:w-72">
-                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                <input type="search" name="search" id="search-input" class="bg-white outline-none border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 p-2.5 transition" 
-                       placeholder="Tìm địa chỉ, chủ sở hữu..." value="<?= htmlspecialchars($search) ?>">
-            </div>
-            <button type="submit" class="ml-2 px-4 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">Tìm</button>
+        <form id="search-form" method="GET" action="trangchu.php" class="flex items-center mb-6">
+             <input type="hidden" name="page" value="ds_sanpham_bds"> 
+             <div class="relative w-full md:w-72">
+                 <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                 <input type="search" name="search" id="search-input" class="bg-white outline-none border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 p-2.5 transition" 
+                        placeholder="Tìm địa chỉ, chủ sở hữu..." value="<?= htmlspecialchars($search) ?>">
+             </div>
+             <button type="submit" class="ml-2 px-4 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">Tìm</button>
         </form>
 
         <main class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200/80">
@@ -70,12 +80,12 @@
                             <th class="p-4 text-center text-xs font-bold text-gray-500 uppercase">Hành động</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200" id="property-table-body">
+                    <tbody id="property-table-body" class="divide-y divide-gray-200">
                         <?php if (empty($properties)): ?>
                             <tr><td colspan="5" class="p-8 text-center text-gray-500">Không tìm thấy tài sản nào.</td></tr>
                         <?php else: ?>
                             <?php foreach($properties as $prop): ?>
-                            <tr class="hover:bg-slate-50 transition duration-150">
+                            <tr id="property-row-<?= $prop['id'] ?>" class="hover:bg-slate-50 transition duration-150"> 
                                 <td class="p-4 max-w-sm">
                                     <p class="font-medium text-sm text-gray-900 truncate" title="<?= htmlspecialchars($prop['dia_chi_day_du']) ?>"><?= htmlspecialchars($prop['dia_chi_day_du']) ?></p>
                                     <p class="text-xs text-indigo-600 font-semibold"><?= htmlspecialchars($prop['ten_danh_muc'] ?? 'Chưa phân loại') ?></p>
@@ -93,7 +103,7 @@
                                 </td>
                                 <td class="p-4">
                                     <div class="flex justify-center items-center gap-4 text-sm">
-                                        <a href="trangchu.php?page=chitiet_sanpham_bds&id=<?= $prop['id'] ?>" class="font-medium text-blue-600 hover:text-blue-800" title="Xem chi tiết"><i class="fa-solid fa-eye"></i></a>
+                                        <a href="trangchu.php?page=quanly_chitiet_sanpham_bds&id=<?= $prop['id'] ?>" class="font-medium text-blue-600 hover:text-blue-800" title="Xem chi tiết"><i class="fa-solid fa-eye"></i></a>
                                         <button type="button" class="delete-btn font-medium text-red-600 hover:text-red-800" data-id="<?= $prop['id'] ?>" title="Xóa"><i class="fa-solid fa-trash-can"></i></button>
                                     </div>
                                 </td>
@@ -125,64 +135,46 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const tableBody = document.getElementById('property-table-body');
-        // VERY IMPORTANT: Double-check this path is correct!
-        const apiUrl = '../../models/xoa_sanpham_bds_qt.php'; 
+        const apiUrl = '../../models/quanly_sanpham_bds/xoa_sanpham_bds_qt.php'; // <<<=== Đảm bảo đường dẫn này chính xác
 
         if (tableBody) {
             tableBody.addEventListener('click', async function(event) {
-                // Find the closest ancestor which is a delete button
                 const targetButton = event.target.closest('.delete-btn'); 
-                if (!targetButton) return; // Exit if the click wasn't on a delete button
+                if (!targetButton) return; 
 
                 const propertyId = targetButton.dataset.id;
 
                 if (confirm('Bạn có chắc chắn muốn xóa tài sản này không? Hành động này không thể hoàn tác.')) {
-                    
                     const formData = new FormData();
                     formData.append('id', propertyId);
 
                     try {
-                        const response = await fetch(apiUrl, {
-                            method: 'POST',
-                            body: formData
-                        });
+                        const response = await fetch(apiUrl, { method: 'POST', body: formData });
+                        const result = await response.json(); 
 
-                        // Check if the server responded okay (e.g., 200)
                         if (!response.ok) {
-                            // Try to get more specific error from server if possible
-                            let errorMsg = `Lỗi mạng: ${response.statusText}`;
-                            try {
-                                const errorData = await response.json();
-                                errorMsg = errorData.message || errorMsg; 
-                            } catch(e) { /* Ignore if response wasn't JSON */ }
-                            throw new Error(errorMsg);
+                             throw new Error(result.message || `Lỗi mạng: ${response.statusText}`);
                         }
 
-                        // Parse the JSON response from the server
-                        const result = await response.json();
-
                         if (result.success) {
-                            // Find the table row using its ID
                             const row = document.getElementById(`property-row-${propertyId}`);
                             if (row) {
-                                // Apply fade-out effect
                                 row.style.transition = 'opacity 0.3s ease-out';
                                 row.style.opacity = '0';
-                                window.dispatchEvent(new CustomEvent('show-toast', { detail: { message: result.message || 'Xóa thành công!', type: 'success' } })); 
-                                // Remove the row after the effect finishes
                                 setTimeout(() => {
                                     row.remove();
-                                    // You could add a success notification here if needed
-                                    
+                                    // Dispatch sự kiện thành công
+                                    window.dispatchEvent(new CustomEvent('show-toast', { detail: { message: result.message || 'Xóa thành công!', type: 'success' } }));
                                 }, 300); 
                             }
                         } else {
-                            // Show error message from the server's JSON response
+                            // Dispatch sự kiện lỗi
                             window.dispatchEvent(new CustomEvent('show-toast', { detail: { message: result.message || 'Xóa không thành công.', type: 'error' } }));
                         }
 
                     } catch (error) {
-                        // Handle network errors or errors during fetch/JSON parsing
+                        console.error('Lỗi Fetch:', error);
+                        // Dispatch sự kiện lỗi kết nối
                         window.dispatchEvent(new CustomEvent('show-toast', { detail: { message: 'Lỗi kết nối: ' + error.message, type: 'error' } }));
                     }
                 }

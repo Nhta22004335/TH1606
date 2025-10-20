@@ -31,14 +31,7 @@ CREATE TABLE IF NOT EXISTS nguoi_dung (
     CONSTRAINT chk_nguoi_dung_hoat_dong CHECK (hoat_dong IN ('online','offline')),
     CONSTRAINT chk_nguoi_dung_so_dt CHECK (so_dt ~ '^[0-9]{1,11}$' OR so_dt = 'chuacapnhat')
 );
-
-ALTER TABLE nguoi_dung
-DROP CONSTRAINT chk_nguoi_dung_trang_thai;
-
-ALTER TABLE nguoi_dung
-ADD CONSTRAINT chk_nguoi_dung_trang_thai
-CHECK (trang_thai IN ('danghoatdong','chuakichhoat','khoa','tamngung'));
-
+select * from nguoi_dung
 
 -- 1. Bảng phan_quyen (Chứa các quyền tương ứng người dùng)
 CREATE TABLE IF NOT EXISTS phan_quyen (
@@ -96,11 +89,15 @@ CREATE TABLE IF NOT EXISTS yeu_cau_otp (
     ),
     CONSTRAINT chk_yeu_cau_otp_time_range CHECK (het_han > bat_dau)
 );
+select * from yeu_cau_otp
+-- Thêm cột để đếm số lần xác thực OTP sai
+ALTER TABLE yeu_cau_otp
+ADD COLUMN so_lan_thu_sai INT DEFAULT 0;
 
 -- 6. Bảng lich_su_xac_thuc (Lưu lại vết đăng nhập, đăng ký hay đổi mật khẩu từ người dùng)
 CREATE TABLE IF NOT EXISTS lich_su_xac_thuc (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    id_nguoi_dung UUID NOT NULL,
+    id_nguoi_dung UUID,
     loai_su_kien VARCHAR(30) NOT NULL,
     thoi_gian_bat_dau TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     thoi_gian_ket_thuc TIMESTAMP,
@@ -110,7 +107,6 @@ CREATE TABLE IF NOT EXISTS lich_su_xac_thuc (
     CONSTRAINT fk_lich_su_xac_thuc_nguoi_dung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
     CONSTRAINT chk_lich_su_xac_thuc_time_range CHECK (thoi_gian_ket_thuc IS NULL OR thoi_gian_ket_thuc >= thoi_gian_bat_dau)
 );
-
 
 -- 7. Bảng bat_dong_san (Lưu thống tin các sản phẩm bất động sản)
 CREATE TABLE IF NOT EXISTS danh_muc (
@@ -159,45 +155,6 @@ CREATE TABLE IF NOT EXISTS bat_dong_san (
     CONSTRAINT fk_bds_danhmuc FOREIGN KEY (id_danh_muc) REFERENCES danh_muc(id)
 );
 
--- CREATE TABLE IF NOT EXISTS bat_dong_san (
---     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
---     id_nguoi_dung UUID, 
---     tieu_de VARCHAR(200) DEFAULT 'chuacapnhat',
---     mo_ta TEXT DEFAULT 'chuacapnhat',
---     gia NUMERIC(18,2) CHECK (gia >= 0) DEFAULT 0,
---     dien_tich NUMERIC(10,2) CHECK (dien_tich > 0),
---     dia_chi TEXT DEFAULT 'chuacapnhat',
---     loai VARCHAR(100) DEFAULT 'chuacapnhat',
---     khu_vuc VARCHAR(100) DEFAULT 'chuacapnhat',
---     trang_thai VARCHAR(50) DEFAULT 'chuacapnhat',
---     hinh_thuc VARCHAR(50) DEFAULT 'chuacapnhat',
---     ngay_dang TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
---     CONSTRAINT fk_bds_nguoi_dung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE, 
---     CONSTRAINT chk_loai_bds CHECK (loai IN ('canho', 'nhapho', 'datnen', 'bietthu', 'chuacapnhat')),
---     CONSTRAINT chk_trang_thai_bds CHECK (trang_thai IN ('chuaduyet', 'daduyet', 'daban', 'dathue', 'chuacapnhat')),
---     CONSTRAINT chk_hinh_thuc_bds CHECK (hinh_thuc IN ('ban', 'chothue', 'chuacapnhat'))
--- );
-
-CREATE TABLE IF NOT EXISTS bai_dang (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    id_nguoi_dung UUID, -- Người đăng bài
-    id_bat_dong_san UUID, -- Bài đăng này thuộc về BĐS nào
-    
-    tieu_de VARCHAR(200) NOT NULL,
-    mo_ta TEXT,
-    gia NUMERIC(18, 2) CHECK (gia >= 0) DEFAULT 0,
-    don_vi_gia VARCHAR(20) DEFAULT 'VND', -- 'VND', 'USD', 'VND/m2'
-    hinh_thuc VARCHAR(50) NOT NULL, -- 'ban' hoặc 'chothue'
-    trang_thai VARCHAR(50) DEFAULT 'chuaduyet',
-    
-    ngay_dang TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    ngay_het_han TIMESTAMP,
-    luot_xem INT DEFAULT 0,
-
-    CONSTRAINT fk_baidang_nguoidung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE SET NULL,
-    CONSTRAINT fk_baidang_bds FOREIGN KEY (id_bat_dong_san) REFERENCES bat_dong_san(id) ON DELETE CASCADE
-);
-
 -- 8. Bảng hin_anh_bds (Hình ảnh sản phẩm bất động sản)
 CREATE TABLE IF NOT EXISTS hinh_anh_bds (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -223,15 +180,49 @@ CREATE TABLE IF NOT EXISTS danh_gia_bds (
     CONSTRAINT fk_danh_gia_bds_nd FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE SET NULL,
     CONSTRAINT fk_danh_gia_bds_bds FOREIGN KEY (id_bds) REFERENCES bat_dong_san(id) ON DELETE CASCADE
 );
+select * from nguoi_dung where ten_dang_nhap = 'quynhln'
+select * from bat_dong_san where id_chu_so_huu ='30f7a140-9e0f-4763-8c73-d0ba585e0584'
+select * from bai_dang
 
-CREATE TABLE IF NOT EXISTS hinh_anh_danh_gia_bds (
+alter table bai_dang add column loai VARCHAR(50)
+	select * from danh_muc
+CREATE TABLE IF NOT EXISTS bai_dang (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    id_dg_bds UUID NOT NULL,
-    url VARCHAR(300) NOT NULL,                     -- không cho phép null
-    mo_ta VARCHAR(200) DEFAULT 'Chưa mô tả',       -- mặc định nếu không có mô tả
-    kich_thuoc NUMERIC(10,2) DEFAULT 0,  -- thêm cột kích thước ảnh
-    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- thời gian tạo ảnh
-    CONSTRAINT fk_hinh_dg FOREIGN KEY (id_dg_bds) REFERENCES danh_gia_bds(id) ON DELETE CASCADE
+    id_nguoi_dung UUID, -- Người đăng bài
+    id_bat_dong_san UUID, -- Bài đăng này thuộc về BĐS nào
+    
+    tieu_de VARCHAR(200) NOT NULL,
+    mo_ta TEXT,
+	dia_chi_lien_he VARCHAR(200),
+
+    hinh_thuc VARCHAR(50) NOT NULL, -- 'ban' hoặc 'chothue'
+    trang_thai VARCHAR(50) DEFAULT 'chuaduyet', -- chuaduyet, daduyet, hethan, dahuy
+    
+    ngay_dang TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ngay_het_han TIMESTAMP,
+    luot_xem INT DEFAULT 0,
+
+    CONSTRAINT fk_baidang_nguoidung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE SET NULL,
+    CONSTRAINT fk_baidang_bds FOREIGN KEY (id_bat_dong_san) REFERENCES bat_dong_san(id) ON DELETE CASCADE
+);
+select * from tin_tuc
+CREATE TABLE IF NOT EXISTS binh_luan (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+
+    id_bai_dang UUID NOT NULL,   -- Bình luận thuộc bài đăng nào
+    id_nguoi_dung UUID NOT NULL, -- Người viết bình luận
+    id_cha UUID,                 -- Bình luận cha (nếu là trả lời một bình luận khác)
+
+    noi_dung TEXT NOT NULL,      -- Nội dung bình luận
+    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ngay_sua TIMESTAMP,
+
+    trang_thai VARCHAR(20) DEFAULT 'hienthi' 
+        CHECK (trang_thai IN ('hienthi', 'an', 'xoa')),  -- kiểm soát hiển thị
+
+    CONSTRAINT fk_binhluan_baidang FOREIGN KEY (id_bai_dang) REFERENCES bai_dang(id) ON DELETE CASCADE,
+    CONSTRAINT fk_binhluan_nguoidung FOREIGN KEY (id_nguoi_dung) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
+    CONSTRAINT fk_binhluan_cha FOREIGN KEY (id_cha) REFERENCES binh_luan(id) ON DELETE CASCADE
 );
 
 -- 11. Bảng giao_dich (ghi nhận giao dịch mua/bán/thue)
@@ -311,9 +302,6 @@ CREATE TABLE IF NOT EXISTS danh_gia_mg (
     CONSTRAINT chk_kh_mg_khacnhau CHECK (id_khach_hang <> id_moi_gioi)
 );
 
-alter table danh_gia_mg add column trang_thai VARCHAR(20)
-select * from nguoi_dung
-
 CREATE TABLE bieu_mau (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),           
     tieu_de VARCHAR(255) NOT NULL,    
@@ -333,6 +321,7 @@ CREATE TABLE IF NOT EXISTS yeu_cau (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), 
     
     id_nguoi_dung UUID NOT NULL,
+	id_moi_gioi UUID NOT NULL,
     loai VARCHAR(100) NOT NULL,               
     id_bds UUID,                             
     trang_thai VARCHAR(50) DEFAULT 'choxuly',
@@ -360,10 +349,6 @@ CREATE TABLE IF NOT EXISTS lich_trinh (
     CONSTRAINT chk_lichtrinh_trangthai CHECK (trang_thai IN ('choxacnhan', 'daxacnhan', 'dahuy'))
 );
 
-alter table lich_trinh add column dia_diem VARCHAR(255)
-select * from lich_trinh
-update lich_trinh set tieu_de='hè lô ì vé rì quan'
-
 -- 1. Bảng tin đăng
 CREATE TABLE tin_tuc (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),       
@@ -378,39 +363,49 @@ CREATE TABLE tin_tuc (
     CONSTRAINT fk_tin_khachhang FOREIGN KEY (id_khach_hang) REFERENCES nguoi_dung(id) ON DELETE CASCADE
 );
 
-select nd.id, i.ho_ten from nguoi_dung nd
-left join info_nguoi_dung i on i.id_nguoi_dung = nd.id
-left join phan_quyen pq on pq.id_nguoi_dung=nd.id
-left join quyen q on q.id=pq.id_quyen
-where q.vai_tro='khachhang'
-
-CREATE TABLE hop_thoai (
-	id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), 
-	da_khoa INT DEFAULT 0,
-	da_xoa INT DEFAULT 0
-)
-
-CREATE TABLE tin_nhan (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), 
-	id_hop_thoai UUID,
-    nguoi_gui UUID NOT NULL,                 -- Người gửi
-    nguoi_nhan UUID NOT NULL,                   -- Người nhận
-    noi_dung TEXT, -- Không cho phép rỗng
-	anh_tn TEXT,
-	video_tn TEXT,
-    tg_gui TIMESTAMP NOT NULL DEFAULT NOW(),
-    -- Ràng buộc khóa ngoại
-    CONSTRAINT fk_gui FOREIGN KEY (nguoi_gui) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
-    CONSTRAINT fk_nhan  FOREIGN KEY (nguoi_nhan)   REFERENCES nguoi_dung(id) ON DELETE CASCADE,
-	CONSTRAINT fk_id_hop_thoai FOREIGN KEY (id_hop_thoai) REFERENCES hop_thoai(id) ON DELETE CASCADE,
-    -- Ràng buộc: người gửi và người nhận không được trùng
-    CONSTRAINT chk_gui_nhan CHECK (nguoi_gui <> nguoi_nhan)
-);
-
 -- select nd.id from nguoi_dung nd
 -- left join phan_quyen pq on pq.id_nguoi_dung=nd.id
 -- left join quyen q on q.id=pq.id_quyen
 -- where q.vai_tro='moigioi' or q.vai_tro='khachhang'
+
+CREATE TABLE IF NOT EXISTS hop_thoai (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id_nguoi_1 UUID NOT NULL,
+    id_nguoi_2 UUID NOT NULL,
+    da_khoa BOOLEAN DEFAULT FALSE,       -- có thể dùng khi block nhau
+    da_xoa BOOLEAN DEFAULT FALSE,        -- xóa mềm (ẩn hội thoại)
+    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    -- Ràng buộc liên kết người dùng
+    CONSTRAINT fk_ht_nguoi1 FOREIGN KEY (id_nguoi_1) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
+    CONSTRAINT fk_ht_nguoi2 FOREIGN KEY (id_nguoi_2) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
+
+    -- Đảm bảo không tạo trùng cuộc trò chuyện giữa 2 người
+    CONSTRAINT uq_cap_nguoi UNIQUE (id_nguoi_1, id_nguoi_2),
+
+    -- Đảm bảo hai người khác nhau
+    CONSTRAINT chk_khacnguoi CHECK (id_nguoi_1 <> id_nguoi_2)
+);
+
+select * from tin_nhan
+select * from hop_thoai
+select * from nguoi_dung
+
+CREATE TABLE IF NOT EXISTS tin_nhan (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id_hop_thoai UUID NOT NULL,
+    nguoi_gui UUID NOT NULL,
+    noi_dung TEXT,
+    anh_tn TEXT,
+    video_tn TEXT,
+    tg_gui TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    trang_thai VARCHAR(20) DEFAULT 'chua_doc'
+        CHECK (trang_thai IN ('chua_doc', 'da_doc', 'xoa')),
+
+    CONSTRAINT fk_tn_hopthoai FOREIGN KEY (id_hop_thoai) REFERENCES hop_thoai(id) ON DELETE CASCADE,
+    CONSTRAINT fk_tn_nguoi_gui FOREIGN KEY (nguoi_gui) REFERENCES nguoi_dung(id) ON DELETE CASCADE,
+    CHECK (noi_dung IS NOT NULL OR anh_tn IS NOT NULL OR video_tn IS NOT NULL)
+);
 
 CREATE TABLE lich_su_tim_kiem (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

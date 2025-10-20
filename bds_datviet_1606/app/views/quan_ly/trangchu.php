@@ -65,7 +65,7 @@
         [
             'title' => 'Dashboard',
             'icon' => 'fas fa-tachometer-alt',
-            'link' => 'trangchu.php',
+            'link' => 'dashboard',
             'roles' => ['quantri', 'moigioi'],
         ],
         [
@@ -88,7 +88,7 @@
             'submenu' => [
                 'Danh sách bất động sản' => ['link' => 'quanly_sanpham_bds', 'roles' => ['quantri']],
                 'Danh mục bất động sản' => ['link' => 'quanly_danhmuc_bds', 'roles' => ['quantri']],
-                'QL Đánh giá' => ['link' => 'ql_danhgia', 'roles' => ['quantri']],
+                'Danh sách đánh giá bds' => ['link' => 'quanly_danhgia_bds', 'roles' => ['quantri']],
                 'Sản phẩm cá nhân' => ['link' => '../moi_gioi/sp_canhan', 'roles' => ['moigioi']],
                 'Đăng sản phẩm' => ['link' => '../moi_gioi/dang_sp', 'roles' => ['moigioi']],
                 'Quản lý giỏ hàng' => ['link' => '../moi_gioi/ql_gio_hang', 'roles' => ['moigioi']],
@@ -99,8 +99,8 @@
             'icon' => 'fas fa-file-invoice-dollar',
             'roles' => ['quantri', 'moigioi'],
             'submenu' => [
-                'Theo dõi Y/C Mua/Bán/Thuê' => ['link' => 'td_yeucau_mbt', 'roles' => ['quantri']],
-                'Quản lý thanh toán' => ['link' => 'ql_thanhtoan', 'roles' => ['quantri']],
+                'Theo dõi yêu cầu MBT' => ['link' => 'quanly_yeucau_mbt', 'roles' => ['quantri']],
+                'Quản lý thanh toán' => ['link' => 'quanly_thanhtoan', 'roles' => ['quantri']],
                 'Giao dịch cá nhân' => ['link' => '../moi_gioi/gd_canhan', 'roles' => ['moigioi']],
             ]
         ],
@@ -118,7 +118,7 @@
             'icon' => 'fas fa-calendar-alt',
             'roles' => ['quantri', 'moigioi'],
             'submenu' => [
-                'Danh sách lịch đặt' => ['link' => 'ds_datlich', 'roles' => ['quantri']],
+                'Danh sách lịch đặt' => ['link' => 'quanly_lichtrinh', 'roles' => ['quantri']],
                 'Lịch trình cá nhân' => ['link' => '../moi_gioi/lt_canhan', 'roles' => ['moigioi']],
             ]
         ],
@@ -127,8 +127,8 @@
             'icon' => 'fas fa-newspaper',
             'roles' => ['quantri', 'moigioi'],
             'submenu' => [
-                'Quản lý tin tức (Admin)' => ['link' => 'ql_tintuc', 'roles' => ['quantri']],
-                'Quản lý bài đăng (Admin)' => ['link' => 'ql_baidang', 'roles' => ['quantri']],
+                'Quản lý tin tức (Admin)' => ['link' => 'quanly_tintuc', 'roles' => ['quantri']],
+                'Quản lý bài đăng (Admin)' => ['link' => 'quanly_baidang', 'roles' => ['quantri']],
                 'Quản lý tin tức (MG)' => ['link' => '../moi_gioi/ql_tintuc_mg', 'roles' => ['moigioi']],
                 'Quản lý bài đăng (MG)' => ['link' => '../moi_gioi/ql_baidang_mg', 'roles' => ['moigioi']],
             ]
@@ -138,18 +138,18 @@
             'icon' => 'fas fa-bell',
             'roles' => ['quantri', 'moigioi'],
             'submenu' => [
-                'Gửi thông báo (Admin)' => ['link' => 'g_thongbao', 'roles' => ['quantri']],
-                'Quản lý hộp thoại chat' => ['link' => 'ql_hopthoai', 'roles' => ['quantri']],
+                'Gửi thông báo (Admin)' => ['link' => 'gui_thongbao', 'roles' => ['quantri']],
+                'Quản lý hộp thoại chat' => ['link' => 'quanly_hopthoai_chat', 'roles' => ['quantri']],
                 'Gửi thông báo khách (MG)' => ['link' => '../moi_gioi/g_thongbao_kh', 'roles' => ['moigioi']],
                 'Quản lý thông báo (MG)' => ['link' => '../moi_gioi/ql_thongbao', 'roles' => ['moigioi']],
-                'Quản lý thông báo' => ['link' => 'ql_thongbao', 'roles' => ['quantri']],
+                'Quản lý thông báo' => ['link' => 'quanly_thongbao', 'roles' => ['quantri']],
                 'Chat trực tuyến' => ['link' => '../moi_gioi/chat_tt', 'roles' => ['moigioi']]
             ]
         ],
         [
             'title' => 'Quản lý lịch sử',
             'icon' => 'fas fa-history',
-            'link' => 'trangchu.php?page=ql_lichsu',
+            'link' => 'trangchu.php?page=quanly_lichsu_hethong',
             'roles' => ['quantri'],
         ],
     ];
@@ -326,9 +326,9 @@
                         <div @click="open = !open" class="flex items-center space-x-3 cursor-pointer p-1 rounded-lg hover:bg-gray-100 transition-colors duration-200 ease-in-out">
                             <img src="../../../storage/pictures/avt/<?= htmlspecialchars($nd['avt']) ?>" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-gray-200">
                             <div class="hidden lg:block">
-                                <span class="text-sm font-medium text-gray-700"><?= htmlspecialchars($ind['ho_ten']) ?></span>
+                                <span class="text-base font-semibold text-gray-600"><?= htmlspecialchars($ind['ho_ten']) ?></span>
                             </div>
-                            <i class="fas fa-chevron-down text-gray-500 text-xs hidden lg:block transition-transform duration-300" :class="{ 'rotate-180': open }"></i>
+                            <i class="fas fa-chevron-down text-gray-500 text-xs transition-transform duration-300" :class="{ 'rotate-180': open }"></i>
                         </div>
                         
                         <div x-show="open" x-cloak @click.outside="open = false" x-transition 
@@ -342,8 +342,8 @@
                             <a href="trangchu.php?page=../moi_gioi/ql_hoso_canhan" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition">
                                 <i class="fas fa-user-circle w-5 mr-2"></i> Trang cá nhân
                             </a>
-                            <a href="../../models/auth/xuly_quen_matkhau.php?email=<?= urlencode($nd['email']) ?>" class="block w-full text-left px-4 py-2 text-sm text-yellow-600 hover:bg-yellow-50 transition">
-                                <i class="fas fa-key w-5 mr-2"></i> Quên mật khẩu
+                            <a href="../auth/doimatkhau.php" class="block w-full text-left px-4 py-2 text-sm text-yellow-600 hover:bg-yellow-50 transition">
+                                <i class="fas fa-key w-5 mr-2"></i> Đổi mật khẩu
                             </a>
                         </div>
                     </div>

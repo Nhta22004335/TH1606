@@ -77,8 +77,8 @@ try {
     exit;
 }
 
-$ten_dang_nhap = trim($_GET['tendangnhap'] ?? '');
-$email = trim($_GET['email'] ?? '');
+$ten_dang_nhap = trim($_POST['tendangnhap'] ?? '');
+$email = trim($_POST['email'] ?? '');
 
 if (empty($ten_dang_nhap) || empty($email)) {
     echo "<script>alert('Vui lòng nhập đầy đủ tên đăng nhập và email.'); window.history.back();</script>";
