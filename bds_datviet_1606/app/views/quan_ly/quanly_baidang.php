@@ -1,53 +1,69 @@
-<?php 
+<?php
+// File: search.php (Đã chuyển sang MySQL)
+
 if (session_status() == PHP_SESSION_NONE) { session_start(); }
 require_once "../../../config/database.php"; 
+
 try {
+    // Giả định ketnoicsdl() trả về kết nối PDO cho MySQL
     $pdo = ketnoicsdl();
 } catch (PDOException $e) {
     die("Không thể kết nối đến cơ sở dữ liệu: " . $e->getMessage());
 }
 
 $search = $_GET['search'] ?? '';
-$search = trim($search); 
+$search = trim($search);    
 
 // ==========================================================
-// == THAY ĐỔI LỚN 1: CÂU LỆNH SQL ĐỒNG BỘ VỚI BẢNG MỚI ==
+// == THAY ĐỔI LỚN 1: CÂU LỆNH SQL CHO MYSQL ==
 // ==========================================================
+
+// Kỹ thuật truy vấn ảnh bìa đầu tiên (Subquery/Correlated Subquery)
+// Lưu ý: Nếu cột 'ngay_tao' trong hinh_anh_bds không có, bạn có thể dùng 'id' hoặc 'stt' để ORDER BY
+$subquery_anh_bia = "
+    SELECT url 
+    FROM hinh_anh_bds
+    WHERE id_bds = bds.id
+    ORDER BY ngay_tao ASC 
+    LIMIT 1
+";
+
 $sql = "
-    SELECT 
+    SELECT  
         bd.id, bd.tieu_de, bd.ngay_dang, bd.luot_xem, bd.trang_thai, bd.hinh_thuc,
-        bd.dia_chi_lien_he, -- Lấy cột mới
-        COALESCE(bds.dien_tich_su_dung, bds.dien_tich_dat) AS dien_tich, -- Lấy diện tích từ BĐS
-        bds.dia_chi_day_du AS dia_chi_bds, -- Lấy địa chỉ BĐS
+        bd.dia_chi_lien_he,
+        COALESCE(bds.dien_tich_su_dung, bds.dien_tich_dat) AS dien_tich,
+        bds.dia_chi_day_du AS dia_chi_bds,
         info.ho_ten AS ten_moigioi, 
         nd.avt AS avatar_moigioi,
-        anh_bia.url AS anh_bia
+        -- Kỹ thuật Correlated Subquery để lấy ảnh bìa
+        ({$subquery_anh_bia}) AS anh_bia
     FROM bai_dang AS bd
     JOIN bat_dong_san AS bds ON bd.id_bat_dong_san = bds.id
     LEFT JOIN nguoi_dung AS nd ON bd.id_nguoi_dung = nd.id
     LEFT JOIN info_nguoi_dung AS info ON nd.id = info.id_nguoi_dung
-    LEFT JOIN LATERAL (
-        SELECT url FROM hinh_anh_bds 
-        WHERE id_bds = bds.id 
-        ORDER BY ngay_tao ASC 
-        LIMIT 1
-    ) AS anh_bia ON TRUE
 ";
 
 $params = [];
 
 if (!empty($search)) {
-    // Cập nhật cột tìm kiếm
-    $searchable_columns = "bd.tieu_de || ' ' || bds.dia_chi_day_du || ' ' || COALESCE(info.ho_ten, '') || ' ' || bd.dia_chi_lien_he";
-    $sql .= " WHERE REPLACE(unaccent({$searchable_columns}), ' ', '') ILIKE REPLACE(unaccent(:search), ' ', '')";
-    $params[':search'] = "%" . $search . "%";
+    // THAY ĐỔI: Sử dụng CONCAT() để nối chuỗi thay vì ||
+    // THAY ĐỔI: Loại bỏ UNACCENT, tập trung vào tìm kiếm không dấu/có dấu mặc định của MySQL
+    $searchable_columns = "CONCAT(bd.tieu_de, ' ', bds.dia_chi_day_du, ' ', COALESCE(info.ho_ten, ''), ' ', bd.dia_chi_lien_he)";
+    
+    // Tìm kiếm KHÔNG PHÂN BIỆT CHỮ HOA/CHỮ THƯỜNG và KHÔNG KHOẢNG TRẮNG
+    $sql .= " WHERE REPLACE({$searchable_columns}, ' ', '') LIKE REPLACE(:search_term, ' ', '')";
+    $params[':search_term'] = "%" . $search . "%";
 }
 
 $sql .= " ORDER BY bd.ngay_dang DESC;";
 $stmt = $pdo->prepare($sql);
+
 if (!empty($search)) {
-    $stmt->bindValue(':search', $params[':search'], PDO::PARAM_STR);
+    // Tên tham số đã được đổi thành :search_term để dễ phân biệt
+    $stmt->bindValue(':search_term', $params[':search_term'], PDO::PARAM_STR);
 }
+
 $stmt->execute();
 $baidang = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -62,24 +78,24 @@ foreach ($baidang as $key => $post) {
 }
 
 // ==========================================================
-// == THAY ĐỔI LỚN 2: CẬP NHẬT HÀM TRẠNG THÁI ==
+// == HÀM TRẠNG THÁI (Giữ nguyên) ==
 // ==========================================================
 function getStatusBadge($status) {
     $map = [
         'chuaduyet' => ['text' => 'Chờ duyệt', 'class' => 'bg-orange-100 text-orange-800'],
         'daduyet'   => ['text' => 'Đang hiển thị', 'class' => 'bg-green-100 text-green-800'],
         'hethan'    => ['text' => 'Hết hạn', 'class' => 'bg-red-100 text-red-800'],
-        'dahuy'     => ['text' => 'Đã hủy', 'class' => 'bg-gray-100 text-gray-800'], // Thêm trạng thái dahuy
+        'dahuy'     => ['text' => 'Đã hủy', 'class' => 'bg-gray-100 text-gray-800'],
     ];
     $info = $map[$status] ?? ['text' => ucfirst($status), 'class' => 'bg-gray-100 text-gray-800'];
     return "<span class='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {$info['class']}'>{$info['text']}</span>";
 }
 
-// Tính toán stats (cập nhật theo trạng thái mới)
+// Tính toán stats (Giữ nguyên)
 $stats = [
     'pending' => count(array_filter($baidang, fn($p) => $p['trang_thai'] === 'chuaduyet')),
     'active'  => count(array_filter($baidang, fn($p) => $p['trang_thai'] === 'daduyet')),
-    'expired' => count(array_filter($baidang, fn($p) => in_array($p['trang_thai'], ['hethan', 'dahuy']))), // Gộp hết hạn và hủy
+    'expired' => count(array_filter($baidang, fn($p) => in_array($p['trang_thai'], ['hethan', 'dahuy']))), 
     'total'   => count($baidang),
 ];
 
