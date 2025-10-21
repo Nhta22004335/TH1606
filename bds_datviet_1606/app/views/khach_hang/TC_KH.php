@@ -92,7 +92,7 @@
             <nav class="hidden xl:flex space-x-6 font-medium text-base">
                 <a href="#" class="text-gray-700 hover:text-blue-600 transition duration-200">Trang chủ</a>
                 <a href="#" class="text-gray-700 hover:text-blue-600 transition duration-200">Dự án</a>
-                <a href="#" class="text-gray-700 hover:text-blue-600 transition duration-200">Tin tức</a>
+                <a href="tintuc.php" class="text-gray-700 hover:text-blue-600 transition duration-200">Tin tức</a>
                 <a href="#" class="text-gray-700 hover:text-blue-600 transition duration-200">Liên hệ</a>
             </nav>
 
@@ -303,6 +303,100 @@
             </p>
         </div>
 
+
+
+        <style>
+    .box-popup .popup-title {
+        /*height: 40px;*/
+        height:80px;
+    }
+
+    .box-list .title {
+        height: 40px;
+        box-sizing: content-box;
+    }
+
+    #ListMember .content {
+        margin-top: 0px;
+    }   
+</style>
+
+<!-- Chat Widget -->
+<button style="border: none" class="btn-show" id="ShowMember" onclick="if (!window.__cfRLUnblockHandlers) return false; ButtonToggle(this)" aria-label="chat" tooltip="Chat trực tuyến" flow="left" data-cf-modified-adf9c6615a41c37c997e0d31-="">
+    <div class="unread-badge" id="az_widget_chat_total_unread_badge" style="display: none;"><p>0</p></div>
+</button>
+
+<div class="box-list" id="ListMember" style="z-index:99999;">
+    <form id="form1">
+        <div class="title">
+            <div class="name"></div>
+            <div class="sub"></div>
+            <div class="minimize" onclick="if (!window.__cfRLUnblockHandlers) return false; Minimizebutton(this)" data-cf-modified-adf9c6615a41c37c997e0d31-=""><span class="ic ic-arrow-down"></span></div>
+        </div>
+
+        <!-- List member -->
+        <div class="content" id="chat_box">
+            <ul class="scroll-style-2"></ul>
+        </div>
+
+        <div id="chat_div"></div>
+        <input id="hdUserName" type="hidden" />
+        <input id="hdnCurrentUserName" type="hidden" value="" />
+        <input id="hdnCurrentAvatar" type="hidden" value="" />
+        <input id="hdnCurrentMobile" type="hidden" value="" />
+        <input id="hdnCurrentEmail" type="hidden" value="" />
+        <input id="hdnCurrentFullName" type="hidden" value="" />
+        <input id="hdnCurrentManager" type="hidden" value="" />
+        <input id="hdnCurrentType" type="hidden" value="" />
+        <input id="hdnCurrentSystem" type="hidden" value="" />
+        <input id="TypeProduct" type="hidden" value="" />
+        <input id="CheckLogout" type="hidden" value="" />
+    </form>
+</div>
+        
+
+ <!-- User info -->
+    <script type="adf9c6615a41c37c997e0d31-text/javascript">
+        var _type = 4;
+        if (location.href.indexOf('trang-ca-nhan') >= 0)
+            _type = 3;
+
+        window.PageData = window.PageData || {};
+        PageData.user = {
+            logged_in: 0,
+            username: '',
+            mobile: '',
+            email: '',
+            full_name: '',
+            avatar: '',
+            typeId: '',
+            companyUserName: ''
+        };
+        PageData.chat = {
+            type: _type,
+            system: 'HDY'
+        }
+
+        var elements = document.getElementsByClassName('loged_in_name');
+        if (elements !== null && elements !== undefined) {
+            for (var i = 0; i < elements.length; i++) {
+                elements[i].innerHTML = '';
+            }
+        }
+
+        var element = document.getElementById('filter_loged_in_name');
+        if (element !== null && element !== undefined){
+            element.innerHTML = '';
+        }
+
+        var element = document.getElementsByClassName('filter_loged_in_avatar');
+        if (element !== null && element !== undefined) {
+            for (var i = 0; i < element.length; i++) {
+                element[i].style.background = 'url(https://static.homedy.com/src/images/broker.jpg)';
+            }
+        }
+
+</script>
         <!-- Về chúng tôi -->
         <div>
             <h3 class="text-gray-900 font-semibold mb-4">Về chúng tôi</h3>
@@ -367,6 +461,8 @@
         </p>
     </div>
 </footer>
+
+
 
     <script>
         const slides = document.querySelectorAll("#heroCarousel .slide");

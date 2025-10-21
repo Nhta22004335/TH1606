@@ -1,104 +1,163 @@
 <?php
-session_start(); // Khởi tạo session để kiểm tra đăng nhập
-
-// duan.php - Trang hiển thị danh sách dự án bất động sản
-include_once __DIR__ . '/../../../config/database.php'; // Sửa đường dẫn
-
-// Kết nối PDO
-try {
-    $pdo = ketnoicsdl(); // Hàm từ config/database.php
-    // Truy vấn JOIN để lấy thông tin dự án và hình ảnh, lấy hình ảnh đầu tiên nếu có nhiều
-    $stmt = $pdo->query("
-        SELECT bds.id, bds.tieu_de, bds.mo_ta, bds.gia, bds.dien_tich, bds.dia_chi, bds.loai, bds.ngay_dang, ha.url
-        FROM bat_dong_san bds
-        LEFT JOIN hinh_anh_bds ha ON bds.id = ha.id_bds
-        GROUP BY bds.id, bds.tieu_de, bds.mo_ta, bds.gia, bds.dien_tich, bds.dia_chi, bds.loai, bds.ngay_dang
-        ORDER BY bds.ngay_dang DESC
-        LIMIT 10
-    ");
-    $du_an = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Debug: Kiểm tra dữ liệu trả về
-    // var_dump($du_an); // Bỏ comment để kiểm tra
-} catch (PDOException $e) {
-    $du_an = []; // Fallback nếu có lỗi
-    error_log("Lỗi truy vấn dự án: " . $e->getMessage());
+session_start();
+if (empty($_SESSION['id_nguoi_dung'])) {
+    header('Location: /login.php');
+    exit;
 }
-?>
 
-<!DOCTYPE html>
+require_once __DIR__ . '/../../../config/database.php';
+$pdo = ketnoicsdl();
+
+function e($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
+function vn_money($n){ return number_format((int)$n,0,',','.'); }
+function format_status($status) {
+    switch ($status) {
+        case 'pending':
+            return '<span class="text-yellow-600 font-semibold">Đang chờ</span>';
+        case 'completed':
+            return '<span class="text-green-600 font-semibold">Thành công</span>';
+        case 'failed':
+            return '<span class="text-red-600 font-semibold">Thất bại</span>';
+        case 'cancelled':
+            return '<span class="text-gray-600 font-semibold">Đã hủy</span>';
+        default:
+            return '<span class="text-gray-500 font-semibold">' . e($status) . '</span>';
+    }
+}
+
+$uid = (string)$_SESSION['id_nguoi_dung'];
+$state = (string)($_GET['state'] ?? 'all'); // 'all', 'pending', 'completed', ...
+
+// ... (code từ đầu) ...
+
+// Xây dựng câu truy vấn
+// Chúng ta JOIN 4 bảng để lấy tất cả thông tin
+$sql = "SELECT 
+            gd.id AS giao_dich_id, gd.ma, gd.so_tien, gd.trang_thai, gd.tao_luc,
+            bd.tieu_de,
+            bds.dia_chi_day_du,
+            nd.ten_dang_nhap, nd.email, nd.so_dt
+        FROM 
+            giao_dich AS gd
+        JOIN 
+            nguoi_dung AS nd ON gd.id_nguoi_dung = nd.id::uuid  -- <<< SỬA Ở ĐÂY
+        JOIN 
+            bai_dang AS bd ON gd.ref_id = bd.id
+        JOIN 
+            bat_dong_san AS bds ON bd.id_bat_dong_san = bds.id
+        WHERE 
+            gd.id_nguoi_dung = :uid";
+
+$params = [':uid' => $uid];
+
+// Thêm bộ lọc trạng thái nếu có
+if ($state !== 'all') {
+    $sql .= " AND gd.trang_thai = :state";
+    $params[':state'] = $state;
+}
+
+$sql .= " ORDER BY gd.tao_luc DESC";
+
+$st = $pdo->prepare($sql);
+$st->execute($params); // Dòng 60 sẽ hết báo lỗi
+$transactions = $st->fetchAll(PDO::FETCH_ASSOC);
+
+// ... (code phần HTML giữ nguyên) ...
+
+$pageTitle = "Lịch sử giao dịch";
+if ($state === 'pending') $pageTitle = "Giao dịch đang chờ";
+if ($state === 'completed') $pageTitle = "Giao dịch thành công";
+
+?>
+<!doctype html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dự Án Bất Động Sản - Đất Việt BDS</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="assets/css/style.css"> <!-- Giả sử có file CSS chung -->
-    <style>
-        .project-card { margin-bottom: 20px; }
-        .project-image { max-height: 200px; object-fit: cover; width: 100%; }
-        .project-title { color: #007bff; font-weight: bold; }
-        .project-price { color: #28a745; font-weight: bold; }
-        .user-info { margin-left: 10px; }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title><?= e($pageTitle) ?></title>
+<script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <!-- Header chung -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container">
-            <a class="navbar-brand" href="trangchu.php">
-                <img src="../../../public/images/datviet.png" alt="Đất Việt BDS" width="100" height="100"> Đất Việt BDS
-            </a>
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link" href="index.php">Trang Chủ</a></li>
-                <li class="nav-item"><a class="nav-link" href="danhsach_bds.php">Bất Động Sản</a></li>
-                <li class="nav-item"><a class="nav-link" href="tintuc.php">Tin Tức</a></li>
-                <li class="nav-item"><a class="nav-link active" href="duan.php">Dự Án</a></li>
-                <li class="nav-item"><a class="nav-link" href="lienhe.php">Liên Hệ</a></li>
-            </ul>
-            <div class="d-flex align-items-center">
-                <?php if (isset($_SESSION['user_id'])): ?>
-                    <span class="user-info">Chào <?php echo htmlspecialchars($_SESSION['ten_nguoi_dung'] ?? 'Người dùng'); ?>!</span>
-                    <a href="dang_xuat.php" class="btn btn-outline-danger ms-2">Đăng xuất</a>
-                <?php else: ?>
-                    <a href="login.php" class="btn btn-outline-primary me-2">Đăng Nhập</a>
-                    <a href="dangky.php" class="btn btn-primary">Đăng Ký</a>
-                <?php endif; ?>
-            </div>
-        </div>
-    </nav>
+<body class="bg-gray-100">
 
-    <div class="container mt-4">
-        <h1 class="text-center mb-4">Danh Sách Dự Án Bất Động Sản</h1>
-        <p class="text-center text-muted">Khám phá các dự án bất động sản mới nhất từ Đất Việt BDS.</p>
+<div class="max-w-4xl mx-auto p-4 mt-8">
+    <h2 class="text-3xl font-bold mb-6 text-center"><?= e($pageTitle) ?></h2>
 
-        <div class="row">
-            <?php foreach ($du_an as $index => $project): ?>
-            <div class="col-md-6 col-lg-4">
-                <div class="card project-card">
-                    <!-- Hiển thị hình ảnh từ CSDL với tiền tố đường dẫn -->
-                    <img src="<?php echo !empty($project['url']) ? htmlspecialchars('../../../public/' . ltrim($project['url'], '/')) : 'https://via.placeholder.com/680x200?text=Ảnh+Dự+Án+' . ($index + 1); ?>" class="card-img-top project-image" alt="<?php echo htmlspecialchars($project['tieu_de']); ?>">
-                    <div class="card-body">
-                        <h5 class="card-title project-title"><?php echo htmlspecialchars($project['tieu_de']); ?></h5>
-                        <p class="card-text"><?php echo htmlspecialchars($project['mo_ta']); ?></p>
-                        <p><strong>Giá:</strong> <?php echo number_format($project['gia'], 0, ',', '.') . ' VNĐ'; ?></p>
-                        <p><strong>Diện tích:</strong> <?php echo $project['dien_tich'] . ' m²'; ?></p>
-                        <p><strong>Địa chỉ:</strong> <?php echo htmlspecialchars($project['dia_chi']); ?></p>
-                        <p><strong>Loại:</strong> <?php echo htmlspecialchars($project['loai']); ?></p>
-                        <p><strong>Ngày đăng:</strong> <?php echo htmlspecialchars($project['ngay_dang']); ?></p>
-                        <a href="chi_tiet_du_an.php?id=<?php echo $project['id']; ?>" class="btn btn-primary">Xem chi tiết</a>
-                    </div>
-                </div>
-            </div>
-            <?php endforeach; ?>
-        </div>
+    <div class="flex justify-center space-x-2 mb-6">
+        <a href="duan.php" 
+           class="px-4 py-2 rounded-lg <?= $state === 'all' ? 'bg-indigo-600 text-white' : 'bg-white border' ?>">
+           Tất cả
+        </a>
+        <a href="duan.php?state=pending" 
+           class="px-4 py-2 rounded-lg <?= $state === 'pending' ? 'bg-indigo-600 text-white' : 'bg-white border' ?>">
+           Đang chờ
+        </a>
+        <a href="duan.php?state=completed" 
+           class="px-4 py-2 rounded-lg <?= $state === 'completed' ? 'bg-indigo-600 text-white' : 'bg-white border' ?>">
+           Thành công
+        </a>
+        <a href="duan.php?state=failed" 
+           class="px-4 py-2 rounded-lg <?= $state === 'failed' ? 'bg-indigo-600 text-white' : 'bg-white border' ?>">
+           Thất bại
+        </a>
     </div>
 
-    <!-- Footer chung -->
-    <footer class="bg-dark text-white text-center py-4 mt-5">
-        <p>&copy; 2025 Đất Việt BDS. Tất cả quyền được bảo lưu.</p>
-    </footer>
+    <div class="space-y-6">
+        <?php if (empty($transactions)): ?>
+            <p class="text-center text-gray-600 text-lg">Không tìm thấy giao dịch nào.</p>
+        <?php else: ?>
+            <?php foreach ($transactions as $tx): ?>
+                <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                    <div class="p-5">
+                        <div class="flex justify-between items-center border-b pb-3 mb-4">
+                            <div>
+                                <div class="text-xs text-gray-500">Mã giao dịch</div>
+                                <div class="font-mono font-bold text-sm text-gray-800"><?= e($tx['ma']) ?></div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xs text-gray-500">Trạng thái</div>
+                                <div class="text-lg"><?= format_status($tx['trang_thai']) ?></div>
+                            </div>
+                        </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-semibold text-gray-700 mb-2">Thông tin người mua</h4>
+                                <div class="text-sm space-y-1">
+                                    <p><b>Họ tên:</b> <?= e($tx['ten_dang_nhap']) ?></p>
+                                    <p><b>Email:</b> <?= e($tx['email']) ?></p>
+                                    <p><b>SĐT:</b> <?= e($tx['so_dt']) ?></p>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-semibold text-gray-700 mb-2">Chi tiết BĐS</h4>
+                                <div class="text-sm space-y-1">
+                                    <p><b>BĐS:</b> <?= e($tx['tieu_de']) ?></p>
+                                    <p><b>Địa chỉ:</b> <?= e($tx['dia_chi_day_du']) ?></p>
+                                    <p><b>Ngày tạo:</b> <?= e(date('d/m/Y H:i', strtotime($tx['tao_luc']))) ?></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border-t mt-4 pt-4 flex justify-between items-center">
+                            <div>
+                                <div class="text-sm text-gray-500">Tổng tiền</div>
+                                <div class="text-2xl font-bold text-red-600"><?= vn_money($tx['so_tien']) ?> đ</div>
+                            </div>
+                            
+                            <?php if ($tx['trang_thai'] === 'pending'): ?>
+                                <a href="chitiet_giaodich.php?id=<?= e($tx['giao_dich_id']) ?>" 
+                                   class="px-5 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700">
+                                   Thanh toán ngay
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </div>
+</div>
+
 </body>
 </html>
