@@ -1,5 +1,5 @@
 <?php
-<<<<<<< Updated upstream:bds_datviet_1606/app/views/khach_hang/nhao.php
+
 // BƯỚC 1: BẮT ĐẦU SESSION
 session_start(); 
 
