@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 2025-10-20 21:26:07,351 INFO Set uid to user 0 succeeded
 2025-10-20 21:26:07,358 INFO supervisord started with pid 1
 2025-10-20 21:26:08,366 INFO spawned: 'apache' with pid 7
@@ -26,3 +27,162 @@
 2025-10-20 21:26:25,002 INFO spawned: 'tailwind' with pid 151
 2025-10-20 21:26:25,509 WARN exited: tailwind (exit status 127; not expected)
 2025-10-20 21:26:26,510 INFO gave up: tailwind entered FATAL state, too many start retries too quickly
+=======
+2025-10-21 00:21:11,953 INFO Set uid to user 0 succeeded
+2025-10-21 00:21:11,966 INFO supervisord started with pid 1
+2025-10-21 00:21:12,973 INFO spawned: 'apache' with pid 7
+2025-10-21 00:21:12,984 INFO spawned: 'socketio' with pid 8
+2025-10-21 00:21:12,994 INFO spawned: 'tailwind' with pid 10
+2025-10-21 00:21:13,374 WARN exited: socketio (exit status 1; not expected)
+2025-10-21 00:21:14,787 INFO success: apache entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:21:14,791 INFO spawned: 'socketio' with pid 45
+2025-10-21 00:21:14,792 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:21:14,887 WARN exited: socketio (exit status 1; not expected)
+2025-10-21 00:21:15,131 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:21:16,137 INFO spawned: 'tailwind' with pid 54
+2025-10-21 00:21:17,147 INFO spawned: 'socketio' with pid 79
+2025-10-21 00:21:17,149 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:21:17,206 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:21:17,247 INFO spawned: 'tailwind' with pid 86
+2025-10-21 00:21:17,254 WARN exited: socketio (exit status 1; not expected)
+2025-10-21 00:21:18,203 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:21:19,209 INFO spawned: 'tailwind' with pid 111
+2025-10-21 00:21:20,180 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:21:21,186 INFO spawned: 'socketio' with pid 136
+2025-10-21 00:21:21,338 WARN exited: socketio (exit status 1; not expected)
+2025-10-21 00:21:22,341 INFO gave up: socketio entered FATAL state, too many start retries too quickly
+2025-10-21 00:21:22,346 INFO spawned: 'tailwind' with pid 143
+2025-10-21 00:21:23,393 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:21:23,449 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:21:24,455 INFO spawned: 'tailwind' with pid 168
+2025-10-21 00:21:25,584 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:21:25,634 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:21:26,639 INFO spawned: 'tailwind' with pid 193
+2025-10-21 00:21:27,683 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:21:27,683 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:21:28,689 INFO spawned: 'tailwind' with pid 218
+2025-10-21 00:21:29,697 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:21:29,697 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:21:30,703 INFO spawned: 'tailwind' with pid 243
+2025-10-21 00:21:31,908 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:21:31,959 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:21:32,965 INFO spawned: 'tailwind' with pid 268
+2025-10-21 00:21:33,951 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:21:34,958 INFO spawned: 'tailwind' with pid 293
+2025-10-21 00:21:36,077 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:21:36,144 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:21:37,150 INFO spawned: 'tailwind' with pid 318
+2025-10-21 00:21:38,099 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:21:39,105 INFO spawned: 'tailwind' with pid 343
+2025-10-21 00:21:40,010 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:21:42,016 INFO spawned: 'tailwind' with pid 368
+2025-10-21 00:21:43,140 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:21:43,209 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:21:44,215 INFO spawned: 'tailwind' with pid 393
+2025-10-21 00:21:45,262 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:21:45,263 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:21:46,269 INFO spawned: 'tailwind' with pid 418
+2025-10-21 00:21:47,319 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:21:47,321 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:21:48,326 INFO spawned: 'tailwind' with pid 443
+2025-10-21 00:21:49,228 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:21:50,233 INFO spawned: 'tailwind' with pid 468
+2025-10-21 00:21:51,180 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:21:53,187 INFO spawned: 'tailwind' with pid 493
+2025-10-21 00:21:54,216 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:21:54,274 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:21:55,280 INFO spawned: 'tailwind' with pid 518
+2025-10-21 00:21:56,282 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:21:56,283 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:21:57,288 INFO spawned: 'tailwind' with pid 543
+2025-10-21 00:21:58,297 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:21:58,354 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:21:59,359 INFO spawned: 'tailwind' with pid 568
+2025-10-21 00:22:00,223 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:22:01,229 INFO spawned: 'tailwind' with pid 593
+2025-10-21 00:22:02,446 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:22:02,509 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:22:03,514 INFO spawned: 'tailwind' with pid 618
+2025-10-21 00:22:04,708 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:22:04,767 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:22:05,773 INFO spawned: 'tailwind' with pid 643
+2025-10-21 00:22:06,830 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:22:06,882 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:22:07,888 INFO spawned: 'tailwind' with pid 668
+2025-10-21 00:22:08,910 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:22:08,966 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:22:09,971 INFO spawned: 'tailwind' with pid 693
+2025-10-21 00:22:11,014 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:22:11,071 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:22:12,076 INFO spawned: 'tailwind' with pid 718
+2025-10-21 00:22:13,023 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:22:14,028 INFO spawned: 'tailwind' with pid 743
+2025-10-21 00:22:15,221 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:22:15,273 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:22:16,279 INFO spawned: 'tailwind' with pid 768
+2025-10-21 00:22:17,256 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:22:18,262 INFO spawned: 'tailwind' with pid 793
+2025-10-21 00:22:19,271 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:22:19,321 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:22:20,326 INFO spawned: 'tailwind' with pid 818
+2025-10-21 00:22:21,382 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:22:21,431 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:22:22,436 INFO spawned: 'tailwind' with pid 843
+2025-10-21 00:22:23,508 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:22:23,560 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:22:24,566 INFO spawned: 'tailwind' with pid 868
+2025-10-21 00:22:25,582 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:22:25,583 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:22:26,588 INFO spawned: 'tailwind' with pid 893
+2025-10-21 00:22:27,803 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:22:27,858 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:22:28,864 INFO spawned: 'tailwind' with pid 918
+2025-10-21 00:22:29,828 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:22:30,834 INFO spawned: 'tailwind' with pid 943
+2025-10-21 00:22:31,976 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:22:32,039 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:22:33,045 INFO spawned: 'tailwind' with pid 968
+2025-10-21 00:22:34,050 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:22:34,098 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:22:35,104 INFO spawned: 'tailwind' with pid 993
+2025-10-21 00:22:36,096 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:22:37,102 INFO spawned: 'tailwind' with pid 1018
+2025-10-21 00:22:38,207 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:22:38,269 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:22:39,274 INFO spawned: 'tailwind' with pid 1043
+2025-10-21 00:22:40,195 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:22:41,199 INFO spawned: 'tailwind' with pid 1068
+2025-10-21 00:22:42,178 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:22:44,187 INFO spawned: 'tailwind' with pid 1093
+2025-10-21 00:22:45,273 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:22:45,321 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:22:46,327 INFO spawned: 'tailwind' with pid 1118
+2025-10-21 00:22:47,334 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:22:47,335 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:22:48,341 INFO spawned: 'tailwind' with pid 1143
+2025-10-21 00:22:49,346 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:22:49,393 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:22:50,398 INFO spawned: 'tailwind' with pid 1168
+2025-10-21 00:22:51,496 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:22:51,542 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:22:52,548 INFO spawned: 'tailwind' with pid 1193
+2025-10-21 00:22:53,656 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:22:53,722 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:22:54,729 INFO spawned: 'tailwind' with pid 1218
+2025-10-21 00:22:55,952 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:22:56,010 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:22:57,016 INFO spawned: 'tailwind' with pid 1243
+2025-10-21 00:22:58,000 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:22:59,006 INFO spawned: 'tailwind' with pid 1268
+2025-10-21 00:23:00,157 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:23:00,212 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:23:01,218 INFO spawned: 'tailwind' with pid 1293
+2025-10-21 00:23:02,154 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:23:03,160 INFO spawned: 'tailwind' with pid 1318
+2025-10-21 00:23:04,311 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:23:04,360 WARN exited: tailwind (exit status 127; not expected)
+2025-10-21 00:23:05,366 INFO spawned: 'tailwind' with pid 1343
+2025-10-21 00:23:06,625 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-21 00:23:06,687 WARN exited: tailwind (exit status 127; not expected)
+
+>>>>>>> 81b4ce07a2e3412703e2fa010f97833dfca547d7
