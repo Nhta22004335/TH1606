@@ -36,6 +36,7 @@ h1{text-align:center;color:#222;margin-bottom:30px}
 .info em{color:#666;font-style:italic}
 .no-data{text-align:center;font-size:18px;color:#777;margin-top:40px}
 </style></head>
+
 <body>
 <h1>Dịch vụ Môi giới</h1>
 <a href="/app/views/khach_hang/trangchu.php"
@@ -60,4 +61,5 @@ h1{text-align:center;color:#222;margin-bottom:30px}
 <?php else: ?>
   <div class="no-data">Chưa có môi giới nào hoạt động.</div>
 <?php endif; ?>
+<?php include __DIR__ . '/../partials/foot_ai.php'; ?>
 </body></html>

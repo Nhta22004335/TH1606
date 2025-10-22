@@ -351,6 +351,7 @@ $current_user_id = $_SESSION['id_nguoi_dung'] ?? null;
         }
     </style>
 </head>
+
 <body>
     <header class="sticky top-0 bg-white shadow-md border-b border-gray-100 z-50" 
         x-data="{ mobileMenuOpen: false }">
@@ -453,6 +454,7 @@ $current_user_id = $_SESSION['id_nguoi_dung'] ?? null;
         </nav>
     </div>
 </header>
+<?php include __DIR__ . '/../partials/foot_ai.php'; ?>
 
 >>>>>>> Stashed changes:php/app/views/khachhang/nhao.php
 </body>

@@ -222,5 +222,6 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+<?php include __DIR__ . '/../partials/foot_ai.php'; ?>
 </body>
 </html>

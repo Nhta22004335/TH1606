@@ -51,6 +51,7 @@
         }
     </style>
 </head>
+
 <body class="bg-white text-gray-800 font-sans" x-data="{ mobileMenuOpen: false }">
 
     <header class="sticky top-0 bg-white shadow-md border-b border-gray-100 z-50" 
@@ -473,6 +474,6 @@
 
 
 
-
+<?php include __DIR__ . '/../partials/foot_ai.php'; ?>
 </body>
 </html>

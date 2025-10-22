@@ -117,5 +117,6 @@ $imgPrefix='/storage/bds/';
     <?php endif; ?>
   <?php endif; ?>
 </div>
+<?php include __DIR__ . '/../partials/foot_ai.php'; ?>
 </body>
 </html>

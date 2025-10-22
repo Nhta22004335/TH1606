@@ -123,6 +123,7 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
     </style>
 </head>
+<?php include __DIR__ . '/../partials/foot_ai.php'; ?>
 <body class="bg-gray-100 text-gray-800">
 
 <div class="max-w-7xl mx-auto px-4 py-8">
