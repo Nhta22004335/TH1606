@@ -3,7 +3,7 @@
 // PHẦN 1: XỬ LÝ LOGIC & DỮ LIỆU (BACKEND)
 // ===================================================================
 
-require_once "../../../config/database.php";
+require_once "../../config/database.php";
 $pdo = ketnoicsdl();
 
 if (session_status() === PHP_SESSION_NONE) session_start();
