@@ -1,3 +1,33 @@
+<<<<<<< HEAD
+2025-10-20 21:26:07,351 INFO Set uid to user 0 succeeded
+2025-10-20 21:26:07,358 INFO supervisord started with pid 1
+2025-10-20 21:26:08,366 INFO spawned: 'apache' with pid 7
+2025-10-20 21:26:08,389 INFO spawned: 'socketio' with pid 8
+2025-10-20 21:26:08,448 INFO spawned: 'tailwind' with pid 9
+2025-10-20 21:26:09,451 INFO success: apache entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-20 21:26:09,452 INFO success: socketio entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-20 21:26:09,452 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-10-20 21:26:12,807 WARN exited: socketio (exit status 1; not expected)
+2025-10-20 21:26:12,851 INFO spawned: 'socketio' with pid 30
+2025-10-20 21:26:12,922 WARN exited: socketio (exit status 1; not expected)
+2025-10-20 21:26:14,416 INFO spawned: 'socketio' with pid 41
+2025-10-20 21:26:14,469 WARN exited: socketio (exit status 1; not expected)
+2025-10-20 21:26:16,450 WARN exited: tailwind (exit status 127; not expected)
+2025-10-20 21:26:17,454 INFO spawned: 'socketio' with pid 62
+2025-10-20 21:26:17,457 INFO spawned: 'tailwind' with pid 63
+2025-10-20 21:26:17,508 WARN exited: socketio (exit status 1; not expected)
+2025-10-20 21:26:17,957 WARN exited: tailwind (exit status 127; not expected)
+2025-10-20 21:26:18,960 INFO spawned: 'tailwind' with pid 94
+2025-10-20 21:26:19,476 WARN exited: tailwind (exit status 127; not expected)
+2025-10-20 21:26:21,484 INFO spawned: 'socketio' with pid 119
+2025-10-20 21:26:21,491 INFO spawned: 'tailwind' with pid 120
+2025-10-20 21:26:21,546 WARN exited: socketio (exit status 1; not expected)
+2025-10-20 21:26:21,627 INFO gave up: socketio entered FATAL state, too many start retries too quickly
+2025-10-20 21:26:21,992 WARN exited: tailwind (exit status 127; not expected)
+2025-10-20 21:26:25,002 INFO spawned: 'tailwind' with pid 151
+2025-10-20 21:26:25,509 WARN exited: tailwind (exit status 127; not expected)
+2025-10-20 21:26:26,510 INFO gave up: tailwind entered FATAL state, too many start retries too quickly
+=======
 2025-10-21 00:21:11,953 INFO Set uid to user 0 succeeded
 2025-10-21 00:21:11,966 INFO supervisord started with pid 1
 2025-10-21 00:21:12,973 INFO spawned: 'apache' with pid 7
@@ -154,6 +184,7 @@
 2025-10-21 00:23:05,366 INFO spawned: 'tailwind' with pid 1343
 2025-10-21 00:23:06,625 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
 2025-10-21 00:23:06,687 WARN exited: tailwind (exit status 127; not expected)
+<<<<<<< HEAD
 2025-10-21 00:23:07,692 INFO spawned: 'tailwind' with pid 1368
 2025-10-21 00:23:08,756 INFO success: tailwind entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
 2025-10-21 00:23:08,805 WARN exited: tailwind (exit status 127; not expected)
@@ -2341,3 +2372,7 @@
 2025-10-22 12:35:51,510 INFO spawned: 'tailwind' with pid 143
 2025-10-22 12:35:52,028 WARN exited: tailwind (exit status 127; not expected)
 2025-10-22 12:35:53,031 INFO gave up: tailwind entered FATAL state, too many start retries too quickly
+=======
+
+>>>>>>> 81b4ce07a2e3412703e2fa010f97833dfca547d7
+>>>>>>> 8c5973cbb84f16a0209146a3cc71a84122eceea3
