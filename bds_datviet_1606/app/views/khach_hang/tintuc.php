@@ -1,5 +1,4 @@
 <?php
-<<<<<<< Updated upstream:bds_datviet_1606/app/views/khach_hang/tintuc.php
 // tintuc.php - Trang tin tức bất động sản
 // Giả sử bạn có kết nối database ở config/database.php hoặc tương tự
 // Ở đây, tôi sử dụng dữ liệu từ web search để hiển thị tin tức động (không từ bảng tin_tuc trong DB để lấy từ web khác)
@@ -382,4 +381,4 @@ foreach ($tryFooterPaths as $p) {
     }
 }
 ?>
->>>>>>> Stashed changes:php/app/views/khachhang/tintuc.php
+

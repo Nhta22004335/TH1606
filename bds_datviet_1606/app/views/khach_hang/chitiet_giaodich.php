@@ -50,6 +50,11 @@ $exp_ts = (int)$tx['exp_ts'];
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
+    <div class="flex md:order-2">
+            <a href="nhao.php" class="text-gray-700 hover:bg-gray-100 font-medium rounded-lg text-sm px-4 py-2 text-center">
+                ← Quay lại
+            </a>
+        </div>
 
 <div class="max-w-xl mx-auto bg-white shadow rounded-lg p-6 mt-8 text-center">
   <h2 class="text-2xl font-bold mb-2">Thanh toán Giao dịch</h2>
@@ -84,8 +89,18 @@ $exp_ts = (int)$tx['exp_ts'];
          href="duan.php">
          « Lịch sử giao dịch
       </a>
+<a class="px-4 py-2 bg-sky-400 text-white rounded-lg hover:bg-sky-500 
+           font-semibold uppercase tracking-wide transition duration-200 ease-in-out 
+           font-sans shadow-sm"
+   href="trangchu.php">
+   Về trang chủ
+</a>
+
   </div>
+  
 </div>
+
+
 
 <?php if ($exp_ts > time()): ?>
 <script>
